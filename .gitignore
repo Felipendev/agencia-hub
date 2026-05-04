@@ -22,6 +22,9 @@
 
 # misc
 .DS_Store
+
+# dados locais do MVP (formulário público / fila de solicitações)
+.local/
 *.pem
 
 # debug
