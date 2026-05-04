@@ -55,7 +55,8 @@ const OWNER_GROUPS: NavGroup[] = [
   {
     label: "Operacional",
     items: [
-      { href: "/atendimentos", label: "Atendimentos", icon: "briefcase" },
+      { href: "/atendimentos", label: "Atendimentos",        icon: "briefcase" },
+      { href: "/calculadora",  label: "Calculadora de Milhas", icon: "document"  },
     ],
   },
   {
