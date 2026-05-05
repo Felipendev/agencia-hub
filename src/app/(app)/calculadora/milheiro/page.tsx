@@ -63,13 +63,25 @@ function CiaCard({
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         {editando ? (
-          <Input
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            className="h-7 w-40 text-sm font-bold"
-          />
+          <div className="flex items-center gap-2">
+            <Input
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              className="h-7 w-40 text-sm font-bold"
+            />
+            <input
+              type="color"
+              value={cia.cor ?? "#000000"}
+              onChange={(e) => onChange({ ...cia, nome, faixas, cor: e.target.value })}
+              className="h-7 w-8 cursor-pointer rounded border border-slate-200 p-0.5"
+              title="Cor da CIA"
+            />
+          </div>
         ) : (
-          <h3 className="text-sm font-bold text-[var(--hub-blue-dark)]">
+          <h3
+            className="text-sm font-bold uppercase tracking-wide"
+            style={{ color: cia.cor ?? "var(--hub-blue-dark)" }}
+          >
             {cia.nome}
           </h3>
         )}

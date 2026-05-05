@@ -9,17 +9,26 @@ type Props = {
   temMala: boolean;
   isMaisBarata: boolean;
   isMaiorLucro: boolean;
+  corCia?: string;
 };
 
-export function ResultadoCiaCard({ resultado: r, qtdPessoas, temMala, isMaisBarata, isMaiorLucro }: Props) {
+export function ResultadoCiaCard({ resultado: r, qtdPessoas, temMala, isMaisBarata, isMaiorLucro, corCia }: Props) {
   const destaque = isMaisBarata || isMaiorLucro;
 
   return (
-    <div className={`rounded-xl border-2 p-4 transition-all ${destaque ? "border-[var(--hub-blue)] bg-blue-50 shadow-md" : "border-[var(--hub-border)] bg-white"}`}>
+    <div
+      className={`rounded-xl border-2 p-4 transition-all ${destaque ? "border-[var(--hub-blue)] bg-blue-50 shadow-md" : "border-[var(--hub-border)] bg-white"}`}
+      style={corCia ? { borderLeftColor: corCia, borderLeftWidth: "4px" } : {}}
+    >
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h3 className="text-sm font-bold text-[var(--hub-blue-dark)]">{r.label}</h3>
+          <h3
+            className="text-sm font-bold uppercase tracking-wide"
+            style={{ color: corCia ?? "var(--hub-blue-dark)" }}
+          >
+            {r.label}
+          </h3>
           <div className="mt-1 flex flex-wrap gap-1.5">
             {isMaisBarata && (
               <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">

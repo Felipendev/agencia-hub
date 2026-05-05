@@ -19,6 +19,8 @@ export type FaixaMilheiro = {
 export type CiaMilheiro = {
   id: string;
   nome: string;
+  /** Cor da marca em hex — usada no nome do card */
+  cor?: string;
   faixas: FaixaMilheiro[];
 };
 
@@ -51,6 +53,7 @@ export const TABELAS_PADRAO: TabelasMilhas = {
     {
       id: "latam",
       nome: "LATAM",
+      cor: "#E3001B",
       faixas: [
         { de: 0,      ate: 39999,   valorPorMilheiro: 28 },
         { de: 40000,  ate: 199999,  valorPorMilheiro: 26 },
@@ -60,6 +63,7 @@ export const TABELAS_PADRAO: TabelasMilhas = {
     {
       id: "azul",
       nome: "Azul",
+      cor: "#1B3F8B",
       faixas: [
         { de: 0,     ate: 59999,   valorPorMilheiro: 18 },
         { de: 60000, ate: 9999999, valorPorMilheiro: 17 },
@@ -68,6 +72,7 @@ export const TABELAS_PADRAO: TabelasMilhas = {
     {
       id: "gol",
       nome: "GOL (Smiles)",
+      cor: "#F47920",
       faixas: [
         { de: 0,      ate: 49999,   valorPorMilheiro: 18 },
         { de: 50000,  ate: 89999,   valorPorMilheiro: 17 },
@@ -78,6 +83,7 @@ export const TABELAS_PADRAO: TabelasMilhas = {
     {
       id: "tap",
       nome: "TAP",
+      cor: "#007A4D",
       faixas: [
         { de: 0,      ate: 89999,   valorPorMilheiro: 45 },
         { de: 90000,  ate: 99999,   valorPorMilheiro: 44 },
@@ -87,6 +93,7 @@ export const TABELAS_PADRAO: TabelasMilhas = {
     {
       id: "azul-viagens",
       nome: "Azul Viagens",
+      cor: "#1B3F8B",
       faixas: [
         { de: 0,     ate: 89999,   valorPorMilheiro: 17 },
         { de: 90000, ate: 9999999, valorPorMilheiro: 16 },
@@ -95,6 +102,7 @@ export const TABELAS_PADRAO: TabelasMilhas = {
     {
       id: "american",
       nome: "American Airlines",
+      cor: "#B11116",
       faixas: [
         { de: 0, ate: 9999999, valorPorMilheiro: 90 },
       ],
@@ -102,6 +110,7 @@ export const TABELAS_PADRAO: TabelasMilhas = {
     {
       id: "iberia",
       nome: "Iberia",
+      cor: "#C8102E",
       faixas: [
         { de: 0, ate: 9999999, valorPorMilheiro: 0 },
       ],
@@ -109,6 +118,7 @@ export const TABELAS_PADRAO: TabelasMilhas = {
     {
       id: "copa",
       nome: "Copa Airlines",
+      cor: "#005DAA",
       faixas: [
         { de: 0, ate: 9999999, valorPorMilheiro: 0 },
       ],

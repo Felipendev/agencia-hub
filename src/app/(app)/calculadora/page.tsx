@@ -99,14 +99,26 @@ function OpcaoVooForm({
   const milheiroSugerido = cia ? getValorMilheiro(cia, milhasTotal) : 0;
 
   return (
-    <div className={`rounded-xl border-2 bg-white p-4 transition-all ${opcao.selecionada ? "border-[var(--hub-blue)]" : "border-[var(--hub-border)] opacity-60"}`}>
+    <div
+      className={`rounded-xl border-2 bg-white p-4 transition-all ${opcao.selecionada ? "border-[var(--hub-blue)]" : "border-[var(--hub-border)] opacity-60"}`}
+      style={cia?.cor ? { borderLeftColor: cia.cor, borderLeftWidth: "4px" } : {}}
+    >
       <div className="flex items-center gap-3">
         <input type="checkbox" checked={opcao.selecionada}
           onChange={(e) => set({ selecionada: e.target.checked })}
           className="h-4 w-4 rounded border-slate-300 accent-[var(--hub-blue)]"
           title="Incluir na cotacao" />
+        {/* Nome colorido da CIA como prefixo */}
+        {cia?.cor && (
+          <span
+            className="shrink-0 text-xs font-bold uppercase tracking-wide"
+            style={{ color: cia.cor }}
+          >
+            {cia.nome}
+          </span>
+        )}
         <Input value={opcao.nome} onChange={(e) => set({ nome: e.target.value })}
-          placeholder="Ex: LATAM Direto manha" className="h-8 flex-1 text-sm font-semibold" />
+          placeholder="Ex: Direto manha" className="h-8 flex-1 text-sm font-semibold" />
         {canRemove && (
           <button type="button" onClick={onRemove} className="text-xs text-red-400 hover:text-red-600">
             Remover
@@ -356,7 +368,9 @@ export default function CalculadoraMilhasPage() {
               {resultado.resultados.map((r, i) => (
                 <ResultadoCiaCard key={i} resultado={r} qtdPessoas={qtdPessoas} temMala={temMala}
                   isMaisBarata={r.cia === resultado.maisBarataSemMala}
-                  isMaiorLucro={r.cia === resultado.maiorLucro} />
+                  isMaiorLucro={r.cia === resultado.maiorLucro}
+                  corCia={tabelas.cias.find((c) => opcoes.find((o) => o.selecionada && o.nome === r.label)?.ciaId === c.id)?.cor}
+                />
               ))}
             </>
           ) : (
