@@ -342,28 +342,6 @@ export default function CalculadoraMilhasPage() {
                   </p>
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-2">
-                  {resultado.maisBarataSemMala && (
-                    <div className="rounded-lg bg-emerald-50 p-2.5">
-                      <p className="text-[10px] font-bold uppercase text-emerald-700">Mais barata</p>
-                      <p className="mt-0.5 text-sm font-semibold text-emerald-900">
-                        {resultado.resultados.find((r) => r.cia === resultado.maisBarataSemMala)?.label}
-                      </p>
-                      <p className="text-xs text-emerald-700">
-                        {fmtBRL(resultado.resultados.find((r) => r.cia === resultado.maisBarataSemMala)?.precoTotalSemMala ?? 0)}
-                      </p>
-                    </div>
-                  )}
-                  {resultado.maiorLucro && (
-                    <div className="rounded-lg bg-amber-50 p-2.5">
-                      <p className="text-[10px] font-bold uppercase text-amber-700">Maior lucro</p>
-                      <p className="mt-0.5 text-sm font-semibold text-amber-900">
-                        {resultado.resultados.find((r) => r.cia === resultado.maiorLucro)?.label}
-                      </p>
-                      <p className="text-xs text-amber-700">
-                        {fmtBRL(resultado.resultados.find((r) => r.cia === resultado.maiorLucro)?.lucroTotal ?? 0)}
-                      </p>
-                    </div>
-                  )}
                 </div>
               </Card>
               {resultado.resultados.map((r, i) => (
