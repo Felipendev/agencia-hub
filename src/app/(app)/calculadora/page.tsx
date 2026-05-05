@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { TimePicker } from "@/components/ui/time-picker";
 import { ClientePicker } from "@/components/cliente/ClientePicker";
 import { useData } from "@/contexts/data-context";
 import {
@@ -144,8 +145,8 @@ function OpcaoVooForm({
         <div>
           <Label>Saida / Chegada</Label>
           <div className="flex gap-1">
-            <Input placeholder="06:00" value={opcao.horarioSaida} onChange={(e) => set({ horarioSaida: e.target.value })} className="text-sm" />
-            <Input placeholder="14:30" value={opcao.horarioChegada} onChange={(e) => set({ horarioChegada: e.target.value })} className="text-sm" />
+            <TimePicker value={opcao.horarioSaida} onChange={(v) => set({ horarioSaida: v })} placeholder="06:00" />
+            <TimePicker value={opcao.horarioChegada} onChange={(v) => set({ horarioChegada: v })} placeholder="14:30" />
           </div>
         </div>
         <div>
