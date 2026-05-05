@@ -10,11 +10,11 @@ type Props = {
   id?: string;
 };
 
-/** Gera horarios de 00:00 a 23:30 em intervalos de 30 min */
+/** Gera horarios de 00:00 a 23:55 em intervalos de 5 min */
 function gerarHorarios(): string[] {
   const h: string[] = [];
   for (let hora = 0; hora < 24; hora++) {
-    for (const min of [0, 30]) {
+    for (let min = 0; min < 60; min += 5) {
       h.push(`${String(hora).padStart(2, "0")}:${String(min).padStart(2, "0")}`);
     }
   }
