@@ -214,7 +214,7 @@ function OpcaoVooForm({
 
 export default function CalculadoraMilhasPage() {
   const router = useRouter();
-  const { clientes } = useData();
+  const { clientes, addCotacao } = useData();
   const [tabelas, setTabelas] = useState<TabelasMilhas | null>(null);
   const [clienteId, setClienteId] = useState("");
   const [qtdPessoas, setQtdPessoas] = useState(1);
@@ -253,6 +253,85 @@ export default function CalculadoraMilhasPage() {
     if (sel.length === 0) return;
     const r = calcular({ qtdPessoas, cias: sel.map((o) => opcaoToCiaInput(o, tabelas)) });
     setResultado(r);
+  }
+
+  async function salvarNaCotacao() {
+    if (!resultado || resultado.resultados.length === 0) return;
+    if (!clienteId) { alert("Selecione um cliente antes de salvar."); return; }
+
+    const opcoesVoo = resultado.resultados.map((r, i) => {
+      const op = opcoes.filter((o) => o.selecionada)[i];
+      const cia = tabelas?.cias.find((c) => c.id === op?.ciaId);
+      return {
+        nome: r.label,
+        cia: cia?.nome ?? "",
+        corCia: cia?.cor,
+        horarioSaida: op?.horarioSaida ?? "",
+        horarioChegada: op?.horarioChegada ?? "",
+        conexoes: op?.conexoes ?? "",
+        precoPassagens: r.precoTotalSemMala,
+        precoBagagens: r.totalMalas,
+        precoTotal: r.precoTotalComMala,
+        qtdPessoas,
+      };
+    });
+
+    const rota = origem && destino ? `${origem} - ${destino}` : destino || origem || "Milhas";
+    const valorTotal = Math.max(...opcoesVoo.map((o) => o.precoTotal));
+    const validade = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+    const nova = await addCotacao({
+      clienteId,
+      titulo: `Cotacao ${rota}`,
+      destino: rota,
+      valorTotal,
+      moeda: "BRL",
+      status: "em_cotacao",
+      validade,
+      dataInicioViagem: dataIda || undefined,
+      dataFimViagem: dataVolta || undefined,
+      observacoes: "",
+      detalhes: {
+        servicosDesejados: ["passagem"],
+        origem,
+        destinoForm: destino,
+        destinosTrechos: [destino],
+        dataIda,
+        dataVolta,
+        flexibilidadeIda: "",
+        flexibilidadeVolta: "",
+        flexibilidadeIdaOutro: "",
+        flexibilidadeVoltaOutro: "",
+        horarioSaidaIda: "",
+        horarioSaidaVolta: "",
+        preferenciaVooIda: "",
+        preferenciaVooVolta: "",
+        adultos: qtdPessoas,
+        criancas: 0,
+        idadesCriancas: "",
+        bebes: 0,
+        malasDespachadas: opcoesVoo.some((o) => o.precoBagagens > 0),
+        qtdMalas: "",
+        bagagemEspecial: false,
+        categoriaHospedagem: "",
+        comodidadesHospedagem: [],
+        qtdQuartos: 0,
+        celular: "",
+        whatsapp: "",
+        whatsappIgualCelular: false,
+        preferenciaComunicacao: "",
+        usaMilhas: true,
+        formaPagamento: "",
+        formaPagamentoOutro: "",
+        cupomCodigo: "",
+      },
+      tags: ["milhas"],
+      prioridade: false,
+      responsavel: "",
+      opcoesVoo,
+    });
+
+    router.push(`/cotacoes/${nova.id}`);
   }
 
   const temMala = opcoes.some((o) => o.qtdMalas > 0 && o.valorMala > 0);
@@ -303,6 +382,11 @@ export default function CalculadoraMilhasPage() {
           <Button type="button" onClick={calcularAgora} disabled={selecionadas.length === 0}>
             Calcular
           </Button>
+          {resultado && resultado.resultados.length > 0 && clienteId && (
+            <Button type="button" variant="secondary" onClick={() => void salvarNaCotacao()}>
+              Salvar na cotacao
+            </Button>
+          )}
         </div>
       </Card>
 
