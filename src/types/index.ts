@@ -195,6 +195,22 @@ export interface Cotacao {
   responsavel: string;
   createdAt: string;
   updatedAt: string;
+  /** Opcoes de voo calculadas na calculadora de milhas (visivel no PDF) */
+  opcoesVoo?: OpcaoVooCotacao[];
+}
+
+/** Opcao de voo salva na cotacao — dados que o cliente ve */
+export interface OpcaoVooCotacao {
+  nome: string;
+  cia: string;
+  corCia?: string;
+  horarioSaida: string;
+  horarioChegada: string;
+  conexoes: string;
+  precoPassagens: number;
+  precoBagagens: number;
+  precoTotal: number;
+  qtdPessoas: number;
 }
 
 export interface UsuarioSessao {
