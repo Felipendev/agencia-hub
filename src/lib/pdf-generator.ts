@@ -322,6 +322,42 @@ export function gerarHtmlCotacao(
   </div>
   ` : ""}
 
+  ${cotacao.opcoesVoo && cotacao.opcoesVoo.length > 0 ? `
+  <div class="section">
+    <div class="section-title">Opcoes de Voo</div>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;margin-top:10px;">
+      <thead>
+        <tr style="border-bottom:2px solid #e2e8f0;text-align:left;">
+          <th style="padding:10px 8px;">Opcao</th>
+          <th style="padding:10px 8px;">Horario</th>
+          <th style="padding:10px 8px;">Conexoes</th>
+          <th style="padding:10px 8px;text-align:right;">Passagens</th>
+          ${cotacao.opcoesVoo.some(o => o.precoBagagens > 0) ? '<th style="padding:10px 8px;text-align:right;">Bagagens</th>' : ''}
+          <th style="padding:10px 8px;text-align:right;font-weight:bold;">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${cotacao.opcoesVoo.map(o => `
+        <tr style="border-bottom:1px solid #e2e8f0;">
+          <td style="padding:10px 8px;">
+            <strong style="color:${o.corCia || '#0369a1'}">${o.cia}</strong>
+            <br><span style="font-size:12px;color:#64748b;">${o.nome}</span>
+          </td>
+          <td style="padding:10px 8px;">${o.horarioSaida}${o.horarioChegada ? ' - ' + o.horarioChegada : ''}</td>
+          <td style="padding:10px 8px;">${o.conexoes || 'Direto'}</td>
+          <td style="padding:10px 8px;text-align:right;">${formatBRL(o.precoPassagens)}</td>
+          ${cotacao.opcoesVoo!.some(x => x.precoBagagens > 0) ? `<td style="padding:10px 8px;text-align:right;">${o.precoBagagens > 0 ? formatBRL(o.precoBagagens) : '—'}</td>` : ''}
+          <td style="padding:10px 8px;text-align:right;font-weight:bold;">${formatBRL(o.precoTotal)}</td>
+        </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    <p style="margin-top:12px;font-size:12px;color:#64748b;">
+      Valores para ${cotacao.opcoesVoo[0].qtdPessoas} passageiro${cotacao.opcoesVoo[0].qtdPessoas > 1 ? 's' : ''}.
+    </p>
+  </div>
+  ` : ""}
+
   <div class="footer">
     <p><span class="footer-strong">${nomeAgencia}</span> - Realizando seus sonhos de viagem</p>
     <p>Esta cotação é válida até ${formatDateBR(cotacao.validade)}</p>
