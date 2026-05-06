@@ -92,7 +92,7 @@ export default function CotacaoDetalhePage() {
   function handleImprimir() {
     if (!cliente) { toast.error("Cliente nao encontrado"); return; }
     try {
-      imprimirCotacao(cotacao!, cliente, "AgenciaHub");
+      imprimirCotacao(cotacao!, cliente, "AgênciasHub");
       toast.success("Abrindo janela de impressao...");
     } catch {
       toast.error("Erro ao abrir impressao. Verifique se popups estao permitidos.");
@@ -102,7 +102,7 @@ export default function CotacaoDetalhePage() {
   function handleBaixarHtml() {
     if (!cliente) { toast.error("Cliente nao encontrado"); return; }
     try {
-      baixarCotacaoHtml(cotacao!, cliente, "AgenciaHub");
+      baixarCotacaoHtml(cotacao!, cliente, "AgênciasHub");
       toast.success("Download iniciado!");
     } catch {
       toast.error("Erro ao baixar arquivo");
