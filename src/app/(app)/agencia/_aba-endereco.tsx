@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { loadDados, saveDados, defaultDados } from "./_aba-agencia";
-import type { DadosAgencia } from "./_aba-agencia";
+import { loadDados, saveDados, defaultDados } from "./_agencia-storage";
+import type { DadosAgencia } from "./_agencia-storage";
 
 export function AbaEndereco() {
   const toast = useToast();
