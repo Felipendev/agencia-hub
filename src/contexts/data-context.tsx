@@ -106,7 +106,7 @@ function loadStored(): Stored {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return fallback;
-    return normalizeStored(JSON.parse(raw) as Partial<Stored>, hasApi);
+    return normalizeStored(JSON.parse(raw) as Partial<Stored>);
   } catch {
     return fallback;
   }
