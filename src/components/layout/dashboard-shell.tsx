@@ -15,8 +15,11 @@ import {
   IconUsers,
   IconWallet,
   IconX,
+  TrashIcon,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { TrialBanner } from "@/components/ui/trial-banner";
+import { TermsAcceptanceModal } from "@/components/ui/terms-acceptance-modal";
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -26,6 +29,7 @@ const iconMap = {
   briefcase: IconBriefcase,
   document:  IconDocument,
   wallet:    IconWallet,
+  trash:     TrashIcon,
 } as const;
 
 type NavItem = {
@@ -50,6 +54,7 @@ const OWNER_GROUPS: NavGroup[] = [
       { href: "/dashboard",    label: "Dashboard",    icon: "layout"    },
       { href: "/cotacoes",     label: "Cotacoes",     icon: "document"  },
       { href: "/clientes",     label: "Clientes",     icon: "users"     },
+      { href: "/lixeira",      label: "Lixeira",      icon: "trash"     },
     ],
   },
   {
@@ -61,8 +66,16 @@ const OWNER_GROUPS: NavGroup[] = [
   },
   {
     label: "Financeiro",
+    ownerOnly: true,
     items: [
       { href: "/financeiro",   label: "Financeiro",   icon: "wallet"    },
+    ],
+  },
+  {
+    label: "Equipe",
+    ownerOnly: true,
+    items: [
+      { href: "/vendedores/convidar", label: "Convidar Vendedores", icon: "users" },
     ],
   },
   {
@@ -81,6 +94,7 @@ const SELLER_GROUPS: NavGroup[] = [
       { href: "/meu-painel",   label: "Meu Painel",       icon: "layout"   },
       { href: "/cotacoes",     label: "Minhas Cotacoes",  icon: "document" },
       { href: "/clientes",     label: "Clientes",         icon: "users"    },
+      { href: "/lixeira",      label: "Lixeira",          icon: "trash"    },
     ],
   },
 ];
@@ -188,6 +202,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-[var(--hub-bg)]">
+      {/* Terms acceptance blocking modal */}
+      <TermsAcceptanceModal />
+
       {/* Desktop sidebar */}
       <aside className="hidden w-60 shrink-0 flex-col border-r border-[var(--hub-border)] bg-[var(--hub-blue-dark)] text-white lg:flex">
         {/* Logo */}
@@ -196,7 +213,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             AH
           </span>
           <div className="min-w-0">
-            <p className="text-[10px] font-medium text-white/50 uppercase tracking-wide">AgenciaHub</p>
+            <p className="text-[10px] font-medium text-white/50 uppercase tracking-wide">AgênciasHub</p>
             <p className="truncate text-sm font-semibold leading-tight">{empresa}</p>
           </div>
         </div>
@@ -236,7 +253,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         }`}
       >
         <div className="flex h-14 items-center justify-between border-b border-white/10 px-4">
-          <span className="text-base font-bold tracking-tight">AgenciaHub</span>
+          <span className="text-base font-bold tracking-tight">AgênciasHub</span>
           <button
             type="button"
             className="rounded-lg p-2 text-white/70 hover:bg-white/10"
@@ -283,6 +300,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </Button>
           </div>
         </header>
+        <TrialBanner
+          trialEndsAt={user?.trialEndsAt ?? null}
+          status={user?.agencyStatus ?? ""}
+        />
         <main className="flex-1 px-4 py-6 lg:px-6 lg:py-8">{children}</main>
       </div>
     </div>

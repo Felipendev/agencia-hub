@@ -53,4 +53,5 @@ export type ApiQuotationResponse = {
   internalNotes: string;
   createdAt: string;
   updatedAt: string;
+  deletedAt: string | null;
 };
