@@ -11,6 +11,12 @@ export type ApiLoginResponse = {
   name: string;
   email: string;
   role: UserRole;
+  agencyId?: string;
+  agencyName?: string;
+  agencyStatus?: string;
+  subscriptionStatus?: string;
+  trialEndsAt?: string | null;
+  requiresTermsAcceptance?: boolean;
 };
 
 export type ApiUserResponse = {

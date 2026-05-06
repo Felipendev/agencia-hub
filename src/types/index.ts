@@ -219,4 +219,10 @@ export interface UsuarioSessao {
   empresa: string;
   email: string;
   role: "OWNER" | "SELLER";
+  agencyId?: string;
+  agencyName?: string;
+  agencyStatus?: string;
+  subscriptionStatus?: string;
+  trialEndsAt?: string | null;
+  requiresTermsAcceptance?: boolean;
 }

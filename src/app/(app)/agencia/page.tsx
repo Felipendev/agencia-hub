@@ -6,14 +6,16 @@ import { AbaAgencia } from "./_aba-agencia";
 import { AbaEndereco } from "./_aba-endereco";
 import { AbaFormulario } from "./_aba-formulario";
 import { AbaEquipe } from "./_aba-equipe";
+import { AbaSeguranca } from "./_aba-seguranca";
 
-type Aba = "agencia" | "endereco" | "formulario" | "equipe";
+type Aba = "agencia" | "endereco" | "formulario" | "equipe" | "seguranca";
 
 const ABAS: { id: Aba; label: string }[] = [
   { id: "agencia",    label: "Agencia"               },
   { id: "endereco",   label: "Endereco"              },
   { id: "formulario", label: "Formulario de Cotacao" },
   { id: "equipe",     label: "Equipe"                },
+  { id: "seguranca",  label: "Segurança"             },
 ];
 
 export default function AgenciaPage() {
@@ -59,6 +61,7 @@ export default function AgenciaPage() {
       {aba === "endereco"   && <AbaEndereco />}
       {aba === "formulario" && <AbaFormulario />}
       {aba === "equipe"     && <AbaEquipe token={token} />}
+      {aba === "seguranca"  && <AbaSeguranca />}
     </div>
   );
 }

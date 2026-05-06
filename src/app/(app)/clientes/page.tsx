@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useAuth } from "@/contexts/auth-context";
 import { filterClientes, useData } from "@/contexts/data-context";
 import { useToast } from "@/components/ui/toast";
 import { DuplicateCustomerError } from "@/lib/api/create-customer-remote";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -16,12 +18,14 @@ import { Table, Th, Td } from "@/components/ui/table";
 import { DuplicateWarning } from "@/components/cliente/DuplicateWarning";
 import { formatDateBR } from "@/lib/format";
 import { exportarClientesCSV } from "@/lib/csv-export";
-import { DownloadIcon } from "@/components/icons";
+import { DownloadIcon, TrashIcon } from "@/components/icons";
+import { softDeleteCustomer } from "@/lib/api/soft-delete-remote";
 import { CLIENTE_STATUS_LABELS } from "@/lib/constants";
 import type { ClienteStatus } from "@/types";
 
 export default function ClientesPage() {
-  const { clientes, addCliente, checkDuplicate, isReady } = useData();
+  const { clientes, addCliente, checkDuplicate, isReady, hasRemoteApi } = useData();
+  const { token } = useAuth();
   const toast = useToast();
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<ClienteStatus | "todos">("todos");
@@ -34,9 +38,39 @@ export default function ClientesPage() {
   const [obs, setObs] = useState("");
   const [confirmDuplicate, setConfirmDuplicate] = useState(false);
 
+  // ── Soft-delete state ──────────────────────────────────────────────────────
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [locallyDeleted, setLocallyDeleted] = useState<Set<string>>(new Set());
+
+  const handleDeleteRequest = useCallback((id: string) => {
+    setDeleteTarget(id);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteTarget) return;
+    if (hasRemoteApi && token) {
+      try {
+        await softDeleteCustomer(deleteTarget, token);
+        toast.success("Cliente excluído com sucesso.");
+        setLocallyDeleted((prev) => new Set(prev).add(deleteTarget));
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Erro ao excluir cliente.");
+      }
+    } else {
+      // Modo local: esconde o cliente da listagem
+      setLocallyDeleted((prev) => new Set(prev).add(deleteTarget));
+      toast.success("Cliente excluído com sucesso.");
+    }
+    setDeleteTarget(null);
+  }, [deleteTarget, token, hasRemoteApi, toast]);
+
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteTarget(null);
+  }, []);
+
   const filtrados = useMemo(
-    () => filterClientes(clientes, q, statusFilter),
-    [clientes, q, statusFilter],
+    () => filterClientes(clientes, q, statusFilter).filter((c) => !locallyDeleted.has(c.id)),
+    [clientes, q, statusFilter, locallyDeleted],
   );
 
   // Verifica duplicidade em tempo real ao digitar email/telefone
@@ -154,6 +188,7 @@ export default function ClientesPage() {
                 <Th>Destino de interesse</Th>
                 <Th>Status</Th>
                 <Th>Cadastro</Th>
+                <Th></Th>
               </tr>
             </thead>
             <tbody>
@@ -177,6 +212,16 @@ export default function ClientesPage() {
                   </Td>
                   <Td className="whitespace-nowrap text-slate-600">
                     {formatDateBR(c.createdAt)}
+                  </Td>
+                  <Td>
+                    <button
+                      type="button"
+                      title="Excluir cliente"
+                      onClick={() => handleDeleteRequest(c.id)}
+                      className="rounded p-1 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
                   </Td>
                 </tr>
               ))}
@@ -270,6 +315,17 @@ export default function ClientesPage() {
           </form>
         </Card>
       </div>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Excluir cliente"
+        message="Tem certeza que deseja excluir este cliente? Ele será movido para a Lixeira e poderá ser restaurado depois."
+        confirmLabel="Excluir"
+        cancelLabel="Cancelar"
+        destructive
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </div>
   );
 }

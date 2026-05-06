@@ -20,4 +20,5 @@ export type ApiCustomerResponse = {
   status: ApiCustomerStatus;
   notes: string;
   createdAt: string;
+  deletedAt: string | null;
 };

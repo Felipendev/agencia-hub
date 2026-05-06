@@ -40,6 +40,7 @@ export type SyncCotacoesFromApiParams = {
   customerId?: string;
   status?: CotacaoStatus;
   search?: string;
+  token?: string | null;
 };
 
 /** Resultado de uma verificação de duplicidade de cliente */
@@ -92,32 +93,22 @@ type Stored = {
 };
 
 function loadStored(): Stored {
-  if (typeof window === "undefined") {
-    return {
-      clientes: seedClientes,
-      atendimentos: seedAtendimentos,
-      lancamentos: seedLancamentos,
-      cotacoes: seedCotacoes,
-    };
-  }
+  const hasApi = Boolean(getAgenciaHubApiBaseUrl());
+  const empty: Stored = { clientes: [], atendimentos: [], lancamentos: [], cotacoes: [] };
+  const fallback: Stored = hasApi ? empty : {
+    clientes: seedClientes,
+    atendimentos: seedAtendimentos,
+    lancamentos: seedLancamentos,
+    cotacoes: seedCotacoes,
+  };
+
+  if (typeof window === "undefined") return fallback;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return {
-        clientes: seedClientes,
-        atendimentos: seedAtendimentos,
-        lancamentos: seedLancamentos,
-        cotacoes: seedCotacoes,
-      };
-    }
+    if (!raw) return fallback;
     return normalizeStored(JSON.parse(raw) as Partial<Stored>);
   } catch {
-    return {
-      clientes: seedClientes,
-      atendimentos: seedAtendimentos,
-      lancamentos: seedLancamentos,
-      cotacoes: seedCotacoes,
-    };
+    return fallback;
   }
 }
 
@@ -421,6 +412,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
               cotacaoStatusToApi(params.status)
             : undefined,
           search: params?.search?.trim() || undefined,
+          token: params?.token,
         });
         setData((d) => ({ ...d, cotacoes: list }));
       } catch (e) {
