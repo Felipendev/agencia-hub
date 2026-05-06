@@ -57,6 +57,14 @@ export async function PUT(request: Request) {
       : [],
   };
 
-  await upsertConfig(normalized);
+  try {
+    await upsertConfig(normalized);
+  } catch (err) {
+    console.error("[solicitacao-config] Erro ao salvar configuração:", err);
+    return NextResponse.json(
+      { error: "Não foi possível salvar a configuração. Em ambientes serverless, o armazenamento em arquivo não é suportado." },
+      { status: 503 },
+    );
+  }
   return NextResponse.json({ ok: true, config: normalized });
 }
