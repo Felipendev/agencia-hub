@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 
 export function LoginForm() {
@@ -32,6 +33,10 @@ export function LoginForm() {
     const result = await login(email, password);
     setLoading(false);
     if (!result.ok) {
+      if (result.error?.includes("Verifique seu e-mail")) {
+        router.push(`/cadastro/verificar?email=${encodeURIComponent(email.trim())}`);
+        return;
+      }
       setError(result.error ?? "Erro ao entrar.");
       return;
     }
@@ -56,7 +61,7 @@ export function LoginForm() {
             Entrar
           </h1>
           <p className="mt-1 text-sm text-slate-600">
-            MVP: use qualquer e-mail e senha para acessar a demonstração.
+            Acesse o painel da sua agência.
           </p>
 
           {resetSuccess && (
@@ -78,9 +83,8 @@ export function LoginForm() {
             </div>
             <div>
               <Label htmlFor="password">Senha</Label>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 autoComplete="current-password"
                 placeholder="••••••••"
                 value={password}

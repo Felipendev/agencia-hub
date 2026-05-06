@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { PasswordStrengthIndicator } from "@/components/ui/password-strength";
@@ -153,9 +154,8 @@ export default function CadastroPage() {
 
             <div>
               <Label htmlFor="password">Senha</Label>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -166,9 +166,8 @@ export default function CadastroPage() {
 
             <div>
               <Label htmlFor="passwordConfirmation">Confirmar senha</Label>
-              <Input
+              <PasswordInput
                 id="passwordConfirmation"
-                type="password"
                 autoComplete="new-password"
                 value={passwordConfirmation}
                 onChange={(e) => setPasswordConfirmation(e.target.value)}

@@ -16,6 +16,8 @@ export default function LandingPage() {
           <nav className="hidden items-center gap-6 text-sm font-medium text-white/70 md:flex">
             <a href="#funcionalidades" className="hover:text-white transition-colors">Funcionalidades</a>
             <a href="#planos" className="hover:text-white transition-colors">Planos</a>
+            <Link href="/contato" className="hover:text-white transition-colors">Contato</Link>
+            <Link href="/suporte" className="hover:text-white transition-colors">Suporte</Link>
             <Link href="/termos" className="hover:text-white transition-colors">Termos</Link>
           </nav>
           <div className="flex items-center gap-3">
@@ -43,10 +45,6 @@ export default function LandingPage() {
           <div className="relative mx-auto max-w-6xl px-4 py-20 lg:flex lg:items-center lg:gap-16 lg:py-32 lg:px-8">
             {/* Left: Text content */}
             <div className="max-w-xl flex-1">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--hub-yellow)]/30 bg-[var(--hub-yellow)]/10 px-4 py-1.5 text-xs font-semibold text-[var(--hub-yellow)]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--hub-yellow)] animate-pulse" />
-                Experimente grátis por 10 dias
-              </div>
               <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-white lg:text-5xl xl:text-6xl">
                 Simplicidade na gestão da sua agência
               </h1>
@@ -56,7 +54,7 @@ export default function LandingPage() {
               <div className="mt-10 flex flex-wrap gap-4">
                 <Link href="/cadastro">
                   <Button className="!px-8 !py-3.5 text-base shadow-lg shadow-[var(--hub-yellow)]/20">
-                    Experimente grátis por 10 dias
+                    Criar conta
                   </Button>
                 </Link>
                 <Link href="/login">
@@ -68,9 +66,6 @@ export default function LandingPage() {
                   </button>
                 </Link>
               </div>
-              <p className="mt-4 text-sm text-white/40">
-                Sem cartão de crédito · Cancele quando quiser
-              </p>
             </div>
 
             {/* Right: Visual illustration */}
@@ -261,12 +256,12 @@ export default function LandingPage() {
               Pronto para transformar sua agência?
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-white/50">
-              Comece agora com 10 dias grátis. Sem compromisso, sem cartão de crédito.
+              Entre em contato para saber mais sobre a plataforma.
             </p>
             <div className="mt-10 flex justify-center gap-4">
-              <Link href="/cadastro">
+              <Link href="/contato">
                 <Button className="!px-10 !py-4 text-base shadow-lg shadow-[var(--hub-yellow)]/20">
-                  Começar grátis agora
+                  Entrar em contato
                 </Button>
               </Link>
             </div>
