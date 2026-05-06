@@ -39,7 +39,7 @@ export default function SuportePage() {
               Nossa equipe está disponível de segunda a sexta, das 9h às 18h.
             </p>
             <a
-              href="https://wa.me/5511999999999"
+              href="https://wa.me/5531982615986"
               target="_blank"
               rel="noopener noreferrer"
               className="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
