@@ -9,6 +9,7 @@ import { Select } from "@/components/ui/select";
 import { IconX } from "@/components/icons";
 import { generateId } from "@/lib/format";
 import { isValidSolicitacaoSlug } from "@/lib/solicitacao-slug";
+import { useAuth } from "@/contexts/auth-context";
 import type {
   LinkSocialItem,
   LinkSocialTipo,
@@ -36,6 +37,7 @@ export function LinkSolicitacaoModal({
   onClose,
   defaultSlug = "demo",
 }: Props) {
+  const { token } = useAuth();
   const [view, setView] = useState<"main" | "customize">("main");
   const [slug, setSlug] = useState(defaultSlug);
   const [config, setConfig] = useState<SolicitacaoPublicaConfig | null>(null);
@@ -53,9 +55,11 @@ export function LinkSolicitacaoModal({
   const loadConfig = useCallback(async (s: string) => {
     setLoadError(null);
     try {
+      const headers: Record<string, string> = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
       const res = await fetch(
         `/api/app/solicitacao-config?slug=${encodeURIComponent(s)}`,
-        { credentials: "include" },
+        { credentials: "include", headers },
       );
       if (res.status === 401) {
         setLoadError("Faça login no painel para carregar a personalização.");
@@ -68,7 +72,7 @@ export function LinkSolicitacaoModal({
     } catch {
       setLoadError("Não foi possível carregar as configurações.");
     }
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     if (!open) {
@@ -91,10 +95,12 @@ export function LinkSolicitacaoModal({
     }
     setSaving(true);
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
       const res = await fetch("/api/app/solicitacao-config", {
         method: "PUT",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ config }),
       });
       const data = (await res.json().catch(() => ({}))) as {
