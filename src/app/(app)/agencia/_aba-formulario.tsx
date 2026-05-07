@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { isValidSolicitacaoSlug } from "@/lib/solicitacao-slug";
 import { generateId } from "@/lib/format";
+import { useAuth } from "@/contexts/auth-context";
 import type { LinkSocialItem, LinkSocialTipo, SolicitacaoPublicaConfig } from "@/types/solicitacao-publica";
 
 const TIPOS_LINK: { id: LinkSocialTipo; label: string }[] = [
@@ -24,18 +25,24 @@ const TIPOS_LINK: { id: LinkSocialTipo; label: string }[] = [
 
 export function AbaFormulario() {
   const toast = useToast();
+  const { token } = useAuth();
   const [config, setConfig] = useState<SolicitacaoPublicaConfig | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch("/api/app/solicitacao-config?slug=demo", { credentials: "include" });
+      const headers: Record<string, string> = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      const res = await fetch("/api/app/solicitacao-config?slug=demo", {
+        credentials: "include",
+        headers,
+      });
       if (!res.ok) throw new Error();
       const data = (await res.json()) as { config: SolicitacaoPublicaConfig };
       setConfig(data.config);
     } catch { setError("Nao foi possivel carregar as configuracoes."); }
-  }, []);
+  }, [token]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -47,9 +54,11 @@ export function AbaFormulario() {
     }
     setSaving(true); setError(null);
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
       const res = await fetch("/api/app/solicitacao-config", {
         method: "PUT", credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ config }),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string; config?: SolicitacaoPublicaConfig };
