@@ -7,12 +7,12 @@ type Props = {
   resultado: ResultadoCia;
   qtdPessoas: number;
   temMala: boolean;
-  isMaisBarata: boolean;
-  isMaiorLucro: boolean;
+  isMaisBarata?: boolean;
+  isMaiorLucro?: boolean;
   corCia?: string;
 };
 
-export function ResultadoCiaCard({ resultado: r, qtdPessoas, temMala, isMaisBarata, isMaiorLucro, corCia }: Props) {
+export function ResultadoCiaCard({ resultado: r, qtdPessoas, temMala, corCia }: Props) {
   return (
     <div
       className="rounded-xl border-2 border-[var(--hub-border)] bg-white p-4"

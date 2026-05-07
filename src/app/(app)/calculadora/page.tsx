@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ import { ClientePicker } from "@/components/cliente/ClientePicker";
 import { useData } from "@/contexts/data-context";
 import {
   calcular,
-  fmtBRL,
   LUCRO_CONFIG_PADRAO,
   type CiaInput,
   type LucroConfig,
@@ -215,26 +214,24 @@ function OpcaoVooForm({
 export default function CalculadoraMilhasPage() {
   const router = useRouter();
   const { clientes, addCotacao } = useData();
-  const [tabelas, setTabelas] = useState<TabelasMilhas | null>(null);
+  const [tabelas] = useState<TabelasMilhas | null>(() => carregarTabelas());
   const [clienteId, setClienteId] = useState("");
   const [qtdPessoas, setQtdPessoas] = useState(1);
   const [origem, setOrigem] = useState("");
   const [destino, setDestino] = useState("");
   const [dataIda, setDataIda] = useState("");
   const [dataVolta, setDataVolta] = useState("");
-  const [opcoes, setOpcoes] = useState<OpcaoVoo[]>([]);
-  const [resultado, setResultado] = useState<ResultadoCalculadora | null>(null);
-
-  useEffect(() => {
+  const [opcoes, setOpcoes] = useState<OpcaoVoo[]>(() => {
     const t = carregarTabelas();
-    setTabelas(t);
     if (t.cias.length > 0) {
-      setOpcoes([
+      return [
         novaOpcao(t.cias[0].id, `${t.cias[0].nome} — Opcao 1`, 0),
         novaOpcao(t.cias[1]?.id ?? t.cias[0].id, `${t.cias[1]?.nome ?? t.cias[0].nome} — Opcao 2`, 1),
-      ]);
+      ];
     }
-  }, []);
+    return [];
+  });
+  const [resultado, setResultado] = useState<ResultadoCalculadora | null>(null);
 
   function updateOpcao(idx: number, v: OpcaoVoo) {
     setOpcoes((prev) => prev.map((o, i) => (i === idx ? v : o)));

@@ -13,7 +13,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { DownloadIcon, EditIcon, WhatsAppIcon } from "@/components/icons";
-import { formatBRL, formatDateBR, formatDateTimeBR } from "@/lib/format";
+import { formatDateBR, formatDateTimeBR } from "@/lib/format";
 import { imprimirCotacao, baixarCotacaoHtml } from "@/lib/pdf-generator";
 import { COTACAO_STATUS_LABELS } from "@/lib/constants";
 import { labelFormaPagamento } from "@/lib/cotacao-options";
@@ -43,6 +43,7 @@ export default function CotacaoDetalhePage() {
 
   useEffect(() => {
     if (!cotacao) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Syncing form state from derived data
     setStatusEdit(cotacao.status);
     setValorEdit(String(cotacao.valorTotal));
     setValidadeEdit(cotacao.validade);

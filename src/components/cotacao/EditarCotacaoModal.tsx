@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { XIcon } from "@/components/icons";
-import { COTACAO_STATUS_LABELS, COTACAO_KANBAN_COLUMNS } from "@/lib/constants";
+import { COTACAO_STATUS_LABELS } from "@/lib/constants";
 import { SERVICOS_DESEJADOS_OPTIONS } from "@/lib/cotacao-options";
 import { formatBRL } from "@/lib/format";
 import type { Cotacao, CotacaoStatus } from "@/types";
@@ -75,6 +75,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
   // Sincroniza ao abrir
   useEffect(() => {
     if (!open) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Syncing form state from prop when modal opens
     setTab("geral");
     setTitulo(cotacao.titulo);
     setClienteId(cotacao.clienteId);

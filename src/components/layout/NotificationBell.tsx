@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useNotifications } from "@/contexts/notification-context";
-import { BellIcon, XIcon } from "@/components/icons";
+import { BellIcon } from "@/components/icons";
 
 export function NotificationBell() {
   const { notifications, unreadCount, markAsRead, markAllAsRead, clearAll } =

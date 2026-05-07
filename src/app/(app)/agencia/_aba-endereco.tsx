@@ -1,19 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { loadDados, saveDados, defaultDados } from "./_agencia-storage";
+import { loadDados, saveDados } from "./_agencia-storage";
 import type { DadosAgencia } from "./_agencia-storage";
 
 export function AbaEndereco() {
   const toast = useToast();
-  const [d, setD] = useState<DadosAgencia>(defaultDados);
-
-  useEffect(() => { setD(loadDados()); }, []);
+  const [d, setD] = useState<DadosAgencia>(() => loadDados());
 
   function f(field: keyof DadosAgencia) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>

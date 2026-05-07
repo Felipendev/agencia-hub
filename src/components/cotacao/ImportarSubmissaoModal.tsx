@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { XIcon } from "@/components/icons";
 import { formatDateBR, formatPhoneBR } from "@/lib/format";
 import type { SolicitacaoPublicSubmission } from "@/types/solicitacao-publica";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,6 @@ import {
   formatarFaixa,
   resetarTabelas,
   salvarTabelas,
-  TABELAS_PADRAO,
   type CiaMilheiro,
   type FaixaMilheiro,
   type TabelasMilhas,
@@ -200,11 +199,7 @@ function CiaCard({
 export default function PrecificarMilheiroPage() {
   const router = useRouter();
   const toast = useToast();
-  const [tabelas, setTabelas] = useState<TabelasMilhas | null>(null);
-
-  useEffect(() => {
-    setTabelas(carregarTabelas());
-  }, []);
+  const [tabelas, setTabelas] = useState<TabelasMilhas | null>(() => carregarTabelas());
 
   function updateCia(id: string, updated: CiaMilheiro) {
     if (!tabelas) return;

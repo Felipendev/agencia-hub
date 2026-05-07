@@ -39,6 +39,7 @@ export function SolicitacaoSubmissionsBanner() {
 
   useEffect(() => {
     if (!isReady) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Async data fetch from external API is a legitimate effect pattern
     void refresh();
   }, [isReady, refresh]);
 

@@ -145,6 +145,7 @@ export function AbaFormulario() {
               <Input type="file" accept="image/*" className="mt-1 text-sm" onChange={onLogoFile} />
               {config.logoDataUrl && (
                 <div className="mt-2 flex items-center gap-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- Data URL from user upload */}
                   <img src={config.logoDataUrl} alt="Logo" className="h-10 rounded border" />
                   <button type="button" className="text-xs text-red-600 hover:underline"
                     onClick={() => setConfig({ ...config, logoDataUrl: null })}>

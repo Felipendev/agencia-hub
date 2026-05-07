@@ -209,6 +209,7 @@ export function AbaAgencia() {
           <Label>Logotipo</Label>
           <div className="mt-2 flex items-center gap-4">
             {logoPreview ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={logoPreview}
                 alt="Logo da agência"

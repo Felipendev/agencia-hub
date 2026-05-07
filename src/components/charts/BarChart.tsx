@@ -31,8 +31,6 @@ export function BarChart({
   }
 
   const max = Math.max(...data.map((d) => d.value), 1);
-  const barWidth = Math.floor(100 / data.length);
-  const gap = 4;
 
   return (
     <div style={{ height }} className="w-full">

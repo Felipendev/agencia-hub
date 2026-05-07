@@ -33,6 +33,7 @@ export function EnviarWhatsAppModal({ cotacao, cliente, open, onClose }: Props) 
   // Reinicia a mensagem toda vez que o modal abre
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Syncing derived state when modal opens
       setMensagem(gerarMensagemTexto(cotacao, cliente));
     }
   }, [open, cotacao, cliente]);
