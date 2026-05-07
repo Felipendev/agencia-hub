@@ -207,7 +207,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const empresa  = user?.empresa ?? "Agencia";
   const nome     = user?.nome    ?? "Usuario";
   const role     = user?.role    ?? "OWNER";
-  const groups   = role === "SELLER" ? SELLER_GROUPS : OWNER_GROUPS;
+  const [viewAsSeller, setViewAsSeller] = useState(false);
+  const groups   = (role === "SELLER" || viewAsSeller) ? SELLER_GROUPS : OWNER_GROUPS;
 
   return (
     <div className="flex min-h-screen bg-[var(--hub-bg)]">
@@ -245,6 +246,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </span>
             <p className="truncate text-xs text-white/40">{user?.email}</p>
           </div>
+          {role === "OWNER" && (
+            <button
+              type="button"
+              onClick={() => setViewAsSeller(!viewAsSeller)}
+              className="mt-2 w-full rounded-lg border border-white/20 px-3 py-1.5 text-[10px] font-medium text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+            >
+              {viewAsSeller ? "← Voltar ao perfil Gestor" : "👁 Ver como Vendedor"}
+            </button>
+          )}
         </div>
       </aside>
 
