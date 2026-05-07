@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { TrialBanner } from "@/components/ui/trial-banner";
 import { TermsAcceptanceModal } from "@/components/ui/terms-acceptance-modal";
+import { ChangePasswordModal } from "@/components/ui/change-password-modal";
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -92,9 +93,14 @@ const SELLER_GROUPS: NavGroup[] = [
     label: "Principal",
     items: [
       { href: "/meu-painel",   label: "Meu Painel",       icon: "layout"   },
-      { href: "/cotacoes",     label: "Minhas Cotacoes",  icon: "document" },
-      { href: "/clientes",     label: "Clientes",         icon: "users"    },
-      { href: "/lixeira",      label: "Lixeira",          icon: "trash"    },
+      { href: "/cotacoes",     label: "Minhas Cotações",  icon: "document" },
+      { href: "/clientes",     label: "Meus Clientes",    icon: "users"    },
+    ],
+  },
+  {
+    label: "Financeiro",
+    items: [
+      { href: "/minhas-comissoes", label: "Minhas Comissões", icon: "wallet" },
     ],
   },
 ];
@@ -201,12 +207,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const empresa  = user?.empresa ?? "Agencia";
   const nome     = user?.nome    ?? "Usuario";
   const role     = user?.role    ?? "OWNER";
-  const groups   = role === "SELLER" ? SELLER_GROUPS : OWNER_GROUPS;
+  const [viewAsSeller, setViewAsSeller] = useState(false);
+  const groups   = (role === "SELLER" || viewAsSeller) ? SELLER_GROUPS : OWNER_GROUPS;
 
   return (
     <div className="flex min-h-screen bg-[var(--hub-bg)]">
       {/* Terms acceptance blocking modal */}
       <TermsAcceptanceModal />
+      {/* Force password change blocking modal */}
+      <ChangePasswordModal />
 
       {/* Desktop sidebar */}
       <aside className="hidden w-60 shrink-0 flex-col border-r border-[var(--hub-border)] bg-[var(--hub-blue-dark)] text-white lg:flex">
@@ -233,10 +242,19 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   : "bg-white/20 text-white"
               }`}
             >
-              {role === "OWNER" ? "Dono" : "Vendedor"}
+              {role === "OWNER" ? "Gestor" : "Vendedor"}
             </span>
             <p className="truncate text-xs text-white/40">{user?.email}</p>
           </div>
+          {role === "OWNER" && (
+            <button
+              type="button"
+              onClick={() => setViewAsSeller(!viewAsSeller)}
+              className="mt-2 w-full rounded-lg border border-white/20 px-3 py-1.5 text-[10px] font-medium text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+            >
+              {viewAsSeller ? "← Voltar ao perfil Gestor" : "👁 Ver como Vendedor"}
+            </button>
+          )}
         </div>
       </aside>
 
@@ -291,7 +309,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <div className="hidden text-right sm:block">
               <p className="text-sm font-medium text-[var(--hub-blue-dark)]">{nome}</p>
               <p className="text-xs text-slate-500">
-                {role === "OWNER" ? "Dono" : "Vendedor"}
+                {role === "OWNER" ? "Gestor" : "Vendedor"}
               </p>
             </div>
             <Button
