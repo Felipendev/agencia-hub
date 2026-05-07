@@ -71,8 +71,7 @@ export function AbaAgencia() {
   const [saving, setSaving] = useState(false);
   const [cnpjError, setCnpjError] = useState("");
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [logoChanged, setLogoChanged] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -126,34 +125,12 @@ export function AbaAgencia() {
       return;
     }
 
-    setLogoFile(file);
     const reader = new FileReader();
-    reader.onload = () => setLogoPreview(reader.result as string);
+    reader.onload = () => {
+      setLogoPreview(reader.result as string);
+      setLogoChanged(true);
+    };
     reader.readAsDataURL(file);
-  }
-
-  async function handleUploadLogo() {
-    if (!logoFile || !token) return;
-    setUploadingLogo(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", logoFile);
-      const base = process.env.NEXT_PUBLIC_AGENCIA_HUB_API_URL || "";
-      const res = await fetch(`${base}/agency/logo`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-      if (!res.ok) throw new Error("Erro ao enviar logo");
-      const result = await res.json();
-      setData((prev) => ({ ...prev, logoUrl: result.logoUrl ?? "" }));
-      setLogoFile(null);
-      toast.success("Logo atualizado!");
-    } catch (err) {
-      toast.error((err as Error).message ?? "Erro ao enviar logo");
-    } finally {
-      setUploadingLogo(false);
-    }
   }
 
   async function handleSave() {
@@ -179,6 +156,7 @@ export function AbaAgencia() {
             cnpj: data.cnpj,
             address: data.address,
             commercialEmail: data.commercialEmail,
+            ...(logoChanged ? { logoUrl: logoPreview || "" } : {}),
           }),
         }, token);
       }
@@ -189,6 +167,7 @@ export function AbaAgencia() {
         telefone: data.phone,
         email: data.commercialEmail,
       }));
+      setLogoChanged(false);
       toast.success("Dados salvos!");
     } catch (err) {
       toast.error((err as Error).message ?? "Erro ao salvar");
@@ -228,16 +207,6 @@ export function AbaAgencia() {
                 className="text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--hub-blue)] file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-[var(--hub-blue-dark)]"
               />
               <p className="text-xs text-slate-400">PNG, JPG ou SVG. Máximo 2MB.</p>
-              {logoFile && (
-                <Button
-                  type="button"
-                  onClick={handleUploadLogo}
-                  disabled={uploadingLogo}
-                  className="w-fit text-xs"
-                >
-                  {uploadingLogo ? "Enviando..." : "Enviar logo"}
-                </Button>
-              )}
             </div>
           </div>
         </div>
