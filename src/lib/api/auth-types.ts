@@ -17,6 +17,7 @@ export type ApiLoginResponse = {
   subscriptionStatus?: string;
   trialEndsAt?: string | null;
   requiresTermsAcceptance?: boolean;
+  mustChangePassword?: boolean;
 };
 
 export type ApiUserResponse = {

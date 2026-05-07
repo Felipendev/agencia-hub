@@ -225,4 +225,5 @@ export interface UsuarioSessao {
   subscriptionStatus?: string;
   trialEndsAt?: string | null;
   requiresTermsAcceptance?: boolean;
+  mustChangePassword?: boolean;
 }

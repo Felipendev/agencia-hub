@@ -128,6 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             subscriptionStatus: data.subscriptionStatus,
             trialEndsAt: data.trialEndsAt,
             requiresTermsAcceptance: data.requiresTermsAcceptance,
+            mustChangePassword: data.mustChangePassword,
           };
 
           persistSession(sessao, data.token);
