@@ -10,7 +10,7 @@ import {
 } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { generateId } from "@/lib/format";
-import type { TimelineEvent, TimelineEventType } from "@/types/timeline";
+import type { TimelineEvent } from "@/types/timeline";
 
 type TimelineContextValue = {
   events: TimelineEvent[];
@@ -40,11 +40,7 @@ function saveEvents(events: TimelineEvent[]) {
 
 export function TimelineProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const [events, setEvents] = useState<TimelineEvent[]>([]);
-
-  useEffect(() => {
-    setEvents(loadEvents());
-  }, []);
+  const [events, setEvents] = useState<TimelineEvent[]>(() => loadEvents());
 
   useEffect(() => {
     saveEvents(events);

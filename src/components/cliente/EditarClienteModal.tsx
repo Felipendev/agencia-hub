@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { XIcon } from "@/components/icons";
-import { DuplicateWarning } from "@/components/cliente/DuplicateWarning";
 import type { Cliente, ClienteStatus } from "@/types";
 
 type Props = {
@@ -37,6 +36,7 @@ export function EditarClienteModal({ cliente, open, onClose }: Props) {
   // Sincroniza se o cliente mudar externamente
   useEffect(() => {
     if (!open) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Syncing form state from prop when modal opens
     setNome(cliente.nome);
     setEmail(cliente.email);
     setTelefone(cliente.telefone);

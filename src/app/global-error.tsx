@@ -5,7 +5,6 @@
  * Must include its own <html> and <body> tags since the root layout may have crashed.
  */
 export default function GlobalError({
-  error,
   reset,
 }: {
   error: Error & { digest?: string };
@@ -78,6 +77,7 @@ export default function GlobalError({
             >
               Tentar novamente
             </button>
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- Global error boundary cannot use <Link> since router context may be unavailable */}
             <a
               href="/"
               style={{

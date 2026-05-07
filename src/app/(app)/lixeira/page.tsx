@@ -7,7 +7,6 @@ import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Table, Th, Td } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { RestoreIcon } from "@/components/icons";
 import {
   listDeletedQuotations,

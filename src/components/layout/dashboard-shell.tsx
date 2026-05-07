@@ -110,13 +110,6 @@ function NavGroup({
   pathname: string;
   onNavigate?: () => void;
 }) {
-  const hasActive = group.items.some(
-    (item) =>
-      pathname === item.href ||
-      (item.href !== "/dashboard" &&
-        item.href !== "/meu-painel" &&
-        pathname.startsWith(item.href)),
-  );
   const [open, setOpen] = useState(true); // começa aberto
 
   return (
@@ -172,6 +165,31 @@ function NavGroup({
   );
 }
 
+// ─── Sidebar content (extracted to avoid re-creation during render) ──────────
+
+function SidebarContent({
+  groups,
+  pathname,
+  onNavigate,
+}: {
+  groups: NavGroup[];
+  pathname: string;
+  onNavigate?: () => void;
+}) {
+  return (
+    <nav className="flex flex-1 flex-col gap-0 p-3 overflow-y-auto">
+      {groups.map((group) => (
+        <NavGroup
+          key={group.label}
+          group={group}
+          pathname={pathname}
+          onNavigate={onNavigate}
+        />
+      ))}
+    </nav>
+  );
+}
+
 // ─── Shell principal ──────────────────────────────────────────────────────────
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -184,21 +202,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const nome     = user?.nome    ?? "Usuario";
   const role     = user?.role    ?? "OWNER";
   const groups   = role === "SELLER" ? SELLER_GROUPS : OWNER_GROUPS;
-
-  function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
-    return (
-      <nav className="flex flex-1 flex-col gap-0 p-3 overflow-y-auto">
-        {groups.map((group) => (
-          <NavGroup
-            key={group.label}
-            group={group}
-            pathname={pathname}
-            onNavigate={onNavigate}
-          />
-        ))}
-      </nav>
-    );
-  }
 
   return (
     <div className="flex min-h-screen bg-[var(--hub-bg)]">
@@ -218,7 +221,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        <SidebarContent />
+        <SidebarContent groups={groups} pathname={pathname} />
 
         {/* Footer com role */}
         <div className="border-t border-white/10 px-4 py-3">
@@ -263,7 +266,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <IconX className="h-5 w-5" />
           </button>
         </div>
-        <SidebarContent onNavigate={() => setMobileOpen(false)} />
+        <SidebarContent groups={groups} pathname={pathname} onNavigate={() => setMobileOpen(false)} />
       </aside>
 
       {/* Main */}
