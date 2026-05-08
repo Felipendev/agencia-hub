@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
 import { isValidSolicitacaoSlug } from "@/lib/solicitacao-slug";
+import { getPublicConfig, upsertConfig } from "@/lib/solicitacao-server-store";
+import type { SolicitacaoPublicaConfig } from "@/types/solicitacao-publica";
 
 export const runtime = "nodejs";
 
@@ -31,6 +33,12 @@ async function requireAuth(request: Request): Promise<string | null> {
     return null;
   }
   return null;
+}
+
+async function hasLocalAuth(request: Request, token: string | null): Promise<boolean> {
+  if (token) return true;
+  const jar = await cookies();
+  return jar.get("ah_auth")?.value === "1";
 }
 
 export async function GET(request: Request) {
@@ -89,6 +97,11 @@ export async function GET(request: Request) {
     }
   }
 
+  if (!base && await hasLocalAuth(request, token)) {
+    const config = await getPublicConfig(slug);
+    return NextResponse.json({ config });
+  }
+
   // No backend configured or no auth — return unauthorized
   return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 }
@@ -97,11 +110,12 @@ export async function PUT(request: Request) {
   const token = await requireAuth(request);
   const base = getAgenciaHubApiBaseUrl();
 
-  if (!token || !base) {
+  const localAuth = await hasLocalAuth(request, token);
+  if ((base && !token) || (!base && !localAuth)) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  let body: { config?: { slug?: string; tituloPagina?: string; textoIntro?: string; logoDataUrl?: string | null; nomeMarca?: string; linksSociais?: unknown[] } };
+  let body: { config?: Partial<SolicitacaoPublicaConfig> };
   try {
     body = await request.json();
   } catch {
@@ -117,16 +131,21 @@ export async function PUT(request: Request) {
   }
 
   // Map to the Spring Boot API request format
-  const apiBody = {
+  const apiBody: SolicitacaoPublicaConfig = {
     slug: config.slug.trim(),
     tituloPagina: config.tituloPagina.trim(),
     textoIntro: (config.textoIntro ?? "").trim(),
     logoDataUrl: config.logoDataUrl ?? null,
     nomeMarca: (config.nomeMarca ?? "Agência").trim() || "Agência",
     linksSociais: Array.isArray(config.linksSociais)
-      ? (config.linksSociais as Array<{ url?: string }>).filter((l) => l.url?.trim())
+      ? config.linksSociais.filter((l) => l.url?.trim())
       : [],
   };
+
+  if (!base) {
+    await upsertConfig(apiBody);
+    return NextResponse.json({ ok: true, config: apiBody });
+  }
 
   try {
     const res = await fetch(`${base}/agency/solicitacao-config`, {
