@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
 import { isValidSolicitacaoSlug } from "@/lib/solicitacao-slug";
-import { getPublicConfig, upsertConfig } from "@/lib/solicitacao-server-store";
+import { upsertConfig } from "@/lib/solicitacao-server-store";
 import type { SolicitacaoPublicaConfig } from "@/types/solicitacao-publica";
 
 export const runtime = "nodejs";

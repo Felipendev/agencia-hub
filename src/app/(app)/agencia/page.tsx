@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { AbaAgencia } from "./_aba-agencia";
@@ -29,22 +29,13 @@ export default function AgenciaPage() {
 
   // Persist active tab via URL search param ?aba=xxx
   const abaFromUrl = searchParams.get("aba") ?? "";
-  const initialAba: Aba = VALID_ABAS.has(abaFromUrl) ? (abaFromUrl as Aba) : "agencia";
-  const [aba, setAbaState] = useState<Aba>(initialAba);
+  const aba: Aba = VALID_ABAS.has(abaFromUrl) ? (abaFromUrl as Aba) : "agencia";
 
   const setAba = useCallback((newAba: Aba) => {
-    setAbaState(newAba);
     const params = new URLSearchParams(searchParams.toString());
     params.set("aba", newAba);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }, [searchParams, router, pathname]);
-
-  // Sync state if URL changes externally
-  useEffect(() => {
-    if (VALID_ABAS.has(abaFromUrl) && abaFromUrl !== aba) {
-      setAbaState(abaFromUrl as Aba);
-    }
-  }, [abaFromUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (user?.role !== "OWNER") {
     return (
