@@ -211,6 +211,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, logout, isReady } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [viewAsSeller, setViewAsSeller] = useState(false);
 
   if (!isReady) {
     return (
@@ -223,7 +224,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const empresa  = user?.empresa ?? "Agencia";
   const nome     = user?.nome    ?? "Usuario";
   const role     = user?.role    ?? "OWNER";
-  const [viewAsSeller, setViewAsSeller] = useState(false);
   const groups   = (role === "SELLER" || viewAsSeller) ? SELLER_GROUPS : OWNER_GROUPS;
 
   return (
