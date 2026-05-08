@@ -34,14 +34,14 @@ export function AbaFormulario() {
     try {
       const headers: Record<string, string> = {};
       if (token) headers["Authorization"] = `Bearer ${token}`;
-      const res = await fetch("/api/app/solicitacao-config?slug=demo", {
+      const res = await fetch("/api/app/solicitacao-config", {
         credentials: "include",
         headers,
       });
       if (!res.ok) throw new Error();
       const data = (await res.json()) as { config: SolicitacaoPublicaConfig };
       setConfig(data.config);
-    } catch { setError("Nao foi possivel carregar as configuracoes."); }
+    } catch { setError("Não foi possível carregar as configurações."); }
   }, [token]);
 
   useEffect(() => { void load(); }, [load]);
@@ -49,7 +49,7 @@ export function AbaFormulario() {
   async function handleSave() {
     if (!config) return;
     if (!isValidSolicitacaoSlug(config.slug)) {
-      setError("Slug invalido: letras minusculas, numeros e hifen (2-64 chars).");
+      setError("O identificador do link deve conter apenas letras minúsculas, números e hífen, com 2 a 64 caracteres. Exemplo: minha-agencia");
       return;
     }
     setSaving(true); setError(null);
@@ -97,33 +97,44 @@ export function AbaFormulario() {
 
   return (
     <div className="space-y-4">
-      {/* Link publico */}
+      {/* Link publico + Preview */}
       <Card>
-        <div className="p-1 space-y-2">
-          <p className="text-sm font-semibold text-[var(--hub-blue-dark)]">Link publico do formulario</p>
+        <div className="p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-[var(--hub-blue-dark)]">Link público do formulário</p>
+            <a
+              href={publicUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-lg bg-[var(--hub-blue)] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[var(--hub-blue-dark)] transition-colors"
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
+                <path fillRule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 0110 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0110 17c-4.257 0-7.893-2.66-9.336-6.41zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+              </svg>
+              Visualizar formulário
+            </a>
+          </div>
           <div className="flex items-center gap-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2">
             <code className="flex-1 break-all text-xs text-slate-700">{publicUrl}</code>
-            <button type="button" onClick={() => navigator.clipboard.writeText(publicUrl).then(() => toast.success("Copiado!"))}
-              className="shrink-0 rounded border border-sky-300 bg-white px-2 py-1 text-xs font-medium text-sky-700 hover:bg-sky-50">
-              Copiar
+            <button type="button" onClick={() => navigator.clipboard.writeText(publicUrl).then(() => toast.success("Link copiado!"))}
+              className="shrink-0 rounded border border-sky-300 bg-white px-3 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-100 transition-colors">
+              Copiar link
             </button>
-            <a href={publicUrl} target="_blank" rel="noopener noreferrer"
-              className="shrink-0 rounded border border-sky-300 bg-white px-2 py-1 text-xs font-medium text-sky-700 hover:bg-sky-50">
-              Abrir
-            </a>
           </div>
         </div>
       </Card>
 
       {/* Config */}
       <Card>
-        <div className="space-y-4 p-1">
+        <div className="space-y-4 p-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="fc-slug">Slug (identificador)</Label>
+              <Label htmlFor="fc-slug">Identificador do link público</Label>
               <Input id="fc-slug" value={config.slug} className="font-mono"
-                onChange={(e) => setConfig({ ...config, slug: e.target.value.trim() })} />
-              <p className="mt-1 text-xs text-slate-400">Letras minusculas, numeros e hifen.</p>
+                placeholder="ex: minha-agencia"
+                onChange={(e) => setConfig({ ...config, slug: e.target.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '') })} />
+              <p className="mt-1 text-xs text-slate-400">Usado na URL do formulário público. Apenas letras minúsculas, números e hífen.</p>
             </div>
             <div>
               <Label htmlFor="fc-marca">Nome da marca</Label>
@@ -131,25 +142,28 @@ export function AbaFormulario() {
                 onChange={(e) => setConfig({ ...config, nomeMarca: e.target.value })} />
             </div>
             <div className="sm:col-span-2">
-              <Label htmlFor="fc-titulo">Titulo da pagina</Label>
+              <Label htmlFor="fc-titulo">Título da página</Label>
               <Input id="fc-titulo" value={config.tituloPagina}
                 onChange={(e) => setConfig({ ...config, tituloPagina: e.target.value })} />
             </div>
             <div className="sm:col-span-2">
-              <Label htmlFor="fc-intro">Texto introdutorio</Label>
+              <Label htmlFor="fc-intro">Texto introdutório</Label>
               <Textarea id="fc-intro" rows={3} value={config.textoIntro}
                 onChange={(e) => setConfig({ ...config, textoIntro: e.target.value })} />
             </div>
             <div className="sm:col-span-2">
-              <Label>Logo (max 400 KB)</Label>
-              <Input type="file" accept="image/*" className="mt-1 text-sm" onChange={onLogoFile} />
+              <Label>Logo do formulário</Label>
+              <p className="mb-2 text-xs text-slate-400">
+                Por padrão, o formulário usa a logo da agência. Envie uma imagem aqui apenas se quiser usar uma logo diferente no formulário público.
+              </p>
+              <Input type="file" accept="image/*" className="text-sm" onChange={onLogoFile} />
               {config.logoDataUrl && (
                 <div className="mt-2 flex items-center gap-3">
                   {/* eslint-disable-next-line @next/next/no-img-element -- Data URL from user upload */}
                   <img src={config.logoDataUrl} alt="Logo" className="h-10 rounded border" />
                   <button type="button" className="text-xs text-red-600 hover:underline"
                     onClick={() => setConfig({ ...config, logoDataUrl: null })}>
-                    Remover
+                    Remover (usar logo da agência)
                   </button>
                 </div>
               )}

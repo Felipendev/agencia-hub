@@ -42,12 +42,6 @@ async function hasLocalAuth(request: Request, token: string | null): Promise<boo
 }
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const slug = (searchParams.get("slug") ?? "demo").trim();
-  if (!isValidSolicitacaoSlug(slug)) {
-    return NextResponse.json({ error: "Slug inválido" }, { status: 400 });
-  }
-
   const base = getAgenciaHubApiBaseUrl();
   const token = await requireAuth(request);
 
@@ -55,7 +49,7 @@ export async function GET(request: Request) {
   if (base && token) {
     try {
       const res = await fetch(
-        `${base}/agency/solicitacao-config?slug=${encodeURIComponent(slug)}`,
+        `${base}/agency/solicitacao-config`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -79,27 +73,6 @@ export async function GET(request: Request) {
         { status: 502 },
       );
     }
-  }
-
-  // If backend is configured but no token, try the public endpoint as fallback
-  if (base) {
-    try {
-      const res = await fetch(
-        `${base}/public/solicitacao-config/${encodeURIComponent(slug)}`,
-        { headers: { "Content-Type": "application/json" } },
-      );
-      if (res.ok) {
-        const config = await res.json();
-        return NextResponse.json({ config });
-      }
-    } catch {
-      // Fall through to error
-    }
-  }
-
-  if (!base && await hasLocalAuth(request, token)) {
-    const config = await getPublicConfig(slug);
-    return NextResponse.json({ config });
   }
 
   // No backend configured or no auth — return unauthorized

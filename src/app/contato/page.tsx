@@ -135,7 +135,7 @@ export default function ContatoPage() {
             WhatsApp
           </a>
           <p className="text-sm text-slate-500">
-            E-mail: <a href="mailto:contato@agenciashub.com.br" className="font-medium text-[var(--hub-blue)] hover:underline">contato@agenciashub.com.br</a>
+            E-mail: <a href="o" className="font-medium text-[var(--hub-blue)] hover:underline">contato@agenciashub.com.br</a>
           </p>
         </div>
       </main>
