@@ -92,9 +92,17 @@ const SELLER_GROUPS: NavGroup[] = [
   {
     label: "Principal",
     items: [
-      { href: "/meu-painel",   label: "Meu Painel",       icon: "layout"   },
-      { href: "/cotacoes",     label: "Minhas Cotações",  icon: "document" },
-      { href: "/clientes",     label: "Meus Clientes",    icon: "users"    },
+      { href: "/meu-painel",   label: "Meu Painel",           icon: "layout"   },
+      { href: "/cotacoes",     label: "Cotações",             icon: "document" },
+      { href: "/clientes",     label: "Clientes",             icon: "users"    },
+      { href: "/lixeira",      label: "Lixeira",              icon: "trash"    },
+    ],
+  },
+  {
+    label: "Operacional",
+    items: [
+      { href: "/atendimentos", label: "Atendimentos",         icon: "briefcase" },
+      { href: "/calculadora",  label: "Calculadora de Milhas", icon: "document"  },
     ],
   },
   {
@@ -201,8 +209,16 @@ function SidebarContent({
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, isReady } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  if (!isReady) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[var(--hub-bg)]">
+        <p className="text-sm text-slate-500">Carregando...</p>
+      </div>
+    );
+  }
 
   const empresa  = user?.empresa ?? "Agencia";
   const nome     = user?.nome    ?? "Usuario";
