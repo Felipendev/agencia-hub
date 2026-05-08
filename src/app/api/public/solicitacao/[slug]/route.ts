@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
+import { getPublicConfig } from "@/lib/solicitacao-server-store";
 
 export const runtime = "nodejs";
 
@@ -26,19 +27,7 @@ export async function GET(_request: Request, context: RouteContext) {
     }
   }
 
-  // Fallback: return a default config if backend is unavailable
-  const defaultConfig = {
-    slug: decodedSlug,
-    tituloPagina: "Solicitação de Orçamento",
-    textoIntro:
-      "Preencha os dados abaixo em poucos minutos. Nossa equipe retorna o mais rápido possível, priorizando viagens com datas mais próximas.",
-    logoDataUrl: null,
-    nomeMarca: "AgenciaHub",
-    linksSociais: [
-      { id: "d1", tipo: "whatsapp", url: "https://wa.me/", label: "WhatsApp" },
-      { id: "d2", tipo: "instagram", url: "https://instagram.com/", label: "Instagram" },
-      { id: "d3", tipo: "email", url: "mailto:contato@agencia.com", label: "E-mail" },
-    ],
-  };
-  return NextResponse.json({ config: defaultConfig });
+  // Fallback: use local mock store if backend is unavailable
+  const config = await getPublicConfig(decodedSlug);
+  return NextResponse.json({ config });
 }
