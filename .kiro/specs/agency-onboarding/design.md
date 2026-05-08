@@ -14,7 +14,7 @@ Este documento descreve o design técnico para transformar o AgenciaHub de uma a
 | Armazenamento de código | BCrypt hash | Segurança: código não fica em texto plano no banco |
 | Token de convite | UUID v4 na URL | Simples, não-adivinhável, sem estado no cliente |
 | Invalidação de sessão | Campo `password_changed_at` no JWT | Permite invalidar tokens sem blacklist |
-| E-mail service | Interface abstrata + implementação SMTP | Permite trocar provider (SES, SendGrid) sem alterar lógica |
+| E-mail service | Interface abstrata + **Resend** (HTTPS) | Padrão em produção e em Railway Hobby (SMTP bloqueado); SMTP opcional em Pro+ |
 | Trial | 10 dias, scheduler verifica expiração | Simples; job diário atualiza status |
 
 ### Diagrama de Contexto
@@ -121,7 +121,8 @@ sequenceDiagram
 ```
 com.agenciahub.api/
 ├── config/
-│   └── TenantInterceptorConfig.java
+│   ├── TenantInterceptorConfig.java
+│   └── MailDispatchConfiguration.java
 ├── controller/
 │   ├── AgencyController.java
 │   └── InvitationController.java
@@ -162,8 +163,11 @@ com.agenciahub.api/
 │   ├── InvitationService.java
 │   ├── VerificationCodeService.java
 │   ├── EmailService.java (interface)
-│   ├── SmtpEmailService.java
-│   └── TrialSchedulerService.java
+│   └── email/
+│       ├── TransactionalMail.java
+│       ├── TransactionalMailBody.java
+│       ├── TransactionalMailChannel.java
+│       └── DefaultEmailService.java
 └── validation/
     └── PhoneValidator.java
 ```
@@ -840,25 +844,21 @@ public interface EmailService {
 }
 ```
 
-Implementação inicial: Spring Boot Starter Mail (SMTP). Configuração via `application.yml`:
+Implementação padrão: **Resend** via HTTPS, selecionado em `MailDispatchConfiguration` quando `EMAIL_RESEND_API_KEY` está definido; SMTP permanece opcional; sem credenciais usa canal de log.
 
 ```yaml
+email:
+  from: ${EMAIL_FROM:contato@agenciashub.com.br}
+  resend:
+    api-key: ${EMAIL_RESEND_API_KEY:}
+
+# SMTP só se definir SMTP_HOST + credenciais e não usar Resend
 spring:
   mail:
-    host: ${SMTP_HOST:smtp.gmail.com}
+    host: ${SMTP_HOST:}
     port: ${SMTP_PORT:587}
-    username: ${SMTP_USERNAME}
-    password: ${SMTP_PASSWORD}
-    properties:
-      mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
-
-email:
-  from: ${EMAIL_FROM:noreply@agenciahub.com}
-  templates:
-    verification-subject: "Seu código de verificação - AgenciaHub"
-    invitation-subject: "Você foi convidado para a {agencyName} - AgenciaHub"
-    password-reset-subject: "Recuperação de senha - AgenciaHub"
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
 ```
 
 ### Scheduler de Trial

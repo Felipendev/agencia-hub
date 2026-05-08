@@ -49,7 +49,7 @@ export function AbaFormulario() {
   async function handleSave() {
     if (!config) return;
     if (!isValidSolicitacaoSlug(config.slug)) {
-      setError("Slug invalido: letras minusculas, numeros e hifen (2-64 chars).");
+      setError("O identificador do link deve conter apenas letras minúsculas, números e hífen, com 2 a 64 caracteres. Exemplo: minha-agencia");
       return;
     }
     setSaving(true); setError(null);
@@ -120,10 +120,11 @@ export function AbaFormulario() {
         <div className="space-y-4 p-1">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="fc-slug">Slug (identificador)</Label>
+              <Label htmlFor="fc-slug">Identificador do link público</Label>
               <Input id="fc-slug" value={config.slug} className="font-mono"
-                onChange={(e) => setConfig({ ...config, slug: e.target.value.trim() })} />
-              <p className="mt-1 text-xs text-slate-400">Letras minusculas, numeros e hifen.</p>
+                placeholder="ex: minha-agencia"
+                onChange={(e) => setConfig({ ...config, slug: e.target.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '') })} />
+              <p className="mt-1 text-xs text-slate-400">Usado na URL do formulário público. Apenas letras minúsculas, números e hífen.</p>
             </div>
             <div>
               <Label htmlFor="fc-marca">Nome da marca</Label>

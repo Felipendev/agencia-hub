@@ -131,7 +131,7 @@ This plan implements the transformation of AgenciaHub from single-tenant to mult
     - Define methods: `sendVerificationCode`, `sendInvitation`, `sendPasswordResetCode`
     - _Requirements: 1.2, 3.2, 6.1_
 
-  - [x] 8.2 Implement SmtpEmailService
+  - [x] 8.2 Implement transactional email (Resend/SMTP/logging via `MailDispatchConfiguration`)
     - Implement `EmailService` using Spring Boot Starter Mail
     - Configure retry with exponential backoff (3 attempts)
     - Add email templates for verification, invitation, and password reset

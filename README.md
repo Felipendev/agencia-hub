@@ -144,7 +144,7 @@ Stack alvo do back-end: **Java + Spring Boot** + **PostgreSQL** (API REST ou exp
 2. **Auth real:** Spring Security com JWT (stateless) ou sessão no servidor; no front, troca do login mock por fluxo contra o back (Bearer em `Authorization` ou cookie httpOnly via mesmo domínio / proxy reverso). Opcional: OAuth2 (Google etc.) no Spring. Papéis **admin** / **agente** e, se necessário, **multi-agência** (`tenant` / `agencia_id` nas tabelas).
 3. **Comercial:** pipeline mais rico — tarefas, histórico de contatos, propostas e anexos (armazenamento em disco/S3 compatível).
 4. **Financeiro:** conciliação, centros de custo, exportação (PDF/CSV gerados no Spring ou relatórios assíncronos), fechamento mensal.
-5. **Integrações (sem WhatsApp por agora):** e-mail transacional (Spring Mail / provedor), calendário (iCal/export ou integração Google Calendar depois).
+5. **Integrações (sem WhatsApp por agora):** e-mail transacional na API via **Resend** (HTTPS); calendário (iCal/export ou integração Google Calendar depois).
 6. **Produto:** multi-agência consolidado, cobrança (ex.: Stripe com webhooks tratados no Spring), observabilidade (logs estruturados, métricas, tracing) e testes (JUnit no back, E2E no front).
 
 **Depois do v2 (fila futura):** WhatsApp Business API (opt-in/LGPD), notificações push ou outros canais — deixados fora do escopo inicial a pedido.
