@@ -7,6 +7,7 @@ import type {
   SolicitacaoPublicSubmission,
 } from "@/types/solicitacao-publica";
 
+/** Armazenamento local só para desenvolvimento sem API Java (`.local/`). Produção usa o backend. */
 const DIR = path.join(process.cwd(), ".local");
 const FILE = path.join(DIR, "solicitacao-hub.json");
 
@@ -101,6 +102,7 @@ export async function addSubmission(input: {
   telefone: string;
   detalhes: SolicitacaoPublicSubmission["detalhes"];
   observacoes: string;
+  referralSellerId?: string;
 }): Promise<SolicitacaoPublicSubmission> {
   const data = await readRaw();
   const row: SolicitacaoPublicSubmission = {
@@ -112,6 +114,7 @@ export async function addSubmission(input: {
     telefone: input.telefone.trim(),
     detalhes: mergeCotacaoDetalhes(input.detalhes),
     observacoes: input.observacoes.trim(),
+    referralSellerId: input.referralSellerId,
   };
   data.submissions.unshift(row);
   await writeRaw(data);

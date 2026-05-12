@@ -9,14 +9,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   brPhoneDigits,
-  formatBrPhoneDisplay,
   isValidBrazilianPhone,
 } from "@/lib/br-phone";
+import { isUuid } from "@/lib/api/quotation-mapper";
 import { emptyCotacaoDetalhes } from "@/lib/cotacao-defaults";
 import type { CotacaoDetalhes } from "@/types";
 import type { SolicitacaoPublicaConfig } from "@/types/solicitacao-publica";
 
 const LEMBRETE_KEY = "agencia-hub-solicitacao-lembrete";
+
+function referralSellerIdFromCurrentUrl(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  const v = new URL(window.location.href).searchParams.get("vendedor");
+  const t = (v ?? "").trim();
+  return t && isUuid(t) ? t : undefined;
+}
 
 type Props = { slug: string };
 
@@ -25,7 +32,6 @@ export function SolicitacaoPublicView({ slug }: Props) {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
-  const [telefone, setTelefone] = useState("");
   const [lembrar, setLembrar] = useState(false);
   const [observacoes, setObservacoes] = useState("");
   const [det, setDet] = useState<CotacaoDetalhes>(() => emptyCotacaoDetalhes());
@@ -41,10 +47,20 @@ export function SolicitacaoPublicView({ slug }: Props) {
           nome?: string;
           email?: string;
           telefone?: string;
+          celular?: string;
         };
         if (p.nome) setNome(p.nome);
         if (p.email) setEmail(p.email);
-        if (p.telefone) setTelefone(brPhoneDigits(p.telefone));
+        const cel = p.celular ?? p.telefone;
+        if (cel) {
+          const digits = brPhoneDigits(cel);
+          setDet((d) => ({
+            ...d,
+            celular: digits,
+            whatsapp: digits,
+            whatsappIgualCelular: true,
+          }));
+        }
         setLembrar(true);
       }
     } catch {
@@ -98,18 +114,30 @@ export function SolicitacaoPublicView({ slug }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErroEnvio(null);
-    if (!nome.trim() || !telefone.trim()) {
-      setErroEnvio("Informe nome e celular.");
+    if (!nome.trim()) {
+      setErroEnvio("Informe seu nome completo.");
       return;
     }
-    const telDigits = brPhoneDigits(telefone);
-    if (!isValidBrazilianPhone(telDigits)) {
-      setErroEnvio("Informe um celular ou telefone válido com DDD.");
+    if (!isValidBrazilianPhone(det.celular)) {
+      setErroEnvio(
+        "Informe um celular válido com DDD na seção Contato e pagamento.",
+      );
+      return;
+    }
+    const whatsappDigits = det.whatsappIgualCelular
+      ? det.celular
+      : det.whatsapp;
+    if (
+      !det.whatsappIgualCelular &&
+      whatsappDigits.length > 0 &&
+      !isValidBrazilianPhone(whatsappDigits)
+    ) {
+      setErroEnvio("Informe um número de WhatsApp válido ou marque “mesmo número”.");
       return;
     }
     setEnviando(true);
     try {
-      const celularFinal = brPhoneDigits(det.celular) || telDigits;
+      const celularFinal = brPhoneDigits(det.celular);
       const whatsFinal = det.whatsappIgualCelular
         ? celularFinal
         : brPhoneDigits(det.whatsapp) || celularFinal;
@@ -118,14 +146,16 @@ export function SolicitacaoPublicView({ slug }: Props) {
         celular: celularFinal,
         whatsapp: whatsFinal,
       };
-      const body = {
+      const body: Record<string, unknown> = {
         slug,
         nome: nome.trim(),
         email: email.trim(),
-        telefone: telefone.trim(),
+        telefone: celularFinal,
         detalhes,
         observacoes: observacoes.trim(),
       };
+      const ref = referralSellerIdFromCurrentUrl();
+      if (ref) body.referralSellerId = ref;
       const res = await fetch("/api/public/solicitacao/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -143,7 +173,7 @@ export function SolicitacaoPublicView({ slug }: Props) {
           JSON.stringify({
             nome: nome.trim(),
             email: email.trim(),
-            telefone: brPhoneDigits(telefone),
+            celular: celularFinal,
           }),
         );
       } else {
@@ -265,19 +295,7 @@ export function SolicitacaoPublicView({ slug }: Props) {
               autoComplete="name"
             />
           </div>
-          <div>
-            <Label htmlFor="sp-tel">Celular *</Label>
-            <Input
-              id="sp-tel"
-              required
-              inputMode="numeric"
-              value={formatBrPhoneDisplay(telefone)}
-              onChange={(e) => setTelefone(brPhoneDigits(e.target.value))}
-              placeholder="(11) 98765-4321"
-              autoComplete="tel"
-            />
-          </div>
-          <div>
+          <div className="sm:col-span-2 xl:col-span-2">
             <Label htmlFor="sp-email">E-mail</Label>
             <Input
               id="sp-email"
@@ -308,6 +326,7 @@ export function SolicitacaoPublicView({ slug }: Props) {
             onToggleComodidade={toggleComodidade}
             onPatch={patchDet}
             secoesAbertas
+            contatoCelularObrigatorio
           />
         </div>
 

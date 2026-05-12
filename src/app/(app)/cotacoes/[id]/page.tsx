@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/contexts/auth-context";
 import { useData } from "@/contexts/data-context";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
@@ -22,11 +23,15 @@ import { TimelineView } from "@/components/timeline/TimelineView";
 import { BackButton } from "@/components/ui/back-button";
 import { EditarCotacaoModal } from "@/components/cotacao/EditarCotacaoModal";
 import { EnviarWhatsAppModal } from "@/components/cotacao/EnviarWhatsAppModal";
+import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
+import { listSellersRemote } from "@/lib/api/users-remote";
+import type { ApiUserResponse } from "@/lib/api/auth-types";
 import type { CotacaoStatus } from "@/types";
 
 export default function CotacaoDetalhePage() {
   const params = useParams();
   const id = typeof params.id === "string" ? params.id : "";
+  const { isOwner, token, user } = useAuth();
   const { clientes, atendimentos, cotacoes, updateCotacao, isReady } = useData();
   const toast = useToast();
 
@@ -40,6 +45,43 @@ export default function CotacaoDetalhePage() {
   const [obsEdit, setObsEdit] = useState("");
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [waModalOpen, setWaModalOpen] = useState(false);
+  const [sellers, setSellers] = useState<ApiUserResponse[]>([]);
+
+  useEffect(() => {
+    if (!isOwner || !token || !getAgenciaHubApiBaseUrl()) return;
+    let cancelled = false;
+    void listSellersRemote(token)
+      .then((rows) => {
+        if (!cancelled) setSellers(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setSellers([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOwner, token]);
+
+  /** Vendedores da API + o dono logado (não costuma vir em `/users/sellers`). */
+  const sellerOptions = useMemo((): ApiUserResponse[] => {
+    if (!isOwner || !user) return sellers;
+    const map = new Map(sellers.map((s) => [s.id, s]));
+    if (!map.has(user.id)) {
+      map.set(user.id, {
+        id: user.id,
+        name: `${user.nome} (dono)`,
+        email: user.email,
+        role: "OWNER",
+        active: true,
+        commissionPct: null,
+        commissionFixed: null,
+        createdAt: "",
+      });
+    }
+    return [...map.values()].sort((a, b) =>
+      a.name.localeCompare(b.name, "pt-BR"),
+    );
+  }, [sellers, user, isOwner]);
 
   useEffect(() => {
     if (!cotacao) return;
@@ -122,12 +164,27 @@ export default function CotacaoDetalhePage() {
           <p className="mt-1 text-slate-600">{cotacao.destino}</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <Badge tone="warning">{COTACAO_STATUS_LABELS[cotacao.status]}</Badge>
+            {cotacao.origemCriacao === "formulario_publico" && (
+              <span className="rounded border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-900">
+                Formulário público
+              </span>
+            )}
+            {cotacao.origemCriacao === "interna" && (
+              <span className="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-700">
+                Criada no sistema
+              </span>
+            )}
             {cotacao.prioridade && (
               <span className="rounded bg-[var(--hub-yellow)]/35 px-2 py-0.5 text-xs font-semibold text-[var(--hub-blue-dark)]">
                 Prioridade
               </span>
             )}
             <span className="text-xs text-slate-500">Resp.: {cotacao.responsavel}</span>
+            {cotacao.criadoPorNome ? (
+              <span className="text-xs text-slate-500">
+                · Registro: {cotacao.criadoPorNome}
+              </span>
+            ) : null}
           </div>
         </div>
 
@@ -181,6 +238,37 @@ export default function CotacaoDetalhePage() {
         <Card>
           <CardTitle>Cliente e vinculos</CardTitle>
           <dl className="mt-4 space-y-3 text-sm">
+            <div>
+              <dt className="text-xs font-medium uppercase text-slate-500">Vendedor</dt>
+              <dd className="mt-1">
+                {isOwner && sellerOptions.length > 0 ? (
+                  <Select
+                    aria-label="Vendedor responsável"
+                    value={cotacao.vendedorId ?? ""}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      updateCotacao(id, {
+                        vendedorId: v ? v : "",
+                      });
+                      toast.success(
+                        v ? "Cotação atribuída com sucesso." : "Responsável removido da cotação.",
+                      );
+                    }}
+                  >
+                    <option value="">Nenhum</option>
+                    {sellerOptions.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </Select>
+                ) : (
+                  <span className="text-slate-800">
+                    {cotacao.vendedorNome ?? "—"}
+                  </span>
+                )}
+              </dd>
+            </div>
             <div>
               <dt className="text-xs font-medium uppercase text-slate-500">Cliente</dt>
               <dd>

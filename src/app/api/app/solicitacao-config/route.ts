@@ -44,12 +44,14 @@ async function hasLocalAuth(request: Request, token: string | null): Promise<boo
 export async function GET(request: Request) {
   const base = getAgenciaHubApiBaseUrl();
   const token = await requireAuth(request);
+  const slug = new URL(request.url).searchParams.get("slug");
+  const slugQs = slug ? `?slug=${encodeURIComponent(slug)}` : "";
 
   // If we have a backend API configured and a token, proxy to Spring Boot
   if (base && token) {
     try {
       const res = await fetch(
-        `${base}/agency/solicitacao-config`,
+        `${base}/agency/solicitacao-config${slugQs}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -110,9 +112,7 @@ export async function PUT(request: Request) {
     textoIntro: (config.textoIntro ?? "").trim(),
     logoDataUrl: config.logoDataUrl ?? null,
     nomeMarca: (config.nomeMarca ?? "Agência").trim() || "Agência",
-    linksSociais: Array.isArray(config.linksSociais)
-      ? config.linksSociais.filter((l) => l.url?.trim())
-      : [],
+    linksSociais: Array.isArray(config.linksSociais) ? config.linksSociais : [],
   };
 
   if (!base) {

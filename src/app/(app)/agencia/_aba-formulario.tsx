@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
+import { isUuid } from "@/lib/api/quotation-mapper";
 import { isValidSolicitacaoSlug } from "@/lib/solicitacao-slug";
 import { generateId } from "@/lib/format";
 import { useAuth } from "@/contexts/auth-context";
@@ -25,7 +26,7 @@ const TIPOS_LINK: { id: LinkSocialTipo; label: string }[] = [
 
 export function AbaFormulario() {
   const toast = useToast();
-  const { token } = useAuth();
+  const { token, isReady, user } = useAuth();
   const [config, setConfig] = useState<SolicitacaoPublicaConfig | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,11 +41,36 @@ export function AbaFormulario() {
       });
       if (!res.ok) throw new Error();
       const data = (await res.json()) as { config: SolicitacaoPublicaConfig };
-      setConfig(data.config);
-    } catch { setError("Não foi possível carregar as configurações."); }
+      const c = data.config;
+      setConfig({
+        ...c,
+        linksSociais: Array.isArray(c.linksSociais) ? c.linksSociais : [],
+      });
+    } catch {
+      setError("Não foi possível carregar as configurações.");
+    }
   }, [token]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    if (!isReady) return;
+    if (!token) {
+      setError("Sessão não encontrada. Entre novamente para editar o formulário.");
+      setConfig(null);
+      return;
+    }
+    setError(null);
+    void load();
+  }, [isReady, token, load]);
+
+  const publicUrl = useMemo(() => {
+    if (typeof window === "undefined" || !config?.slug) return "";
+    const base = `${window.location.origin}/solicitacao/${config.slug}`;
+    const uid = user?.id?.trim();
+    if (uid && isUuid(uid)) {
+      return `${base}?vendedor=${encodeURIComponent(uid)}`;
+    }
+    return base;
+  }, [config?.slug, user?.id]);
 
   async function handleSave() {
     if (!config) return;
@@ -61,9 +87,18 @@ export function AbaFormulario() {
         headers,
         body: JSON.stringify({ config }),
       });
-      const data = (await res.json().catch(() => ({}))) as { error?: string; config?: SolicitacaoPublicaConfig };
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        config?: SolicitacaoPublicaConfig;
+      };
       if (!res.ok) throw new Error(data.error ?? "Erro ao salvar");
-      if (data.config) setConfig(data.config);
+      if (data.config) {
+        const c = data.config;
+        setConfig({
+          ...c,
+          linksSociais: Array.isArray(c.linksSociais) ? c.linksSociais : [],
+        });
+      }
       toast.success("Formulario salvo!");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro ao salvar");
@@ -91,9 +126,31 @@ export function AbaFormulario() {
     reader.readAsDataURL(file);
   }
 
-  if (!config) return <Card><p className="p-4 text-sm text-slate-500">{error ?? "Carregando..."}</p></Card>;
+  if (!isReady) {
+    return (
+      <Card>
+        <p className="p-4 text-sm text-slate-500">Carregando sessão…</p>
+      </Card>
+    );
+  }
 
-  const publicUrl = typeof window !== "undefined" ? `${window.location.origin}/solicitacao/${config.slug}` : "";
+  if (!token) {
+    return (
+      <Card>
+        <p className="p-4 text-sm text-amber-800">
+          {error ?? "Faça login novamente para editar o formulário público."}
+        </p>
+      </Card>
+    );
+  }
+
+  if (!config) {
+    return (
+      <Card>
+        <p className="p-4 text-sm text-slate-500">{error ?? "Carregando…"}</p>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -122,6 +179,14 @@ export function AbaFormulario() {
               Copiar link
             </button>
           </div>
+          {user?.id ? (
+            <p className="mt-2 text-xs leading-relaxed text-slate-600">
+              O link copiado inclui <code className="rounded bg-white/90 px-1 py-0.5 text-[11px]">?vendedor=</code>{" "}
+              com o seu usuário: solicitações enviadas por esse endereço ficam atribuídas a você no painel.
+              Para um link sem atribuição, remova manualmente o trecho{" "}
+              <code className="rounded bg-white/90 px-1 text-[11px]">?vendedor=…</code> da URL.
+            </p>
+          ) : null}
         </div>
       </Card>
 

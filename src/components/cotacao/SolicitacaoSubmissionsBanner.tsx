@@ -1,11 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/contexts/auth-context";
 import { useData } from "@/contexts/data-context";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { ImportarSubmissaoModal } from "@/components/cotacao/ImportarSubmissaoModal";
 import { DuplicateCustomerError } from "@/lib/api/create-customer-remote";
+import { isUuid } from "@/lib/api/quotation-mapper";
 import type { SolicitacaoPublicSubmission } from "@/types/solicitacao-publica";
 import type { CotacaoStatus } from "@/types";
 
@@ -16,16 +18,24 @@ function validadeEmDias(dias: number): string {
 }
 
 export function SolicitacaoSubmissionsBanner() {
+  const { token } = useAuth();
   const { clientes, addCliente, addCotacao, isReady } = useData();
   const toast = useToast();
   const [list, setList] = useState<SolicitacaoPublicSubmission[]>([]);
   const [selectedSubmission, setSelectedSubmission] =
     useState<SolicitacaoPublicSubmission | null>(null);
 
+  const authHeaders = useCallback((): HeadersInit => {
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }, [token]);
+
   const refresh = useCallback(async () => {
     try {
       const res = await fetch("/api/app/solicitacao-submissions", {
         credentials: "include",
+        headers: {
+          ...authHeaders(),
+        },
       });
       if (!res.ok) return;
       const data = (await res.json()) as {
@@ -35,7 +45,7 @@ export function SolicitacaoSubmissionsBanner() {
     } catch (e) {
       console.error("Erro ao carregar submissões:", e);
     }
-  }, []);
+  }, [authHeaders]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -100,11 +110,23 @@ export function SolicitacaoSubmissionsBanner() {
         tags: ["formulario-web", selectedSubmission.slug],
         prioridade: false,
         responsavel: "Equipe",
+        origemCriacao: "formulario_publico",
+        publicSubmissionId:
+          isUuid(selectedSubmission.id) ? selectedSubmission.id : undefined,
+        vendedorId:
+          selectedSubmission.referralSellerId &&
+          isUuid(selectedSubmission.referralSellerId) ?
+            selectedSubmission.referralSellerId
+          : undefined,
       });
 
       await fetch(
         `/api/app/solicitacao-submissions?id=${encodeURIComponent(selectedSubmission.id)}`,
-        { method: "DELETE", credentials: "include" }
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: { ...authHeaders() },
+        },
       );
 
       toast.success("Cotação importada com sucesso!");
@@ -144,6 +166,11 @@ export function SolicitacaoSubmissionsBanner() {
                 <span className="font-medium text-slate-900">{s.nome}</span>
                 <span className="ml-2 text-xs text-slate-500">
                   {new Date(s.createdAt).toLocaleString("pt-BR")} · {s.slug}
+                  {s.referralSellerName ?
+                    ` · ref.: ${s.referralSellerName}`
+                  : s.referralSellerId ?
+                    " · link com vendedor"
+                  : ""}
                 </span>
               </div>
               <Button

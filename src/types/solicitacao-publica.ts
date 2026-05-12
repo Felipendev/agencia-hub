@@ -38,6 +38,9 @@ export type SolicitacaoPublicSubmission = {
   nome: string;
   email: string;
   telefone: string;
+  /** Vendedor/dono indicado no link (?vendedor=uuid) */
+  referralSellerId?: string | null;
+  referralSellerName?: string | null;
   detalhes: CotacaoDetalhes;
   observacoes: string;
 };

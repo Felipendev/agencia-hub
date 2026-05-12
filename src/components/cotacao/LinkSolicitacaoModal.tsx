@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { IconX } from "@/components/icons";
 import { generateId } from "@/lib/format";
+import { isUuid } from "@/lib/api/quotation-mapper";
 import { isValidSolicitacaoSlug } from "@/lib/solicitacao-slug";
 import { useAuth } from "@/contexts/auth-context";
 import type {
@@ -37,7 +38,7 @@ export function LinkSolicitacaoModal({
   onClose,
   defaultSlug = "demo",
 }: Props) {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [view, setView] = useState<"main" | "customize">("main");
   const [slug, setSlug] = useState(defaultSlug);
   const [config, setConfig] = useState<SolicitacaoPublicaConfig | null>(null);
@@ -49,8 +50,13 @@ export function LinkSolicitacaoModal({
   const publicUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
     const s = slug.trim() || defaultSlug;
-    return `${window.location.origin}/solicitacao/${encodeURIComponent(s)}`;
-  }, [slug, defaultSlug]);
+    const base = `${window.location.origin}/solicitacao/${encodeURIComponent(s)}`;
+    const uid = user?.id?.trim();
+    if (uid && isUuid(uid)) {
+      return `${base}?vendedor=${encodeURIComponent(uid)}`;
+    }
+    return base;
+  }, [slug, defaultSlug, user?.id]);
 
   const loadConfig = useCallback(async (s: string) => {
     setLoadError(null);
@@ -230,6 +236,15 @@ export function LinkSolicitacaoModal({
                 </Button>
               </div>
             </div>
+
+            <p className="text-xs leading-relaxed text-slate-600">
+              {user?.id && isUuid(user.id) ?
+                <>
+                  O link inclui <code className="rounded bg-slate-100 px-1 text-[11px]">?vendedor=</code> com o seu usuário
+                  para que envios feitos por ele fiquem associados a você. Remova esse parâmetro da URL para um link genérico da agência.
+                </>
+              : "Compartilhe este endereço com clientes; o identificador do slug pode ser personalizado abaixo."}
+            </p>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-lg border border-slate-200 p-3">

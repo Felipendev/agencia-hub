@@ -9,6 +9,8 @@ export type ApiQuotationStatus =
   | "EXPIRED"
   | "CANCELLED";
 
+export type ApiQuotationCreationSource = "INTERNAL" | "PUBLIC_FORM";
+
 export type ApiCreateQuotationRequest = {
   customerId: string;
   opportunityId?: string;
@@ -27,6 +29,8 @@ export type ApiCreateQuotationRequest = {
   priority?: boolean;
   assignee?: string;
   internalNotes?: string;
+  creationSource?: ApiQuotationCreationSource;
+  publicSubmissionId?: string;
 };
 
 export type ApiQuotationResponse = {
@@ -54,4 +58,8 @@ export type ApiQuotationResponse = {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+  creationSource?: ApiQuotationCreationSource;
+  createdByUserId?: string | null;
+  createdByUserName?: string | null;
+  publicSubmissionId?: string | null;
 };
