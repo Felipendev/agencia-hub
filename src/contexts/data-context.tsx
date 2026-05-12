@@ -21,6 +21,7 @@ import { createOpportunityRemote } from "@/lib/api/create-opportunity-remote";
 import { updateOpportunityRemote } from "@/lib/api/update-opportunity-remote";
 import { createFinancialEntryRemote } from "@/lib/api/create-financial-entry-remote";
 import { updateFinancialEntryRemote } from "@/lib/api/update-financial-entry-remote";
+import { useAuth } from "@/contexts/auth-context";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
 import { listQuotationsRemote } from "@/lib/api/list-quotations-remote";
 import { cotacaoStatusToApi, isUuid } from "@/lib/api/quotation-mapper";
@@ -158,6 +159,7 @@ export type DataContextValue = {
 const DataContext = createContext<DataContextValue | null>(null);
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
+  const { token } = useAuth();
   const [data, setData] = useState<Stored>(() => ({
     clientes: seedClientes,
     atendimentos: seedAtendimentos,
@@ -185,7 +187,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
     let novo = draft;
     try {
-      const remote = await createCustomerRemote(draft);
+      const remote = await createCustomerRemote(draft, token);
       if (remote) {
         novo = remote;
       }
@@ -201,7 +203,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
     setData((d) => ({ ...d, clientes: [novo, ...d.clientes] }));
     return novo;
-  }, []);
+  }, [token]);
 
   const updateCliente = useCallback((id: string, patch: Partial<Cliente>) => {
     setData((d) => ({
@@ -333,7 +335,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
       let novo = draft;
       try {
-        const remote = await createQuotationRemote(draft);
+        const remote = await createQuotationRemote(draft, token);
         if (remote) {
           novo = remote;
         }
@@ -350,11 +352,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       }));
       return novo;
     },
-    [],
+    [token],
   );
 
   const updateCotacao = useCallback((id: string, patch: Partial<Cotacao>) => {
     const now = new Date().toISOString();
+    let mergedForRemote: Cotacao | null = null;
     setData((d) => ({
       ...d,
       cotacoes: d.cotacoes.map((x) => {
@@ -366,24 +369,28 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             ...patch.detalhes,
           });
         }
+        mergedForRemote = merged;
         return merged;
       }),
     }));
 
-    // Sincroniza com o backend em background (fire-and-forget)
-    setData((d) => {
-      const current = d.cotacoes.find((x) => x.id === id);
-      if (current) {
-        updateQuotationRemote(current, patch).catch((e) => {
+    if (mergedForRemote) {
+      void updateQuotationRemote(mergedForRemote, patch, token)
+        .then((apiMerged) => {
+          if (!apiMerged) return;
+          setData((d) => ({
+            ...d,
+            cotacoes: d.cotacoes.map((x) => (x.id === id ? apiMerged : x)),
+          }));
+        })
+        .catch((e) => {
           console.warn(
             "[agencia-hub] Falha ao atualizar cotação na API; mudança salva localmente.",
             e,
           );
         });
-      }
-      return d;
-    });
-  }, []);
+    }
+  }, [token]);
 
   const resetDemoData = useCallback(() => {
     const fresh: Stored = {

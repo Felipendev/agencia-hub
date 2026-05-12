@@ -176,6 +176,12 @@ export interface Cotacao {
   atendimentoId?: string;
   vendedorId?: string;
   vendedorNome?: string;
+  /** interna | formulario_publico — espelha creationSource da API */
+  origemCriacao?: "interna" | "formulario_publico";
+  /** UUID da submissão pública (solicitacao_submissions) quando aplicável */
+  publicSubmissionId?: string;
+  criadoPorUsuarioId?: string;
+  criadoPorNome?: string;
   /** Título curto ex.: “Orçamento Europa” */
   titulo: string;
   /** Destino/rota — em geral montado a partir dos trechos no formulário */

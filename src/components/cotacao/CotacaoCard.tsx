@@ -89,6 +89,20 @@ export function CotacaoCard({ cotacao, cliente, onDragStart, onDragEnd, onDelete
         {/* Cliente */}
         <p className="mt-1.5 text-sm text-slate-700">{cliente?.nome ?? "—"}</p>
 
+        {(cotacao.origemCriacao ||
+          cotacao.criadoPorNome ||
+          cotacao.vendedorNome) && (
+          <p className="mt-1 text-[10px] leading-snug text-slate-500">
+            {cotacao.origemCriacao === "formulario_publico" ?
+              "Formulário público"
+            : cotacao.origemCriacao === "interna" ?
+              "Interna"
+            : null}
+            {cotacao.criadoPorNome ? ` · ${cotacao.criadoPorNome}` : ""}
+            {cotacao.vendedorNome ? ` · Vend.: ${cotacao.vendedorNome}` : ""}
+          </p>
+        )}
+
         {/* Tags e prioridade */}
         {(cotacao.prioridade || cotacao.tags.length > 0) && (
           <div className="mt-2 flex flex-wrap gap-1">
