@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { IconX } from "@/components/icons";
 import { generateId } from "@/lib/format";
+import { isUuid } from "@/lib/api/quotation-mapper";
 import { isValidSolicitacaoSlug } from "@/lib/solicitacao-slug";
 import { useAuth } from "@/contexts/auth-context";
 import type {
@@ -40,7 +41,7 @@ export function LinkSolicitacaoModal({
   onClose,
   sellerPublicCode,
 }: Props) {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [view, setView] = useState<"main" | "customize">("main");
   const [config, setConfig] = useState<SolicitacaoPublicaConfig | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -55,9 +56,14 @@ export function LinkSolicitacaoModal({
     let url = `${window.location.origin}/solicitacao/${encodeURIComponent(slugPart)}`;
     if (sellerPublicCode?.trim()) {
       url += `?vendedor=${encodeURIComponent(sellerPublicCode.trim())}`;
+    } else {
+      const uid = user?.id?.trim();
+      if (uid && isUuid(uid)) {
+        url += `?vendedor=${encodeURIComponent(uid)}`;
+      }
     }
     return url;
-  }, [config?.slug, sellerPublicCode]);
+  }, [config?.slug, sellerPublicCode, user?.id]);
 
   const loadConfig = useCallback(async () => {
     setLoadError(null);
@@ -254,19 +260,50 @@ export function LinkSolicitacaoModal({
               </div>
             </div>
 
-            <div className="rounded-lg border border-slate-200 p-3">
-              <p className="text-xs text-slate-600">
-                Ajuste o identificador da URL, textos, logo e links de contato do
-                formulário público (mesmas opções da aba Agência → Formulário de
-                cotação).
-              </p>
-              <Button
-                type="button"
-                className="mt-3 w-full text-sm"
-                onClick={() => setView("customize")}
-              >
-                Personalizar página pública
-              </Button>
+            <p className="text-xs leading-relaxed text-slate-600">
+              {sellerPublicCode?.trim() ?
+                <>
+                  O link inclui{" "}
+                  <code className="rounded bg-slate-100 px-1 text-[11px]">?vendedor=</code>{" "}
+                  com seu código público para atribuir envios a você. Remova esse parâmetro
+                  para um link genérico da agência.
+                </>
+              : user?.id && isUuid(user.id) ?
+                <>
+                  O link inclui{" "}
+                  <code className="rounded bg-slate-100 px-1 text-[11px]">?vendedor=</code>{" "}
+                  com o seu usuário para que envios fiquem associados a você. Remova esse
+                  parâmetro da URL para um link genérico da agência.
+                </>
+              : "Compartilhe este endereço com clientes; o identificador do slug pode ser personalizado abaixo."}
+            </p>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-lg border border-slate-200 p-3">
+                <p className="text-xs text-slate-600">
+                  Crie identificadores diferentes para afiliados ou canais (salve
+                  em Personalizar alterando o campo do link).
+                </p>
+                <Button
+                  type="button"
+                  className="mt-3 w-full text-sm"
+                  onClick={() => setView("customize")}
+                >
+                  Criar / ajustar link
+                </Button>
+              </div>
+              <div className="rounded-lg border border-slate-200 p-3">
+                <p className="text-xs text-slate-600">
+                  Logo, textos e ícones de contato com links clicáveis.
+                </p>
+                <Button
+                  type="button"
+                  className="mt-3 w-full text-sm"
+                  onClick={() => setView("customize")}
+                >
+                  Personalizar o formulário
+                </Button>
+              </div>
             </div>
 
             {loadError ? (

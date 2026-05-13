@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import type { CotacaoDetalhes } from "@/types";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
+import { isUuid } from "@/lib/api/quotation-mapper";
+import { brPhoneDigits, isValidBrazilianPhone } from "@/lib/br-phone";
 import { addSubmission, getPublicConfig } from "@/lib/solicitacao-server-store";
 import { isValidSolicitacaoSlug } from "@/lib/solicitacao-slug";
 
@@ -13,6 +15,9 @@ type Body = {
   telefone?: string;
   detalhes?: Partial<CotacaoDetalhes>;
   observacoes?: string;
+  /** UUID do vendedor/dono (query ?vendedor= no link público, quando for UUID) */
+  referralSellerId?: string;
+  /** Código público do vendedor em ?vendedor= quando não for UUID */
   sellerPublicCode?: string | null;
 };
 
@@ -31,15 +36,23 @@ export async function POST(request: Request) {
 
   const nome = (body.nome ?? "").trim();
   const email = (body.email ?? "").trim();
-  const telefone = (body.telefone ?? "").trim();
-  if (!nome || !telefone) {
+  const det = body.detalhes ?? {};
+  const telefoneDigits =
+    brPhoneDigits((body.telefone ?? "").trim()) ||
+    brPhoneDigits((det.celular as string | undefined) ?? "");
+  if (!nome || !telefoneDigits) {
     return NextResponse.json(
       { error: "Nome e celular são obrigatórios" },
       { status: 400 },
     );
   }
+  if (!isValidBrazilianPhone(telefoneDigits)) {
+    return NextResponse.json(
+      { error: "Informe um celular válido com DDD (10 ou 11 dígitos)." },
+      { status: 400 },
+    );
+  }
 
-  const det = body.detalhes ?? {};
   const temTrecho =
     Array.isArray(det.destinosTrechos) &&
     det.destinosTrechos.some((x) => x?.trim());
@@ -50,7 +63,21 @@ export async function POST(request: Request) {
     );
   }
 
+  const referralRaw = (body.referralSellerId ?? "").trim();
+  const referralSellerId =
+    referralRaw && isUuid(referralRaw) ? referralRaw : undefined;
   const sellerPublicCode = body.sellerPublicCode?.trim() || null;
+
+  const payload = {
+    slug,
+    nome,
+    email,
+    telefone: telefoneDigits,
+    detalhes: det,
+    observacoes: body.observacoes ?? "",
+    ...(referralSellerId ? { referralSellerId } : {}),
+    ...(sellerPublicCode ? { sellerPublicCode } : {}),
+  };
 
   const base = getAgenciaHubApiBaseUrl();
   if (base) {
@@ -58,69 +85,71 @@ export async function POST(request: Request) {
       const res = await fetch(`${base}/public/solicitacao/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          slug,
-          nome,
-          email,
-          telefone,
-          detalhes: det,
-          observacoes: body.observacoes ?? "",
-          referralSellerId: null,
-          sellerPublicCode,
-        }),
+        body: JSON.stringify(payload),
       });
+      const text = await res.text();
+      const contentType =
+        res.headers.get("Content-Type") ?? "application/json";
 
-      const rawText = await res.text();
-      let payload: {
-        ok?: boolean;
-        id?: string;
-        message?: string;
-        code?: string;
-      } = {};
-      if (rawText) {
-        try {
-          payload = JSON.parse(rawText) as typeof payload;
-        } catch {
-          return NextResponse.json(
-            { error: "Resposta inválida do servidor." },
-            { status: 502 },
-          );
-        }
+      if (res.ok) {
+        return new NextResponse(text, {
+          status: res.status,
+          headers: { "Content-Type": contentType },
+        });
       }
 
-      if (!res.ok) {
-        const status =
-          res.status >= 400 && res.status < 600 ? res.status : 502;
-        return NextResponse.json(
-          { error: payload.message ?? "Falha ao enviar." },
-          { status },
-        );
+      let message = "Falha ao enviar.";
+      try {
+        const j = JSON.parse(text) as {
+          message?: string;
+          error?: string;
+        };
+        message = j.error ?? j.message ?? message;
+      } catch {
+        /* ignore */
       }
-
-      return NextResponse.json({
-        ok: true,
-        id: payload.id ?? "",
-      });
+      return NextResponse.json({ error: message }, { status: res.status });
     } catch (err) {
-      console.error("[public/solicitacao/submit] Erro ao enviar ao backend:", err);
+      console.error("[solicitacao/submit] Erro ao chamar API Java:", err);
       return NextResponse.json(
-        { error: "Não foi possível contactar o servidor." },
+        { error: "Erro de conexão com o servidor. Tente novamente." },
         { status: 502 },
       );
     }
   }
 
+  if (process.env.VERCEL === "1") {
+    return NextResponse.json(
+      {
+        error:
+          "Serviço de orçamentos não configurado. Defina NEXT_PUBLIC_AGENCIA_HUB_API_URL na Vercel apontando para a API Java.",
+      },
+      { status: 503 },
+    );
+  }
+
   await getPublicConfig(slug);
 
-  const created = await addSubmission({
-    slug,
-    nome,
-    email,
-    telefone,
-    detalhes: det as CotacaoDetalhes,
-    observacoes: body.observacoes ?? "",
-    sellerPublicCode,
-  });
-
-  return NextResponse.json({ ok: true, id: created.id });
+  try {
+    const created = await addSubmission({
+      slug,
+      nome,
+      email,
+      telefone: telefoneDigits,
+      detalhes: det as CotacaoDetalhes,
+      observacoes: body.observacoes ?? "",
+      referralSellerId,
+      sellerPublicCode,
+    });
+    return NextResponse.json({ ok: true, id: created.id });
+  } catch (err) {
+    console.error("[solicitacao/submit] falha ao persistir localmente", err);
+    return NextResponse.json(
+      {
+        error:
+          "Não foi possível registrar o envio no momento. Tente novamente em instantes.",
+      },
+      { status: 503 },
+    );
+  }
 }

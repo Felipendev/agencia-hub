@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
+import { isUuid } from "@/lib/api/quotation-mapper";
 import { isValidSolicitacaoSlug } from "@/lib/solicitacao-slug";
 import { generateId } from "@/lib/format";
 import { useAuth } from "@/contexts/auth-context";
@@ -28,7 +29,7 @@ const AUTOSAVE_DEBOUNCE_MS = 1200;
 
 export function AbaFormulario() {
   const toast = useToast();
-  const { token, user } = useAuth();
+  const { token, isReady, user } = useAuth();
   const [config, setConfig] = useState<SolicitacaoPublicaConfig | null>(null);
   const [lastSavedConfig, setLastSavedConfig] = useState<SolicitacaoPublicaConfig | null>(null);
   const [saving, setSaving] = useState(false);
@@ -57,11 +58,17 @@ export function AbaFormulario() {
         headers,
       });
       if (!res.ok) throw new Error();
+      setError(null);
       const data = (await res.json()) as { config: SolicitacaoPublicaConfig };
-      setConfig(data.config);
-      setLastSavedConfig(data.config);
+      const c = data.config;
+      const normalized = {
+        ...c,
+        linksSociais: Array.isArray(c.linksSociais) ? c.linksSociais : [],
+      };
+      setConfig(normalized);
+      setLastSavedConfig(normalized);
       if (typeof window !== "undefined") {
-        localStorage.setItem(LOCAL_CONFIG_KEY, JSON.stringify(data.config));
+        localStorage.setItem(LOCAL_CONFIG_KEY, JSON.stringify(normalized));
       }
     } catch {
       loadLocalConfig();
@@ -69,7 +76,29 @@ export function AbaFormulario() {
     }
   }, [token]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    if (!isReady) return;
+    if (!token) {
+      setError("Sessão não encontrada. Entre novamente para editar o formulário.");
+      setConfig(null);
+      return;
+    }
+    setError(null);
+    void load();
+  }, [isReady, token, load]);
+
+  const publicUrl = useMemo(() => {
+    if (typeof window === "undefined" || !config?.slug) return "";
+    const base = `${window.location.origin}/solicitacao/${config.slug}`;
+    if (user?.role === "SELLER" && user.linkPublicCode?.trim()) {
+      return `${base}?vendedor=${encodeURIComponent(user.linkPublicCode.trim())}`;
+    }
+    const uid = user?.id?.trim();
+    if (uid && isUuid(uid)) {
+      return `${base}?vendedor=${encodeURIComponent(uid)}`;
+    }
+    return base;
+  }, [config?.slug, user?.id, user?.role, user?.linkPublicCode]);
 
   const handleSave = useCallback(async () => {
     if (!config) return;
@@ -86,14 +115,22 @@ export function AbaFormulario() {
         headers,
         body: JSON.stringify({ config }),
       });
-      const data = (await res.json().catch(() => ({}))) as { error?: string; config?: SolicitacaoPublicaConfig };
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        config?: SolicitacaoPublicaConfig;
+      };
       if (!res.ok) throw new Error(data.error ?? "Erro ao salvar");
       if (data.config) {
-        setConfig(data.config);
-        setLastSavedConfig(data.config);
+        const c = data.config;
+        const normalized = {
+          ...c,
+          linksSociais: Array.isArray(c.linksSociais) ? c.linksSociais : [],
+        };
+        setConfig(normalized);
+        setLastSavedConfig(normalized);
         setLastSavedAt(Date.now());
         if (typeof window !== "undefined") {
-          localStorage.setItem(LOCAL_CONFIG_KEY, JSON.stringify(data.config));
+          localStorage.setItem(LOCAL_CONFIG_KEY, JSON.stringify(normalized));
         }
       }
       toast.success("Formulario salvo!");
@@ -142,18 +179,32 @@ export function AbaFormulario() {
     reader.readAsDataURL(file);
   }
 
-  if (!config) return <Card><p className="p-4 text-sm text-slate-500">{error ?? "Carregando..."}</p></Card>;
+  if (!isReady) {
+    return (
+      <Card>
+        <p className="p-4 text-sm text-slate-500">Carregando sessão…</p>
+      </Card>
+    );
+  }
 
-  const publicUrl =
-    typeof window !== "undefined" ?
-      (() => {
-        let u = `${window.location.origin}/solicitacao/${config.slug}`;
-        if (user?.role === "SELLER" && user.linkPublicCode?.trim()) {
-          u += `?vendedor=${encodeURIComponent(user.linkPublicCode.trim())}`;
-        }
-        return u;
-      })()
-    : "";
+  if (!token) {
+    return (
+      <Card>
+        <p className="p-4 text-sm text-amber-800">
+          {error ?? "Faça login novamente para editar o formulário público."}
+        </p>
+      </Card>
+    );
+  }
+
+  if (!config) {
+    return (
+      <Card>
+        <p className="p-4 text-sm text-slate-500">{error ?? "Carregando…"}</p>
+      </Card>
+    );
+  }
+
   const hasUnsavedChanges =
     !!lastSavedConfig && JSON.stringify(config) !== JSON.stringify(lastSavedConfig);
   const savedAgoText = (() => {
@@ -192,6 +243,14 @@ export function AbaFormulario() {
               Copiar link
             </button>
           </div>
+          {user?.id ? (
+            <p className="mt-2 text-xs leading-relaxed text-slate-600">
+              O link copiado inclui <code className="rounded bg-white/90 px-1 py-0.5 text-[11px]">?vendedor=</code>{" "}
+              com o seu usuário: solicitações enviadas por esse endereço ficam atribuídas a você no painel.
+              Para um link sem atribuição, remova manualmente o trecho{" "}
+              <code className="rounded bg-white/90 px-1 text-[11px]">?vendedor=…</code> da URL.
+            </p>
+          ) : null}
         </div>
       </Card>
 

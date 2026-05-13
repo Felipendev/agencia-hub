@@ -24,6 +24,7 @@ function extractApiErrorMessage(
  */
 export async function createQuotationRemote(
   draft: Cotacao,
+  token?: string | null,
 ): Promise<Cotacao | null> {
   const base = getAgenciaHubApiBaseUrl();
   if (!base || !isUuid(draft.clienteId)) {
@@ -31,9 +32,13 @@ export async function createQuotationRemote(
   }
 
   const body = cotacaoToCreateRequest(draft);
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
   const res = await fetch(`${base}/quotations`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(body),
   });
 

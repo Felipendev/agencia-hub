@@ -29,6 +29,8 @@ export type CotacaoDetalhesFormProps = {
   onPatch: (patch: Partial<CotacaoDetalhes>) => void;
   /** Na página pública, mantém as seções abertas para leitura contínua */
   secoesAbertas?: boolean;
+  /** Página pública: celular em "Contato e pagamento" é o único campo de celular obrigatório */
+  contatoCelularObrigatorio?: boolean;
 };
 
 export function CotacaoDetalhesForm({
@@ -37,13 +39,15 @@ export function CotacaoDetalhesForm({
   onToggleComodidade,
   onPatch,
   secoesAbertas = false,
+  contatoCelularObrigatorio = false,
 }: CotacaoDetalhesFormProps) {
   const detailsProps = secoesAbertas ? { open: true as const } : {};
   const [cupomBusy, setCupomBusy] = useState(false);
   const [cupomHint, setCupomHint] = useState<string | null>(null);
 
-  const celularOk =
-    det.celular.length === 0 || isValidBrazilianPhone(det.celular);
+  const celularOk = contatoCelularObrigatorio
+    ? isValidBrazilianPhone(det.celular)
+    : det.celular.length === 0 || isValidBrazilianPhone(det.celular);
   const whatsappDigits = det.whatsappIgualCelular
     ? det.celular
     : det.whatsapp;
@@ -512,26 +516,35 @@ export function CotacaoDetalhesForm({
         </summary>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3 xl:gap-6">
           <div className="sm:col-span-2 xl:col-span-3">
-            <Label htmlFor="cdf-cel">Celular (Brasil)</Label>
+            <Label htmlFor="cdf-cel">
+              Celular (Brasil)
+              {contatoCelularObrigatorio ? " *" : ""}
+            </Label>
             <Input
               id="cdf-cel"
               inputMode="numeric"
               autoComplete="tel"
               placeholder="(11) 98765-4321"
+              required={contatoCelularObrigatorio}
               value={formatBrPhoneDisplay(det.celular)}
               onChange={(e) => setCelularRaw(e.target.value)}
               aria-invalid={!celularOk}
               className={
-                det.celular.length > 0
-                  ? celularOk
-                    ? "border-emerald-400/80"
-                    : "border-red-400/90"
-                  : undefined
+                contatoCelularObrigatorio && det.celular.length === 0
+                  ? "border-red-400/90"
+                  : det.celular.length > 0
+                    ? celularOk
+                      ? "border-emerald-400/80"
+                      : "border-red-400/90"
+                    : undefined
               }
             />
-            {det.celular.length > 0 && !celularOk ? (
+            {((contatoCelularObrigatorio && det.celular.length === 0) ||
+              (det.celular.length > 0 && !celularOk)) ? (
               <p className="mt-1 text-xs text-red-600">
-                Informe DDD + número com 10 ou 11 dígitos (celular com 9).
+                {contatoCelularObrigatorio && det.celular.length === 0
+                  ? "Informe o celular com DDD."
+                  : "Informe DDD + número com 10 ou 11 dígitos (celular com 9)."}
               </p>
             ) : null}
           </div>
