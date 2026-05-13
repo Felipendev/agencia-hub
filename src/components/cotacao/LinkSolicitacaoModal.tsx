@@ -26,20 +26,22 @@ const TIPOS_LINK: { id: LinkSocialTipo; label: string }[] = [
   { id: "outro", label: "Outro" },
 ];
 
+const LOCAL_CONFIG_KEY = "agencia-hub-solicitacao-config";
+
 type Props = {
   open: boolean;
   onClose: () => void;
-  defaultSlug?: string;
+  /** Código público do vendedor (não é o UUID) — anexado ao link para atribuição. */
+  sellerPublicCode?: string | null;
 };
 
 export function LinkSolicitacaoModal({
   open,
   onClose,
-  defaultSlug = "demo",
+  sellerPublicCode,
 }: Props) {
   const { token } = useAuth();
   const [view, setView] = useState<"main" | "customize">("main");
-  const [slug, setSlug] = useState(defaultSlug);
   const [config, setConfig] = useState<SolicitacaoPublicaConfig | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -48,19 +50,24 @@ export function LinkSolicitacaoModal({
 
   const publicUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
-    const s = slug.trim() || defaultSlug;
-    return `${window.location.origin}/solicitacao/${encodeURIComponent(s)}`;
-  }, [slug, defaultSlug]);
+    const slugPart = (config?.slug ?? "").trim();
+    if (!slugPart) return "";
+    let url = `${window.location.origin}/solicitacao/${encodeURIComponent(slugPart)}`;
+    if (sellerPublicCode?.trim()) {
+      url += `?vendedor=${encodeURIComponent(sellerPublicCode.trim())}`;
+    }
+    return url;
+  }, [config?.slug, sellerPublicCode]);
 
-  const loadConfig = useCallback(async (s: string) => {
+  const loadConfig = useCallback(async () => {
     setLoadError(null);
     try {
       const headers: Record<string, string> = {};
       if (token) headers["Authorization"] = `Bearer ${token}`;
-      const res = await fetch(
-        `/api/app/solicitacao-config?slug=${encodeURIComponent(s)}`,
-        { credentials: "include", headers },
-      );
+      const res = await fetch("/api/app/solicitacao-config", {
+        credentials: "include",
+        headers,
+      });
       if (res.status === 401) {
         setLoadError("Faça login no painel para carregar a personalização.");
         return;
@@ -68,8 +75,21 @@ export function LinkSolicitacaoModal({
       if (!res.ok) throw new Error("Falha ao carregar");
       const data = (await res.json()) as { config: SolicitacaoPublicaConfig };
       setConfig(data.config);
-      setSlug(data.config.slug);
+      if (typeof window !== "undefined") {
+        localStorage.setItem(LOCAL_CONFIG_KEY, JSON.stringify(data.config));
+      }
     } catch {
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem(LOCAL_CONFIG_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw) as SolicitacaoPublicaConfig;
+            if (parsed?.slug) setConfig(parsed);
+          }
+        } catch {
+          /* ignore */
+        }
+      }
       setLoadError("Não foi possível carregar as configurações.");
     }
   }, [token]);
@@ -80,9 +100,8 @@ export function LinkSolicitacaoModal({
       setCopied(false);
       return;
     }
-    setSlug(defaultSlug);
-    void loadConfig(defaultSlug);
-  }, [open, defaultSlug, loadConfig]);
+    void loadConfig();
+  }, [open, loadConfig]);
 
   async function handleSave() {
     if (!config) return;
@@ -112,7 +131,9 @@ export function LinkSolicitacaoModal({
       }
       if (data.config) {
         setConfig(data.config);
-        setSlug(data.config.slug);
+        if (typeof window !== "undefined") {
+          localStorage.setItem(LOCAL_CONFIG_KEY, JSON.stringify(data.config));
+        }
       }
       setView("main");
     } catch (e) {
@@ -209,7 +230,7 @@ export function LinkSolicitacaoModal({
                 Link principal da agência
               </p>
               <p className="mt-2 break-all font-mono text-xs text-slate-800">
-                {publicUrl || "…"}
+                {publicUrl || "Carregando identificador…"}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button
@@ -217,6 +238,7 @@ export function LinkSolicitacaoModal({
                   variant="secondary"
                   className="text-sm"
                   onClick={() => void copyLink()}
+                  disabled={!publicUrl}
                 >
                   {copied ? "Copiado!" : "Copiar link"}
                 </Button>
@@ -224,46 +246,28 @@ export function LinkSolicitacaoModal({
                   type="button"
                   variant="secondary"
                   className="text-sm"
-                  onClick={() => window.open(publicUrl, "_blank", "noopener")}
+                  onClick={() => publicUrl && window.open(publicUrl, "_blank", "noopener")}
+                  disabled={!publicUrl}
                 >
                   Abrir em nova aba
                 </Button>
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-lg border border-slate-200 p-3">
-                <p className="text-xs text-slate-600">
-                  Crie identificadores diferentes para afiliados ou canais (salve
-                  em Personalizar alterando o campo do link).
-                </p>
-                <Button
-                  type="button"
-                  className="mt-3 w-full text-sm"
-                  onClick={() => setView("customize")}
-                >
-                  Criar / ajustar link
-                </Button>
-              </div>
-              <div className="rounded-lg border border-slate-200 p-3">
-                <p className="text-xs text-slate-600">
-                  Logo, textos e ícones de contato com links clicáveis.
-                </p>
-                <Button
-                  type="button"
-                  className="mt-3 w-full text-sm"
-                  onClick={() => setView("customize")}
-                >
-                  Personalizar o formulário
-                </Button>
-              </div>
+            <div className="rounded-lg border border-slate-200 p-3">
+              <p className="text-xs text-slate-600">
+                Ajuste o identificador da URL, textos, logo e links de contato do
+                formulário público (mesmas opções da aba Agência → Formulário de
+                cotação).
+              </p>
+              <Button
+                type="button"
+                className="mt-3 w-full text-sm"
+                onClick={() => setView("customize")}
+              >
+                Personalizar página pública
+              </Button>
             </div>
-
-            <p className="text-xs leading-relaxed text-slate-500">
-              Os links são fixos: use em redes sociais, campanhas, envio direto ao
-              cliente ou incorporação no site. Em produção, configure backend e
-              domínio próprio para rastreio e estatísticas.
-            </p>
 
             {loadError ? (
               <p className="text-sm text-amber-700">{loadError}</p>
@@ -279,11 +283,13 @@ export function LinkSolicitacaoModal({
                     id="ls-slug"
                     value={config.slug}
                     onChange={(e) => {
-                      const v = e.target.value.trim();
-                      setSlug(v);
+                      const v = e.target.value
+                        .trim()
+                        .toLowerCase()
+                        .replace(/[^a-z0-9-]/g, "");
                       setConfig({ ...config, slug: v });
                     }}
-                    placeholder="ex.: demo, parceiro-jan"
+                    placeholder="ex.: minha-agencia"
                     className="mt-1 font-mono text-sm"
                   />
                   <p className="mt-1 text-xs text-slate-500">
@@ -331,15 +337,21 @@ export function LinkSolicitacaoModal({
                     onChange={onLogoFile}
                   />
                   {config.logoDataUrl ? (
-                    <button
-                      type="button"
-                      className="mt-2 text-xs text-red-600 hover:underline"
-                      onClick={() =>
-                        setConfig({ ...config, logoDataUrl: null })
-                      }
-                    >
-                      Remover imagem
-                    </button>
+                    <div className="mt-2 flex items-center gap-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- Data URL */}
+                      <img
+                        src={config.logoDataUrl}
+                        alt="Logo"
+                        className="h-10 rounded border"
+                      />
+                      <button
+                        type="button"
+                        className="text-xs text-red-600 hover:underline"
+                        onClick={() => setConfig({ ...config, logoDataUrl: null })}
+                      >
+                        Remover imagem
+                      </button>
+                    </div>
                   ) : null}
                 </div>
 

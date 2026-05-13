@@ -218,20 +218,12 @@ export default function CotacoesPage() {
       {hasRemoteApi ?
         <div className="rounded-xl border border-sky-200 bg-sky-50/90 px-4 py-4 shadow-sm">
           <p className="text-sm font-semibold text-[var(--hub-blue-dark)]">
-            Lista no servidor (API)
+            Atualizar lista do servidor
           </p>
           <p className="mt-1 text-xs text-slate-600">
-            Consulta o backend em{" "}
-            <code className="rounded bg-white/80 px-1 py-0.5 text-[11px]">
-              GET /quotations
-            </code>{" "}
-            e atualiza o quadro abaixo. Os filtros da caixa branca refinam essa
-            lista no navegador. Com um único cliente encontrado na busca acima e
-            ID UUID, ele é enviado como{" "}
-            <code className="rounded bg-white/80 px-1 py-0.5 text-[11px]">
-              customerId
-            </code>
-            .
+            Use os filtros abaixo e clique em &quot;Atualizar lista&quot; para buscar
+            novamente no servidor. A busca por cliente acima continua refinando o
+            quadro localmente.
           </p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
@@ -382,7 +374,7 @@ export default function CotacoesPage() {
       <ConfirmDialog
         open={deleteTarget !== null}
         title="Excluir cotação"
-        message="Tem certeza que deseja excluir esta cotação? Ela será movida para a Lixeira e poderá ser restaurada depois."
+        message="Tem certeza de que deseja excluir esta cotação? Esta ação não pode ser desfeita."
         confirmLabel="Excluir"
         cancelLabel="Cancelar"
         destructive
@@ -393,7 +385,11 @@ export default function CotacoesPage() {
       <LinkSolicitacaoModal
         open={linkModalOpen}
         onClose={() => setLinkModalOpen(false)}
-        defaultSlug="demo"
+        sellerPublicCode={
+          user?.role === "SELLER" && user.linkPublicCode ?
+            user.linkPublicCode
+          : null
+        }
       />
     </div>
   );

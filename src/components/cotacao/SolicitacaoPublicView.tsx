@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { CotacaoDetalhesForm } from "@/components/cotacao/CotacaoDetalhesForm";
 import { SolicitacaoSocialPanel } from "@/components/cotacao/SolicitacaoSocialRow";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,8 @@ const LEMBRETE_KEY = "agencia-hub-solicitacao-lembrete";
 type Props = { slug: string };
 
 export function SolicitacaoPublicView({ slug }: Props) {
+  const searchParams = useSearchParams();
+  const sellerPublicCode = searchParams.get("vendedor")?.trim() || null;
   const [config, setConfig] = useState<SolicitacaoPublicaConfig | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [nome, setNome] = useState("");
@@ -125,6 +128,7 @@ export function SolicitacaoPublicView({ slug }: Props) {
         telefone: telefone.trim(),
         detalhes,
         observacoes: observacoes.trim(),
+        sellerPublicCode,
       };
       const res = await fetch("/api/public/solicitacao/submit", {
         method: "POST",

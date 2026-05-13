@@ -226,4 +226,6 @@ export interface UsuarioSessao {
   trialEndsAt?: string | null;
   requiresTermsAcceptance?: boolean;
   mustChangePassword?: boolean;
+  /** Código público curto para links (?vendedor=); não é o UUID interno. */
+  linkPublicCode?: string;
 }

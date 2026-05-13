@@ -1,12 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useData } from "@/contexts/data-context";
+import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { ImportarSubmissaoModal } from "@/components/cotacao/ImportarSubmissaoModal";
 import { DuplicateCustomerError } from "@/lib/api/create-customer-remote";
+import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
+import { listCustomersRemote } from "@/lib/api/list-customers-remote";
+import { lookupCustomerRemote } from "@/lib/api/lookup-customer-remote";
 import type { SolicitacaoPublicSubmission } from "@/types/solicitacao-publica";
+import type { Cliente } from "@/types";
 import type { CotacaoStatus } from "@/types";
 
 function validadeEmDias(dias: number): string {
@@ -17,10 +22,23 @@ function validadeEmDias(dias: number): string {
 
 export function SolicitacaoSubmissionsBanner() {
   const { clientes, addCliente, addCotacao, isReady } = useData();
+  const { token } = useAuth();
   const toast = useToast();
   const [list, setList] = useState<SolicitacaoPublicSubmission[]>([]);
   const [selectedSubmission, setSelectedSubmission] =
     useState<SolicitacaoPublicSubmission | null>(null);
+  const [remoteClientes, setRemoteClientes] = useState<Cliente[]>([]);
+
+  const hasRemoteApi = Boolean(getAgenciaHubApiBaseUrl());
+
+  const mergedClientes = useMemo(() => {
+    const byId = new Map<string, Cliente>();
+    for (const c of remoteClientes) byId.set(c.id, c);
+    for (const c of clientes) {
+      if (!byId.has(c.id)) byId.set(c.id, c);
+    }
+    return [...byId.values()];
+  }, [clientes, remoteClientes]);
 
   const refresh = useCallback(async () => {
     try {
@@ -39,9 +57,17 @@ export function SolicitacaoSubmissionsBanner() {
 
   useEffect(() => {
     if (!isReady) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Async data fetch from external API is a legitimate effect pattern
     void refresh();
   }, [isReady, refresh]);
+
+  useEffect(() => {
+    if (!isReady || !hasRemoteApi || !token) return;
+    void listCustomersRemote(token)
+      .then(setRemoteClientes)
+      .catch(() => {
+        /* API indisponível — segue só com clientes locais */
+      });
+  }, [isReady, hasRemoteApi, token]);
 
   async function handleImport(params: {
     clienteId: string;
@@ -55,22 +81,42 @@ export function SolicitacaoSubmissionsBanner() {
       let clienteId = params.clienteId;
 
       if (params.isNewClient) {
-        const cliente = await addCliente({
-          nome: selectedSubmission.nome,
-          email: selectedSubmission.email || "",
-          telefone: selectedSubmission.telefone,
-          destinoInteresse:
-            selectedSubmission.detalhes.destinosTrechos
-              ?.filter((x) => x.trim())
-              .join(" · ") ||
-            selectedSubmission.detalhes.destinoForm ||
-            selectedSubmission.detalhes.origem ||
-            "—",
-          status: "prospecto",
-          observacoes: `Lead: formulário público (slug ${selectedSubmission.slug}).`,
-        });
-        clienteId = cliente.id;
-        toast.success(`Cliente "${cliente.nome}" criado com sucesso!`);      }
+        try {
+          const cliente = await addCliente({
+            nome: selectedSubmission.nome,
+            email: selectedSubmission.email || "",
+            telefone: selectedSubmission.telefone,
+            destinoInteresse:
+              selectedSubmission.detalhes.destinosTrechos
+                ?.filter((x) => x.trim())
+                .join(" · ") ||
+              selectedSubmission.detalhes.destinoForm ||
+              selectedSubmission.detalhes.origem ||
+              "—",
+            status: "prospecto",
+            observacoes: `Lead: formulário público (slug ${selectedSubmission.slug}).`,
+          });
+          clienteId = cliente.id;
+          toast.success(`Cliente "${cliente.nome}" criado com sucesso!`);
+        } catch (e) {
+          if (e instanceof DuplicateCustomerError && token) {
+            const found = await lookupCustomerRemote(token, {
+              email: selectedSubmission.email,
+              phone: selectedSubmission.telefone,
+            });
+            if (found) {
+              clienteId = found.id;
+              toast.success(
+                `Este contato já estava cadastrado como "${found.nome}". Vinculamos à cotação.`,
+              );
+            } else {
+              throw e;
+            }
+          } else {
+            throw e;
+          }
+        }
+      }
 
       const dest =
         selectedSubmission.detalhes.destinosTrechos
@@ -104,7 +150,7 @@ export function SolicitacaoSubmissionsBanner() {
 
       await fetch(
         `/api/app/solicitacao-submissions?id=${encodeURIComponent(selectedSubmission.id)}`,
-        { method: "DELETE", credentials: "include" }
+        { method: "DELETE", credentials: "include" },
       );
 
       toast.success("Cotação importada com sucesso!");
@@ -144,6 +190,9 @@ export function SolicitacaoSubmissionsBanner() {
                 <span className="font-medium text-slate-900">{s.nome}</span>
                 <span className="ml-2 text-xs text-slate-500">
                   {new Date(s.createdAt).toLocaleString("pt-BR")} · {s.slug}
+                  {s.sellerPublicCode ?
+                    ` · ref. vendedor ${s.sellerPublicCode}`
+                  : null}
                 </span>
               </div>
               <Button
@@ -163,7 +212,7 @@ export function SolicitacaoSubmissionsBanner() {
           open={!!selectedSubmission}
           onClose={() => setSelectedSubmission(null)}
           submission={selectedSubmission}
-          clientes={clientes}
+          clientes={mergedClientes}
           onImport={handleImport}
         />
       )}

@@ -18,6 +18,8 @@ export type ApiLoginResponse = {
   trialEndsAt?: string | null;
   requiresTermsAcceptance?: boolean;
   mustChangePassword?: boolean;
+  /** Presente após login na API; usado em links públicos do vendedor. */
+  publicLinkCode?: string;
 };
 
 export type ApiUserResponse = {

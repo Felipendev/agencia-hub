@@ -23,14 +23,32 @@ const TIPOS_LINK: { id: LinkSocialTipo; label: string }[] = [
   { id: "outro",      label: "Outro"       },
 ];
 
+const LOCAL_CONFIG_KEY = "agencia-hub-solicitacao-config";
+const AUTOSAVE_DEBOUNCE_MS = 1200;
+
 export function AbaFormulario() {
   const toast = useToast();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [config, setConfig] = useState<SolicitacaoPublicaConfig | null>(null);
+  const [lastSavedConfig, setLastSavedConfig] = useState<SolicitacaoPublicaConfig | null>(null);
   const [saving, setSaving] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+  const [statusNow, setStatusNow] = useState<number>(Date.now());
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
+    const loadLocalConfig = () => {
+      if (typeof window === "undefined") return;
+      try {
+        const raw = localStorage.getItem(LOCAL_CONFIG_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw) as SolicitacaoPublicaConfig;
+        if (parsed?.slug) setConfig(parsed);
+      } catch {
+        // Ignore local parse errors
+      }
+    };
+
     try {
       const headers: Record<string, string> = {};
       if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -41,12 +59,19 @@ export function AbaFormulario() {
       if (!res.ok) throw new Error();
       const data = (await res.json()) as { config: SolicitacaoPublicaConfig };
       setConfig(data.config);
-    } catch { setError("Não foi possível carregar as configurações."); }
+      setLastSavedConfig(data.config);
+      if (typeof window !== "undefined") {
+        localStorage.setItem(LOCAL_CONFIG_KEY, JSON.stringify(data.config));
+      }
+    } catch {
+      loadLocalConfig();
+      setError("Não foi possível carregar as configurações.");
+    }
   }, [token]);
 
   useEffect(() => { void load(); }, [load]);
 
-  async function handleSave() {
+  const handleSave = useCallback(async () => {
     if (!config) return;
     if (!isValidSolicitacaoSlug(config.slug)) {
       setError("O identificador do link deve conter apenas letras minúsculas, números e hífen, com 2 a 64 caracteres. Exemplo: minha-agencia");
@@ -63,12 +88,38 @@ export function AbaFormulario() {
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string; config?: SolicitacaoPublicaConfig };
       if (!res.ok) throw new Error(data.error ?? "Erro ao salvar");
-      if (data.config) setConfig(data.config);
+      if (data.config) {
+        setConfig(data.config);
+        setLastSavedConfig(data.config);
+        setLastSavedAt(Date.now());
+        if (typeof window !== "undefined") {
+          localStorage.setItem(LOCAL_CONFIG_KEY, JSON.stringify(data.config));
+        }
+      }
       toast.success("Formulario salvo!");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro ao salvar");
     } finally { setSaving(false); }
-  }
+  }, [config, token, toast]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setStatusNow(Date.now()), 15000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!config || !lastSavedConfig) return;
+    if (saving) return;
+    if (JSON.stringify(config) === JSON.stringify(lastSavedConfig)) return;
+    if (!isValidSolicitacaoSlug(config.slug)) return;
+    if (!config.tituloPagina?.trim()) return;
+
+    const timeout = setTimeout(() => {
+      void handleSave();
+    }, AUTOSAVE_DEBOUNCE_MS);
+
+    return () => clearTimeout(timeout);
+  }, [config, lastSavedConfig, saving, handleSave]);
 
   function addLink() {
     if (!config) return;
@@ -93,7 +144,26 @@ export function AbaFormulario() {
 
   if (!config) return <Card><p className="p-4 text-sm text-slate-500">{error ?? "Carregando..."}</p></Card>;
 
-  const publicUrl = typeof window !== "undefined" ? `${window.location.origin}/solicitacao/${config.slug}` : "";
+  const publicUrl =
+    typeof window !== "undefined" ?
+      (() => {
+        let u = `${window.location.origin}/solicitacao/${config.slug}`;
+        if (user?.role === "SELLER" && user.linkPublicCode?.trim()) {
+          u += `?vendedor=${encodeURIComponent(user.linkPublicCode.trim())}`;
+        }
+        return u;
+      })()
+    : "";
+  const hasUnsavedChanges =
+    !!lastSavedConfig && JSON.stringify(config) !== JSON.stringify(lastSavedConfig);
+  const savedAgoText = (() => {
+    if (!lastSavedAt) return "Ainda não salvo";
+    const diffSec = Math.max(0, Math.floor((statusNow - lastSavedAt) / 1000));
+    if (diffSec < 5) return "Salvo agora";
+    if (diffSec < 60) return `Salvo há ${diffSec}s`;
+    const diffMin = Math.floor(diffSec / 60);
+    return `Salvo há ${diffMin}min`;
+  })();
 
   return (
     <div className="space-y-4">
@@ -198,9 +268,14 @@ export function AbaFormulario() {
 
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex justify-end pt-2">
-            <Button type="button" onClick={() => void handleSave()} disabled={saving}>
-              {saving ? "Salvando..." : "Salvar"}
-            </Button>
+            <div className="flex items-center gap-3">
+              <p className={`text-xs ${error ? "text-red-600" : "text-slate-500"}`}>
+                {saving ? "Salvando..." : error ? "Erro ao salvar" : hasUnsavedChanges ? "Alterações pendentes" : savedAgoText}
+              </p>
+              <Button type="button" onClick={() => void handleSave()} disabled={saving}>
+                {saving ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
           </div>
         </div>
       </Card>

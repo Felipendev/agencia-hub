@@ -21,6 +21,7 @@ import { exportarClientesCSV } from "@/lib/csv-export";
 import { DownloadIcon, TrashIcon } from "@/components/icons";
 import { softDeleteCustomer } from "@/lib/api/soft-delete-remote";
 import { CLIENTE_STATUS_LABELS } from "@/lib/constants";
+import { isUuid } from "@/lib/api/quotation-mapper";
 import type { ClienteStatus } from "@/types";
 
 export default function ClientesPage() {
@@ -48,7 +49,7 @@ export default function ClientesPage() {
 
   const handleDeleteConfirm = useCallback(async () => {
     if (!deleteTarget) return;
-    if (hasRemoteApi && token) {
+    if (hasRemoteApi && token && isUuid(deleteTarget)) {
       try {
         await softDeleteCustomer(deleteTarget, token);
         toast.success("Cliente excluído com sucesso.");
@@ -57,7 +58,7 @@ export default function ClientesPage() {
         toast.error(e instanceof Error ? e.message : "Erro ao excluir cliente.");
       }
     } else {
-      // Modo local: esconde o cliente da listagem
+      // Modo local (ou registro legado sem UUID): esconde da listagem
       setLocallyDeleted((prev) => new Set(prev).add(deleteTarget));
       toast.success("Cliente excluído com sucesso.");
     }
@@ -319,7 +320,7 @@ export default function ClientesPage() {
       <ConfirmDialog
         open={deleteTarget !== null}
         title="Excluir cliente"
-        message="Tem certeza que deseja excluir este cliente? Ele será movido para a Lixeira e poderá ser restaurado depois."
+        message="Esta ação remove o cliente de forma permanente, junto com cotações e atendimentos vinculados a ele. Não é possível desfazer."
         confirmLabel="Excluir"
         cancelLabel="Cancelar"
         destructive

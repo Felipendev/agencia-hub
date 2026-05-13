@@ -121,6 +121,7 @@ function VerifyEmailForm() {
             nome: data.name,
             empresa: data.agencyName || "AgênciasHub",
             role: data.role,
+            linkPublicCode: data.publicLinkCode,
           }),
         );
         // Set auth cookie

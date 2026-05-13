@@ -40,4 +40,6 @@ export type SolicitacaoPublicSubmission = {
   telefone: string;
   detalhes: CotacaoDetalhes;
   observacoes: string;
+  /** Código público do vendedor (query ?vendedor=), quando o envio veio de link pessoal. */
+  sellerPublicCode?: string | null;
 };
