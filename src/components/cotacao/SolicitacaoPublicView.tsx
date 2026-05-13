@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { CotacaoDetalhesForm } from "@/components/cotacao/CotacaoDetalhesForm";
 import { SolicitacaoSocialPanel } from "@/components/cotacao/SolicitacaoSocialRow";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,8 @@ function referralSellerIdFromCurrentUrl(): string | undefined {
 type Props = { slug: string };
 
 export function SolicitacaoPublicView({ slug }: Props) {
+  const searchParams = useSearchParams();
+  const sellerPublicCode = searchParams.get("vendedor")?.trim() || null;
   const [config, setConfig] = useState<SolicitacaoPublicaConfig | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [nome, setNome] = useState("");
@@ -153,6 +156,7 @@ export function SolicitacaoPublicView({ slug }: Props) {
         telefone: celularFinal,
         detalhes,
         observacoes: observacoes.trim(),
+        sellerPublicCode,
       };
       const ref = referralSellerIdFromCurrentUrl();
       if (ref) body.referralSellerId = ref;

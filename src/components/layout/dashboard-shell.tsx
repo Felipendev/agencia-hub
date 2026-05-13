@@ -15,7 +15,6 @@ import {
   IconUsers,
   IconWallet,
   IconX,
-  TrashIcon,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { TrialBanner } from "@/components/ui/trial-banner";
@@ -30,7 +29,6 @@ const iconMap = {
   briefcase: IconBriefcase,
   document:  IconDocument,
   wallet:    IconWallet,
-  trash:     TrashIcon,
 } as const;
 
 type NavItem = {
@@ -55,7 +53,6 @@ const OWNER_GROUPS: NavGroup[] = [
       { href: "/dashboard",    label: "Dashboard",    icon: "layout"    },
       { href: "/cotacoes",     label: "Cotacoes",     icon: "document"  },
       { href: "/clientes",     label: "Clientes",     icon: "users"     },
-      { href: "/lixeira",      label: "Lixeira",      icon: "trash"     },
     ],
   },
   {
@@ -95,7 +92,6 @@ const SELLER_GROUPS: NavGroup[] = [
       { href: "/meu-painel",   label: "Meu Painel",           icon: "layout"   },
       { href: "/cotacoes",     label: "Cotações",             icon: "document" },
       { href: "/clientes",     label: "Clientes",             icon: "users"    },
-      { href: "/lixeira",      label: "Lixeira",              icon: "trash"    },
     ],
   },
   {

@@ -103,6 +103,7 @@ export async function addSubmission(input: {
   detalhes: SolicitacaoPublicSubmission["detalhes"];
   observacoes: string;
   referralSellerId?: string;
+  sellerPublicCode?: string | null;
 }): Promise<SolicitacaoPublicSubmission> {
   const data = await readRaw();
   const row: SolicitacaoPublicSubmission = {
@@ -114,7 +115,8 @@ export async function addSubmission(input: {
     telefone: input.telefone.trim(),
     detalhes: mergeCotacaoDetalhes(input.detalhes),
     observacoes: input.observacoes.trim(),
-    referralSellerId: input.referralSellerId,
+    referralSellerId: input.referralSellerId ?? null,
+    sellerPublicCode: input.sellerPublicCode?.trim() || null,
   };
   data.submissions.unshift(row);
   await writeRaw(data);

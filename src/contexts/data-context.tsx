@@ -93,6 +93,22 @@ type Stored = {
   cotacoes: Cotacao[];
 };
 
+function stripSeedDataWhenRemote(data: Stored, hasApi: boolean): Stored {
+  if (!hasApi) return data;
+
+  const seedClienteIds = new Set(["c1", "c2", "c3", "c4", "c5"]);
+  const seedAtendimentoIds = new Set(["a1", "a2", "a3", "a4", "a5"]);
+  const seedLancamentoIds = new Set(["l1", "l2", "l3", "l4", "l5", "l6", "l7", "l8"]);
+  const seedCotacaoIds = new Set(["q1", "q2", "q3", "q4", "q5"]);
+
+  return {
+    clientes: data.clientes.filter((c) => !seedClienteIds.has(c.id)),
+    atendimentos: data.atendimentos.filter((a) => !seedAtendimentoIds.has(a.id)),
+    lancamentos: data.lancamentos.filter((l) => !seedLancamentoIds.has(l.id)),
+    cotacoes: data.cotacoes.filter((c) => !seedCotacaoIds.has(c.id)),
+  };
+}
+
 function loadStored(): Stored {
   const hasApi = Boolean(getAgenciaHubApiBaseUrl());
   const empty: Stored = { clientes: [], atendimentos: [], lancamentos: [], cotacoes: [] };
@@ -107,7 +123,8 @@ function loadStored(): Stored {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return fallback;
-    return normalizeStored(JSON.parse(raw) as Partial<Stored>);
+    const normalized = normalizeStored(JSON.parse(raw) as Partial<Stored>);
+    return stripSeedDataWhenRemote(normalized, hasApi);
   } catch {
     return fallback;
   }
@@ -393,11 +410,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   }, [token]);
 
   const resetDemoData = useCallback(() => {
+    const hasApi = Boolean(getAgenciaHubApiBaseUrl());
     const fresh: Stored = {
-      clientes: seedClientes,
-      atendimentos: seedAtendimentos,
-      lancamentos: seedLancamentos,
-      cotacoes: seedCotacoes,
+      clientes: hasApi ? [] : seedClientes,
+      atendimentos: hasApi ? [] : seedAtendimentos,
+      lancamentos: hasApi ? [] : seedLancamentos,
+      cotacoes: hasApi ? [] : seedCotacoes,
     };
     setData(fresh);
     saveStored(fresh);

@@ -15,8 +15,10 @@ type Body = {
   telefone?: string;
   detalhes?: Partial<CotacaoDetalhes>;
   observacoes?: string;
-  /** UUID do vendedor/dono (query ?vendedor= no link público) */
+  /** UUID do vendedor/dono (query ?vendedor= no link público, quando for UUID) */
   referralSellerId?: string;
+  /** Código público do vendedor em ?vendedor= quando não for UUID */
+  sellerPublicCode?: string | null;
 };
 
 export async function POST(request: Request) {
@@ -64,6 +66,7 @@ export async function POST(request: Request) {
   const referralRaw = (body.referralSellerId ?? "").trim();
   const referralSellerId =
     referralRaw && isUuid(referralRaw) ? referralRaw : undefined;
+  const sellerPublicCode = body.sellerPublicCode?.trim() || null;
 
   const payload = {
     slug,
@@ -73,6 +76,7 @@ export async function POST(request: Request) {
     detalhes: det,
     observacoes: body.observacoes ?? "",
     ...(referralSellerId ? { referralSellerId } : {}),
+    ...(sellerPublicCode ? { sellerPublicCode } : {}),
   };
 
   const base = getAgenciaHubApiBaseUrl();
@@ -135,6 +139,7 @@ export async function POST(request: Request) {
       detalhes: det as CotacaoDetalhes,
       observacoes: body.observacoes ?? "",
       referralSellerId,
+      sellerPublicCode,
     });
     return NextResponse.json({ ok: true, id: created.id });
   } catch (err) {
