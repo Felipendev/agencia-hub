@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "AgênciasHub — Gestão para agências de viagem",
   description:
-    "Controle financeiro, clientes e atendimentos em um único painel. Plataforma SaaS para agências de viagem.",
+    "Controle financeiro, clientes e cotações em um único painel. Plataforma SaaS para agências de viagem.",
 };
 
 export default function RootLayout({

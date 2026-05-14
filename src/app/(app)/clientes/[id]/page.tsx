@@ -11,8 +11,8 @@ import { EditIcon } from "@/components/icons";
 import { formatBRL, formatDateBR } from "@/lib/format";
 import { whatsappLink } from "@/lib/whatsapp";
 import {
-  ATENDIMENTO_STATUS_LABELS,
   CLIENTE_STATUS_LABELS,
+  COTACAO_STATUS_LABELS,
 } from "@/lib/constants";
 import { TimelineView } from "@/components/timeline/TimelineView";
 import { BackButton } from "@/components/ui/back-button";
@@ -21,11 +21,11 @@ import { EditarClienteModal } from "@/components/cliente/EditarClienteModal";
 export default function ClienteDetalhePage() {
   const params = useParams();
   const id = typeof params.id === "string" ? params.id : "";
-  const { clientes, atendimentos, isReady } = useData();
+  const { clientes, cotacoes, isReady } = useData();
   const [editOpen, setEditOpen] = useState(false);
 
   const cliente = clientes.find((c) => c.id === id);
-  const atendDoCliente = atendimentos.filter((a) => a.clienteId === id);
+  const cotacoesDoCliente = cotacoes.filter((q) => q.clienteId === id);
 
   if (!isReady) {
     return <p className="text-sm text-slate-600">Carregando…</p>;
@@ -212,41 +212,43 @@ export default function ClienteDetalhePage() {
 
         <Card>
           <div className="mb-4 flex items-center justify-between">
-            <CardTitle>Atendimentos vinculados</CardTitle>
+            <CardTitle>Cotações deste cliente</CardTitle>
             <Link
-              href={`/atendimentos?clienteId=${cliente.id}`}
+              href={`/cotacoes/nova?clienteId=${cliente.id}`}
               className="text-sm font-medium text-[var(--hub-yellow)] hover:underline"
             >
-              + Novo atendimento
+              + Nova cotação
             </Link>
           </div>
-          {atendDoCliente.length === 0 ? (
+          {cotacoesDoCliente.length === 0 ? (
             <p className="text-sm text-slate-500">
-              Nenhum atendimento ainda.{" "}
+              Nenhuma cotação ainda.{" "}
               <Link
-                href={`/atendimentos?clienteId=${cliente.id}`}
+                href={`/cotacoes/nova?clienteId=${cliente.id}`}
                 className="font-medium text-[var(--hub-blue)] underline"
               >
-                Cadastrar oportunidade
+                Criar cotação
               </Link>
             </p>
           ) : (
             <ul className="divide-y divide-[var(--hub-border)]">
-              {atendDoCliente.map((a) => (
-                <li key={a.id} className="py-3 first:pt-0">
-                  <p className="font-medium text-[var(--hub-blue-dark)]">
-                    {a.titulo}
-                  </p>
+              {cotacoesDoCliente.map((q) => (
+                <li key={q.id} className="py-3 first:pt-0">
+                  <Link
+                    href={`/cotacoes/${q.id}`}
+                    className="font-medium text-[var(--hub-blue)] hover:underline"
+                  >
+                    {q.titulo}
+                  </Link>
                   <p className="text-xs text-slate-500">
-                    {a.destino} · viagem prevista{" "}
-                    {formatDateBR(a.dataPrevistaViagem)}
+                    {q.destino} · validade {formatDateBR(q.validade)}
                   </p>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
                     <Badge tone="muted">
-                      {ATENDIMENTO_STATUS_LABELS[a.status]}
+                      {COTACAO_STATUS_LABELS[q.status]}
                     </Badge>
                     <span className="text-sm font-semibold tabular-nums text-slate-800">
-                      {formatBRL(a.valorEstimado)}
+                      {formatBRL(q.valorTotal)}
                     </span>
                   </div>
                 </li>

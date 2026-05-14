@@ -7,7 +7,6 @@ import { useAuth } from "@/contexts/auth-context";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { GlobalSearch } from "@/components/layout/GlobalSearch";
 import {
-  IconBriefcase,
   IconChevronRight,
   IconDocument,
   IconLayout,
@@ -24,11 +23,10 @@ import { ChangePasswordModal } from "@/components/ui/change-password-modal";
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
 const iconMap = {
-  layout:    IconLayout,
-  users:     IconUsers,
-  briefcase: IconBriefcase,
-  document:  IconDocument,
-  wallet:    IconWallet,
+  layout:   IconLayout,
+  users:    IconUsers,
+  document: IconDocument,
+  wallet:   IconWallet,
 } as const;
 
 type NavItem = {
@@ -58,7 +56,6 @@ const OWNER_GROUPS: NavGroup[] = [
   {
     label: "Operacional",
     items: [
-      { href: "/atendimentos", label: "Atendimentos",        icon: "briefcase" },
       { href: "/calculadora",  label: "Calculadora de Milhas", icon: "document"  },
     ],
   },
@@ -97,7 +94,6 @@ const SELLER_GROUPS: NavGroup[] = [
   {
     label: "Operacional",
     items: [
-      { href: "/atendimentos", label: "Atendimentos",         icon: "briefcase" },
       { href: "/calculadora",  label: "Calculadora de Milhas", icon: "document"  },
     ],
   },

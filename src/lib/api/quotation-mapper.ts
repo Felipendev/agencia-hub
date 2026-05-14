@@ -116,9 +116,6 @@ export function cotacaoToCreateRequest(
     internalNotes: c.observacoes?.trim() || undefined,
   };
 
-  if (c.atendimentoId && isUuid(c.atendimentoId)) {
-    req.opportunityId = c.atendimentoId.trim();
-  }
   if (c.vendedorId && isUuid(c.vendedorId)) {
     req.sellerId = c.vendedorId.trim();
   }
@@ -147,7 +144,6 @@ export function mergeQuotationApiResponse(
     ...draft,
     id: api.id,
     clienteId: api.customerId,
-    atendimentoId: api.opportunityId ?? undefined,
     vendedorId: api.sellerId ?? undefined,
     vendedorNome: api.sellerName ?? undefined,
     titulo: api.title,
@@ -260,7 +256,6 @@ export function apiQuotationResponseToCotacao(api: ApiQuotationResponse): Cotaca
   return {
     id: api.id,
     clienteId: api.customerId,
-    atendimentoId: api.opportunityId ?? undefined,
     vendedorId: api.sellerId ?? undefined,
     vendedorNome: api.sellerName ?? undefined,
     titulo: api.title,

@@ -49,9 +49,6 @@ export async function updateQuotationRemote(
   if (patch.prioridade !== undefined) body.priority = patch.prioridade;
   if (patch.responsavel !== undefined) body.assignee = patch.responsavel?.trim() || null;
   if (patch.observacoes !== undefined) body.internalNotes = patch.observacoes?.trim() ?? "";
-  if (patch.atendimentoId !== undefined && isUuid(patch.atendimentoId ?? "")) {
-    body.opportunityId = patch.atendimentoId;
-  }
   if (patch.vendedorId !== undefined) {
     if (patch.vendedorId && isUuid(patch.vendedorId)) {
       body.sellerId = patch.vendedorId.trim();

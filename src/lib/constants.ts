@@ -1,5 +1,4 @@
 import type {
-  AtendimentoStatus,
   ClienteStatus,
   CotacaoStatus,
   LancamentoCategoria,
@@ -62,14 +61,6 @@ export const CLIENTE_STATUS_LABELS: Record<ClienteStatus, string> = {
   prospecto: "Prospecto",
 };
 
-export const ATENDIMENTO_STATUS_LABELS: Record<AtendimentoStatus, string> = {
-  novo_lead: "Novo lead",
-  em_atendimento: "Em atendimento",
-  proposta_enviada: "Proposta enviada",
-  fechado: "Fechado",
-  cancelado: "Cancelado",
-};
-
 export const LANCAMENTO_CATEGORIA_LABELS: Record<LancamentoCategoria, string> =
   {
     pacote_vendido: "Pacote vendido",
@@ -102,7 +93,6 @@ export const COTACAO_STATUS_LABELS: Record<CotacaoStatus, string> = {
 export const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: "layout" as const },
   { href: "/clientes", label: "Clientes", icon: "users" as const },
-  { href: "/atendimentos", label: "Atendimentos", icon: "briefcase" as const },
   { href: "/cotacoes", label: "Cotações", icon: "document" as const },
   { href: "/financeiro", label: "Financeiro", icon: "wallet" as const },
 ];

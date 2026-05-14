@@ -9,7 +9,6 @@ import {
   useState,
 } from "react";
 import {
-  seedAtendimentos,
   seedClientes,
   seedCotacoes,
   seedLancamentos,
@@ -17,8 +16,6 @@ import {
 import { createCustomerRemote, DuplicateCustomerError } from "@/lib/api/create-customer-remote";
 import { createQuotationRemote } from "@/lib/api/create-quotation-remote";
 import { updateQuotationRemote } from "@/lib/api/update-quotation-remote";
-import { createOpportunityRemote } from "@/lib/api/create-opportunity-remote";
-import { updateOpportunityRemote } from "@/lib/api/update-opportunity-remote";
 import { createFinancialEntryRemote } from "@/lib/api/create-financial-entry-remote";
 import { updateFinancialEntryRemote } from "@/lib/api/update-financial-entry-remote";
 import { useAuth } from "@/contexts/auth-context";
@@ -28,8 +25,6 @@ import { cotacaoStatusToApi, isUuid } from "@/lib/api/quotation-mapper";
 import { mergeCotacaoDetalhes, migrateCotacao } from "@/lib/cotacao-migrate";
 import { generateId } from "@/lib/format";
 import type {
-  Atendimento,
-  AtendimentoStatus,
   Cliente,
   ClienteStatus,
   Cotacao,
@@ -88,7 +83,6 @@ const STORAGE_KEY = "agencia-hub-data";
 
 type Stored = {
   clientes: Cliente[];
-  atendimentos: Atendimento[];
   lancamentos: LancamentoFinanceiro[];
   cotacoes: Cotacao[];
 };
@@ -97,13 +91,11 @@ function stripSeedDataWhenRemote(data: Stored, hasApi: boolean): Stored {
   if (!hasApi) return data;
 
   const seedClienteIds = new Set(["c1", "c2", "c3", "c4", "c5"]);
-  const seedAtendimentoIds = new Set(["a1", "a2", "a3", "a4", "a5"]);
   const seedLancamentoIds = new Set(["l1", "l2", "l3", "l4", "l5", "l6", "l7", "l8"]);
   const seedCotacaoIds = new Set(["q1", "q2", "q3", "q4", "q5"]);
 
   return {
     clientes: data.clientes.filter((c) => !seedClienteIds.has(c.id)),
-    atendimentos: data.atendimentos.filter((a) => !seedAtendimentoIds.has(a.id)),
     lancamentos: data.lancamentos.filter((l) => !seedLancamentoIds.has(l.id)),
     cotacoes: data.cotacoes.filter((c) => !seedCotacaoIds.has(c.id)),
   };
@@ -111,10 +103,9 @@ function stripSeedDataWhenRemote(data: Stored, hasApi: boolean): Stored {
 
 function loadStored(): Stored {
   const hasApi = Boolean(getAgenciaHubApiBaseUrl());
-  const empty: Stored = { clientes: [], atendimentos: [], lancamentos: [], cotacoes: [] };
+  const empty: Stored = { clientes: [], lancamentos: [], cotacoes: [] };
   const fallback: Stored = hasApi ? empty : {
     clientes: seedClientes,
-    atendimentos: seedAtendimentos,
     lancamentos: seedLancamentos,
     cotacoes: seedCotacoes,
   };
@@ -138,7 +129,6 @@ function normalizeStored(partial: Partial<Stored>): Stored {
   const rawCot = partial.cotacoes ?? seedCotacoes;
   return {
     clientes: partial.clientes ?? seedClientes,
-    atendimentos: partial.atendimentos ?? seedAtendimentos,
     lancamentos: partial.lancamentos ?? seedLancamentos,
     cotacoes: rawCot.map((c) => migrateCotacao(c)),
   };
@@ -146,17 +136,12 @@ function normalizeStored(partial: Partial<Stored>): Stored {
 
 export type DataContextValue = {
   clientes: Cliente[];
-  atendimentos: Atendimento[];
   lancamentos: LancamentoFinanceiro[];
   cotacoes: Cotacao[];
   addCliente: (c: Omit<Cliente, "id" | "createdAt">) => Promise<Cliente>;
   updateCliente: (id: string, patch: Partial<Cliente>) => void;
   /** Verifica duplicidade antes de criar/editar. `excludeId` = próprio id ao editar. */
   checkDuplicate: (email: string, telefone: string, excludeId?: string) => ClienteDuplicateCheck;
-  addAtendimento: (
-    a: Omit<Atendimento, "id">,
-  ) => Promise<Atendimento>;
-  updateAtendimento: (id: string, patch: Partial<Atendimento>) => void;
   addLancamento: (
     l: Omit<LancamentoFinanceiro, "id">,
   ) => Promise<LancamentoFinanceiro>;
@@ -179,7 +164,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const { token } = useAuth();
   const [data, setData] = useState<Stored>(() => ({
     clientes: seedClientes,
-    atendimentos: seedAtendimentos,
     lancamentos: seedLancamentos,
     cotacoes: seedCotacoes,
   }));
@@ -235,52 +219,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     (email: string, telefone: string, excludeId?: string): ClienteDuplicateCheck =>
       checkClienteDuplicate(data.clientes, email, telefone, excludeId),
     [data.clientes],
-  );
-
-  const addAtendimento = useCallback(async (a: Omit<Atendimento, "id">) => {
-    const draft: Atendimento = { ...a, id: generateId() };
-
-    let novo = draft;
-    try {
-      const remote = await createOpportunityRemote(draft);
-      if (remote) {
-        novo = remote;
-      }
-    } catch (e) {
-      console.warn(
-        "[agencia-hub] Falha ao criar atendimento na API; usando só armazenamento local.",
-        e,
-      );
-    }
-
-    setData((d) => ({
-      ...d,
-      atendimentos: [novo, ...d.atendimentos],
-    }));
-    return novo;
-  }, []);
-
-  const updateAtendimento = useCallback(
-    (id: string, patch: Partial<Atendimento>) => {
-      setData((d) => {
-        const current = d.atendimentos.find((x) => x.id === id);
-        if (current) {
-          updateOpportunityRemote(current, patch).catch((e) => {
-            console.warn(
-              "[agencia-hub] Falha ao atualizar atendimento na API; mudança salva localmente.",
-              e,
-            );
-          });
-        }
-        return {
-          ...d,
-          atendimentos: d.atendimentos.map((x) =>
-            x.id === id ? { ...x, ...patch } : x,
-          ),
-        };
-      });
-    },
-    [],
   );
 
   const addLancamento = useCallback(
@@ -413,7 +351,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     const hasApi = Boolean(getAgenciaHubApiBaseUrl());
     const fresh: Stored = {
       clientes: hasApi ? [] : seedClientes,
-      atendimentos: hasApi ? [] : seedAtendimentos,
       lancamentos: hasApi ? [] : seedLancamentos,
       cotacoes: hasApi ? [] : seedCotacoes,
     };
@@ -456,8 +393,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       addCliente,
       updateCliente,
       checkDuplicate,
-      addAtendimento,
-      updateAtendimento,
       addLancamento,
       updateLancamento,
       addCotacao,
@@ -472,8 +407,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       addCliente,
       updateCliente,
       checkDuplicate,
-      addAtendimento,
-      updateAtendimento,
       addLancamento,
       updateLancamento,
       addCotacao,
@@ -511,13 +444,13 @@ export function filterClientes(
   return list;
 }
 
-export function atendimentosEmAndamento(atendimentos: Atendimento[]) {
-  const abertos: AtendimentoStatus[] = [
-    "novo_lead",
-    "em_atendimento",
-    "proposta_enviada",
+export function cotacoesEmAndamento(cotacoes: Cotacao[]) {
+  const abertos: CotacaoStatus[] = [
+    "aguardando",
+    "em_cotacao",
+    "aguardando_cliente",
   ];
-  return atendimentos.filter((a) => abertos.includes(a.status));
+  return cotacoes.filter((c) => abertos.includes(c.status));
 }
 
 export function computeFinanceiroResumo(lancamentos: LancamentoFinanceiro[]) {

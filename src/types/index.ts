@@ -2,13 +2,6 @@
 
 export type ClienteStatus = "ativo" | "inativo" | "prospecto";
 
-export type AtendimentoStatus =
-  | "novo_lead"
-  | "em_atendimento"
-  | "proposta_enviada"
-  | "fechado"
-  | "cancelado";
-
 export type LancamentoTipo = "entrada" | "saida";
 
 export type LancamentoCategoria =
@@ -89,17 +82,6 @@ export interface Cliente {
   endereco?: ClienteEndereco;
 }
 
-export interface Atendimento {
-  id: string;
-  clienteId: string;
-  titulo: string;
-  destino: string;
-  valorEstimado: number;
-  status: AtendimentoStatus;
-  dataPrevistaViagem: string;
-  observacoes: string;
-}
-
 export interface LancamentoFinanceiro {
   id: string;
   descricao: string;
@@ -173,7 +155,6 @@ export interface CotacaoDetalhes {
 export interface Cotacao {
   id: string;
   clienteId: string;
-  atendimentoId?: string;
   vendedorId?: string;
   vendedorNome?: string;
   /** interna | formulario_publico — espelha creationSource da API */

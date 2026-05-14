@@ -282,7 +282,7 @@ export default function ClientesPage() {
               />
             </div>
             <div>
-              <Label htmlFor="st">Status do atendimento</Label>
+              <Label htmlFor="st">Status do cliente</Label>
               <Select
                 id="st"
                 value={status}
@@ -320,7 +320,7 @@ export default function ClientesPage() {
       <ConfirmDialog
         open={deleteTarget !== null}
         title="Excluir cliente"
-        message="Esta ação remove o cliente de forma permanente, junto com cotações e atendimentos vinculados a ele. Não é possível desfazer."
+        message="Esta ação remove o cliente de forma permanente, junto com as cotações vinculadas a ele. Não é possível desfazer."
         confirmLabel="Excluir"
         cancelLabel="Cancelar"
         destructive
