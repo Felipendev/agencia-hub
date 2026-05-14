@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useData } from "@/contexts/data-context";
 import { emptyCotacaoDetalhes } from "@/lib/cotacao-defaults";
@@ -21,7 +21,11 @@ export default function NovaCotacaoPage() {
   const { user } = useAuth();
   const { clientes, addCotacao, isReady } = useData();
 
-  const [clienteId, setClienteId] = useState("");
+  /** `null` = seguir só a URL; string = escolha explícita no picker (inclui ""). */
+  const [clienteIdDraft, setClienteIdDraft] = useState<string | null>(null);
+  const urlClienteId = searchParams.get("clienteId") ?? "";
+  const clienteId =
+    clienteIdDraft !== null ? clienteIdDraft : urlClienteId;
   const [titulo, setTitulo] = useState("");
   const [valorTotal, setValorTotal] = useState("");
   const [validade, setValidade] = useState("");
@@ -30,13 +34,6 @@ export default function NovaCotacaoPage() {
   const [responsavel, setResponsavel] = useState(user?.nome ?? "");
   const [observacoes, setObservacoes] = useState("");
   const [det, setDet] = useState<CotacaoDetalhes>(() => emptyCotacaoDetalhes());
-
-  useEffect(() => {
-    const fromUrl = searchParams.get("clienteId");
-    if (fromUrl && !clienteId) {
-      setClienteId(fromUrl);
-    }
-  }, [searchParams, clienteId]);
 
   function toggleServico(id: string) {
     setDet((d) => {
@@ -128,7 +125,7 @@ export default function NovaCotacaoPage() {
                 clientes={clientes}
                 value={clienteId}
                 onChange={(id) => {
-                  setClienteId(id);
+                  setClienteIdDraft(id);
                 }}
                 required
               />
