@@ -4,21 +4,21 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useData } from "@/contexts/data-context";
 import { SearchIcon, XIcon } from "@/components/icons";
-import type { Cliente, Cotacao, Atendimento } from "@/types";
+import type { Cliente, Cotacao } from "@/types";
 
 type SearchResult = {
-  type: "cliente" | "cotacao" | "atendimento";
+  type: "cliente" | "cotacao";
   id: string;
   title: string;
   subtitle: string;
   link: string;
-  data: Cliente | Cotacao | Atendimento;
+  data: Cliente | Cotacao;
 };
 
 export function GlobalSearch() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const { clientes, cotacoes, atendimentos } = useData();
+  const { clientes, cotacoes } = useData();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -89,26 +89,8 @@ export function GlobalSearch() {
       }
     }
 
-    // Buscar atendimentos
-    for (const a of atendimentos) {
-      if (
-        a.titulo.toLowerCase().includes(q) ||
-        a.destino.toLowerCase().includes(q)
-      ) {
-        const cliente = clientes.find((c) => c.id === a.clienteId);
-        list.push({
-          type: "atendimento",
-          id: a.id,
-          title: a.titulo,
-          subtitle: `${a.destino} · ${cliente?.nome || "—"}`,
-          link: `/atendimentos`,
-          data: a,
-        });
-      }
-    }
-
     return list.slice(0, 20);
-  }, [query, clientes, cotacoes, atendimentos]);
+  }, [query, clientes, cotacoes]);
 
   function handleSelect(result: SearchResult) {
     router.push(result.link);
@@ -141,7 +123,7 @@ export function GlobalSearch() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar clientes, cotações, atendimentos..."
+            placeholder="Buscar clientes e cotações..."
             className="flex-1 bg-transparent text-sm text-[var(--hub-blue-dark)] placeholder-slate-400 outline-none"
           />
           <button
@@ -176,16 +158,10 @@ export function GlobalSearch() {
                       className={`mt-0.5 rounded px-2 py-0.5 text-xs font-semibold ${
                         r.type === "cliente"
                           ? "bg-blue-100 text-blue-700"
-                          : r.type === "cotacao"
-                            ? "bg-amber-100 text-amber-700"
-                            : "bg-emerald-100 text-emerald-700"
+                          : "bg-amber-100 text-amber-700"
                       }`}
                     >
-                      {r.type === "cliente"
-                        ? "Cliente"
-                        : r.type === "cotacao"
-                          ? "Cotação"
-                          : "Atend."}
+                      {r.type === "cliente" ? "Cliente" : "Cotação"}
                     </span>
                     <div className="flex-1">
                       <p className="font-medium text-[var(--hub-blue-dark)]">

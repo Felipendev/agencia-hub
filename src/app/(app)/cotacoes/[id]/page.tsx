@@ -32,12 +32,11 @@ export default function CotacaoDetalhePage() {
   const params = useParams();
   const id = typeof params.id === "string" ? params.id : "";
   const { isOwner, token, user } = useAuth();
-  const { clientes, atendimentos, cotacoes, updateCotacao, isReady } = useData();
+  const { clientes, cotacoes, updateCotacao, isReady } = useData();
   const toast = useToast();
 
   const cotacao = cotacoes.find((c) => c.id === id);
   const cliente = clientes.find((c) => c.id === cotacao?.clienteId);
-  const atendimento = atendimentos.find((a) => a.id === cotacao?.atendimentoId);
 
   const [statusEdit, setStatusEdit] = useState<CotacaoStatus>("aguardando");
   const [valorEdit, setValorEdit] = useState("");
@@ -279,19 +278,6 @@ export default function CotacaoDetalhePage() {
                   >
                     {cliente.nome}
                   </Link>
-                ) : "—"}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs font-medium uppercase text-slate-500">Atendimento</dt>
-              <dd>
-                {atendimento ? (
-                  <span>
-                    {atendimento.titulo}{" "}
-                    <span className="text-slate-500">
-                      ({formatDateBR(atendimento.dataPrevistaViagem)})
-                    </span>
-                  </span>
                 ) : "—"}
               </dd>
             </div>

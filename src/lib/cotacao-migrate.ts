@@ -68,7 +68,6 @@ export function migrateCotacao(raw: unknown): Cotacao {
   return {
     id: c.id!,
     clienteId: c.clienteId!,
-    atendimentoId: c.atendimentoId,
     vendedorId: c.vendedorId,
     vendedorNome: c.vendedorNome,
     origemCriacao: c.origemCriacao,

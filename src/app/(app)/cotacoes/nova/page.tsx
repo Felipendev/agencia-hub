@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useData } from "@/contexts/data-context";
 import { emptyCotacaoDetalhes } from "@/lib/cotacao-defaults";
@@ -12,17 +12,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ClientePicker } from "@/components/cliente/ClientePicker";
-import { Select } from "@/components/ui/select";
 import { BackButton } from "@/components/ui/back-button";
 import type { CotacaoDetalhes } from "@/types";
 
 export default function NovaCotacaoPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
-  const { clientes, atendimentos, addCotacao, isReady } = useData();
+  const { clientes, addCotacao, isReady } = useData();
 
   const [clienteId, setClienteId] = useState("");
-  const [atendimentoId, setAtendimentoId] = useState("");
   const [titulo, setTitulo] = useState("");
   const [valorTotal, setValorTotal] = useState("");
   const [validade, setValidade] = useState("");
@@ -32,10 +31,12 @@ export default function NovaCotacaoPage() {
   const [observacoes, setObservacoes] = useState("");
   const [det, setDet] = useState<CotacaoDetalhes>(() => emptyCotacaoDetalhes());
 
-  const atendDoCliente = useMemo(() => {
-    if (!clienteId) return [];
-    return atendimentos.filter((a) => a.clienteId === clienteId);
-  }, [atendimentos, clienteId]);
+  useEffect(() => {
+    const fromUrl = searchParams.get("clienteId");
+    if (fromUrl && !clienteId) {
+      setClienteId(fromUrl);
+    }
+  }, [searchParams, clienteId]);
 
   function toggleServico(id: string) {
     setDet((d) => {
@@ -74,7 +75,6 @@ export default function NovaCotacaoPage() {
 
     const novo = await addCotacao({
       clienteId,
-      atendimentoId: atendimentoId || undefined,
       titulo: titulo.trim(),
       destino: trechosDestino || "—",
       valorTotal: v,
@@ -129,26 +129,9 @@ export default function NovaCotacaoPage() {
                 value={clienteId}
                 onChange={(id) => {
                   setClienteId(id);
-                  setAtendimentoId("");
                 }}
                 required
               />
-            </div>
-            <div className="sm:col-span-2 xl:col-span-3">
-              <Label htmlFor="nova-at">Atendimento (opcional)</Label>
-              <Select
-                id="nova-at"
-                value={atendimentoId}
-                onChange={(e) => setAtendimentoId(e.target.value)}
-                disabled={!clienteId}
-              >
-                <option value="">Nenhum</option>
-                {atendDoCliente.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.titulo}
-                  </option>
-                ))}
-              </Select>
             </div>
             <div className="sm:col-span-2 xl:col-span-3">
               <Label htmlFor="nova-tit">Título *</Label>

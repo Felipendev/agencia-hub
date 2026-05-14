@@ -1,6 +1,5 @@
 import { emptyCotacaoDetalhes } from "@/lib/cotacao-defaults";
 import type {
-  Atendimento,
   Cliente,
   Cotacao,
   LancamentoFinanceiro,
@@ -56,59 +55,6 @@ export const seedClientes: Cliente[] = [
     status: "ativo",
     observacoes: "Lua de mel — flexível com datas em setembro.",
     createdAt: "2026-04-08",
-  },
-];
-
-export const seedAtendimentos: Atendimento[] = [
-  {
-    id: "a1",
-    clienteId: "c1",
-    titulo: "Pacote Europa Sul — 12 noites",
-    destino: "Portugal / Espanha",
-    valorEstimado: 28500,
-    status: "em_atendimento",
-    dataPrevistaViagem: "2026-09-10",
-    observacoes: "Aguardando confirmação de disponibilidade em Lisboa.",
-  },
-  {
-    id: "a2",
-    clienteId: "c2",
-    titulo: "Resort Jericoacoara — all inclusive",
-    destino: "Jericoacoara, CE",
-    valorEstimado: 12400,
-    status: "proposta_enviada",
-    dataPrevistaViagem: "2026-07-20",
-    observacoes: "Proposta enviada com duas opções de resort.",
-  },
-  {
-    id: "a3",
-    clienteId: "c3",
-    titulo: "Orlando — pacote família",
-    destino: "Orlando, EUA",
-    valorEstimado: 42000,
-    status: "novo_lead",
-    dataPrevistaViagem: "2026-12-15",
-    observacoes: "Cliente em fase de definição de orçamento.",
-  },
-  {
-    id: "a4",
-    clienteId: "c5",
-    titulo: "Egito + Dubai — premium",
-    destino: "Cairo / Dubai",
-    valorEstimado: 38900,
-    status: "fechado",
-    dataPrevistaViagem: "2026-09-28",
-    observacoes: "Contrato assinado; pagamento parcelado.",
-  },
-  {
-    id: "a5",
-    clienteId: "c1",
-    titulo: "City tour Santiago",
-    destino: "Santiago, Chile",
-    valorEstimado: 5200,
-    status: "cancelado",
-    dataPrevistaViagem: "2026-05-01",
-    observacoes: "Cliente desistiu por motivos pessoais.",
   },
 ];
 
@@ -201,7 +147,6 @@ export const seedCotacoes: Cotacao[] = [
   {
     id: "q1",
     clienteId: "c1",
-    atendimentoId: "a1",
     titulo: "Cotação Europa Sul — 12 noites",
     destino: "Portugal / Espanha",
     valorTotal: 28500,
@@ -239,7 +184,6 @@ export const seedCotacoes: Cotacao[] = [
   {
     id: "q2",
     clienteId: "c2",
-    atendimentoId: "a2",
     titulo: "Resort Jeri — família (5 noites)",
     destino: "Jericoacoara, CE",
     valorTotal: 12400,
@@ -299,7 +243,6 @@ export const seedCotacoes: Cotacao[] = [
   {
     id: "q4",
     clienteId: "c5",
-    atendimentoId: "a4",
     titulo: "Egito + Dubai — pacote premium",
     destino: "Cairo / Dubai",
     valorTotal: 38900,

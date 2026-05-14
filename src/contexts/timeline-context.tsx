@@ -16,7 +16,7 @@ type TimelineContextValue = {
   events: TimelineEvent[];
   addEvent: (event: Omit<TimelineEvent, "id" | "createdAt" | "createdBy">) => void;
   getEventsForEntity: (entityType: string, entityId: string) => TimelineEvent[];
-  addNote: (entityType: "cliente" | "cotacao" | "atendimento", entityId: string, note: string) => void;
+  addNote: (entityType: "cliente" | "cotacao", entityId: string, note: string) => void;
 };
 
 const TimelineContext = createContext<TimelineContextValue | null>(null);
@@ -70,7 +70,7 @@ export function TimelineProvider({ children }: { children: React.ReactNode }) {
 
   const addNote = useCallback(
     (
-      entityType: "cliente" | "cotacao" | "atendimento",
+      entityType: "cliente" | "cotacao",
       entityId: string,
       note: string
     ) => {
