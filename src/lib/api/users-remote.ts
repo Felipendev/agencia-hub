@@ -1,6 +1,5 @@
 import { apiFetch } from "@/lib/api/authenticated-fetch";
 import type {
-  ApiCreateUserRequest,
   ApiSalesAgentDashboardResponse,
   ApiUpdateUserRequest,
   ApiUserResponse,
@@ -12,16 +11,6 @@ export async function listUsersRemote(token: string): Promise<ApiUserResponse[]>
 
 export async function listSalesAgentsRemote(token: string): Promise<ApiUserResponse[]> {
   return apiFetch<ApiUserResponse[]>("/users/sales-agents", {}, token);
-}
-
-export async function createUserRemote(
-  data: ApiCreateUserRequest,
-  token: string,
-): Promise<ApiUserResponse> {
-  return apiFetch<ApiUserResponse>("/users", {
-    method: "POST",
-    body: JSON.stringify(data),
-  }, token);
 }
 
 export async function updateUserRemote(
