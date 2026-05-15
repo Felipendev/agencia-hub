@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/components/ui/toast";
 import { Card, CardTitle } from "@/components/ui/card";
 import { KpiCard } from "@/components/kpi-card";
+import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { formatBRL, formatDateBR } from "@/lib/format";
 import { getSalesAgentDashboardRemote } from "@/lib/api/users-remote";
@@ -64,14 +65,10 @@ export default function MeuPainelPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-[var(--hub-blue-dark)]">
-          Meu Painel
-        </h1>
-        <p className="mt-1 text-slate-600">
-          Olá, <strong>{user?.nome}</strong>! Aqui estão suas cotações e comissões.
-        </p>
-      </div>
+      <PageHeader
+        title="Meu Painel"
+        description={`Olá, ${user?.nome ?? ""}! Aqui estão suas cotações e comissões.`}
+      />
 
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

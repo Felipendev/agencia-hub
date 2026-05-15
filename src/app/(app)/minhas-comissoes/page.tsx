@@ -10,6 +10,7 @@ import { apiFetch } from "@/lib/api/authenticated-fetch";
 import type { ApiQuotationResponse } from "@/lib/api/quotation-types";
 import type { ApiSalesAgentDashboardResponse } from "@/lib/api/auth-types";
 import { getSalesAgentDashboardRemote } from "@/lib/api/users-remote";
+import { PageHeader } from "@/components/layout/page-header";
 
 const STATUS_LABELS: Record<string, string> = {
   ACCEPTED: "Aprovada",
@@ -93,14 +94,10 @@ export default function MinhasComissoesPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-[var(--hub-blue-dark)]">
-          Minhas Comissões
-        </h1>
-        <p className="mt-1 text-slate-600">
-          Acompanhe suas comissões sobre cotações aprovadas.
-        </p>
-      </div>
+      <PageHeader
+        title="Minhas Comissões"
+        description="Acompanhe suas comissões sobre cotações aprovadas."
+      />
 
       {/* Summary cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

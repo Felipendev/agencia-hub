@@ -8,6 +8,7 @@ import {
   useData,
 } from "@/contexts/data-context";
 import { KpiCard } from "@/components/kpi-card";
+import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BarChart } from "@/components/charts/BarChart";
@@ -137,15 +138,10 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-[var(--hub-blue-dark)]">
-          Dashboard
-        </h1>
-        <p className="mt-1 text-slate-600">
-          Visão geral da operação — período consolidado com base nos lançamentos
-          cadastrados.
-        </p>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        description="Visão geral da operação — período consolidado com base nos lançamentos cadastrados."
+      />
 
       {/* KPIs financeiros */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
