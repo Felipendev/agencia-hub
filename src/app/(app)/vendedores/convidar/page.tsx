@@ -64,7 +64,7 @@ export default function InviteSellersPage() {
   }, [loadInvitations]);
 
   // Route guard: OWNER only
-  if (user?.role !== "OWNER") {
+  if (user?.accountKind !== "AGENCY_OWNER") {
     return (
       <div className="flex h-64 items-center justify-center">
         <p className="text-slate-500">Acesso restrito ao dono da agência.</p>

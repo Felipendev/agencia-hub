@@ -8,8 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { formatBRL } from "@/lib/format";
 import { apiFetch } from "@/lib/api/authenticated-fetch";
 import type { ApiQuotationResponse } from "@/lib/api/quotation-types";
-import type { ApiSellerDashboardResponse } from "@/lib/api/auth-types";
-import { getSellerDashboardRemote } from "@/lib/api/users-remote";
+import type { ApiSalesAgentDashboardResponse } from "@/lib/api/auth-types";
+import { getSalesAgentDashboardRemote } from "@/lib/api/users-remote";
 
 const STATUS_LABELS: Record<string, string> = {
   ACCEPTED: "Aprovada",
@@ -34,7 +34,7 @@ const STATUS_TONE: Record<string, "success" | "warning" | "danger" | "muted"> = 
 export default function MinhasComissoesPage() {
   const { token } = useAuth();
   const toast = useToast();
-  const [dashboard, setDashboard] = useState<ApiSellerDashboardResponse | null>(null);
+  const [dashboard, setDashboard] = useState<ApiSalesAgentDashboardResponse | null>(null);
   const [quotations, setQuotations] = useState<ApiQuotationResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,7 +44,7 @@ export default function MinhasComissoesPage() {
     async function load() {
       try {
         const [dashData, quots] = await Promise.all([
-          getSellerDashboardRemote(token!),
+          getSalesAgentDashboardRemote(token!),
           apiFetch<ApiQuotationResponse[]>("/quotations", {}, token),
         ]);
         setDashboard(dashData);
@@ -77,8 +77,8 @@ export default function MinhasComissoesPage() {
     );
   }
 
-  const commissionPct = dashboard.seller.commissionPct;
-  const commissionFixed = dashboard.seller.commissionFixed;
+  const commissionPct = dashboard.salesAgent.commissionPct;
+  const commissionFixed = dashboard.salesAgent.commissionFixed;
   const hasCommissionConfig = commissionPct != null || commissionFixed != null;
 
   function calcCommission(totalAmount: number): number {

@@ -16,7 +16,7 @@ import {
   listUsersRemote,
   updateUserRemote,
 } from "@/lib/api/users-remote";
-import type { ApiUserResponse, UserRole } from "@/lib/api/auth-types";
+import type { AccountKind, ApiUserResponse } from "@/lib/api/auth-types";
 
 export default function VendedoresPage() {
   const { user, token } = useAuth();
@@ -29,7 +29,7 @@ export default function VendedoresPage() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [role, setRole] = useState<UserRole>("SELLER");
+  const [role, setRole] = useState<AccountKind>("SALES_AGENT");
   const [commissionPct, setCommissionPct] = useState("");
   const [commissionFixed, setCommissionFixed] = useState("");
   const [commissionType, setCommissionType] = useState<"pct" | "fixed" | "none">("pct");
@@ -49,7 +49,7 @@ export default function VendedoresPage() {
       .finally(() => setLoading(false));
   }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (user?.role !== "OWNER") {
+  if (user?.accountKind !== "AGENCY_OWNER") {
     return (
       <div className="flex h-64 items-center justify-center">
         <p className="text-slate-500">Acesso restrito ao dono da agência.</p>
@@ -67,7 +67,7 @@ export default function VendedoresPage() {
           name: nome.trim(),
           email: email.trim(),
           password: senha,
-          role,
+          accountKind: role,
           commissionPct:
             commissionType === "pct" && commissionPct
               ? parseFloat(commissionPct)
@@ -82,7 +82,7 @@ export default function VendedoresPage() {
       setUsers((prev) => [...prev, created]);
       setNome(""); setEmail(""); setSenha("");
       setCommissionPct(""); setCommissionFixed("");
-      toast.success(`${role === "SELLER" ? "Vendedor" : "Usuário"} criado com sucesso!`);
+      toast.success(`${role === "SALES_AGENT" ? "Vendedor" : "Usuário"} criado com sucesso!`);
     } catch (err) {
       toast.error((err as Error).message ?? "Erro ao criar usuário.");
     } finally {
@@ -184,8 +184,8 @@ export default function VendedoresPage() {
                       </Td>
                       <Td className="text-slate-600 text-sm">{u.email}</Td>
                       <Td>
-                        <Badge tone={u.role === "OWNER" ? "warning" : "muted"}>
-                          {u.role === "OWNER" ? "Dono" : "Vendedor"}
+                        <Badge tone={u.accountKind === "AGENCY_OWNER" ? "warning" : "muted"}>
+                          {u.accountKind === "AGENCY_OWNER" ? "Dono" : "Vendedor"}
                         </Badge>
                       </Td>
                       <Td>
@@ -314,13 +314,13 @@ export default function VendedoresPage() {
               <Select
                 id="role"
                 value={role}
-                onChange={(e) => setRole(e.target.value as UserRole)}
+                onChange={(e) => setRole(e.target.value as AccountKind)}
               >
-                <option value="SELLER">Vendedor</option>
-                <option value="OWNER">Dono</option>
+                <option value="SALES_AGENT">Vendedor</option>
+                <option value="AGENCY_OWNER">Dono</option>
               </Select>
             </div>
-            {role === "SELLER" && (
+            {role === "SALES_AGENT" && (
               <>
                 <div>
                   <Label htmlFor="comm-type">Tipo de comissão</Label>

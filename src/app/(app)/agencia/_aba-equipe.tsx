@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, Th, Td } from "@/components/ui/table";
 import { formatBRL } from "@/lib/format";
 import { createUserRemote, listUsersRemote, updateUserRemote } from "@/lib/api/users-remote";
-import type { ApiUserResponse, UserRole } from "@/lib/api/auth-types";
+import type { AccountKind, ApiUserResponse } from "@/lib/api/auth-types";
 
 type Props = { token: string | null };
 
@@ -24,7 +24,7 @@ export function AbaEquipe({ token }: Props) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [role, setRole] = useState<UserRole>("SELLER");
+  const [role, setRole] = useState<AccountKind>("SALES_AGENT");
   const [commType, setCommType] = useState<"pct" | "fixed" | "none">("pct");
   const [commPct, setCommPct] = useState("");
   const [commFixed, setCommFixed] = useState("");
@@ -50,7 +50,7 @@ export function AbaEquipe({ token }: Props) {
     setSaving(true);
     try {
       const created = await createUserRemote({
-        name: nome.trim(), email: email.trim(), password: senha, role,
+        name: nome.trim(), email: email.trim(), password: senha, accountKind: role,
         commissionPct: commType === "pct" && commPct ? parseFloat(commPct) : undefined,
         commissionFixed: commType === "fixed" && commFixed ? parseFloat(commFixed.replace(",", ".")) : undefined,
       }, token);
@@ -117,7 +117,7 @@ export function AbaEquipe({ token }: Props) {
                   <tr key={u.id}>
                     <Td className="font-medium text-[var(--hub-blue-dark)]">{u.name}</Td>
                     <Td className="text-sm text-slate-600">{u.email}</Td>
-                    <Td><Badge tone={u.role === "OWNER" ? "warning" : "muted"}>{u.role === "OWNER" ? "Dono" : "Vendedor"}</Badge></Td>
+                    <Td><Badge tone={u.accountKind === "AGENCY_OWNER" ? "warning" : "muted"}>{u.accountKind === "AGENCY_OWNER" ? "Dono" : "Vendedor"}</Badge></Td>
                     <Td>
                       {editingId === u.id ? (
                         <div className="flex items-center gap-1.5">
@@ -166,12 +166,12 @@ export function AbaEquipe({ token }: Props) {
             <div><Label htmlFor="eq-senha">Senha (min. 6)</Label><Input id="eq-senha" type="password" required minLength={6} value={senha} onChange={(e) => setSenha(e.target.value)} /></div>
             <div>
               <Label htmlFor="eq-role">Perfil</Label>
-              <Select id="eq-role" value={role} onChange={(e) => setRole(e.target.value as UserRole)}>
-                <option value="SELLER">Vendedor</option>
-                <option value="OWNER">Dono</option>
+              <Select id="eq-role" value={role} onChange={(e) => setRole(e.target.value as AccountKind)}>
+                <option value="SALES_AGENT">Vendedor</option>
+                <option value="AGENCY_OWNER">Dono</option>
               </Select>
             </div>
-            {role === "SELLER" && (
+            {role === "SALES_AGENT" && (
               <>
                 <div>
                   <Label htmlFor="eq-ctype">Tipo de comissao</Label>

@@ -213,10 +213,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const empresa  = user?.empresa ?? "Agencia";
-  const nome     = user?.nome    ?? "Usuario";
-  const role     = user?.role    ?? "OWNER";
-  const groups   = (role === "SELLER" || viewAsSeller) ? SELLER_GROUPS : OWNER_GROUPS;
+  const empresa     = user?.empresa     ?? "Agencia";
+  const nome        = user?.nome        ?? "Usuario";
+  const accountKind = user?.accountKind ?? "AGENCY_OWNER";
+  const groups      = (accountKind === "SALES_AGENT" || viewAsSeller) ? SELLER_GROUPS : OWNER_GROUPS;
 
   return (
     <div className="flex min-h-screen bg-[var(--hub-bg)]">
@@ -245,16 +245,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2">
             <span
               className={`inline-flex h-5 items-center rounded px-1.5 text-[10px] font-bold uppercase tracking-wide ${
-                role === "OWNER"
+                accountKind === "AGENCY_OWNER"
                   ? "bg-[var(--hub-yellow)] text-[var(--hub-blue-dark)]"
                   : "bg-white/20 text-white"
               }`}
             >
-              {role === "OWNER" ? "Gestor" : "Vendedor"}
+              {accountKind === "AGENCY_OWNER" ? "Gestor" : "Vendedor"}
             </span>
             <p className="truncate text-xs text-white/40">{user?.email}</p>
           </div>
-          {role === "OWNER" && (
+          {accountKind === "AGENCY_OWNER" && (
             <button
               type="button"
               onClick={() => setViewAsSeller(!viewAsSeller)}
@@ -317,7 +317,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <div className="hidden text-right sm:block">
               <p className="text-sm font-medium text-[var(--hub-blue-dark)]">{nome}</p>
               <p className="text-xs text-slate-500">
-                {role === "OWNER" ? "Gestor" : "Vendedor"}
+                {accountKind === "AGENCY_OWNER" ? "Gestor" : "Vendedor"}
               </p>
             </div>
             <Button

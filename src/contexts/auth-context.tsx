@@ -121,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: data.email,
             nome: data.name,
             empresa: data.agencyName ?? "AgênciasHub",
-            role: data.role,
+            accountKind: data.accountKind,
             agencyId: data.agencyId,
             agencyName: data.agencyName,
             agencyStatus: data.agencyStatus,
@@ -149,7 +149,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: trimmed,
         nome,
         empresa: "Minha Agência",
-        role: "OWNER",
+        accountKind: "AGENCY_OWNER",
       };
       const mockToken = "mock-token";
       persistSession(sessao, mockToken);
@@ -166,8 +166,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
   }, []);
 
-  const isOwner = user?.role === "OWNER";
-  const isSeller = user?.role === "SELLER";
+  const isOwner = user?.accountKind === "AGENCY_OWNER";
+  const isSeller = user?.accountKind === "SALES_AGENT";
 
   const value = useMemo(
     () => ({ user, token, login, logout, isReady, isOwner, isSeller }),

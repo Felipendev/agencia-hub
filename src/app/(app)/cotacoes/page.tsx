@@ -386,7 +386,7 @@ export default function CotacoesPage() {
         open={linkModalOpen}
         onClose={() => setLinkModalOpen(false)}
         sellerPublicCode={
-          user?.role === "SELLER" && user.linkPublicCode ?
+          user?.accountKind === "SALES_AGENT" && user.linkPublicCode ?
             user.linkPublicCode
           : null
         }
