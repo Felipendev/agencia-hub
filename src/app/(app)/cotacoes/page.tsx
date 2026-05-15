@@ -1,16 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useData } from "@/contexts/data-context";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { KanbanBoard } from "@/components/cotacao/KanbanBoard";
 import { LinkSolicitacaoModal } from "@/components/cotacao/LinkSolicitacaoModal";
 import { SolicitacaoSubmissionsBanner } from "@/components/cotacao/SolicitacaoSubmissionsBanner";
+import { useToast } from "@/components/ui/toast";
+import { softDeleteQuotation } from "@/lib/api/soft-delete-remote";
 import { isUuid } from "@/lib/api/quotation-mapper";
 import { COTACAO_STATUS_LABELS } from "@/lib/constants";
 import type { CotacaoStatus } from "@/types";
@@ -23,7 +26,7 @@ function inDateRange(isoDate: string, from: string, to: string): boolean {
 }
 
 export default function CotacoesPage() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const {
     clientes,
     cotacoes,
@@ -50,6 +53,36 @@ export default function CotacoesPage() {
     "",
   );
   const [filtroApiBusca, setFiltroApiBusca] = useState("");
+
+  // ── Soft-delete state ──────────────────────────────────────────────────────
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const toast = useToast();
+
+  const handleDeleteRequest = useCallback((id: string) => {
+    setDeleteTarget(id);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteTarget) return;
+    if (hasRemoteApi && token) {
+      try {
+        await softDeleteQuotation(deleteTarget, token);
+        syncCotacoesFromApi({ token });
+        toast.success("Cotação excluída com sucesso.");
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Erro ao excluir cotação.");
+      }
+    } else {
+      // Modo local: remove da lista em memória via updateCotacao (marca como cancelada)
+      updateCotacao(deleteTarget, { status: "cancelada" as CotacaoStatus });
+      toast.success("Cotação excluída com sucesso.");
+    }
+    setDeleteTarget(null);
+  }, [deleteTarget, token, hasRemoteApi, syncCotacoesFromApi, updateCotacao, toast]);
+
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteTarget(null);
+  }, []);
 
   const responsaveisOpcoes = useMemo(() => {
     const set = new Set<string>();
@@ -146,13 +179,14 @@ export default function CotacoesPage() {
       status: filtroApiStatus || undefined,
       search: filtroApiBusca.trim() || undefined,
       customerId: cust,
+      token,
     });
   }
 
   useEffect(() => {
     if (!isReady || !hasRemoteApi) return;
-    void syncCotacoesFromApi({});
-  }, [isReady, hasRemoteApi, syncCotacoesFromApi]);
+    void syncCotacoesFromApi({ token });
+  }, [isReady, hasRemoteApi, syncCotacoesFromApi, token]);
 
   if (!isReady) {
     return <p className="text-sm text-slate-600">Carregando…</p>;
@@ -184,20 +218,12 @@ export default function CotacoesPage() {
       {hasRemoteApi ?
         <div className="rounded-xl border border-sky-200 bg-sky-50/90 px-4 py-4 shadow-sm">
           <p className="text-sm font-semibold text-[var(--hub-blue-dark)]">
-            Lista no servidor (API)
+            Atualizar lista do servidor
           </p>
           <p className="mt-1 text-xs text-slate-600">
-            Consulta o backend em{" "}
-            <code className="rounded bg-white/80 px-1 py-0.5 text-[11px]">
-              GET /quotations
-            </code>{" "}
-            e atualiza o quadro abaixo. Os filtros da caixa branca refinam essa
-            lista no navegador. Com um único cliente encontrado na busca acima e
-            ID UUID, ele é enviado como{" "}
-            <code className="rounded bg-white/80 px-1 py-0.5 text-[11px]">
-              customerId
-            </code>
-            .
+            Use os filtros abaixo e clique em &quot;Atualizar lista&quot; para buscar
+            novamente no servidor. A busca por cliente acima continua refinando o
+            quadro localmente.
           </p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
@@ -342,12 +368,28 @@ export default function CotacoesPage() {
         cotacoes={cotacoesFiltradas}
         clientes={clientes}
         onMove={handleMove}
+        onDelete={handleDeleteRequest}
+      />
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Excluir cotação"
+        message="Tem certeza de que deseja excluir esta cotação? Esta ação não pode ser desfeita."
+        confirmLabel="Excluir"
+        cancelLabel="Cancelar"
+        destructive
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
       />
 
       <LinkSolicitacaoModal
         open={linkModalOpen}
         onClose={() => setLinkModalOpen(false)}
-        defaultSlug="demo"
+        sellerPublicCode={
+          user?.accountKind === "SALES_AGENT" && user.linkPublicCode ?
+            user.linkPublicCode
+          : null
+        }
       />
     </div>
   );

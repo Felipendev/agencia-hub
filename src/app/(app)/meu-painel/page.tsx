@@ -8,9 +8,9 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { KpiCard } from "@/components/kpi-card";
 import { Badge } from "@/components/ui/badge";
 import { formatBRL, formatDateBR } from "@/lib/format";
-import { getSellerDashboardRemote } from "@/lib/api/users-remote";
+import { getSalesAgentDashboardRemote } from "@/lib/api/users-remote";
 import { COTACAO_STATUS_LABELS } from "@/lib/constants";
-import type { ApiSellerDashboardResponse } from "@/lib/api/auth-types";
+import type { ApiSalesAgentDashboardResponse } from "@/lib/api/auth-types";
 import type { CotacaoStatus } from "@/types";
 
 const STATUS_TONE: Record<string, "success" | "warning" | "danger" | "muted"> = {
@@ -37,12 +37,12 @@ const API_TO_FRONT_STATUS: Record<string, CotacaoStatus> = {
 export default function MeuPainelPage() {
   const { user, token } = useAuth();
   const toast = useToast();
-  const [data, setData] = useState<ApiSellerDashboardResponse | null>(null);
+  const [data, setData] = useState<ApiSalesAgentDashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!token) return;
-    getSellerDashboardRemote(token)
+    getSalesAgentDashboardRemote(token)
       .then(setData)
       .catch(() => toast.error("Erro ao carregar painel."))
       .finally(() => setLoading(false));
@@ -118,21 +118,21 @@ export default function MeuPainelPage() {
       )}
 
       {/* Configuração de comissão */}
-      {(data.seller.commissionPct != null || data.seller.commissionFixed != null) && (
+      {(data.salesAgent.commissionPct != null || data.salesAgent.commissionFixed != null) && (
         <Card>
           <CardTitle>Minha comissão</CardTitle>
           <div className="mt-3 flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 text-xl font-bold">
-              {data.seller.commissionPct != null ? "%" : "R$"}
+              {data.salesAgent.commissionPct != null ? "%" : "R$"}
             </div>
             <div>
-              {data.seller.commissionPct != null ? (
+              {data.salesAgent.commissionPct != null ? (
                 <p className="text-lg font-semibold text-[var(--hub-blue-dark)]">
-                  {data.seller.commissionPct}% sobre o valor da cotação aprovada
+                  {data.salesAgent.commissionPct}% sobre o valor da cotação aprovada
                 </p>
               ) : (
                 <p className="text-lg font-semibold text-[var(--hub-blue-dark)]">
-                  {formatBRL(data.seller.commissionFixed!)} fixo por cotação aprovada
+                  {formatBRL(data.salesAgent.commissionFixed!)} fixo por cotação aprovada
                 </p>
               )}
               <p className="text-sm text-slate-500">

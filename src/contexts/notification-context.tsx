@@ -9,7 +9,6 @@ import {
   useState,
 } from "react";
 import { useData } from "@/contexts/data-context";
-import type { Cotacao } from "@/types";
 
 export type Notification = {
   id: string;
@@ -73,13 +72,8 @@ export function NotificationProvider({
   children: React.ReactNode;
 }) {
   const { cotacoes, isReady } = useData();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    setNotifications(loadNotifications());
-    setDismissed(loadDismissed());
-  }, []);
+  const [notifications, setNotifications] = useState<Notification[]>(() => loadNotifications());
+  const [dismissed, setDismissed] = useState<Set<string>>(() => loadDismissed());
 
   useEffect(() => {
     if (!isReady) return;
@@ -148,9 +142,11 @@ export function NotificationProvider({
     }
 
     if (novas.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Merging computed notifications from external data source
       setNotifications((prev) => {
         const existing = new Set(prev.map((n) => n.id));
         const filtered = novas.filter((n) => !existing.has(n.id));
+        if (filtered.length === 0) return prev;
         return [...filtered, ...prev];
       });
     }

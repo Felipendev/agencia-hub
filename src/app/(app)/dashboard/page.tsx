@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import {
-  atendimentosEmAndamento,
   computeFinanceiroResumo,
+  cotacoesEmAndamento,
   useData,
 } from "@/contexts/data-context";
 import { KpiCard } from "@/components/kpi-card";
@@ -15,7 +15,6 @@ import { LineChart } from "@/components/charts/LineChart";
 import { DonutChart } from "@/components/charts/DonutChart";
 import { formatBRL, formatDateBR } from "@/lib/format";
 import {
-  ATENDIMENTO_STATUS_LABELS,
   CLIENTE_STATUS_LABELS,
   COTACAO_STATUS_LABELS,
   LANCAMENTO_CATEGORIA_LABELS,
@@ -33,48 +32,18 @@ const COTACAO_COLORS: Record<CotacaoStatus, string> = {
 };
 
 export default function DashboardPage() {
-  const { clientes, atendimentos, lancamentos, cotacoes, isReady } = useData();
-
-  if (!isReady) {
-    return <div className="text-sm text-slate-600">Carregando dados…</div>;
-  }
-
-  const resumo = computeFinanceiroResumo(lancamentos);
-  const clientesAtivos = clientes.filter((c) => c.status === "ativo").length;
-  const emAndamento = atendimentosEmAndamento(atendimentos).length;
-  const cotacoesAbertas = cotacoes.filter((c) =>
-    ["aguardando", "em_cotacao", "aguardando_cliente"].includes(c.status),
-  ).length;
-
-  const ultimosLancamentos = [...lancamentos]
-    .sort((a, b) => b.data.localeCompare(a.data))
-    .slice(0, 5);
-
-  const clientesRecentes = [...clientes]
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .slice(0, 4);
-
-  const atendimentosRecentes = [...atendimentos]
-    .sort((a, b) => b.dataPrevistaViagem.localeCompare(a.dataPrevistaViagem))
-    .slice(0, 4);
-
-  const cotacoesRecentes = [...cotacoes]
-    .sort(
-      (a, b) =>
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-    )
-    .slice(0, 4);
+  const { clientes, lancamentos, cotacoes, isReady } = useData();
 
   // --- Dados para gráficos ---
 
   // Faturamento por mês (últimos 6 meses)
   const faturamentoPorMes = useMemo(() => {
+    if (!isReady) return [];
     const meses: Record<string, number> = {};
     const hoje = new Date();
     for (let i = 5; i >= 0; i--) {
       const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      const label = d.toLocaleDateString("pt-BR", { month: "short" });
       meses[key] = 0;
     }
     for (const l of lancamentos) {
@@ -91,10 +60,11 @@ export default function DashboardPage() {
         value,
       };
     });
-  }, [lancamentos]);
+  }, [lancamentos, isReady]);
 
   // Cotações por status (donut)
   const cotacoesPorStatus = useMemo(() => {
+    if (!isReady) return [];
     const counts: Partial<Record<CotacaoStatus, number>> = {};
     for (const c of cotacoes) {
       counts[c.status] = (counts[c.status] ?? 0) + 1;
@@ -106,10 +76,11 @@ export default function DashboardPage() {
         value,
         color: COTACAO_COLORS[status],
       }));
-  }, [cotacoes]);
+  }, [cotacoes, isReady]);
 
   // Top destinos (bar)
   const topDestinos = useMemo(() => {
+    if (!isReady) return [];
     const counts: Record<string, number> = {};
     for (const c of cotacoes) {
       const dest = c.destino.split(/[/,·]/)[0].trim();
@@ -119,10 +90,11 @@ export default function DashboardPage() {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 6)
       .map(([label, value]) => ({ label, value, color: "#0369a1" }));
-  }, [cotacoes]);
+  }, [cotacoes, isReady]);
 
   // Despesas por categoria (bar)
   const despesasPorCategoria = useMemo(() => {
+    if (!isReady) return [];
     const totals: Record<string, number> = {};
     for (const l of lancamentos) {
       if (l.tipo === "saida" && l.status === "confirmado") {
@@ -137,7 +109,31 @@ export default function DashboardPage() {
         value,
         color: "#ef4444",
       }));
-  }, [lancamentos]);
+  }, [lancamentos, isReady]);
+
+  if (!isReady) {
+    return <div className="text-sm text-slate-600">Carregando dados…</div>;
+  }
+
+  const resumo = computeFinanceiroResumo(lancamentos);
+  const clientesAtivos = clientes.filter((c) => c.status === "ativo").length;
+  const emFunil = cotacoesEmAndamento(cotacoes).length;
+  const totalCotacoes = cotacoes.length;
+
+  const ultimosLancamentos = [...lancamentos]
+    .sort((a, b) => b.data.localeCompare(a.data))
+    .slice(0, 5);
+
+  const clientesRecentes = [...clientes]
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, 4);
+
+  const cotacoesRecentes = [...cotacoes]
+    .sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+    )
+    .slice(0, 4);
 
   return (
     <div className="space-y-8">
@@ -186,15 +182,14 @@ export default function DashboardPage() {
         />
         <KpiCard title="Clientes ativos" value={String(clientesAtivos)} />
         <KpiCard
-          title="Atendimentos em andamento"
-          value={String(emAndamento)}
-          hint="Lead, atendimento ou proposta"
+          title="Cotações no funil"
+          value={String(emFunil)}
+          hint="Aguardando, em cotação ou aguardando cliente"
         />
         <KpiCard
-          title="Cotações em aberto"
-          value={String(cotacoesAbertas)}
+          title="Total de cotações"
+          value={String(totalCotacoes)}
           accent="yellow"
-          hint="Aguardando, em cotação ou aguardando cliente"
         />
       </div>
 
@@ -352,48 +347,6 @@ export default function DashboardPage() {
             </li>
           ))}
         </ul>
-      </Card>
-
-      <Card>
-        <div className="mb-4 flex items-center justify-between gap-2">
-          <CardTitle>Atendimentos / oportunidades recentes</CardTitle>
-          <Link
-            href="/atendimentos"
-            className="text-sm font-medium text-[var(--hub-blue)] hover:underline"
-          >
-            Ver atendimentos
-          </Link>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[520px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-[var(--hub-border)] text-slate-600">
-                <th className="pb-2 font-semibold">Título</th>
-                <th className="pb-2 font-semibold">Destino</th>
-                <th className="pb-2 font-semibold">Status</th>
-                <th className="pb-2 text-right font-semibold">Valor est.</th>
-              </tr>
-            </thead>
-            <tbody>
-              {atendimentosRecentes.map((a) => (
-                <tr key={a.id} className="border-b border-[var(--hub-border)]">
-                  <td className="py-3 font-medium text-[var(--hub-blue-dark)]">
-                    {a.titulo}
-                  </td>
-                  <td className="py-3 text-slate-700">{a.destino}</td>
-                  <td className="py-3">
-                    <Badge tone="warning">
-                      {ATENDIMENTO_STATUS_LABELS[a.status]}
-                    </Badge>
-                  </td>
-                  <td className="py-3 text-right tabular-nums font-medium">
-                    {formatBRL(a.valorEstimado)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </Card>
     </div>
   );

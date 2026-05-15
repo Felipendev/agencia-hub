@@ -13,6 +13,7 @@ export type ListQuotationsRemoteParams = {
   customerId?: string;
   status?: ApiQuotationStatus;
   search?: string;
+  token?: string | null;
 };
 
 function extractMessage(parsed: unknown): string | null {
@@ -45,7 +46,15 @@ export async function listQuotationsRemote(
 
   const qs = sp.toString();
   const url = `${base}/quotations${qs ? `?${qs}` : ""}`;
-  const res = await fetch(url);
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (params.token) {
+    headers["Authorization"] = `Bearer ${params.token}`;
+  }
+
+  const res = await fetch(url, { headers });
 
   const parsed = await res.json().catch(() => null);
 

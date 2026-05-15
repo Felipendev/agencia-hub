@@ -1,4 +1,4 @@
-export type UserRole = "OWNER" | "SELLER";
+export type AccountKind = "AGENCY_OWNER" | "SALES_AGENT";
 
 export type ApiLoginRequest = {
   email: string;
@@ -10,25 +10,35 @@ export type ApiLoginResponse = {
   userId: string;
   name: string;
   email: string;
-  role: UserRole;
+  accountKind: AccountKind;
+  agencyId?: string;
+  agencyName?: string;
+  agencyStatus?: string;
+  subscriptionStatus?: string;
+  trialEndsAt?: string | null;
+  requiresTermsAcceptance?: boolean;
+  mustChangePassword?: boolean;
+  /** Presente após login na API; usado em links públicos do agente. */
+  publicLinkCode?: string;
 };
 
 export type ApiUserResponse = {
   id: string;
   name: string;
   email: string;
-  role: UserRole;
+  accountKind: AccountKind;
   active: boolean;
   commissionPct: number | null;
   commissionFixed: number | null;
   createdAt: string;
+  termsAccepted?: boolean;
 };
 
 export type ApiCreateUserRequest = {
   name: string;
   email: string;
   password: string;
-  role: UserRole;
+  accountKind: AccountKind;
   commissionPct?: number;
   commissionFixed?: number;
 };
@@ -41,8 +51,8 @@ export type ApiUpdateUserRequest = {
   commissionFixed?: number | null;
 };
 
-export type ApiSellerDashboardResponse = {
-  seller: ApiUserResponse;
+export type ApiSalesAgentDashboardResponse = {
+  salesAgent: ApiUserResponse;
   totalQuotations: number;
   openQuotations: number;
   approvedQuotations: number;

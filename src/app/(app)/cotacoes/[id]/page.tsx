@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/contexts/auth-context";
 import { useData } from "@/contexts/data-context";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { DownloadIcon, EditIcon, WhatsAppIcon } from "@/components/icons";
-import { formatBRL, formatDateBR, formatDateTimeBR } from "@/lib/format";
+import { formatDateBR, formatDateTimeBR } from "@/lib/format";
 import { imprimirCotacao, baixarCotacaoHtml } from "@/lib/pdf-generator";
 import { COTACAO_STATUS_LABELS } from "@/lib/constants";
 import { labelFormaPagamento } from "@/lib/cotacao-options";
@@ -22,17 +23,20 @@ import { TimelineView } from "@/components/timeline/TimelineView";
 import { BackButton } from "@/components/ui/back-button";
 import { EditarCotacaoModal } from "@/components/cotacao/EditarCotacaoModal";
 import { EnviarWhatsAppModal } from "@/components/cotacao/EnviarWhatsAppModal";
+import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
+import { listSalesAgentsRemote } from "@/lib/api/users-remote";
+import type { ApiUserResponse } from "@/lib/api/auth-types";
 import type { CotacaoStatus } from "@/types";
 
 export default function CotacaoDetalhePage() {
   const params = useParams();
   const id = typeof params.id === "string" ? params.id : "";
-  const { clientes, atendimentos, cotacoes, updateCotacao, isReady } = useData();
+  const { isOwner, token, user } = useAuth();
+  const { clientes, cotacoes, updateCotacao, isReady } = useData();
   const toast = useToast();
 
   const cotacao = cotacoes.find((c) => c.id === id);
   const cliente = clientes.find((c) => c.id === cotacao?.clienteId);
-  const atendimento = atendimentos.find((a) => a.id === cotacao?.atendimentoId);
 
   const [statusEdit, setStatusEdit] = useState<CotacaoStatus>("aguardando");
   const [valorEdit, setValorEdit] = useState("");
@@ -40,9 +44,47 @@ export default function CotacaoDetalhePage() {
   const [obsEdit, setObsEdit] = useState("");
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [waModalOpen, setWaModalOpen] = useState(false);
+  const [sellers, setSellers] = useState<ApiUserResponse[]>([]);
+
+  useEffect(() => {
+    if (!isOwner || !token || !getAgenciaHubApiBaseUrl()) return;
+    let cancelled = false;
+    void listSalesAgentsRemote(token)
+      .then((rows) => {
+        if (!cancelled) setSellers(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setSellers([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOwner, token]);
+
+  /** Agentes da API + o dono logado (não costuma vir em `/users/sales-agents`). */
+  const sellerOptions = useMemo((): ApiUserResponse[] => {
+    if (!isOwner || !user) return sellers;
+    const map = new Map(sellers.map((s) => [s.id, s]));
+    if (!map.has(user.id)) {
+      map.set(user.id, {
+        id: user.id,
+        name: `${user.nome} (dono)`,
+        email: user.email,
+        accountKind: "AGENCY_OWNER",
+        active: true,
+        commissionPct: null,
+        commissionFixed: null,
+        createdAt: "",
+      });
+    }
+    return [...map.values()].sort((a, b) =>
+      a.name.localeCompare(b.name, "pt-BR"),
+    );
+  }, [sellers, user, isOwner]);
 
   useEffect(() => {
     if (!cotacao) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Syncing form state from derived data
     setStatusEdit(cotacao.status);
     setValorEdit(String(cotacao.valorTotal));
     setValidadeEdit(cotacao.validade);
@@ -92,7 +134,7 @@ export default function CotacaoDetalhePage() {
   function handleImprimir() {
     if (!cliente) { toast.error("Cliente nao encontrado"); return; }
     try {
-      imprimirCotacao(cotacao!, cliente, "AgenciaHub");
+      imprimirCotacao(cotacao!, cliente, "AgênciasHub");
       toast.success("Abrindo janela de impressao...");
     } catch {
       toast.error("Erro ao abrir impressao. Verifique se popups estao permitidos.");
@@ -102,7 +144,7 @@ export default function CotacaoDetalhePage() {
   function handleBaixarHtml() {
     if (!cliente) { toast.error("Cliente nao encontrado"); return; }
     try {
-      baixarCotacaoHtml(cotacao!, cliente, "AgenciaHub");
+      baixarCotacaoHtml(cotacao!, cliente, "AgênciasHub");
       toast.success("Download iniciado!");
     } catch {
       toast.error("Erro ao baixar arquivo");
@@ -121,12 +163,27 @@ export default function CotacaoDetalhePage() {
           <p className="mt-1 text-slate-600">{cotacao.destino}</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <Badge tone="warning">{COTACAO_STATUS_LABELS[cotacao.status]}</Badge>
+            {cotacao.origemCriacao === "formulario_publico" && (
+              <span className="rounded border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-900">
+                Formulário público
+              </span>
+            )}
+            {cotacao.origemCriacao === "interna" && (
+              <span className="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-700">
+                Criada no sistema
+              </span>
+            )}
             {cotacao.prioridade && (
               <span className="rounded bg-[var(--hub-yellow)]/35 px-2 py-0.5 text-xs font-semibold text-[var(--hub-blue-dark)]">
                 Prioridade
               </span>
             )}
             <span className="text-xs text-slate-500">Resp.: {cotacao.responsavel}</span>
+            {cotacao.criadoPorNome ? (
+              <span className="text-xs text-slate-500">
+                · Registro: {cotacao.criadoPorNome}
+              </span>
+            ) : null}
           </div>
         </div>
 
@@ -181,6 +238,37 @@ export default function CotacaoDetalhePage() {
           <CardTitle>Cliente e vinculos</CardTitle>
           <dl className="mt-4 space-y-3 text-sm">
             <div>
+              <dt className="text-xs font-medium uppercase text-slate-500">Vendedor</dt>
+              <dd className="mt-1">
+                {isOwner && sellerOptions.length > 0 ? (
+                  <Select
+                    aria-label="Vendedor responsável"
+                    value={cotacao.vendedorId ?? ""}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      updateCotacao(id, {
+                        vendedorId: v ? v : "",
+                      });
+                      toast.success(
+                        v ? "Cotação atribuída com sucesso." : "Responsável removido da cotação.",
+                      );
+                    }}
+                  >
+                    <option value="">Nenhum</option>
+                    {sellerOptions.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </Select>
+                ) : (
+                  <span className="text-slate-800">
+                    {cotacao.vendedorNome ?? "—"}
+                  </span>
+                )}
+              </dd>
+            </div>
+            <div>
               <dt className="text-xs font-medium uppercase text-slate-500">Cliente</dt>
               <dd>
                 {cliente ? (
@@ -190,19 +278,6 @@ export default function CotacaoDetalhePage() {
                   >
                     {cliente.nome}
                   </Link>
-                ) : "—"}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs font-medium uppercase text-slate-500">Atendimento</dt>
-              <dd>
-                {atendimento ? (
-                  <span>
-                    {atendimento.titulo}{" "}
-                    <span className="text-slate-500">
-                      ({formatDateBR(atendimento.dataPrevistaViagem)})
-                    </span>
-                  </span>
                 ) : "—"}
               </dd>
             </div>

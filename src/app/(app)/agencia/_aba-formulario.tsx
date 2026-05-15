@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
+import { isUuid } from "@/lib/api/quotation-mapper";
 import { isValidSolicitacaoSlug } from "@/lib/solicitacao-slug";
 import { generateId } from "@/lib/format";
+import { useAuth } from "@/contexts/auth-context";
 import type { LinkSocialItem, LinkSocialTipo, SolicitacaoPublicaConfig } from "@/types/solicitacao-publica";
 
 const TIPOS_LINK: { id: LinkSocialTipo; label: string }[] = [
@@ -22,44 +24,139 @@ const TIPOS_LINK: { id: LinkSocialTipo; label: string }[] = [
   { id: "outro",      label: "Outro"       },
 ];
 
+const LOCAL_CONFIG_KEY = "agencia-hub-solicitacao-config";
+const AUTOSAVE_DEBOUNCE_MS = 1200;
+
 export function AbaFormulario() {
   const toast = useToast();
+  const { token, isReady, user } = useAuth();
   const [config, setConfig] = useState<SolicitacaoPublicaConfig | null>(null);
+  const [lastSavedConfig, setLastSavedConfig] = useState<SolicitacaoPublicaConfig | null>(null);
   const [saving, setSaving] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
+  const [statusNow, setStatusNow] = useState<number>(Date.now());
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
+    const loadLocalConfig = () => {
+      if (typeof window === "undefined") return;
+      try {
+        const raw = localStorage.getItem(LOCAL_CONFIG_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw) as SolicitacaoPublicaConfig;
+        if (parsed?.slug) setConfig(parsed);
+      } catch {
+        // Ignore local parse errors
+      }
+    };
+
     try {
-      const res = await fetch("/api/app/solicitacao-config?slug=demo", { credentials: "include" });
+      const headers: Record<string, string> = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      const res = await fetch("/api/app/solicitacao-config", {
+        credentials: "include",
+        headers,
+      });
       if (!res.ok) throw new Error();
+      setError(null);
       const data = (await res.json()) as { config: SolicitacaoPublicaConfig };
-      setConfig(data.config);
-    } catch { setError("Nao foi possivel carregar as configuracoes."); }
-  }, []);
+      const c = data.config;
+      const normalized = {
+        ...c,
+        linksSociais: Array.isArray(c.linksSociais) ? c.linksSociais : [],
+      };
+      setConfig(normalized);
+      setLastSavedConfig(normalized);
+      if (typeof window !== "undefined") {
+        localStorage.setItem(LOCAL_CONFIG_KEY, JSON.stringify(normalized));
+      }
+    } catch {
+      loadLocalConfig();
+      setError("Não foi possível carregar as configurações.");
+    }
+  }, [token]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    if (!isReady) return;
+    if (!token) {
+      setError("Sessão não encontrada. Entre novamente para editar o formulário.");
+      setConfig(null);
+      return;
+    }
+    setError(null);
+    void load();
+  }, [isReady, token, load]);
 
-  async function handleSave() {
+  const publicUrl = useMemo(() => {
+    if (typeof window === "undefined" || !config?.slug) return "";
+    const base = `${window.location.origin}/solicitacao/${config.slug}`;
+    if (user?.accountKind === "SALES_AGENT" && user.linkPublicCode?.trim()) {
+      return `${base}?vendedor=${encodeURIComponent(user.linkPublicCode.trim())}`;
+    }
+    const uid = user?.id?.trim();
+    if (uid && isUuid(uid)) {
+      return `${base}?vendedor=${encodeURIComponent(uid)}`;
+    }
+    return base;
+  }, [config?.slug, user?.id, user?.accountKind, user?.linkPublicCode]);
+
+  const handleSave = useCallback(async () => {
     if (!config) return;
     if (!isValidSolicitacaoSlug(config.slug)) {
-      setError("Slug invalido: letras minusculas, numeros e hifen (2-64 chars).");
+      setError("O identificador do link deve conter apenas letras minúsculas, números e hífen, com 2 a 64 caracteres. Exemplo: minha-agencia");
       return;
     }
     setSaving(true); setError(null);
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
       const res = await fetch("/api/app/solicitacao-config", {
         method: "PUT", credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ config }),
       });
-      const data = (await res.json().catch(() => ({}))) as { error?: string; config?: SolicitacaoPublicaConfig };
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        config?: SolicitacaoPublicaConfig;
+      };
       if (!res.ok) throw new Error(data.error ?? "Erro ao salvar");
-      if (data.config) setConfig(data.config);
+      if (data.config) {
+        const c = data.config;
+        const normalized = {
+          ...c,
+          linksSociais: Array.isArray(c.linksSociais) ? c.linksSociais : [],
+        };
+        setConfig(normalized);
+        setLastSavedConfig(normalized);
+        setLastSavedAt(Date.now());
+        if (typeof window !== "undefined") {
+          localStorage.setItem(LOCAL_CONFIG_KEY, JSON.stringify(normalized));
+        }
+      }
       toast.success("Formulario salvo!");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro ao salvar");
     } finally { setSaving(false); }
-  }
+  }, [config, token, toast]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setStatusNow(Date.now()), 15000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!config || !lastSavedConfig) return;
+    if (saving) return;
+    if (JSON.stringify(config) === JSON.stringify(lastSavedConfig)) return;
+    if (!isValidSolicitacaoSlug(config.slug)) return;
+    if (!config.tituloPagina?.trim()) return;
+
+    const timeout = setTimeout(() => {
+      void handleSave();
+    }, AUTOSAVE_DEBOUNCE_MS);
+
+    return () => clearTimeout(timeout);
+  }, [config, lastSavedConfig, saving, handleSave]);
 
   function addLink() {
     if (!config) return;
@@ -82,39 +179,91 @@ export function AbaFormulario() {
     reader.readAsDataURL(file);
   }
 
-  if (!config) return <Card><p className="p-4 text-sm text-slate-500">{error ?? "Carregando..."}</p></Card>;
+  if (!isReady) {
+    return (
+      <Card>
+        <p className="p-4 text-sm text-slate-500">Carregando sessão…</p>
+      </Card>
+    );
+  }
 
-  const publicUrl = typeof window !== "undefined" ? `${window.location.origin}/solicitacao/${config.slug}` : "";
+  if (!token) {
+    return (
+      <Card>
+        <p className="p-4 text-sm text-amber-800">
+          {error ?? "Faça login novamente para editar o formulário público."}
+        </p>
+      </Card>
+    );
+  }
+
+  if (!config) {
+    return (
+      <Card>
+        <p className="p-4 text-sm text-slate-500">{error ?? "Carregando…"}</p>
+      </Card>
+    );
+  }
+
+  const hasUnsavedChanges =
+    !!lastSavedConfig && JSON.stringify(config) !== JSON.stringify(lastSavedConfig);
+  const savedAgoText = (() => {
+    if (!lastSavedAt) return "Ainda não salvo";
+    const diffSec = Math.max(0, Math.floor((statusNow - lastSavedAt) / 1000));
+    if (diffSec < 5) return "Salvo agora";
+    if (diffSec < 60) return `Salvo há ${diffSec}s`;
+    const diffMin = Math.floor(diffSec / 60);
+    return `Salvo há ${diffMin}min`;
+  })();
 
   return (
     <div className="space-y-4">
-      {/* Link publico */}
+      {/* Link publico + Preview */}
       <Card>
-        <div className="p-1 space-y-2">
-          <p className="text-sm font-semibold text-[var(--hub-blue-dark)]">Link publico do formulario</p>
-          <div className="flex items-center gap-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2">
-            <code className="flex-1 break-all text-xs text-slate-700">{publicUrl}</code>
-            <button type="button" onClick={() => navigator.clipboard.writeText(publicUrl).then(() => toast.success("Copiado!"))}
-              className="shrink-0 rounded border border-sky-300 bg-white px-2 py-1 text-xs font-medium text-sky-700 hover:bg-sky-50">
-              Copiar
-            </button>
-            <a href={publicUrl} target="_blank" rel="noopener noreferrer"
-              className="shrink-0 rounded border border-sky-300 bg-white px-2 py-1 text-xs font-medium text-sky-700 hover:bg-sky-50">
-              Abrir
+        <div className="p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-[var(--hub-blue-dark)]">Link público do formulário</p>
+            <a
+              href={publicUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-lg bg-[var(--hub-blue)] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[var(--hub-blue-dark)] transition-colors"
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
+                <path fillRule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 0110 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0110 17c-4.257 0-7.893-2.66-9.336-6.41zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+              </svg>
+              Visualizar formulário
             </a>
           </div>
+          <div className="flex items-center gap-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2">
+            <code className="flex-1 break-all text-xs text-slate-700">{publicUrl}</code>
+            <button type="button" onClick={() => navigator.clipboard.writeText(publicUrl).then(() => toast.success("Link copiado!"))}
+              className="shrink-0 rounded border border-sky-300 bg-white px-3 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-100 transition-colors">
+              Copiar link
+            </button>
+          </div>
+          {user?.id ? (
+            <p className="mt-2 text-xs leading-relaxed text-slate-600">
+              O link copiado inclui <code className="rounded bg-white/90 px-1 py-0.5 text-[11px]">?vendedor=</code>{" "}
+              com o seu usuário: solicitações enviadas por esse endereço ficam atribuídas a você no painel.
+              Para um link sem atribuição, remova manualmente o trecho{" "}
+              <code className="rounded bg-white/90 px-1 text-[11px]">?vendedor=…</code> da URL.
+            </p>
+          ) : null}
         </div>
       </Card>
 
       {/* Config */}
       <Card>
-        <div className="space-y-4 p-1">
+        <div className="space-y-4 p-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="fc-slug">Slug (identificador)</Label>
+              <Label htmlFor="fc-slug">Identificador do link público</Label>
               <Input id="fc-slug" value={config.slug} className="font-mono"
-                onChange={(e) => setConfig({ ...config, slug: e.target.value.trim() })} />
-              <p className="mt-1 text-xs text-slate-400">Letras minusculas, numeros e hifen.</p>
+                placeholder="ex: minha-agencia"
+                onChange={(e) => setConfig({ ...config, slug: e.target.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '') })} />
+              <p className="mt-1 text-xs text-slate-400">Usado na URL do formulário público. Apenas letras minúsculas, números e hífen.</p>
             </div>
             <div>
               <Label htmlFor="fc-marca">Nome da marca</Label>
@@ -122,24 +271,28 @@ export function AbaFormulario() {
                 onChange={(e) => setConfig({ ...config, nomeMarca: e.target.value })} />
             </div>
             <div className="sm:col-span-2">
-              <Label htmlFor="fc-titulo">Titulo da pagina</Label>
+              <Label htmlFor="fc-titulo">Título da página</Label>
               <Input id="fc-titulo" value={config.tituloPagina}
                 onChange={(e) => setConfig({ ...config, tituloPagina: e.target.value })} />
             </div>
             <div className="sm:col-span-2">
-              <Label htmlFor="fc-intro">Texto introdutorio</Label>
+              <Label htmlFor="fc-intro">Texto introdutório</Label>
               <Textarea id="fc-intro" rows={3} value={config.textoIntro}
                 onChange={(e) => setConfig({ ...config, textoIntro: e.target.value })} />
             </div>
             <div className="sm:col-span-2">
-              <Label>Logo (max 400 KB)</Label>
-              <Input type="file" accept="image/*" className="mt-1 text-sm" onChange={onLogoFile} />
+              <Label>Logo do formulário</Label>
+              <p className="mb-2 text-xs text-slate-400">
+                Por padrão, o formulário usa a logo da agência. Envie uma imagem aqui apenas se quiser usar uma logo diferente no formulário público.
+              </p>
+              <Input type="file" accept="image/*" className="text-sm" onChange={onLogoFile} />
               {config.logoDataUrl && (
                 <div className="mt-2 flex items-center gap-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- Data URL from user upload */}
                   <img src={config.logoDataUrl} alt="Logo" className="h-10 rounded border" />
                   <button type="button" className="text-xs text-red-600 hover:underline"
                     onClick={() => setConfig({ ...config, logoDataUrl: null })}>
-                    Remover
+                    Remover (usar logo da agência)
                   </button>
                 </div>
               )}
@@ -174,9 +327,14 @@ export function AbaFormulario() {
 
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex justify-end pt-2">
-            <Button type="button" onClick={() => void handleSave()} disabled={saving}>
-              {saving ? "Salvando..." : "Salvar"}
-            </Button>
+            <div className="flex items-center gap-3">
+              <p className={`text-xs ${error ? "text-red-600" : "text-slate-500"}`}>
+                {saving ? "Salvando..." : error ? "Erro ao salvar" : hasUnsavedChanges ? "Alterações pendentes" : savedAgoText}
+              </p>
+              <Button type="button" onClick={() => void handleSave()} disabled={saving}>
+                {saving ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
           </div>
         </div>
       </Card>

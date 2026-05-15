@@ -9,7 +9,6 @@ import {
   useState,
 } from "react";
 import {
-  seedAtendimentos,
   seedClientes,
   seedCotacoes,
   seedLancamentos,
@@ -17,18 +16,15 @@ import {
 import { createCustomerRemote, DuplicateCustomerError } from "@/lib/api/create-customer-remote";
 import { createQuotationRemote } from "@/lib/api/create-quotation-remote";
 import { updateQuotationRemote } from "@/lib/api/update-quotation-remote";
-import { createOpportunityRemote } from "@/lib/api/create-opportunity-remote";
-import { updateOpportunityRemote } from "@/lib/api/update-opportunity-remote";
 import { createFinancialEntryRemote } from "@/lib/api/create-financial-entry-remote";
 import { updateFinancialEntryRemote } from "@/lib/api/update-financial-entry-remote";
+import { useAuth } from "@/contexts/auth-context";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
 import { listQuotationsRemote } from "@/lib/api/list-quotations-remote";
 import { cotacaoStatusToApi, isUuid } from "@/lib/api/quotation-mapper";
 import { mergeCotacaoDetalhes, migrateCotacao } from "@/lib/cotacao-migrate";
 import { generateId } from "@/lib/format";
 import type {
-  Atendimento,
-  AtendimentoStatus,
   Cliente,
   ClienteStatus,
   Cotacao,
@@ -40,6 +36,7 @@ export type SyncCotacoesFromApiParams = {
   customerId?: string;
   status?: CotacaoStatus;
   search?: string;
+  token?: string | null;
 };
 
 /** Resultado de uma verificação de duplicidade de cliente */
@@ -86,38 +83,41 @@ const STORAGE_KEY = "agencia-hub-data";
 
 type Stored = {
   clientes: Cliente[];
-  atendimentos: Atendimento[];
   lancamentos: LancamentoFinanceiro[];
   cotacoes: Cotacao[];
 };
 
+function stripSeedDataWhenRemote(data: Stored, hasApi: boolean): Stored {
+  if (!hasApi) return data;
+
+  const seedClienteIds = new Set(["c1", "c2", "c3", "c4", "c5"]);
+  const seedLancamentoIds = new Set(["l1", "l2", "l3", "l4", "l5", "l6", "l7", "l8"]);
+  const seedCotacaoIds = new Set(["q1", "q2", "q3", "q4", "q5"]);
+
+  return {
+    clientes: data.clientes.filter((c) => !seedClienteIds.has(c.id)),
+    lancamentos: data.lancamentos.filter((l) => !seedLancamentoIds.has(l.id)),
+    cotacoes: data.cotacoes.filter((c) => !seedCotacaoIds.has(c.id)),
+  };
+}
+
 function loadStored(): Stored {
-  if (typeof window === "undefined") {
-    return {
-      clientes: seedClientes,
-      atendimentos: seedAtendimentos,
-      lancamentos: seedLancamentos,
-      cotacoes: seedCotacoes,
-    };
-  }
+  const hasApi = Boolean(getAgenciaHubApiBaseUrl());
+  const empty: Stored = { clientes: [], lancamentos: [], cotacoes: [] };
+  const fallback: Stored = hasApi ? empty : {
+    clientes: seedClientes,
+    lancamentos: seedLancamentos,
+    cotacoes: seedCotacoes,
+  };
+
+  if (typeof window === "undefined") return fallback;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return {
-        clientes: seedClientes,
-        atendimentos: seedAtendimentos,
-        lancamentos: seedLancamentos,
-        cotacoes: seedCotacoes,
-      };
-    }
-    return normalizeStored(JSON.parse(raw) as Partial<Stored>);
+    if (!raw) return fallback;
+    const normalized = normalizeStored(JSON.parse(raw) as Partial<Stored>);
+    return stripSeedDataWhenRemote(normalized, hasApi);
   } catch {
-    return {
-      clientes: seedClientes,
-      atendimentos: seedAtendimentos,
-      lancamentos: seedLancamentos,
-      cotacoes: seedCotacoes,
-    };
+    return fallback;
   }
 }
 
@@ -129,7 +129,6 @@ function normalizeStored(partial: Partial<Stored>): Stored {
   const rawCot = partial.cotacoes ?? seedCotacoes;
   return {
     clientes: partial.clientes ?? seedClientes,
-    atendimentos: partial.atendimentos ?? seedAtendimentos,
     lancamentos: partial.lancamentos ?? seedLancamentos,
     cotacoes: rawCot.map((c) => migrateCotacao(c)),
   };
@@ -137,17 +136,12 @@ function normalizeStored(partial: Partial<Stored>): Stored {
 
 export type DataContextValue = {
   clientes: Cliente[];
-  atendimentos: Atendimento[];
   lancamentos: LancamentoFinanceiro[];
   cotacoes: Cotacao[];
   addCliente: (c: Omit<Cliente, "id" | "createdAt">) => Promise<Cliente>;
   updateCliente: (id: string, patch: Partial<Cliente>) => void;
   /** Verifica duplicidade antes de criar/editar. `excludeId` = próprio id ao editar. */
   checkDuplicate: (email: string, telefone: string, excludeId?: string) => ClienteDuplicateCheck;
-  addAtendimento: (
-    a: Omit<Atendimento, "id">,
-  ) => Promise<Atendimento>;
-  updateAtendimento: (id: string, patch: Partial<Atendimento>) => void;
   addLancamento: (
     l: Omit<LancamentoFinanceiro, "id">,
   ) => Promise<LancamentoFinanceiro>;
@@ -167,9 +161,9 @@ export type DataContextValue = {
 const DataContext = createContext<DataContextValue | null>(null);
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
+  const { token } = useAuth();
   const [data, setData] = useState<Stored>(() => ({
     clientes: seedClientes,
-    atendimentos: seedAtendimentos,
     lancamentos: seedLancamentos,
     cotacoes: seedCotacoes,
   }));
@@ -194,7 +188,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
     let novo = draft;
     try {
-      const remote = await createCustomerRemote(draft);
+      const remote = await createCustomerRemote(draft, token);
       if (remote) {
         novo = remote;
       }
@@ -210,7 +204,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
     setData((d) => ({ ...d, clientes: [novo, ...d.clientes] }));
     return novo;
-  }, []);
+  }, [token]);
 
   const updateCliente = useCallback((id: string, patch: Partial<Cliente>) => {
     setData((d) => ({
@@ -225,52 +219,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     (email: string, telefone: string, excludeId?: string): ClienteDuplicateCheck =>
       checkClienteDuplicate(data.clientes, email, telefone, excludeId),
     [data.clientes],
-  );
-
-  const addAtendimento = useCallback(async (a: Omit<Atendimento, "id">) => {
-    const draft: Atendimento = { ...a, id: generateId() };
-
-    let novo = draft;
-    try {
-      const remote = await createOpportunityRemote(draft);
-      if (remote) {
-        novo = remote;
-      }
-    } catch (e) {
-      console.warn(
-        "[agencia-hub] Falha ao criar atendimento na API; usando só armazenamento local.",
-        e,
-      );
-    }
-
-    setData((d) => ({
-      ...d,
-      atendimentos: [novo, ...d.atendimentos],
-    }));
-    return novo;
-  }, []);
-
-  const updateAtendimento = useCallback(
-    (id: string, patch: Partial<Atendimento>) => {
-      setData((d) => {
-        const current = d.atendimentos.find((x) => x.id === id);
-        if (current) {
-          updateOpportunityRemote(current, patch).catch((e) => {
-            console.warn(
-              "[agencia-hub] Falha ao atualizar atendimento na API; mudança salva localmente.",
-              e,
-            );
-          });
-        }
-        return {
-          ...d,
-          atendimentos: d.atendimentos.map((x) =>
-            x.id === id ? { ...x, ...patch } : x,
-          ),
-        };
-      });
-    },
-    [],
   );
 
   const addLancamento = useCallback(
@@ -342,7 +290,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
       let novo = draft;
       try {
-        const remote = await createQuotationRemote(draft);
+        const remote = await createQuotationRemote(draft, token);
         if (remote) {
           novo = remote;
         }
@@ -359,11 +307,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       }));
       return novo;
     },
-    [],
+    [token],
   );
 
   const updateCotacao = useCallback((id: string, patch: Partial<Cotacao>) => {
     const now = new Date().toISOString();
+    let mergedForRemote: Cotacao | null = null;
     setData((d) => ({
       ...d,
       cotacoes: d.cotacoes.map((x) => {
@@ -375,31 +324,35 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             ...patch.detalhes,
           });
         }
+        mergedForRemote = merged;
         return merged;
       }),
     }));
 
-    // Sincroniza com o backend em background (fire-and-forget)
-    setData((d) => {
-      const current = d.cotacoes.find((x) => x.id === id);
-      if (current) {
-        updateQuotationRemote(current, patch).catch((e) => {
+    if (mergedForRemote) {
+      void updateQuotationRemote(mergedForRemote, patch, token)
+        .then((apiMerged) => {
+          if (!apiMerged) return;
+          setData((d) => ({
+            ...d,
+            cotacoes: d.cotacoes.map((x) => (x.id === id ? apiMerged : x)),
+          }));
+        })
+        .catch((e) => {
           console.warn(
             "[agencia-hub] Falha ao atualizar cotação na API; mudança salva localmente.",
             e,
           );
         });
-      }
-      return d;
-    });
-  }, []);
+    }
+  }, [token]);
 
   const resetDemoData = useCallback(() => {
+    const hasApi = Boolean(getAgenciaHubApiBaseUrl());
     const fresh: Stored = {
-      clientes: seedClientes,
-      atendimentos: seedAtendimentos,
-      lancamentos: seedLancamentos,
-      cotacoes: seedCotacoes,
+      clientes: hasApi ? [] : seedClientes,
+      lancamentos: hasApi ? [] : seedLancamentos,
+      cotacoes: hasApi ? [] : seedCotacoes,
     };
     setData(fresh);
     saveStored(fresh);
@@ -421,6 +374,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
               cotacaoStatusToApi(params.status)
             : undefined,
           search: params?.search?.trim() || undefined,
+          token: params?.token,
         });
         setData((d) => ({ ...d, cotacoes: list }));
       } catch (e) {
@@ -439,8 +393,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       addCliente,
       updateCliente,
       checkDuplicate,
-      addAtendimento,
-      updateAtendimento,
       addLancamento,
       updateLancamento,
       addCotacao,
@@ -455,8 +407,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       addCliente,
       updateCliente,
       checkDuplicate,
-      addAtendimento,
-      updateAtendimento,
       addLancamento,
       updateLancamento,
       addCotacao,
@@ -494,13 +444,13 @@ export function filterClientes(
   return list;
 }
 
-export function atendimentosEmAndamento(atendimentos: Atendimento[]) {
-  const abertos: AtendimentoStatus[] = [
-    "novo_lead",
-    "em_atendimento",
-    "proposta_enviada",
+export function cotacoesEmAndamento(cotacoes: Cotacao[]) {
+  const abertos: CotacaoStatus[] = [
+    "aguardando",
+    "em_cotacao",
+    "aguardando_cliente",
   ];
-  return atendimentos.filter((a) => abertos.includes(a.status));
+  return cotacoes.filter((c) => abertos.includes(c.status));
 }
 
 export function computeFinanceiroResumo(lancamentos: LancamentoFinanceiro[]) {

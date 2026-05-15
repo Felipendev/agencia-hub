@@ -1,6 +1,7 @@
 import { emptyCotacaoDetalhes } from "@/lib/cotacao-defaults";
 import type {
   ApiCreateQuotationRequest,
+  ApiQuotationCreationSource,
   ApiQuotationResponse,
   ApiQuotationStatus,
 } from "@/lib/api/quotation-types";
@@ -45,6 +46,13 @@ export function apiQuotationStatusToFront(
     CANCELLED: "cancelada",
   };
   return map[status] ?? "aguardando";
+}
+
+function apiCreationSourceToOrigem(
+  s: ApiQuotationCreationSource | null | undefined,
+): "interna" | "formulario_publico" | undefined {
+  if (!s) return undefined;
+  return s === "PUBLIC_FORM" ? "formulario_publico" : "interna";
 }
 
 /** Formulário detalhado (campos PT do SPA) → payload JSON em inglês para o backend. */
@@ -108,11 +116,17 @@ export function cotacaoToCreateRequest(
     internalNotes: c.observacoes?.trim() || undefined,
   };
 
-  if (c.atendimentoId && isUuid(c.atendimentoId)) {
-    req.opportunityId = c.atendimentoId.trim();
-  }
   if (c.vendedorId && isUuid(c.vendedorId)) {
     req.sellerId = c.vendedorId.trim();
+  }
+
+  if (c.origemCriacao === "formulario_publico") {
+    req.creationSource = "PUBLIC_FORM";
+  } else if (c.origemCriacao === "interna") {
+    req.creationSource = "INTERNAL";
+  }
+  if (c.publicSubmissionId && isUuid(c.publicSubmissionId)) {
+    req.publicSubmissionId = c.publicSubmissionId.trim();
   }
 
   return req;
@@ -130,7 +144,6 @@ export function mergeQuotationApiResponse(
     ...draft,
     id: api.id,
     clienteId: api.customerId,
-    atendimentoId: api.opportunityId ?? undefined,
     vendedorId: api.sellerId ?? undefined,
     vendedorNome: api.sellerName ?? undefined,
     titulo: api.title,
@@ -148,6 +161,13 @@ export function mergeQuotationApiResponse(
     responsavel: api.assignee?.trim() || draft.responsavel,
     createdAt,
     updatedAt,
+    origemCriacao:
+      api.creationSource != null
+        ? apiCreationSourceToOrigem(api.creationSource)
+        : draft.origemCriacao,
+    publicSubmissionId: api.publicSubmissionId ?? draft.publicSubmissionId,
+    criadoPorUsuarioId: api.createdByUserId ?? draft.criadoPorUsuarioId,
+    criadoPorNome: api.createdByUserName ?? draft.criadoPorNome,
   };
 }
 
@@ -236,7 +256,6 @@ export function apiQuotationResponseToCotacao(api: ApiQuotationResponse): Cotaca
   return {
     id: api.id,
     clienteId: api.customerId,
-    atendimentoId: api.opportunityId ?? undefined,
     vendedorId: api.sellerId ?? undefined,
     vendedorNome: api.sellerName ?? undefined,
     titulo: api.title,
@@ -254,5 +273,9 @@ export function apiQuotationResponseToCotacao(api: ApiQuotationResponse): Cotaca
     responsavel: api.assignee?.trim() || "Equipe",
     createdAt,
     updatedAt,
+    origemCriacao: apiCreationSourceToOrigem(api.creationSource),
+    publicSubmissionId: api.publicSubmissionId ?? undefined,
+    criadoPorUsuarioId: api.createdByUserId ?? undefined,
+    criadoPorNome: api.createdByUserName ?? undefined,
   };
 }

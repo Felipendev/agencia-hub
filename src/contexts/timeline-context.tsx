@@ -10,13 +10,13 @@ import {
 } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { generateId } from "@/lib/format";
-import type { TimelineEvent, TimelineEventType } from "@/types/timeline";
+import type { TimelineEvent } from "@/types/timeline";
 
 type TimelineContextValue = {
   events: TimelineEvent[];
   addEvent: (event: Omit<TimelineEvent, "id" | "createdAt" | "createdBy">) => void;
   getEventsForEntity: (entityType: string, entityId: string) => TimelineEvent[];
-  addNote: (entityType: "cliente" | "cotacao" | "atendimento", entityId: string, note: string) => void;
+  addNote: (entityType: "cliente" | "cotacao", entityId: string, note: string) => void;
 };
 
 const TimelineContext = createContext<TimelineContextValue | null>(null);
@@ -40,11 +40,7 @@ function saveEvents(events: TimelineEvent[]) {
 
 export function TimelineProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const [events, setEvents] = useState<TimelineEvent[]>([]);
-
-  useEffect(() => {
-    setEvents(loadEvents());
-  }, []);
+  const [events, setEvents] = useState<TimelineEvent[]>(() => loadEvents());
 
   useEffect(() => {
     saveEvents(events);
@@ -74,7 +70,7 @@ export function TimelineProvider({ children }: { children: React.ReactNode }) {
 
   const addNote = useCallback(
     (
-      entityType: "cliente" | "cotacao" | "atendimento",
+      entityType: "cliente" | "cotacao",
       entityId: string,
       note: string
     ) => {

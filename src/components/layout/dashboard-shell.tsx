@@ -7,7 +7,6 @@ import { useAuth } from "@/contexts/auth-context";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { GlobalSearch } from "@/components/layout/GlobalSearch";
 import {
-  IconBriefcase,
   IconChevronRight,
   IconDocument,
   IconLayout,
@@ -17,15 +16,17 @@ import {
   IconX,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { TrialBanner } from "@/components/ui/trial-banner";
+import { TermsAcceptanceModal } from "@/components/ui/terms-acceptance-modal";
+import { ChangePasswordModal } from "@/components/ui/change-password-modal";
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
 const iconMap = {
-  layout:    IconLayout,
-  users:     IconUsers,
-  briefcase: IconBriefcase,
-  document:  IconDocument,
-  wallet:    IconWallet,
+  layout:   IconLayout,
+  users:    IconUsers,
+  document: IconDocument,
+  wallet:   IconWallet,
 } as const;
 
 type NavItem = {
@@ -55,14 +56,21 @@ const OWNER_GROUPS: NavGroup[] = [
   {
     label: "Operacional",
     items: [
-      { href: "/atendimentos", label: "Atendimentos",        icon: "briefcase" },
       { href: "/calculadora",  label: "Calculadora de Milhas", icon: "document"  },
     ],
   },
   {
     label: "Financeiro",
+    ownerOnly: true,
     items: [
       { href: "/financeiro",   label: "Financeiro",   icon: "wallet"    },
+    ],
+  },
+  {
+    label: "Equipe",
+    ownerOnly: true,
+    items: [
+      { href: "/vendedores/convidar", label: "Convidar Vendedores", icon: "users" },
     ],
   },
   {
@@ -78,9 +86,21 @@ const SELLER_GROUPS: NavGroup[] = [
   {
     label: "Principal",
     items: [
-      { href: "/meu-painel",   label: "Meu Painel",       icon: "layout"   },
-      { href: "/cotacoes",     label: "Minhas Cotacoes",  icon: "document" },
-      { href: "/clientes",     label: "Clientes",         icon: "users"    },
+      { href: "/meu-painel",   label: "Meu Painel",           icon: "layout"   },
+      { href: "/cotacoes",     label: "Cotações",             icon: "document" },
+      { href: "/clientes",     label: "Clientes",             icon: "users"    },
+    ],
+  },
+  {
+    label: "Operacional",
+    items: [
+      { href: "/calculadora",  label: "Calculadora de Milhas", icon: "document"  },
+    ],
+  },
+  {
+    label: "Financeiro",
+    items: [
+      { href: "/minhas-comissoes", label: "Minhas Comissões", icon: "wallet" },
     ],
   },
 ];
@@ -96,13 +116,6 @@ function NavGroup({
   pathname: string;
   onNavigate?: () => void;
 }) {
-  const hasActive = group.items.some(
-    (item) =>
-      pathname === item.href ||
-      (item.href !== "/dashboard" &&
-        item.href !== "/meu-painel" &&
-        pathname.startsWith(item.href)),
-  );
   const [open, setOpen] = useState(true); // começa aberto
 
   return (
@@ -158,36 +171,60 @@ function NavGroup({
   );
 }
 
+// ─── Sidebar content (extracted to avoid re-creation during render) ──────────
+
+function SidebarContent({
+  groups,
+  pathname,
+  onNavigate,
+}: {
+  groups: NavGroup[];
+  pathname: string;
+  onNavigate?: () => void;
+}) {
+  return (
+    <nav className="flex flex-1 flex-col gap-0 p-3 overflow-y-auto">
+      {groups.map((group) => (
+        <NavGroup
+          key={group.label}
+          group={group}
+          pathname={pathname}
+          onNavigate={onNavigate}
+        />
+      ))}
+    </nav>
+  );
+}
+
 // ─── Shell principal ──────────────────────────────────────────────────────────
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, isReady } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [viewAsSeller, setViewAsSeller] = useState(false);
 
-  const empresa  = user?.empresa ?? "Agencia";
-  const nome     = user?.nome    ?? "Usuario";
-  const role     = user?.role    ?? "OWNER";
-  const groups   = role === "SELLER" ? SELLER_GROUPS : OWNER_GROUPS;
-
-  function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+  if (!isReady) {
     return (
-      <nav className="flex flex-1 flex-col gap-0 p-3 overflow-y-auto">
-        {groups.map((group) => (
-          <NavGroup
-            key={group.label}
-            group={group}
-            pathname={pathname}
-            onNavigate={onNavigate}
-          />
-        ))}
-      </nav>
+      <div className="flex min-h-screen items-center justify-center bg-[var(--hub-bg)]">
+        <p className="text-sm text-slate-500">Carregando...</p>
+      </div>
     );
   }
 
+  const empresa     = user?.empresa     ?? "Agencia";
+  const nome        = user?.nome        ?? "Usuario";
+  const accountKind = user?.accountKind ?? "AGENCY_OWNER";
+  const groups      = (accountKind === "SALES_AGENT" || viewAsSeller) ? SELLER_GROUPS : OWNER_GROUPS;
+
   return (
     <div className="flex min-h-screen bg-[var(--hub-bg)]">
+      {/* Terms acceptance blocking modal */}
+      <TermsAcceptanceModal />
+      {/* Force password change blocking modal */}
+      <ChangePasswordModal />
+
       {/* Desktop sidebar */}
       <aside className="hidden w-60 shrink-0 flex-col border-r border-[var(--hub-border)] bg-[var(--hub-blue-dark)] text-white lg:flex">
         {/* Logo */}
@@ -196,27 +233,36 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             AH
           </span>
           <div className="min-w-0">
-            <p className="text-[10px] font-medium text-white/50 uppercase tracking-wide">AgenciaHub</p>
+            <p className="text-[10px] font-medium text-white/50 uppercase tracking-wide">AgênciasHub</p>
             <p className="truncate text-sm font-semibold leading-tight">{empresa}</p>
           </div>
         </div>
 
-        <SidebarContent />
+        <SidebarContent groups={groups} pathname={pathname} />
 
         {/* Footer com role */}
         <div className="border-t border-white/10 px-4 py-3">
           <div className="flex items-center gap-2">
             <span
               className={`inline-flex h-5 items-center rounded px-1.5 text-[10px] font-bold uppercase tracking-wide ${
-                role === "OWNER"
+                accountKind === "AGENCY_OWNER"
                   ? "bg-[var(--hub-yellow)] text-[var(--hub-blue-dark)]"
                   : "bg-white/20 text-white"
               }`}
             >
-              {role === "OWNER" ? "Dono" : "Vendedor"}
+              {accountKind === "AGENCY_OWNER" ? "Gestor" : "Vendedor"}
             </span>
             <p className="truncate text-xs text-white/40">{user?.email}</p>
           </div>
+          {accountKind === "AGENCY_OWNER" && (
+            <button
+              type="button"
+              onClick={() => setViewAsSeller(!viewAsSeller)}
+              className="mt-2 w-full rounded-lg border border-white/20 px-3 py-1.5 text-[10px] font-medium text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+            >
+              {viewAsSeller ? "← Voltar ao perfil Gestor" : "👁 Ver como Vendedor"}
+            </button>
+          )}
         </div>
       </aside>
 
@@ -236,7 +282,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         }`}
       >
         <div className="flex h-14 items-center justify-between border-b border-white/10 px-4">
-          <span className="text-base font-bold tracking-tight">AgenciaHub</span>
+          <span className="text-base font-bold tracking-tight">AgênciasHub</span>
           <button
             type="button"
             className="rounded-lg p-2 text-white/70 hover:bg-white/10"
@@ -246,7 +292,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <IconX className="h-5 w-5" />
           </button>
         </div>
-        <SidebarContent onNavigate={() => setMobileOpen(false)} />
+        <SidebarContent groups={groups} pathname={pathname} onNavigate={() => setMobileOpen(false)} />
       </aside>
 
       {/* Main */}
@@ -271,7 +317,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <div className="hidden text-right sm:block">
               <p className="text-sm font-medium text-[var(--hub-blue-dark)]">{nome}</p>
               <p className="text-xs text-slate-500">
-                {role === "OWNER" ? "Dono" : "Vendedor"}
+                {accountKind === "AGENCY_OWNER" ? "Gestor" : "Vendedor"}
               </p>
             </div>
             <Button
@@ -283,6 +329,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </Button>
           </div>
         </header>
+        <TrialBanner
+          trialEndsAt={user?.trialEndsAt ?? null}
+          status={user?.agencyStatus ?? ""}
+        />
         <main className="flex-1 px-4 py-6 lg:px-6 lg:py-8">{children}</main>
       </div>
     </div>

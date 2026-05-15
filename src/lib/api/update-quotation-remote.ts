@@ -26,6 +26,7 @@ function extractApiErrorMessage(
 export async function updateQuotationRemote(
   current: Cotacao,
   patch: Partial<Cotacao>,
+  token?: string | null,
 ): Promise<Cotacao | null> {
   const base = getAgenciaHubApiBaseUrl();
   if (!base || !isUuid(current.id)) {
@@ -48,17 +49,26 @@ export async function updateQuotationRemote(
   if (patch.prioridade !== undefined) body.priority = patch.prioridade;
   if (patch.responsavel !== undefined) body.assignee = patch.responsavel?.trim() || null;
   if (patch.observacoes !== undefined) body.internalNotes = patch.observacoes?.trim() ?? "";
-  if (patch.atendimentoId !== undefined && isUuid(patch.atendimentoId ?? "")) {
-    body.opportunityId = patch.atendimentoId;
+  if (patch.vendedorId !== undefined) {
+    if (patch.vendedorId && isUuid(patch.vendedorId)) {
+      body.sellerId = patch.vendedorId.trim();
+    } else {
+      body.unsetSeller = true;
+    }
   }
 
   if (Object.keys(body).length === 0) {
     return null; // Nada a atualizar
   }
 
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${base}/quotations/${current.id}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(body),
   });
 

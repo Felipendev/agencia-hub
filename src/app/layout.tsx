@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
@@ -14,9 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AgenciaHub — Gestão para agências de viagem",
+  title: "AgênciasHub — Gestão para agências de viagem",
   description:
-    "Controle financeiro, clientes e atendimentos em um único painel. Plataforma SaaS para agências de viagem.",
+    "Controle financeiro, clientes e cotações em um único painel. Plataforma SaaS para agências de viagem.",
 };
 
 export default function RootLayout({
@@ -31,6 +33,8 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

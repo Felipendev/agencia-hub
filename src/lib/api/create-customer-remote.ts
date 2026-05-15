@@ -36,16 +36,22 @@ function extractApiError(
  */
 export async function createCustomerRemote(
   draft: Cliente,
+  token?: string | null,
 ): Promise<Cliente | null> {
   const base = getAgenciaHubApiBaseUrl();
   if (!base || !isProbablyValidEmail(draft.email)) {
     return null;
   }
 
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const body = clienteToCreateRequest(draft);
   const res = await fetch(`${base}/customers`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(body),
   });
 

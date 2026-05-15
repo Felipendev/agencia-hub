@@ -9,7 +9,7 @@ import { formatDateTimeBR } from "@/lib/format";
 import type { TimelineEvent } from "@/types/timeline";
 
 type Props = {
-  entityType: "cliente" | "cotacao" | "atendimento";
+  entityType: "cliente" | "cotacao";
   entityId: string;
 };
 
@@ -84,8 +84,6 @@ function TimelineItem({ event }: { event: TimelineEvent }) {
     cotacao_criada: "bg-amber-500",
     cotacao_status_mudou: "bg-amber-600",
     cotacao_atualizada: "bg-amber-400",
-    atendimento_criado: "bg-emerald-500",
-    atendimento_atualizado: "bg-emerald-400",
     lancamento_criado: "bg-purple-500",
     nota_adicionada: "bg-slate-500",
   }[event.type];

@@ -22,6 +22,8 @@ type AuthContextValue = {
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
   isReady: boolean;
+  isOwner: boolean;
+  isSeller: boolean;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -118,8 +120,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             id: data.userId,
             email: data.email,
             nome: data.name,
-            empresa: "AgenciaHub",
-            role: data.role,
+            empresa: data.agencyName ?? "AgênciasHub",
+            accountKind: data.accountKind,
+            agencyId: data.agencyId,
+            agencyName: data.agencyName,
+            agencyStatus: data.agencyStatus,
+            subscriptionStatus: data.subscriptionStatus,
+            trialEndsAt: data.trialEndsAt,
+            requiresTermsAcceptance: data.requiresTermsAcceptance,
+            mustChangePassword: data.mustChangePassword,
+            linkPublicCode: data.publicLinkCode,
           };
 
           persistSession(sessao, data.token);
@@ -139,7 +149,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: trimmed,
         nome,
         empresa: "Minha Agência",
-        role: "OWNER",
+        accountKind: "AGENCY_OWNER",
       };
       const mockToken = "mock-token";
       persistSession(sessao, mockToken);
@@ -156,9 +166,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
   }, []);
 
+  const isOwner = user?.accountKind === "AGENCY_OWNER";
+  const isSeller = user?.accountKind === "SALES_AGENT";
+
   const value = useMemo(
-    () => ({ user, token, login, logout, isReady }),
-    [user, token, login, logout, isReady],
+    () => ({ user, token, login, logout, isReady, isOwner, isSeller }),
+    [user, token, login, logout, isReady, isOwner, isSeller],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

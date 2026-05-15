@@ -6,13 +6,14 @@ import type { Cliente, Cotacao } from "@/types";
 import { formatBRL, formatDateBR } from "@/lib/format";
 import { EditarCotacaoModal } from "@/components/cotacao/EditarCotacaoModal";
 import { EnviarWhatsAppModal } from "@/components/cotacao/EnviarWhatsAppModal";
-import { EditIcon, EyeIcon, UserIcon, TagIcon, WhatsAppIcon } from "@/components/icons";
+import { EditIcon, EyeIcon, UserIcon, TagIcon, WhatsAppIcon, TrashIcon } from "@/components/icons";
 
 type Props = {
   cotacao: Cotacao;
   cliente?: Cliente;
   onDragStart: (e: React.DragEvent, id: string) => void;
   onDragEnd?: () => void;
+  onDelete?: (id: string) => void;
 };
 
 function ActionButton({
@@ -39,7 +40,7 @@ function ActionButton({
   );
 }
 
-export function CotacaoCard({ cotacao, cliente, onDragStart, onDragEnd }: Props) {
+export function CotacaoCard({ cotacao, cliente, onDragStart, onDragEnd, onDelete }: Props) {
   const [editOpen, setEditOpen] = useState(false);
   const [waOpen, setWaOpen] = useState(false);
   const created = cotacao.createdAt.slice(0, 10);
@@ -87,6 +88,20 @@ export function CotacaoCard({ cotacao, cliente, onDragStart, onDragEnd }: Props)
 
         {/* Cliente */}
         <p className="mt-1.5 text-sm text-slate-700">{cliente?.nome ?? "—"}</p>
+
+        {(cotacao.origemCriacao ||
+          cotacao.criadoPorNome ||
+          cotacao.vendedorNome) && (
+          <p className="mt-1 text-[10px] leading-snug text-slate-500">
+            {cotacao.origemCriacao === "formulario_publico" ?
+              "Formulário público"
+            : cotacao.origemCriacao === "interna" ?
+              "Interna"
+            : null}
+            {cotacao.criadoPorNome ? ` · ${cotacao.criadoPorNome}` : ""}
+            {cotacao.vendedorNome ? ` · Vend.: ${cotacao.vendedorNome}` : ""}
+          </p>
+        )}
 
         {/* Tags e prioridade */}
         {(cotacao.prioridade || cotacao.tags.length > 0) && (
@@ -162,6 +177,18 @@ export function CotacaoCard({ cotacao, cliente, onDragStart, onDragEnd }: Props)
               }}
             >
               <WhatsAppIcon className="h-4 w-4 text-emerald-500" />
+            </ActionButton>
+          )}
+
+          {onDelete && (
+            <ActionButton
+              title="Excluir cotação"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(cotacao.id);
+              }}
+            >
+              <TrashIcon className="h-4 w-4 text-red-400" />
             </ActionButton>
           )}
         </div>

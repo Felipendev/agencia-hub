@@ -2,13 +2,6 @@
 
 export type ClienteStatus = "ativo" | "inativo" | "prospecto";
 
-export type AtendimentoStatus =
-  | "novo_lead"
-  | "em_atendimento"
-  | "proposta_enviada"
-  | "fechado"
-  | "cancelado";
-
 export type LancamentoTipo = "entrada" | "saida";
 
 export type LancamentoCategoria =
@@ -89,17 +82,6 @@ export interface Cliente {
   endereco?: ClienteEndereco;
 }
 
-export interface Atendimento {
-  id: string;
-  clienteId: string;
-  titulo: string;
-  destino: string;
-  valorEstimado: number;
-  status: AtendimentoStatus;
-  dataPrevistaViagem: string;
-  observacoes: string;
-}
-
 export interface LancamentoFinanceiro {
   id: string;
   descricao: string;
@@ -173,9 +155,14 @@ export interface CotacaoDetalhes {
 export interface Cotacao {
   id: string;
   clienteId: string;
-  atendimentoId?: string;
   vendedorId?: string;
   vendedorNome?: string;
+  /** interna | formulario_publico — espelha creationSource da API */
+  origemCriacao?: "interna" | "formulario_publico";
+  /** UUID da submissão pública (solicitacao_submissions) quando aplicável */
+  publicSubmissionId?: string;
+  criadoPorUsuarioId?: string;
+  criadoPorNome?: string;
   /** Título curto ex.: “Orçamento Europa” */
   titulo: string;
   /** Destino/rota — em geral montado a partir dos trechos no formulário */
@@ -218,5 +205,14 @@ export interface UsuarioSessao {
   nome: string;
   empresa: string;
   email: string;
-  role: "OWNER" | "SELLER";
+  accountKind: "AGENCY_OWNER" | "SALES_AGENT";
+  agencyId?: string;
+  agencyName?: string;
+  agencyStatus?: string;
+  subscriptionStatus?: string;
+  trialEndsAt?: string | null;
+  requiresTermsAcceptance?: boolean;
+  mustChangePassword?: boolean;
+  /** Código público curto para links (?vendedor=); não é o UUID interno. */
+  linkPublicCode?: string;
 }

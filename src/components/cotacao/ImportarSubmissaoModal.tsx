@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { XIcon } from "@/components/icons";
 import { formatDateBR, formatPhoneBR } from "@/lib/format";
 import type { SolicitacaoPublicSubmission } from "@/types/solicitacao-publica";
@@ -36,6 +35,22 @@ export function ImportarSubmissaoModal({
   const [status, setStatus] = useState<CotacaoStatus>("aguardando");
   const [observacoes, setObservacoes] = useState(submission.observacoes || "");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const matches = clientes.filter(
+      (c) =>
+        c.email.toLowerCase() === submission.email.toLowerCase() ||
+        c.telefone.replace(/\D/g, "") === submission.telefone.replace(/\D/g, ""),
+    );
+    if (matches.length > 0) {
+      setClienteId(matches[0].id);
+    } else {
+      setClienteId("");
+    }
+    setStatus("aguardando");
+    setObservacoes(submission.observacoes || "");
+  }, [open, submission, clientes]);
 
   if (!open) return null;
 

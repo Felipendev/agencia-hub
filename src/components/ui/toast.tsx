@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { createContext, useContext, useState, useCallback } from "react";
 import { CheckCircleIcon, XCircleIcon, InfoIcon, AlertTriangleIcon, XIcon } from "@/components/icons";
 
 type ToastType = "success" | "error" | "info" | "warning";
