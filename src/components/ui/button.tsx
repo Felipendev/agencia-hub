@@ -1,27 +1,34 @@
 import type { ButtonHTMLAttributes } from "react";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger";
+type Size = "sm" | "md";
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-[var(--hub-yellow)] text-[var(--hub-blue-dark)] font-semibold shadow-sm hover:bg-[var(--hub-yellow-hover)] focus-visible:ring-2 focus-visible:ring-[var(--hub-yellow)] focus-visible:ring-offset-2",
+    "bg-[var(--hub-blue-dark)] text-white shadow-[var(--hub-shadow-xs)] hover:bg-[var(--hub-blue)] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[var(--hub-blue)] focus-visible:ring-offset-2",
   secondary:
-    "bg-white text-[var(--hub-blue)] border border-[var(--hub-blue-muted)] hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-[var(--hub-blue)]",
+    "bg-white text-[var(--hub-text-primary)] border border-[var(--hub-border)] shadow-[var(--hub-shadow-xs)] hover:bg-[var(--hub-bg-subtle)] hover:border-[var(--hub-border-strong)] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-[var(--hub-blue)]",
   ghost:
-    "text-[var(--hub-blue)] hover:bg-white/10 dark:hover:bg-white/5",
+    "text-[var(--hub-text-secondary)] hover:bg-[var(--hub-bg-subtle)] hover:text-[var(--hub-text-primary)] active:scale-[0.98]",
   danger:
-    "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-red-500",
+    "bg-red-600 text-white shadow-[var(--hub-shadow-xs)] hover:bg-red-700 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2",
+};
+
+const sizes: Record<Size, string> = {
+  sm: "px-3 py-1.5 text-xs gap-1.5",
+  md: "px-4 py-2 text-sm gap-2",
 };
 
 export function Button({
   className = "",
   variant = "primary",
+  size = "md",
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
+}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: Size }) {
   return (
     <button
       type="button"
-      className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm transition-colors disabled:opacity-50 disabled:pointer-events-none ${variants[variant]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-[var(--hub-radius)] font-medium transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none ${sizes[size]} ${variants[variant]} ${className}`}
       {...props}
     />
   );

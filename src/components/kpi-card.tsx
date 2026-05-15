@@ -1,35 +1,35 @@
-import { Card } from "@/components/ui/card";
+const accentColors = {
+  neutral: { bar: "bg-[var(--hub-blue)]",    value: "text-[var(--hub-text-primary)]" },
+  yellow:  { bar: "bg-[var(--hub-yellow)]",  value: "text-amber-700" },
+  green:   { bar: "bg-emerald-500",           value: "text-emerald-700" },
+  red:     { bar: "bg-red-400",               value: "text-red-700" },
+};
 
 export function KpiCard({
   title,
   value,
   hint,
-  accent,
+  accent = "neutral",
 }: {
   title: string;
   value: string;
   hint?: string;
-  accent?: "neutral" | "yellow" | "green" | "red";
+  accent?: keyof typeof accentColors;
 }) {
-  const accentClass =
-    accent === "yellow"
-      ? "border-l-4 border-l-[var(--hub-yellow)]"
-      : accent === "green"
-        ? "border-l-4 border-l-emerald-500"
-        : accent === "red"
-          ? "border-l-4 border-l-red-400"
-          : "border-l-4 border-l-[var(--hub-blue)]";
+  const { bar, value: valueClass } = accentColors[accent];
+
   return (
-    <Card className={accentClass} padding="p-5">
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+    <div className="flex flex-col rounded-[var(--hub-radius-lg)] border border-[var(--hub-border)] bg-white p-5 shadow-[var(--hub-shadow-sm)]">
+      <div className={`mb-3 h-0.5 w-8 rounded-full ${bar}`} />
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-[var(--hub-text-muted)]">
         {title}
       </p>
-      <p className="mt-2 text-2xl font-bold tabular-nums text-[var(--hub-blue-dark)]">
+      <p className={`mt-1.5 text-2xl font-bold tabular-nums tracking-tight ${valueClass}`}>
         {value}
       </p>
-      {hint ? (
-        <p className="mt-1 text-xs text-slate-500">{hint}</p>
-      ) : null}
-    </Card>
+      {hint && (
+        <p className="mt-1 text-xs text-[var(--hub-text-muted)]">{hint}</p>
+      )}
+    </div>
   );
 }
