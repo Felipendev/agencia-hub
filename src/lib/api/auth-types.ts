@@ -34,15 +34,6 @@ export type ApiUserResponse = {
   termsAccepted?: boolean;
 };
 
-export type ApiCreateUserRequest = {
-  name: string;
-  email: string;
-  password: string;
-  accountKind: AccountKind;
-  commissionPct?: number;
-  commissionFixed?: number;
-};
-
 export type ApiUpdateUserRequest = {
   name?: string;
   password?: string;
