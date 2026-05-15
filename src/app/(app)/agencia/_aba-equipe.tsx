@@ -17,7 +17,7 @@ type Props = { token: string | null };
 export function AbaEquipe({ token }: Props) {
   const toast = useToast();
   const [users, setUsers] = useState<ApiUserResponse[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!!token);
 
   // Edição inline de comissão
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export function AbaEquipe({ token }: Props) {
   const [editFixed, setEditFixed] = useState("");
 
   useEffect(() => {
-    if (!token) { setLoading(false); return; }
+    if (!token) return;
     listUsersRemote(token)
       .then(setUsers)
       .catch(() => toast.error("Erro ao carregar usuários."))
