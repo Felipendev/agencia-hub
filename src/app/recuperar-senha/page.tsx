@@ -67,7 +67,7 @@ export default function RecuperarSenhaPage() {
           href="/"
           className="mb-8 flex items-center gap-2 text-white/90 hover:text-white"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hub-yellow)] text-sm font-bold text-[var(--hub-blue-dark)]">
+          <span className="flex h-10 w-10 items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-yellow)] text-sm font-bold text-[var(--hub-blue-dark)]">
             AH
           </span>
           <span className="text-xl font-bold">AgênciasHub</span>
@@ -80,7 +80,7 @@ export default function RecuperarSenhaPage() {
 
           {submitted ? (
             <div className="mt-6 space-y-4">
-              <div className="rounded-lg bg-green-50 border border-green-200 p-4">
+              <div className="rounded-[var(--hub-radius)] bg-green-50 border border-green-200 p-4">
                 <p className="text-sm text-green-800">
                   Se o e-mail estiver cadastrado, você receberá um código de verificação.
                   Verifique sua caixa de entrada e spam.
@@ -94,7 +94,7 @@ export default function RecuperarSenhaPage() {
                   Já tenho o código
                 </Button>
               </Link>
-              <p className="text-center text-sm text-slate-500">
+              <p className="text-center text-sm text-[var(--hub-text-muted)]">
                 <Link
                   href="/login"
                   className="font-medium text-[var(--hub-blue)] hover:underline"
@@ -105,7 +105,7 @@ export default function RecuperarSenhaPage() {
             </div>
           ) : (
             <>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-[var(--hub-text-secondary)]">
                 Informe seu e-mail para receber um código de recuperação.
               </p>
 
@@ -131,7 +131,7 @@ export default function RecuperarSenhaPage() {
                 </Button>
               </form>
 
-              <p className="mt-6 text-center text-sm text-slate-500">
+              <p className="mt-6 text-center text-sm text-[var(--hub-text-muted)]">
                 <Link
                   href="/login"
                   className="font-medium text-[var(--hub-blue)] hover:underline"

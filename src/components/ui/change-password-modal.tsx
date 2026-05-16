@@ -73,7 +73,7 @@ export function ChangePasswordModal() {
         <h2 className="text-xl font-bold text-[var(--hub-blue-dark)]">
           Alterar senha obrigatória
         </h2>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-[var(--hub-text-secondary)]">
           Por segurança, você precisa definir uma nova senha antes de continuar usando o sistema.
         </p>
 

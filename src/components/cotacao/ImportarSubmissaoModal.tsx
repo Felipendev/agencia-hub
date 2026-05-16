@@ -92,7 +92,7 @@ export function ImportarSubmissaoModal({
           </h2>
           <button
             onClick={onClose}
-            className="rounded p-1 transition-colors hover:bg-slate-100"
+            className="rounded p-1 transition-colors hover:bg-[var(--hub-bg-subtle)]"
             aria-label="Fechar"
           >
             <XIcon className="h-5 w-5" />
@@ -105,37 +105,37 @@ export function ImportarSubmissaoModal({
             <h3 className="mb-3 text-sm font-semibold text-[var(--hub-blue-dark)]">
               Dados da Solicitação
             </h3>
-            <div className="grid gap-3 rounded-lg bg-slate-50 p-4 text-sm">
+            <div className="grid gap-3 rounded-[var(--hub-radius)] bg-[var(--hub-bg-subtle)] p-4 text-sm">
               <div className="grid gap-1">
-                <span className="font-medium text-slate-600">Nome:</span>
+                <span className="font-medium text-[var(--hub-text-secondary)]">Nome:</span>
                 <span className="text-[var(--hub-blue-dark)]">
                   {submission.nome}
                 </span>
               </div>
               <div className="grid gap-1">
-                <span className="font-medium text-slate-600">E-mail:</span>
+                <span className="font-medium text-[var(--hub-text-secondary)]">E-mail:</span>
                 <span className="text-[var(--hub-blue-dark)]">
                   {submission.email || "—"}
                 </span>
               </div>
               <div className="grid gap-1">
-                <span className="font-medium text-slate-600">Telefone:</span>
+                <span className="font-medium text-[var(--hub-text-secondary)]">Telefone:</span>
                 <span className="text-[var(--hub-blue-dark)]">
                   {formatPhoneBR(submission.telefone)}
                 </span>
               </div>
               <div className="grid gap-1">
-                <span className="font-medium text-slate-600">Destino:</span>
+                <span className="font-medium text-[var(--hub-text-secondary)]">Destino:</span>
                 <span className="text-[var(--hub-blue-dark)]">{destinos}</span>
               </div>
               <div className="grid gap-1">
-                <span className="font-medium text-slate-600">Origem:</span>
+                <span className="font-medium text-[var(--hub-text-secondary)]">Origem:</span>
                 <span className="text-[var(--hub-blue-dark)]">
                   {submission.detalhes.origem || "—"}
                 </span>
               </div>
               <div className="grid gap-1">
-                <span className="font-medium text-slate-600">Datas:</span>
+                <span className="font-medium text-[var(--hub-text-secondary)]">Datas:</span>
                 <span className="text-[var(--hub-blue-dark)]">
                   {submission.detalhes.dataIda
                     ? formatDateBR(submission.detalhes.dataIda)
@@ -147,7 +147,7 @@ export function ImportarSubmissaoModal({
                 </span>
               </div>
               <div className="grid gap-1">
-                <span className="font-medium text-slate-600">Passageiros:</span>
+                <span className="font-medium text-[var(--hub-text-secondary)]">Passageiros:</span>
                 <span className="text-[var(--hub-blue-dark)]">
                   {submission.detalhes.adultos || 0} adulto(s),{" "}
                   {submission.detalhes.criancas || 0} criança(s),{" "}
@@ -155,7 +155,7 @@ export function ImportarSubmissaoModal({
                 </span>
               </div>
               <div className="grid gap-1">
-                <span className="font-medium text-slate-600">Recebido em:</span>
+                <span className="font-medium text-[var(--hub-text-secondary)]">Recebido em:</span>
                 <span className="text-[var(--hub-blue-dark)]">
                   {formatDateBR(submission.createdAt.slice(0, 10))} às{" "}
                   {new Date(submission.createdAt).toLocaleTimeString("pt-BR", {
@@ -171,7 +171,7 @@ export function ImportarSubmissaoModal({
           <div>
             <Label htmlFor="cliente-select">Cliente</Label>
             {clientesMatch.length > 0 && (
-              <div className="mb-2 rounded-lg bg-amber-50 p-3 text-sm">
+              <div className="mb-2 rounded-[var(--hub-radius)] bg-amber-50 p-3 text-sm">
                 <p className="font-medium text-amber-900">
                   ⚠️ Cliente(s) encontrado(s) com mesmo e-mail ou telefone:
                 </p>

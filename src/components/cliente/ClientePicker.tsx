@@ -95,13 +95,13 @@ export function ClientePicker({
         </div>
 
         {selected && !disabled ? (
-          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+          <div className="flex flex-wrap items-center gap-2 rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-3 py-2">
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium text-[var(--hub-blue-dark)]">
                 {selected.nome}
               </p>
               {selected.email ? (
-                <p className="truncate text-xs text-slate-500">
+                <p className="truncate text-xs text-[var(--hub-text-muted)]">
                   {selected.email}
                 </p>
               ) : null}
@@ -118,7 +118,7 @@ export function ClientePicker({
         ) : null}
 
         {selected && disabled ? (
-          <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+          <p className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-3 py-2 text-sm">
             {selected.nome}
           </p>
         ) : null}
@@ -137,14 +137,14 @@ export function ClientePicker({
               autoComplete="off"
             />
             {showHintMinChars ? (
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-[var(--hub-text-muted)]">
                 Digite {CLIENTE_SEARCH_MIN_CHARS} ou mais caracteres para buscar.
               </p>
             ) : null}
             {showResults ? (
-              <ul className="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+              <ul className="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white py-1 shadow-lg">
                 {filtered.length === 0 ? (
-                  <li className="px-3 py-2 text-sm text-slate-500">
+                  <li className="px-3 py-2 text-sm text-[var(--hub-text-muted)]">
                     Nenhum cliente encontrado.
                   </li>
                 ) : (
@@ -152,14 +152,14 @@ export function ClientePicker({
                     <li key={c.id}>
                       <button
                         type="button"
-                        className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50"
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-[var(--hub-bg-subtle)]"
                         onClick={() => pick(c.id)}
                       >
                         <span className="font-medium text-[var(--hub-blue-dark)]">
                           {c.nome}
                         </span>
                         {c.email ? (
-                          <span className="ml-2 text-xs text-slate-500">
+                          <span className="ml-2 text-xs text-[var(--hub-text-muted)]">
                             {c.email}
                           </span>
                         ) : null}

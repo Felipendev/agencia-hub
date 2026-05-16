@@ -91,7 +91,7 @@ export function VerificationCodeInput({
           onChange={(e) => handleChange(i, e.target.value)}
           onKeyDown={(e) => handleKeyDown(i, e)}
           onPaste={handlePaste}
-          className="h-12 w-10 rounded-lg border border-[var(--hub-border)] bg-white text-center text-lg font-semibold text-[var(--hub-blue-dark)] focus:border-[var(--hub-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--hub-blue)]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="h-12 w-10 rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white text-center text-lg font-semibold text-[var(--hub-blue-dark)] focus:border-[var(--hub-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--hub-blue)]/20 disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label={`Dígito ${i + 1} do código de verificação`}
         />
       ))}

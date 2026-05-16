@@ -11,7 +11,7 @@ export function PasswordInput(props: Omit<React.InputHTMLAttributes<HTMLInputEle
       <button
         type="button"
         onClick={() => setShow(!show)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--hub-text-muted)] hover:text-[var(--hub-text-secondary)]"
         tabIndex={-1}
         aria-label={show ? "Ocultar senha" : "Mostrar senha"}
       >

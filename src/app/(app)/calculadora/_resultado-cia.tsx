@@ -54,7 +54,7 @@ export function ResultadoCiaCard({ resultado: r, qtdPessoas, temMala, corCia }: 
           </div>
         )}
         {r.totalMalas > 0 && (
-          <div className="flex items-center justify-between border-t border-slate-100 pt-1.5">
+          <div className="flex items-center justify-between border-t border-[var(--hub-border)] pt-1.5">
             <span className="font-semibold text-[var(--hub-text-primary)]">Total</span>
             <span className="font-bold tabular-nums text-[var(--hub-blue-dark)]">{fmtBRL(r.precoTotalComMala)}</span>
           </div>

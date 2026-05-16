@@ -102,11 +102,11 @@ export function GlobalSearch() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-500 transition-colors hover:border-slate-300 hover:text-slate-700"
+        className="flex items-center gap-2 rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white px-3 py-1.5 text-sm text-[var(--hub-text-muted)] transition-colors hover:border-[var(--hub-border)] hover:text-[var(--hub-text-primary)]"
       >
         <SearchIcon className="h-4 w-4" />
         <span className="hidden sm:inline">Buscar...</span>
-        <kbd className="hidden rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-xs font-mono text-slate-600 sm:inline">
+        <kbd className="hidden rounded border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-1.5 py-0.5 text-xs font-mono text-[var(--hub-text-secondary)] sm:inline">
           ⌘K
         </kbd>
       </button>
@@ -115,9 +115,9 @@ export function GlobalSearch() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 pt-[15vh]">
-      <div className="w-full max-w-2xl rounded-xl border border-[var(--hub-border)] bg-white shadow-2xl">
+      <div className="w-full max-w-2xl rounded-[var(--hub-radius-lg)] border border-[var(--hub-border)] bg-white shadow-2xl">
         <div className="flex items-center gap-3 border-b border-[var(--hub-border)] px-4 py-3">
-          <SearchIcon className="h-5 w-5 text-slate-400" />
+          <SearchIcon className="h-5 w-5 text-[var(--hub-text-muted)]" />
           <input
             ref={inputRef}
             type="text"
@@ -129,7 +129,7 @@ export function GlobalSearch() {
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+            className="rounded p-1 text-[var(--hub-text-muted)] transition-colors hover:bg-[var(--hub-bg-subtle)] hover:text-[var(--hub-text-secondary)]"
             aria-label="Fechar"
           >
             <XIcon className="h-5 w-5" />
@@ -138,11 +138,11 @@ export function GlobalSearch() {
 
         <div className="max-h-96 overflow-y-auto">
           {query.trim() === "" ? (
-            <div className="px-4 py-8 text-center text-sm text-slate-500">
+            <div className="px-4 py-8 text-center text-sm text-[var(--hub-text-muted)]">
               Digite para buscar...
             </div>
           ) : results.length === 0 ? (
-            <div className="px-4 py-8 text-center text-sm text-slate-500">
+            <div className="px-4 py-8 text-center text-sm text-[var(--hub-text-muted)]">
               Nenhum resultado encontrado
             </div>
           ) : (
@@ -152,7 +152,7 @@ export function GlobalSearch() {
                   <button
                     type="button"
                     onClick={() => handleSelect(r)}
-                    className="flex w-full items-start gap-3 border-b border-[var(--hub-border)] px-4 py-3 text-left transition-colors hover:bg-slate-50 last:border-b-0"
+                    className="flex w-full items-start gap-3 border-b border-[var(--hub-border)] px-4 py-3 text-left transition-colors hover:bg-[var(--hub-bg-subtle)] last:border-b-0"
                   >
                     <span
                       className={`mt-0.5 rounded px-2 py-0.5 text-xs font-semibold ${
@@ -167,7 +167,7 @@ export function GlobalSearch() {
                       <p className="font-medium text-[var(--hub-blue-dark)]">
                         {r.title}
                       </p>
-                      <p className="text-sm text-slate-600">{r.subtitle}</p>
+                      <p className="text-sm text-[var(--hub-text-secondary)]">{r.subtitle}</p>
                     </div>
                   </button>
                 </li>
@@ -176,8 +176,8 @@ export function GlobalSearch() {
           )}
         </div>
 
-        <div className="border-t border-[var(--hub-border)] px-4 py-2 text-xs text-slate-500">
-          <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono">
+        <div className="border-t border-[var(--hub-border)] px-4 py-2 text-xs text-[var(--hub-text-muted)]">
+          <kbd className="rounded border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-1.5 py-0.5 font-mono">
             ESC
           </kbd>{" "}
           para fechar

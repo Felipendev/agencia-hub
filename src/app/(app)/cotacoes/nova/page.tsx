@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ClientePicker } from "@/components/cliente/ClientePicker";
 import { BackButton } from "@/components/ui/back-button";
+import { PageHeader } from "@/components/layout/page-header";
 import type { CotacaoDetalhes } from "@/types";
 
 export default function NovaCotacaoPage() {
@@ -100,13 +101,10 @@ export default function NovaCotacaoPage() {
     <div className="mx-auto w-full max-w-[92rem] space-y-8 px-1 sm:px-0">
       <div>
         <BackButton href="/cotacoes" label="Cotações" />
-        <h1 className="mt-4 text-2xl font-bold text-[var(--hub-blue-dark)] sm:text-3xl">
-          Nova cotação
-        </h1>
-        <p className="mt-1 max-w-3xl text-sm text-[var(--hub-text-secondary)] sm:text-base">
-          Mesma largura e estilo de leitura do formulário público enviado ao
-          cliente — preencha com calma.
-        </p>
+        <PageHeader
+          title="Nova cotação"
+          description="Mesma largura e estilo de leitura do formulário público enviado ao cliente — preencha com calma."
+        />
       </div>
 
       <form

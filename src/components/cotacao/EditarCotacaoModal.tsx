@@ -16,7 +16,7 @@ import type { Cotacao, CotacaoStatus } from "@/types";
 
 // Funil principal (sem arquivo)
 const FUNIL_STEPS: { id: CotacaoStatus; label: string; color: string }[] = [
-  { id: "aguardando",        label: "Aguardando",         color: "bg-slate-400" },
+  { id: "aguardando",        label: "Aguardando",         color: "bg-[var(--hub-text-muted)]" },
   { id: "em_cotacao",        label: "Em cotação",          color: "bg-amber-400" },
   { id: "aguardando_cliente",label: "Aguard. cliente",     color: "bg-sky-500"   },
   { id: "aprovado",          label: "Aprovado",            color: "bg-emerald-500"},
@@ -152,18 +152,18 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="flex max-h-[92vh] w-full max-w-2xl flex-col rounded-xl border border-[var(--hub-border)] bg-white shadow-2xl">
+      <div className="flex max-h-[92vh] w-full max-w-2xl flex-col rounded-[var(--hub-radius-lg)] border border-[var(--hub-border)] bg-white shadow-2xl">
 
         {/* ── Header ── */}
         <div className="flex items-start justify-between border-b border-[var(--hub-border)] px-6 py-4">
           <div className="min-w-0">
             <h2 className="text-lg font-bold text-[var(--hub-blue-dark)]">Editar Cotação</h2>
-            <p className="truncate text-sm text-slate-500">{cotacao.titulo}</p>
+            <p className="truncate text-sm text-[var(--hub-text-muted)]">{cotacao.titulo}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="ml-4 shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+            className="ml-4 shrink-0 rounded-[var(--hub-radius)] p-1.5 text-[var(--hub-text-muted)] transition-colors hover:bg-[var(--hub-bg-subtle)] hover:text-[var(--hub-text-secondary)]"
             aria-label="Fechar"
           >
             <XIcon className="h-5 w-5" />
@@ -171,8 +171,8 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
         </div>
 
         {/* ── Funil de status ── */}
-        <div className="border-b border-[var(--hub-border)] bg-slate-50 px-6 py-3">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+        <div className="border-b border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-6 py-3">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--hub-text-muted)]">
             Status da cotação
           </p>
           <div className="flex items-center gap-1">
@@ -189,8 +189,8 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
                     isActive
                       ? `${step.color} text-white shadow-sm`
                       : isPast
-                        ? "bg-slate-200 text-slate-500"
-                        : "bg-white text-slate-500 ring-1 ring-slate-200 hover:bg-slate-100"
+                        ? "bg-[var(--hub-border)] text-[var(--hub-text-muted)]"
+                        : "bg-white text-[var(--hub-text-muted)] ring-1 ring-slate-200 hover:bg-[var(--hub-bg-subtle)]"
                   }`}
                 >
                   <span className="hidden sm:inline">{step.label}</span>
@@ -202,7 +202,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
               );
             })}
             {/* Arquivo */}
-            <div className="mx-1 h-4 w-px bg-slate-300" />
+            <div className="mx-1 h-4 w-px bg-[var(--hub-border)]" />
             {(["expirada", "cancelada"] as CotacaoStatus[]).map((s) => (
               <button
                 key={s}
@@ -211,8 +211,8 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
                 title={COTACAO_STATUS_LABELS[s]}
                 className={`rounded px-2 py-1.5 text-[11px] font-semibold transition-all ${
                   status === s
-                    ? "bg-slate-500 text-white"
-                    : "bg-white text-slate-400 ring-1 ring-slate-200 hover:bg-slate-100"
+                    ? "bg-[var(--hub-bg-subtle)]0 text-white"
+                    : "bg-white text-[var(--hub-text-muted)] ring-1 ring-slate-200 hover:bg-[var(--hub-bg-subtle)]"
                 }`}
               >
                 <span className="hidden sm:inline">{COTACAO_STATUS_LABELS[s]}</span>
@@ -232,7 +232,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
               className={`px-4 py-2.5 text-sm font-medium transition-colors ${
                 tab === t.id
                   ? "border-b-2 border-[var(--hub-blue)] text-[var(--hub-blue)]"
-                  : "text-slate-500 hover:text-slate-700"
+                  : "text-[var(--hub-text-muted)] hover:text-[var(--hub-text-primary)]"
               }`}
             >
               {t.label}
@@ -260,7 +260,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
               <div>
                 <Label htmlFor="eq-cliente">Cliente *</Label>
                 {clienteSelecionado && (
-                  <div className="mb-2 flex items-center gap-2 rounded-lg border border-[var(--hub-border)] bg-slate-50 px-3 py-2 text-sm">
+                  <div className="mb-2 flex items-center gap-2 rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-3 py-2 text-sm">
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--hub-blue)] text-xs font-bold text-white">
                       {clienteSelecionado.nome.charAt(0).toUpperCase()}
                     </span>
@@ -268,14 +268,14 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
                       <p className="truncate font-medium text-[var(--hub-blue-dark)]">
                         {clienteSelecionado.nome}
                       </p>
-                      <p className="truncate text-xs text-slate-500">
+                      <p className="truncate text-xs text-[var(--hub-text-muted)]">
                         {clienteSelecionado.email || clienteSelecionado.telefone}
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setClienteId("")}
-                      className="shrink-0 text-xs text-slate-400 hover:text-red-500"
+                      className="shrink-0 text-xs text-[var(--hub-text-muted)] hover:text-red-500"
                     >
                       Trocar
                     </button>
@@ -312,7 +312,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
                     onChange={(e) => setValorTotal(e.target.value)}
                   />
                   {parseFloat(valorTotal.replace(",", ".")) > 0 && (
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-[var(--hub-text-muted)]">
                       {formatBRL(parseFloat(valorTotal.replace(",", ".")))}
                     </p>
                   )}
@@ -345,14 +345,14 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
                 </div>
               </div>
 
-              <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-[var(--hub-border)] bg-slate-50 px-4 py-3">
+              <label className="flex cursor-pointer items-center gap-3 rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-4 py-3">
                 <input
                   type="checkbox"
                   checked={prioridade}
                   onChange={(e) => setPrioridade(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 accent-[var(--hub-yellow)]"
+                  className="h-4 w-4 rounded border-[var(--hub-border)] accent-[var(--hub-yellow)]"
                 />
-                <span className="text-sm font-medium text-slate-700">
+                <span className="text-sm font-medium text-[var(--hub-text-primary)]">
                   Marcar como prioridade
                 </span>
               </label>
@@ -427,10 +427,10 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
                     return (
                       <label
                         key={s.id}
-                        className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
+                        className={`flex cursor-pointer items-center gap-2 rounded-[var(--hub-radius)] border px-3 py-2 text-sm transition-colors ${
                           checked
                             ? "border-[var(--hub-blue)] bg-sky-50 text-[var(--hub-blue-dark)]"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                            : "border-[var(--hub-border)] bg-white text-[var(--hub-text-secondary)] hover:border-[var(--hub-border)]"
                         }`}
                       >
                         <input
@@ -463,7 +463,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
                       <button
                         type="button"
                         onClick={() => set(Math.max(0, value - 1))}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-lg font-bold text-slate-600 hover:bg-slate-50"
+                        className="flex h-8 w-8 items-center justify-center rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white text-lg font-bold text-[var(--hub-text-secondary)] hover:bg-[var(--hub-bg-subtle)]"
                       >
                         −
                       </button>
@@ -473,7 +473,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
                       <button
                         type="button"
                         onClick={() => set(value + 1)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-lg font-bold text-slate-600 hover:bg-slate-50"
+                        className="flex h-8 w-8 items-center justify-center rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white text-lg font-bold text-[var(--hub-text-secondary)] hover:bg-[var(--hub-bg-subtle)]"
                       >
                         +
                       </button>
@@ -494,7 +494,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
                 </div>
               )}
 
-              <div className="rounded-lg border border-[var(--hub-border)] bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              <div className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-4 py-3 text-sm text-[var(--hub-text-secondary)]">
                 Total:{" "}
                 <span className="font-semibold text-[var(--hub-blue-dark)]">
                   {adultos + criancas + bebes} passageiro{adultos + criancas + bebes !== 1 ? "s" : ""}
@@ -535,7 +535,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
 
         {/* ── Footer ── */}
         <div className="flex items-center justify-between border-t border-[var(--hub-border)] px-6 py-4">
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-[var(--hub-text-muted)]">
             ID: {cotacao.id.slice(0, 8).toUpperCase()}
           </p>
           <div className="flex gap-3">

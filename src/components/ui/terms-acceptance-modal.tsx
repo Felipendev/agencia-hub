@@ -49,7 +49,7 @@ export function TermsAcceptanceModal() {
         <h2 className="text-xl font-bold text-[var(--hub-blue-dark)]">
           Aceite os Termos de Uso
         </h2>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-[var(--hub-text-secondary)]">
           Uma nova versão dos Termos de Uso foi publicada. Para continuar usando a plataforma, é necessário aceitar os novos termos.
         </p>
 
@@ -59,9 +59,9 @@ export function TermsAcceptanceModal() {
             id="terms-accept"
             checked={accepted}
             onChange={(e) => setAccepted(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-slate-300"
+            className="mt-0.5 h-4 w-4 rounded border-[var(--hub-border)]"
           />
-          <label htmlFor="terms-accept" className="text-sm text-slate-700">
+          <label htmlFor="terms-accept" className="text-sm text-[var(--hub-text-primary)]">
             Li e aceito os{" "}
             <Link href="/termos" target="_blank" className="text-[var(--hub-blue)] hover:underline">
               Termos de Uso

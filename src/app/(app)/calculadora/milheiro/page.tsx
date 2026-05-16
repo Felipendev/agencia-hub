@@ -165,7 +165,7 @@ function CiaCard({
       </div>
 
       {/* Botoes */}
-      <div className="mt-3 border-t border-slate-100 pt-3">
+      <div className="mt-3 border-t border-[var(--hub-border)] pt-3">
         {editando ? (
           <div className="flex gap-2">
             <Button type="button" onClick={salvar} className="flex-1 !py-1.5 text-xs">

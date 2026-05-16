@@ -72,7 +72,7 @@ function ClassificacaoHub({
       className="flex flex-col items-end gap-1.5"
       title="Classifique esse cliente"
     >
-      <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+      <span className="text-[11px] font-semibold uppercase tracking-wide text-[var(--hub-text-muted)]">
         Etapa no funil
       </span>
       <div
@@ -92,7 +92,7 @@ function ClassificacaoHub({
                   className={`h-0.5 w-2 shrink-0 sm:w-3 ${
                     value != null && nivel <= value ?
                       "bg-[var(--hub-blue)]"
-                    : "bg-slate-200"
+                    : "bg-[var(--hub-border)]"
                   }`}
                   aria-hidden
                 />
@@ -108,7 +108,7 @@ function ClassificacaoHub({
                     "bg-[var(--hub-yellow)] text-[var(--hub-blue-dark)] ring-2 ring-[var(--hub-yellow-hover)] ring-offset-1 ring-offset-white"
                   : reached ?
                     "bg-[var(--hub-blue)] text-white shadow-sm"
-                  : "border-2 border-slate-200 bg-white text-slate-400 hover:border-slate-300 hover:text-slate-600"
+                  : "border-2 border-[var(--hub-border)] bg-white text-[var(--hub-text-muted)] hover:border-[var(--hub-border)] hover:text-[var(--hub-text-secondary)]"
                 }`}
                 aria-pressed={Boolean(value && nivel <= value)}
               >
@@ -121,7 +121,7 @@ function ClassificacaoHub({
       <div className="flex max-w-[11rem] flex-col items-end gap-0 text-right">
         <span
           className={`text-[11px] font-semibold leading-tight ${
-            value ? "text-[var(--hub-blue-dark)]" : "text-slate-400"
+            value ? "text-[var(--hub-blue-dark)]" : "text-[var(--hub-text-muted)]"
           }`}
           aria-live="polite"
         >
@@ -180,7 +180,7 @@ function TipoSwitch({
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className={`relative inline-flex h-7 w-12 shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hub-blue)] focus-visible:ring-offset-2 ${
-          checked ? "bg-sky-600" : "bg-slate-200"
+          checked ? "bg-sky-600" : "bg-[var(--hub-border)]"
         }`}
       >
         <span
@@ -189,7 +189,7 @@ function TipoSwitch({
           }`}
         />
       </button>
-      <span className="text-sm font-medium text-slate-700">{label}</span>
+      <span className="text-sm font-medium text-[var(--hub-text-primary)]">{label}</span>
     </label>
   );
 }
@@ -411,7 +411,7 @@ export function NovoClienteModal({ open, onClose, onCreated }: Props) {
           </h2>
           <button
             type="button"
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100"
+            className="rounded-[var(--hub-radius)] p-1.5 text-[var(--hub-text-muted)] hover:bg-[var(--hub-bg-subtle)]"
             onClick={handleClose}
             aria-label="Fechar"
           >
@@ -509,7 +509,7 @@ export function NovoClienteModal({ open, onClose, onCreated }: Props) {
                   className={`border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
                     tab === t.id
                       ? "border-[var(--hub-blue)] text-[var(--hub-blue-dark)]"
-                      : "border-transparent text-slate-500 hover:text-slate-700"
+                      : "border-transparent text-[var(--hub-text-muted)] hover:text-[var(--hub-text-primary)]"
                   }`}
                 >
                   {t.label}
@@ -525,7 +525,7 @@ export function NovoClienteModal({ open, onClose, onCreated }: Props) {
                   <Label htmlFor="nc-cel">Celular</Label>
                   <div className="mt-1 flex gap-2">
                     <span
-                      className="flex shrink-0 items-center rounded-lg border border-slate-200 bg-slate-50 px-2 text-xs text-slate-600"
+                      className="flex shrink-0 items-center rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-2 text-xs text-[var(--hub-text-secondary)]"
                       title="Brasil"
                     >
                       🇧🇷 +55
@@ -585,14 +585,14 @@ export function NovoClienteModal({ open, onClose, onCreated }: Props) {
                     className="mt-1"
                   />
                 </div>
-                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-100 bg-slate-50/80 px-3 py-2">
+                <label className="flex cursor-pointer items-center gap-3 rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)]/80 px-3 py-2">
                   <input
                     type="checkbox"
-                    className="h-4 w-4 rounded border-slate-300 text-[var(--hub-blue)]"
+                    className="h-4 w-4 rounded border-[var(--hub-border)] text-[var(--hub-blue)]"
                     checked={aceitaComunicacao}
                     onChange={(e) => setAceitaComunicacao(e.target.checked)}
                   />
-                  <span className="text-sm text-slate-700">
+                  <span className="text-sm text-[var(--hub-text-primary)]">
                     Aceita receber comunicação via e-mail / WhatsApp
                   </span>
                 </label>
@@ -843,7 +843,7 @@ export function NovoClienteModal({ open, onClose, onCreated }: Props) {
                       Telefone contato de emergência
                     </Label>
                     <div className="mt-1 flex gap-2">
-                      <span className="flex shrink-0 items-center rounded-lg border border-slate-200 bg-slate-50 px-2 text-xs text-slate-600">
+                      <span className="flex shrink-0 items-center rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-2 text-xs text-[var(--hub-text-secondary)]">
                         🇧🇷 +55
                       </span>
                       <Input
@@ -861,7 +861,7 @@ export function NovoClienteModal({ open, onClose, onCreated }: Props) {
                     </div>
                   </div>
                 </div>
-                <div className="grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-2">
+                <div className="grid gap-3 border-t border-[var(--hub-border)] pt-4 sm:grid-cols-2">
                   <div>
                     <Label htmlFor="nc-dest">Destino de interesse</Label>
                     <Input

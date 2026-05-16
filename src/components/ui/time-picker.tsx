@@ -59,14 +59,14 @@ export function TimePicker({ value, onChange, placeholder = "00:00", className =
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setOpen(true)}
-        className="w-full rounded-lg border border-[var(--hub-border)] bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-[var(--hub-blue)] focus:outline-none focus:ring-1 focus:ring-[var(--hub-blue)]"
+        className="w-full rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white px-3 py-2 text-sm text-[var(--hub-text-primary)] placeholder:text-[var(--hub-text-muted)] focus:border-[var(--hub-blue)] focus:outline-none focus:ring-1 focus:ring-[var(--hub-blue)]"
         autoComplete="off"
       />
 
       {open && (
         <div
           ref={listRef}
-          className="absolute left-0 top-full z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-[var(--hub-border)] bg-white shadow-lg"
+          className="absolute left-0 top-full z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white shadow-lg"
         >
           {HORARIOS.map((h) => (
             <button
@@ -79,7 +79,7 @@ export function TimePicker({ value, onChange, placeholder = "00:00", className =
               className={`block w-full px-3 py-1.5 text-left text-sm transition-colors ${
                 h === value
                   ? "bg-[var(--hub-blue)] text-white font-medium"
-                  : "text-slate-700 hover:bg-slate-50"
+                  : "text-[var(--hub-text-primary)] hover:bg-[var(--hub-bg-subtle)]"
               }`}
             >
               {h}

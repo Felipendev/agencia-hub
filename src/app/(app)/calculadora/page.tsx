@@ -182,7 +182,7 @@ function OpcaoVooForm({
         </div>
       </div>
 
-      <div className="mt-3 border-t border-slate-100 pt-3">
+      <div className="mt-3 border-t border-[var(--hub-border)] pt-3">
         <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--hub-text-muted)]">Lucro</p>
         <div className="flex flex-wrap items-center gap-3">
           <label className="flex items-center gap-1.5 text-xs">

@@ -9,7 +9,7 @@ export function BackButton({ href, label }: Props) {
   return (
     <Link
       href={href}
-      className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--hub-border)] bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-[var(--hub-blue-dark)]"
+      className="inline-flex items-center gap-1.5 rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white px-3 py-1.5 text-sm font-medium text-[var(--hub-text-primary)] shadow-sm transition-colors hover:border-[var(--hub-border)] hover:bg-[var(--hub-bg-subtle)] hover:text-[var(--hub-blue-dark)]"
     >
       <svg
         viewBox="0 0 20 20"

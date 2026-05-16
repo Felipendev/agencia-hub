@@ -44,7 +44,7 @@ export function TimelineView({ entityType, entityId }: Props) {
       </div>
 
       {showNoteForm && (
-        <div className="rounded-lg border border-[var(--hub-border)] bg-slate-50 p-4">
+        <div className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] p-4">
           <Textarea
             value={noteText}
             onChange={(e) => setNoteText(e.target.value)}
@@ -63,11 +63,11 @@ export function TimelineView({ entityType, entityId }: Props) {
       )}
 
       {events.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
+        <div className="rounded-[var(--hub-radius)] border border-dashed border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-4 py-8 text-center text-sm text-[var(--hub-text-muted)]">
           Nenhuma atividade registrada ainda
         </div>
       ) : (
-        <div className="relative space-y-4 border-l-2 border-slate-200 pl-6">
+        <div className="relative space-y-4 border-l-2 border-[var(--hub-border)] pl-6">
           {events.map((event) => (
             <TimelineItem key={event.id} event={event} />
           ))}
@@ -85,7 +85,7 @@ function TimelineItem({ event }: { event: TimelineEvent }) {
     cotacao_status_mudou: "bg-amber-600",
     cotacao_atualizada: "bg-amber-400",
     lancamento_criado: "bg-purple-500",
-    nota_adicionada: "bg-slate-500",
+    nota_adicionada: "bg-[var(--hub-bg-subtle)]0",
   }[event.type];
 
   return (
@@ -95,16 +95,16 @@ function TimelineItem({ event }: { event: TimelineEvent }) {
       >
         <ClockIcon className="h-3.5 w-3.5 text-white" />
       </div>
-      <div className="rounded-lg border border-[var(--hub-border)] bg-white p-4">
+      <div className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1">
             <p className="font-semibold text-[var(--hub-blue-dark)]">
               {event.title}
             </p>
-            <p className="mt-1 text-sm text-slate-700">{event.description}</p>
+            <p className="mt-1 text-sm text-[var(--hub-text-primary)]">{event.description}</p>
           </div>
         </div>
-        <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
+        <div className="mt-2 flex items-center gap-2 text-xs text-[var(--hub-text-muted)]">
           <span>{formatDateTimeBR(event.createdAt)}</span>
           <span>·</span>
           <span>{event.createdBy}</span>

@@ -221,7 +221,7 @@ export function LinkSolicitacaoModal({
           </h2>
           <button
             type="button"
-            className="rounded-lg p-2 text-slate-600 hover:bg-slate-100"
+            className="rounded-[var(--hub-radius)] p-2 text-[var(--hub-text-secondary)] hover:bg-[var(--hub-bg-subtle)]"
             onClick={onClose}
             aria-label="Fechar"
           >
@@ -231,11 +231,11 @@ export function LinkSolicitacaoModal({
 
         {view === "main" ? (
           <div className="space-y-4 px-5 py-4">
-            <div className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3">
+            <div className="rounded-[var(--hub-radius-lg)] border border-sky-200 bg-sky-50 px-4 py-3">
               <p className="text-sm font-semibold text-[var(--hub-blue-dark)]">
                 Link principal da agência
               </p>
-              <p className="mt-2 break-all font-mono text-xs text-slate-800">
+              <p className="mt-2 break-all font-mono text-xs text-[var(--hub-text-primary)]">
                 {publicUrl || "Carregando identificador…"}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -260,18 +260,18 @@ export function LinkSolicitacaoModal({
               </div>
             </div>
 
-            <p className="text-xs leading-relaxed text-slate-600">
+            <p className="text-xs leading-relaxed text-[var(--hub-text-secondary)]">
               {sellerPublicCode?.trim() ?
                 <>
                   O link inclui{" "}
-                  <code className="rounded bg-slate-100 px-1 text-[11px]">?vendedor=</code>{" "}
+                  <code className="rounded bg-[var(--hub-bg-subtle)] px-1 text-[11px]">?vendedor=</code>{" "}
                   com seu código público para atribuir envios a você. Remova esse parâmetro
                   para um link genérico da agência.
                 </>
               : user?.id && isUuid(user.id) ?
                 <>
                   O link inclui{" "}
-                  <code className="rounded bg-slate-100 px-1 text-[11px]">?vendedor=</code>{" "}
+                  <code className="rounded bg-[var(--hub-bg-subtle)] px-1 text-[11px]">?vendedor=</code>{" "}
                   com o seu usuário para que envios fiquem associados a você. Remova esse
                   parâmetro da URL para um link genérico da agência.
                 </>
@@ -279,8 +279,8 @@ export function LinkSolicitacaoModal({
             </p>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-lg border border-slate-200 p-3">
-                <p className="text-xs text-slate-600">
+              <div className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] p-3">
+                <p className="text-xs text-[var(--hub-text-secondary)]">
                   Crie identificadores diferentes para afiliados ou canais (salve
                   em Personalizar alterando o campo do link).
                 </p>
@@ -292,8 +292,8 @@ export function LinkSolicitacaoModal({
                   Criar / ajustar link
                 </Button>
               </div>
-              <div className="rounded-lg border border-slate-200 p-3">
-                <p className="text-xs text-slate-600">
+              <div className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] p-3">
+                <p className="text-xs text-[var(--hub-text-secondary)]">
                   Logo, textos e ícones de contato com links clicáveis.
                 </p>
                 <Button
@@ -329,7 +329,7 @@ export function LinkSolicitacaoModal({
                     placeholder="ex.: minha-agencia"
                     className="mt-1 font-mono text-sm"
                   />
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-[var(--hub-text-muted)]">
                     URL pública: /solicitacao/[identificador] — letras minúsculas,
                     números e hífen.
                   </p>
@@ -410,7 +410,7 @@ export function LinkSolicitacaoModal({
                     {config.linksSociais.map((l) => (
                       <li
                         key={l.id}
-                        className="grid gap-2 rounded-lg border border-slate-200 p-2 sm:grid-cols-[1fr_1fr_auto]"
+                        className="grid gap-2 rounded-[var(--hub-radius)] border border-[var(--hub-border)] p-2 sm:grid-cols-[1fr_1fr_auto]"
                       >
                         <Select
                           value={l.tipo}
@@ -468,7 +468,7 @@ export function LinkSolicitacaoModal({
                 </div>
               </>
             ) : (
-              <p className="text-sm text-slate-600">Carregando…</p>
+              <p className="text-sm text-[var(--hub-text-secondary)]">Carregando…</p>
             )}
           </div>
         )}
