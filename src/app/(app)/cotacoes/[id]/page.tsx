@@ -21,6 +21,7 @@ import { labelFormaPagamento } from "@/lib/cotacao-options";
 import { formatBrPhoneDisplay } from "@/lib/br-phone";
 import { TimelineView } from "@/components/timeline/TimelineView";
 import { BackButton } from "@/components/ui/back-button";
+import { PageHeader } from "@/components/layout/page-header";
 import { EditarCotacaoModal } from "@/components/cotacao/EditarCotacaoModal";
 import { EnviarWhatsAppModal } from "@/components/cotacao/EnviarWhatsAppModal";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
@@ -92,12 +93,12 @@ export default function CotacaoDetalhePage() {
   }, [cotacao]);
 
   if (!isReady) {
-    return <p className="text-sm text-slate-600">Carregando…</p>;
+    return <p className="text-sm text-[var(--hub-text-muted)]">Carregando…</p>;
   }
 
   if (!cotacao) {
     return (
-      <div className="space-y-4 rounded-xl border border-amber-200 bg-amber-50 p-6 text-amber-900">
+      <div className="space-y-4 rounded-[var(--hub-radius-lg)] border border-amber-200 bg-amber-50 p-6 text-amber-900">
         <BackButton href="/cotacoes" label="Cotacoes" />
         <p className="font-medium">Cotacao nao encontrada.</p>
       </div>
@@ -153,83 +154,66 @@ export default function CotacaoDetalhePage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <BackButton href="/cotacoes" label="Cotacoes" />
-          <h1 className="mt-4 text-2xl font-bold text-[var(--hub-blue-dark)]">
-            {cotacao.titulo}
-          </h1>
-          <p className="mt-1 text-slate-600">{cotacao.destino}</p>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <Badge tone="warning">{COTACAO_STATUS_LABELS[cotacao.status]}</Badge>
-            {cotacao.origemCriacao === "formulario_publico" && (
-              <span className="rounded border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-900">
-                Formulário público
-              </span>
-            )}
-            {cotacao.origemCriacao === "interna" && (
-              <span className="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-medium text-slate-700">
-                Criada no sistema
-              </span>
-            )}
-            {cotacao.prioridade && (
-              <span className="rounded bg-[var(--hub-yellow)]/35 px-2 py-0.5 text-xs font-semibold text-[var(--hub-blue-dark)]">
-                Prioridade
-              </span>
-            )}
-            <span className="text-xs text-slate-500">Resp.: {cotacao.responsavel}</span>
-            {cotacao.criadoPorNome ? (
-              <span className="text-xs text-slate-500">
-                · Registro: {cotacao.criadoPorNome}
-              </span>
-            ) : null}
-          </div>
-        </div>
-
-        {/* Botoes de acao */}
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setEditModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg border border-[var(--hub-border)] bg-white px-4 py-2.5 text-sm font-semibold text-[var(--hub-blue-dark)] shadow-sm transition-colors hover:bg-slate-50"
-          >
-            <EditIcon className="h-4 w-4" />
-            Editar cotacao
-          </button>
-
-          {/* WhatsApp — abre modal com mensagem editavel */}
-          <button
-            type="button"
-            onClick={() => {
-              if (!cliente) { toast.error("Cliente nao encontrado"); return; }
-              if (!temTelefone) { toast.error("Telefone do cliente nao cadastrado"); return; }
-              setWaModalOpen(true);
-            }}
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
-          >
-            <WhatsAppIcon className="h-4 w-4" />
-            WhatsApp
-          </button>
-
-          <button
-            type="button"
-            onClick={handleImprimir}
-            className="inline-flex items-center gap-2 rounded-lg border border-[var(--hub-border)] bg-white px-4 py-2.5 text-sm font-semibold text-[var(--hub-blue-dark)] shadow-sm transition-colors hover:bg-slate-50"
-          >
-            <DownloadIcon className="h-4 w-4" />
-            Imprimir / PDF
-          </button>
-
-          <button
-            type="button"
-            onClick={handleBaixarHtml}
-            className="inline-flex items-center gap-2 rounded-lg border border-[var(--hub-border)] bg-white px-4 py-2.5 text-sm font-semibold text-[var(--hub-blue-dark)] shadow-sm transition-colors hover:bg-slate-50"
-          >
-            <DownloadIcon className="h-4 w-4" />
-            Baixar HTML
-          </button>
-        </div>
+      <BackButton href="/cotacoes" label="Cotações" />
+      <PageHeader title={cotacao.titulo} description={cotacao.destino}>
+        <button
+          type="button"
+          onClick={() => setEditModalOpen(true)}
+          className="inline-flex items-center gap-2 rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--hub-text-primary)] shadow-[var(--hub-shadow-xs)] transition-colors hover:bg-[var(--hub-bg-subtle)]"
+        >
+          <EditIcon className="h-4 w-4" />
+          Editar
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            if (!cliente) { toast.error("Cliente não encontrado"); return; }
+            if (!temTelefone) { toast.error("Telefone do cliente não cadastrado"); return; }
+            setWaModalOpen(true);
+          }}
+          className="inline-flex items-center gap-2 rounded-[var(--hub-radius)] bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-[var(--hub-shadow-xs)] transition-colors hover:bg-emerald-700"
+        >
+          <WhatsAppIcon className="h-4 w-4" />
+          WhatsApp
+        </button>
+        <button
+          type="button"
+          onClick={handleImprimir}
+          className="inline-flex items-center gap-2 rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--hub-text-primary)] shadow-[var(--hub-shadow-xs)] transition-colors hover:bg-[var(--hub-bg-subtle)]"
+        >
+          <DownloadIcon className="h-4 w-4" />
+          Imprimir / PDF
+        </button>
+        <button
+          type="button"
+          onClick={handleBaixarHtml}
+          className="inline-flex items-center gap-2 rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--hub-text-primary)] shadow-[var(--hub-shadow-xs)] transition-colors hover:bg-[var(--hub-bg-subtle)]"
+        >
+          <DownloadIcon className="h-4 w-4" />
+          Baixar HTML
+        </button>
+      </PageHeader>
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge tone="warning">{COTACAO_STATUS_LABELS[cotacao.status]}</Badge>
+        {cotacao.origemCriacao === "formulario_publico" && (
+          <span className="rounded-[var(--hub-radius-sm)] border border-sky-200 bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-900">
+            Formulário público
+          </span>
+        )}
+        {cotacao.origemCriacao === "interna" && (
+          <span className="rounded-[var(--hub-radius-sm)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-2 py-0.5 text-xs font-medium text-[var(--hub-text-secondary)]">
+            Criada no sistema
+          </span>
+        )}
+        {cotacao.prioridade && (
+          <span className="rounded-[var(--hub-radius-sm)] bg-[var(--hub-yellow)]/35 px-2 py-0.5 text-xs font-semibold text-[var(--hub-blue-dark)]">
+            Prioridade
+          </span>
+        )}
+        <span className="text-xs text-[var(--hub-text-muted)]">Resp.: {cotacao.responsavel}</span>
+        {cotacao.criadoPorNome && (
+          <span className="text-xs text-[var(--hub-text-muted)]">· Registro: {cotacao.criadoPorNome}</span>
+        )}
       </div>
 
       {/* Cards principais */}
@@ -238,7 +222,7 @@ export default function CotacaoDetalhePage() {
           <CardTitle>Cliente e vinculos</CardTitle>
           <dl className="mt-4 space-y-3 text-sm">
             <div>
-              <dt className="text-xs font-medium uppercase text-slate-500">Vendedor</dt>
+              <dt className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">Vendedor</dt>
               <dd className="mt-1">
                 {isOwner && sellerOptions.length > 0 ? (
                   <Select
@@ -262,14 +246,14 @@ export default function CotacaoDetalhePage() {
                     ))}
                   </Select>
                 ) : (
-                  <span className="text-slate-800">
+                  <span className="text-[var(--hub-text-primary)]">
                     {cotacao.vendedorNome ?? "—"}
                   </span>
                 )}
               </dd>
             </div>
             <div>
-              <dt className="text-xs font-medium uppercase text-slate-500">Cliente</dt>
+              <dt className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">Cliente</dt>
               <dd>
                 {cliente ? (
                   <Link
@@ -283,12 +267,12 @@ export default function CotacaoDetalhePage() {
             </div>
             {cotacao.tags.length > 0 && (
               <div>
-                <dt className="text-xs font-medium uppercase text-slate-500">Tags</dt>
+                <dt className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">Tags</dt>
                 <dd className="flex flex-wrap gap-1">
                   {cotacao.tags.map((t) => (
                     <span
                       key={t}
-                      className="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs"
+                      className="rounded-[var(--hub-radius-sm)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-2 py-0.5 text-xs"
                     >
                       #{t}
                     </span>
@@ -297,10 +281,10 @@ export default function CotacaoDetalhePage() {
               </div>
             )}
             <div>
-              <dt className="text-xs font-medium uppercase text-slate-500">
+              <dt className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">
                 Criada / atualizada
               </dt>
-              <dd className="text-slate-700">
+              <dd className="text-[var(--hub-text-primary)]">
                 {formatDateTimeBR(cotacao.createdAt)} · {formatDateTimeBR(cotacao.updatedAt)}
               </dd>
             </div>
@@ -309,7 +293,7 @@ export default function CotacaoDetalhePage() {
 
         <Card>
           <CardTitle>Atalhos de status</CardTitle>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-[var(--hub-text-secondary)]">
             O mesmo fluxo pode ser feito pelo quadro Kanban na lista de cotacoes.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -334,13 +318,13 @@ export default function CotacaoDetalhePage() {
         <CardTitle>Ficha do formulario (solicitacao de orcamento)</CardTitle>
         <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
           <div>
-            <p className="text-xs uppercase text-slate-500">Servicos</p>
+            <p className="text-xs uppercase text-[var(--hub-text-muted)]">Servicos</p>
             <p className="text-[var(--hub-blue-dark)]">
               {d.servicosDesejados.length ? d.servicosDesejados.join(", ") : "—"}
             </p>
           </div>
           <div>
-            <p className="text-xs uppercase text-slate-500">Origem → destinos</p>
+            <p className="text-xs uppercase text-[var(--hub-text-muted)]">Origem → destinos</p>
             <p>
               {d.origem || "—"}
               {d.destinosTrechos.some((x) => x.trim()) ? (
@@ -351,7 +335,7 @@ export default function CotacaoDetalhePage() {
             </p>
           </div>
           <div>
-            <p className="text-xs uppercase text-slate-500">Datas ida / volta</p>
+            <p className="text-xs uppercase text-[var(--hub-text-muted)]">Datas ida / volta</p>
             <p>
               {d.dataIda ? formatDateBR(d.dataIda) : "—"} · {d.dataVolta ? formatDateBR(d.dataVolta) : "—"}
             </p>
@@ -359,7 +343,7 @@ export default function CotacaoDetalhePage() {
           {((d.flexibilidadeIda === "outro" && d.flexibilidadeIdaOutro.trim()) ||
             (d.flexibilidadeVolta === "outro" && d.flexibilidadeVoltaOutro.trim())) && (
             <div className="sm:col-span-2">
-              <p className="text-xs uppercase text-slate-500">Flexibilidade (outro)</p>
+              <p className="text-xs uppercase text-[var(--hub-text-muted)]">Flexibilidade (outro)</p>
               <p>
                 Ida: {d.flexibilidadeIda === "outro" ? d.flexibilidadeIdaOutro.trim() || "—" : "—"} ·
                 Volta: {d.flexibilidadeVolta === "outro" ? d.flexibilidadeVoltaOutro.trim() || "—" : "—"}
@@ -367,14 +351,14 @@ export default function CotacaoDetalhePage() {
             </div>
           )}
           <div>
-            <p className="text-xs uppercase text-slate-500">Passageiros</p>
+            <p className="text-xs uppercase text-[var(--hub-text-muted)]">Passageiros</p>
             <p>
               {d.adultos} adultos · {d.criancas} criancas · {d.bebes} bebes
               {d.idadesCriancas ? ` (${d.idadesCriancas})` : ""}
             </p>
           </div>
           <div>
-            <p className="text-xs uppercase text-slate-500">Pagamento / milhas</p>
+            <p className="text-xs uppercase text-[var(--hub-text-muted)]">Pagamento / milhas</p>
             <p>
               {d.formaPagamento === "outro" && d.formaPagamentoOutro.trim()
                 ? `Outro: ${d.formaPagamentoOutro}`
@@ -384,7 +368,7 @@ export default function CotacaoDetalhePage() {
           </div>
           {d.cupomCodigo.trim() && (
             <div>
-              <p className="text-xs uppercase text-slate-500">Cupom</p>
+              <p className="text-xs uppercase text-[var(--hub-text-muted)]">Cupom</p>
               <p>
                 {d.cupomCodigo}
                 {d.cupomValidoAte ? ` (valido ate ${formatDateBR(d.cupomValidoAte)})` : ""}
@@ -392,7 +376,7 @@ export default function CotacaoDetalhePage() {
             </div>
           )}
           <div>
-            <p className="text-xs uppercase text-slate-500">Celular / WhatsApp</p>
+            <p className="text-xs uppercase text-[var(--hub-text-muted)]">Celular / WhatsApp</p>
             <p>
               {d.celular ? formatBrPhoneDisplay(d.celular) : "—"} · WA:{" "}
               {d.whatsappIgualCelular
@@ -401,7 +385,7 @@ export default function CotacaoDetalhePage() {
             </p>
           </div>
           <div>
-            <p className="text-xs uppercase text-slate-500">Comunicacao</p>
+            <p className="text-xs uppercase text-[var(--hub-text-muted)]">Comunicacao</p>
             <p>{d.preferenciaComunicacao || "—"}</p>
           </div>
         </div>
