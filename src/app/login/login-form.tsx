@@ -33,7 +33,10 @@ export function LoginForm() {
     const result = await login(email, password);
     setLoading(false);
     if (!result.ok) {
-      if (result.error?.includes("Verifique seu e-mail")) {
+      const isUnverified =
+        result.code === "EMAIL_NOT_VERIFIED" ||
+        result.error?.toLowerCase().includes("verif");
+      if (isUnverified) {
         router.push(`/cadastro/verificar?email=${encodeURIComponent(email.trim())}`);
         return;
       }
