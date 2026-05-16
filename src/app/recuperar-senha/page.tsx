@@ -73,7 +73,7 @@ export default function RecuperarSenhaPage() {
           <span className="text-xl font-bold">AgênciasHub</span>
         </Link>
 
-        <div className="w-full max-w-md rounded-2xl border border-white/15 bg-white p-8 shadow-xl">
+        <div className="w-full max-w-md rounded-[var(--hub-radius-xl)] border border-white/15 bg-white p-8 shadow-xl">
           <h1 className="text-xl font-bold text-[var(--hub-blue-dark)]">
             Recuperar senha
           </h1>

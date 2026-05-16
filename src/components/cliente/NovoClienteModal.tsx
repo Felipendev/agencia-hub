@@ -397,7 +397,7 @@ export function NovoClienteModal({ open, onClose, onCreated }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/45 p-4">
       <div
-        className="my-6 w-full max-w-4xl rounded-2xl border border-[var(--hub-border)] bg-white shadow-xl"
+        className="my-6 w-full max-w-4xl rounded-[var(--hub-radius-xl)] border border-[var(--hub-border)] bg-white shadow-xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="novo-cli-titulo"

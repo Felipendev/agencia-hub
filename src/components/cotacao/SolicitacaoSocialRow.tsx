@@ -135,7 +135,7 @@ export function SolicitacaoSocialPanel({ links }: { links: LinkSocialItem[] }) {
                 href={l.url.trim()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`group flex items-center gap-3 rounded-2xl border border-[var(--hub-border)]/90 bg-gradient-to-br ${tone} px-3 py-3 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--hub-blue-muted)] hover:shadow-md`}
+                className={`group flex items-center gap-3 rounded-[var(--hub-radius-xl)] border border-[var(--hub-border)]/90 bg-gradient-to-br ${tone} px-3 py-3 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--hub-blue-muted)] hover:shadow-md`}
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--hub-radius-lg)] bg-white text-[var(--hub-blue)] shadow-inner ring-1 ring-slate-100 transition group-hover:text-[var(--hub-blue-dark)]">
                   <IconForTipo tipo={l.tipo} />

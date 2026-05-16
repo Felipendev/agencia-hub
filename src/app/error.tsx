@@ -44,7 +44,7 @@ export default function ErrorPage({
           <Link href="/">
             <button
               type="button"
-              className="w-full rounded-lg border border-white/20 bg-white/5 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-white/10 sm:w-auto"
+              className="w-full rounded-[var(--hub-radius)] border border-white/20 bg-white/5 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-white/10 sm:w-auto"
             >
               Voltar ao início
             </button>

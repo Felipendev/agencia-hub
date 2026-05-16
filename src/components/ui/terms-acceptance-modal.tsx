@@ -45,7 +45,7 @@ export function TermsAcceptanceModal() {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+      <div className="w-full max-w-md rounded-[var(--hub-radius-xl)] bg-white p-8 shadow-2xl">
         <h2 className="text-xl font-bold text-[var(--hub-blue-dark)]">
           Aceite os Termos de Uso
         </h2>

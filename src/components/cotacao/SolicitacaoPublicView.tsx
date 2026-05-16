@@ -210,7 +210,7 @@ export function SolicitacaoPublicView({ slug }: Props) {
   if (sucesso) {
     return (
       <div className="mx-auto max-w-5xl px-5 py-16 text-center sm:px-8">
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-10">
+        <div className="rounded-[var(--hub-radius-xl)] border border-emerald-200 bg-emerald-50 px-6 py-10">
           <h2 className="text-xl font-bold text-emerald-900">
             Recebemos sua solicitação
           </h2>
@@ -254,7 +254,7 @@ export function SolicitacaoPublicView({ slug }: Props) {
                     className="h-auto max-h-32 w-auto max-w-[200px] shrink-0 object-contain sm:max-h-36"
                   />
                 ) : (
-                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--hub-yellow)] to-amber-300/90 text-xl font-bold text-[var(--hub-blue-dark)] shadow-md ring-2 ring-white/80">
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[var(--hub-radius-xl)] bg-gradient-to-br from-[var(--hub-yellow)] to-amber-300/90 text-xl font-bold text-[var(--hub-blue-dark)] shadow-md ring-2 ring-white/80">
                     {config.nomeMarca.slice(0, 2).toUpperCase()}
                   </div>
                 )}

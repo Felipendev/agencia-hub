@@ -81,7 +81,7 @@ function ResetPasswordForm() {
   if (!email) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-[var(--hub-blue-dark)] via-[var(--hub-blue)] to-[#1a5080] px-4">
-        <div className="w-full max-w-md rounded-2xl border border-white/15 bg-white p-8 shadow-xl text-center">
+        <div className="w-full max-w-md rounded-[var(--hub-radius-xl)] border border-white/15 bg-white p-8 shadow-xl text-center">
           <p className="text-[var(--hub-text-secondary)]">E-mail não informado.</p>
           <Link href="/recuperar-senha" className="mt-4 inline-block font-medium text-[var(--hub-blue)] hover:underline">
             Voltar à recuperação de senha
@@ -104,7 +104,7 @@ function ResetPasswordForm() {
           <span className="text-xl font-bold">AgênciasHub</span>
         </Link>
 
-        <div className="w-full max-w-md rounded-2xl border border-white/15 bg-white p-8 shadow-xl">
+        <div className="w-full max-w-md rounded-[var(--hub-radius-xl)] border border-white/15 bg-white p-8 shadow-xl">
           <h1 className="text-xl font-bold text-[var(--hub-blue-dark)]">
             Redefinir senha
           </h1>
