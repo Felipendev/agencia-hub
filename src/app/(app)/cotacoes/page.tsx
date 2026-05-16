@@ -17,6 +17,7 @@ import { softDeleteQuotation } from "@/lib/api/soft-delete-remote";
 import { isUuid } from "@/lib/api/quotation-mapper";
 import { COTACAO_STATUS_LABELS } from "@/lib/constants";
 import type { CotacaoStatus } from "@/types";
+import { PageHeader } from "@/components/layout/page-header";
 
 function inDateRange(isoDate: string, from: string, to: string): boolean {
   const d = isoDate.slice(0, 10);
@@ -194,24 +195,17 @@ export default function CotacoesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--hub-blue-dark)]">
-            Cotações
-          </h1>
-        </div>
-        <div className="flex shrink-0 flex-wrap gap-2">
-          <Button variant="secondary" onClick={() => setLinkModalOpen(true)}>
-            Links
-          </Button>
-          <Link
-            href="/cotacoes/nova"
-            className="inline-flex items-center justify-center rounded-lg bg-[var(--hub-yellow)] px-4 py-2.5 text-sm font-semibold text-[var(--hub-blue-dark)] shadow-sm transition-colors hover:bg-[var(--hub-yellow-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hub-yellow)] focus-visible:ring-offset-2"
-          >
-            Nova cotação
-          </Link>
-        </div>
-      </div>
+      <PageHeader title="Cotações">
+        <Button variant="secondary" onClick={() => setLinkModalOpen(true)}>
+          Links
+        </Button>
+        <Link
+          href="/cotacoes/nova"
+          className="inline-flex items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-yellow)] px-4 py-2.5 text-sm font-semibold text-[var(--hub-blue-dark)] shadow-sm transition-colors hover:bg-[var(--hub-yellow-hover)] focus-visible:outline-none"
+        >
+          Nova cotação
+        </Link>
+      </PageHeader>
 
       <SolicitacaoSubmissionsBanner />
 

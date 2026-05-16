@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, Th, Td } from "@/components/ui/table";
+import { PageHeader } from "@/components/layout/page-header";
 import { formatBRL } from "@/lib/format";
 import { listUsersRemote, updateUserRemote } from "@/lib/api/users-remote";
 import type { ApiUserResponse } from "@/lib/api/auth-types";
@@ -101,22 +102,17 @@ export default function VendedoresPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--hub-blue-dark)]">
-            Equipe
-          </h1>
-          <p className="mt-1 text-slate-600">
-            Gerencie os membros da equipe, perfis de acesso e comissões.
-          </p>
-        </div>
+      <PageHeader
+        title="Equipe"
+        description="Gerencie os membros da equipe, perfis de acesso e comissões."
+      >
         <Link
           href="/vendedores/convidar"
-          className="rounded-lg bg-[var(--hub-blue)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+          className="rounded-[var(--hub-radius)] bg-[var(--hub-blue)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
         >
           Convidar agente de venda
         </Link>
-      </div>
+      </PageHeader>
 
       <Card>
         <CardTitle>Membros</CardTitle>

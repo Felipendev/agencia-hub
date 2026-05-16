@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/toast";
 import { DuplicateCustomerError } from "@/lib/api/create-customer-remote";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/page-header";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -131,16 +132,10 @@ export default function ClientesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--hub-blue-dark)]">
-            Clientes
-          </h1>
-          <p className="mt-1 text-slate-600">
-            Cadastro e listagem da sua carteira — busque por nome e filtre por
-            status.
-          </p>
-        </div>
+      <PageHeader
+        title="Clientes"
+        description="Cadastro e listagem da sua carteira — busque por nome e filtre por status."
+      >
         <Button
           type="button"
           variant="secondary"
@@ -150,7 +145,7 @@ export default function ClientesPage() {
           <DownloadIcon className="mr-1.5 h-4 w-4" />
           Exportar Clientes ({filtrados.length})
         </Button>
-      </div>
+      </PageHeader>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <Card>
