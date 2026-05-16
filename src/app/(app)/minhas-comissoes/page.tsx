@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { formatBRL } from "@/lib/format";
 import { apiFetch } from "@/lib/api/authenticated-fetch";
 import type { ApiQuotationResponse } from "@/lib/api/quotation-types";
-import type { ApiSellerDashboardResponse } from "@/lib/api/auth-types";
-import { getSellerDashboardRemote } from "@/lib/api/users-remote";
+import type { ApiSalesAgentDashboardResponse } from "@/lib/api/auth-types";
+import { getSalesAgentDashboardRemote } from "@/lib/api/users-remote";
+import { PageHeader } from "@/components/layout/page-header";
 
 const STATUS_LABELS: Record<string, string> = {
   ACCEPTED: "Aprovada",
@@ -34,7 +35,7 @@ const STATUS_TONE: Record<string, "success" | "warning" | "danger" | "muted"> = 
 export default function MinhasComissoesPage() {
   const { token } = useAuth();
   const toast = useToast();
-  const [dashboard, setDashboard] = useState<ApiSellerDashboardResponse | null>(null);
+  const [dashboard, setDashboard] = useState<ApiSalesAgentDashboardResponse | null>(null);
   const [quotations, setQuotations] = useState<ApiQuotationResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,7 +45,7 @@ export default function MinhasComissoesPage() {
     async function load() {
       try {
         const [dashData, quots] = await Promise.all([
-          getSellerDashboardRemote(token!),
+          getSalesAgentDashboardRemote(token!),
           apiFetch<ApiQuotationResponse[]>("/quotations", {}, token),
         ]);
         setDashboard(dashData);
@@ -77,8 +78,8 @@ export default function MinhasComissoesPage() {
     );
   }
 
-  const commissionPct = dashboard.seller.commissionPct;
-  const commissionFixed = dashboard.seller.commissionFixed;
+  const commissionPct = dashboard.salesAgent.commissionPct;
+  const commissionFixed = dashboard.salesAgent.commissionFixed;
   const hasCommissionConfig = commissionPct != null || commissionFixed != null;
 
   function calcCommission(totalAmount: number): number {
@@ -93,14 +94,10 @@ export default function MinhasComissoesPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-[var(--hub-blue-dark)]">
-          Minhas Comissões
-        </h1>
-        <p className="mt-1 text-slate-600">
-          Acompanhe suas comissões sobre cotações aprovadas.
-        </p>
-      </div>
+      <PageHeader
+        title="Minhas Comissões"
+        description="Acompanhe suas comissões sobre cotações aprovadas."
+      />
 
       {/* Summary cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -90,7 +90,7 @@ export function AbaFormulario() {
   const publicUrl = useMemo(() => {
     if (typeof window === "undefined" || !config?.slug) return "";
     const base = `${window.location.origin}/solicitacao/${config.slug}`;
-    if (user?.role === "SELLER" && user.linkPublicCode?.trim()) {
+    if (user?.accountKind === "SALES_AGENT" && user.linkPublicCode?.trim()) {
       return `${base}?vendedor=${encodeURIComponent(user.linkPublicCode.trim())}`;
     }
     const uid = user?.id?.trim();
@@ -98,7 +98,7 @@ export function AbaFormulario() {
       return `${base}?vendedor=${encodeURIComponent(uid)}`;
     }
     return base;
-  }, [config?.slug, user?.id, user?.role, user?.linkPublicCode]);
+  }, [config?.slug, user?.id, user?.accountKind, user?.linkPublicCode]);
 
   const handleSave = useCallback(async () => {
     if (!config) return;

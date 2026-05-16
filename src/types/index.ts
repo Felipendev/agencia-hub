@@ -205,7 +205,7 @@ export interface UsuarioSessao {
   nome: string;
   empresa: string;
   email: string;
-  role: "OWNER" | "SELLER";
+  accountKind: "AGENCY_OWNER" | "SALES_AGENT";
   agencyId?: string;
   agencyName?: string;
   agencyStatus?: string;

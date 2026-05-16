@@ -10,7 +10,7 @@ export function Label({
   return (
     <label
       htmlFor={htmlFor}
-      className={`mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-600 ${className}`}
+      className={`mb-1.5 block text-xs font-medium text-[var(--hub-text-secondary)] ${className}`}
     >
       {children}
     </label>

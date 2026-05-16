@@ -1,7 +1,6 @@
 import { apiFetch } from "@/lib/api/authenticated-fetch";
 import type {
-  ApiCreateUserRequest,
-  ApiSellerDashboardResponse,
+  ApiSalesAgentDashboardResponse,
   ApiUpdateUserRequest,
   ApiUserResponse,
 } from "@/lib/api/auth-types";
@@ -10,18 +9,8 @@ export async function listUsersRemote(token: string): Promise<ApiUserResponse[]>
   return apiFetch<ApiUserResponse[]>("/users", {}, token);
 }
 
-export async function listSellersRemote(token: string): Promise<ApiUserResponse[]> {
-  return apiFetch<ApiUserResponse[]>("/users/sellers", {}, token);
-}
-
-export async function createUserRemote(
-  data: ApiCreateUserRequest,
-  token: string,
-): Promise<ApiUserResponse> {
-  return apiFetch<ApiUserResponse>("/users", {
-    method: "POST",
-    body: JSON.stringify(data),
-  }, token);
+export async function listSalesAgentsRemote(token: string): Promise<ApiUserResponse[]> {
+  return apiFetch<ApiUserResponse[]>("/users/sales-agents", {}, token);
 }
 
 export async function updateUserRemote(
@@ -35,10 +24,10 @@ export async function updateUserRemote(
   }, token);
 }
 
-export async function getSellerDashboardRemote(
+export async function getSalesAgentDashboardRemote(
   token: string,
-  sellerId?: string,
-): Promise<ApiSellerDashboardResponse> {
-  const path = sellerId ? `/seller-dashboard/${sellerId}` : "/seller-dashboard/me";
-  return apiFetch<ApiSellerDashboardResponse>(path, {}, token);
+  agentId?: string,
+): Promise<ApiSalesAgentDashboardResponse> {
+  const path = agentId ? `/sales-agent/dashboard/${agentId}` : "/sales-agent/dashboard/me";
+  return apiFetch<ApiSalesAgentDashboardResponse>(path, {}, token);
 }

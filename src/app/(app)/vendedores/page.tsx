@@ -1,22 +1,19 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, Th, Td } from "@/components/ui/table";
+import { PageHeader } from "@/components/layout/page-header";
 import { formatBRL } from "@/lib/format";
-import {
-  createUserRemote,
-  listUsersRemote,
-  updateUserRemote,
-} from "@/lib/api/users-remote";
-import type { ApiUserResponse, UserRole } from "@/lib/api/auth-types";
+import { listUsersRemote, updateUserRemote } from "@/lib/api/users-remote";
+import type { ApiUserResponse } from "@/lib/api/auth-types";
 
 export default function VendedoresPage() {
   const { user, token } = useAuth();
@@ -24,16 +21,6 @@ export default function VendedoresPage() {
 
   const [users, setUsers] = useState<ApiUserResponse[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Formulário novo usuário
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [role, setRole] = useState<UserRole>("SELLER");
-  const [commissionPct, setCommissionPct] = useState("");
-  const [commissionFixed, setCommissionFixed] = useState("");
-  const [commissionType, setCommissionType] = useState<"pct" | "fixed" | "none">("pct");
-  const [saving, setSaving] = useState(false);
 
   // Edição inline de comissão
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -49,45 +36,12 @@ export default function VendedoresPage() {
       .finally(() => setLoading(false));
   }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (user?.role !== "OWNER") {
+  if (user?.accountKind !== "AGENCY_OWNER") {
     return (
       <div className="flex h-64 items-center justify-center">
         <p className="text-slate-500">Acesso restrito ao dono da agência.</p>
       </div>
     );
-  }
-
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
-    if (!token) return;
-    setSaving(true);
-    try {
-      const created = await createUserRemote(
-        {
-          name: nome.trim(),
-          email: email.trim(),
-          password: senha,
-          role,
-          commissionPct:
-            commissionType === "pct" && commissionPct
-              ? parseFloat(commissionPct)
-              : undefined,
-          commissionFixed:
-            commissionType === "fixed" && commissionFixed
-              ? parseFloat(commissionFixed.replace(",", "."))
-              : undefined,
-        },
-        token,
-      );
-      setUsers((prev) => [...prev, created]);
-      setNome(""); setEmail(""); setSenha("");
-      setCommissionPct(""); setCommissionFixed("");
-      toast.success(`${role === "SELLER" ? "Vendedor" : "Usuário"} criado com sucesso!`);
-    } catch (err) {
-      toast.error((err as Error).message ?? "Erro ao criar usuário.");
-    } finally {
-      setSaving(false);
-    }
   }
 
   async function handleToggleActive(u: ApiUserResponse) {
@@ -148,226 +102,133 @@ export default function VendedoresPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-[var(--hub-blue-dark)]">
-          Vendedores & Usuários
-        </h1>
-        <p className="mt-1 text-slate-600">
-          Gerencie os membros da equipe, perfis de acesso e comissões.
-        </p>
-      </div>
+      <PageHeader
+        title="Equipe"
+        description="Gerencie os membros da equipe, perfis de acesso e comissões."
+      >
+        <Link
+          href="/vendedores/convidar"
+          className="rounded-[var(--hub-radius)] bg-[var(--hub-blue)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+        >
+          Convidar agente de venda
+        </Link>
+      </PageHeader>
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
-        {/* Tabela de usuários */}
-        <Card>
-          <CardTitle>Equipe</CardTitle>
-          {loading ? (
-            <p className="mt-4 text-sm text-slate-500">Carregando…</p>
-          ) : (
-            <div className="mt-4 overflow-x-auto">
-              <Table>
-                <thead>
-                  <tr>
-                    <Th>Nome</Th>
-                    <Th>E-mail</Th>
-                    <Th>Perfil</Th>
-                    <Th>Comissão</Th>
-                    <Th>Status</Th>
-                    <Th>Ações</Th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((u) => (
-                    <tr key={u.id}>
-                      <Td className="font-medium text-[var(--hub-blue-dark)]">
-                        {u.name}
-                      </Td>
-                      <Td className="text-slate-600 text-sm">{u.email}</Td>
-                      <Td>
-                        <Badge tone={u.role === "OWNER" ? "warning" : "muted"}>
-                          {u.role === "OWNER" ? "Dono" : "Vendedor"}
-                        </Badge>
-                      </Td>
-                      <Td>
-                        {editingId === u.id ? (
-                          <div className="flex items-center gap-2">
-                            <Select
-                              value={editType}
-                              onChange={(e) =>
-                                setEditType(e.target.value as "pct" | "fixed" | "none")
-                              }
+      <Card>
+        <CardTitle>Membros</CardTitle>
+        {loading ? (
+          <p className="mt-4 text-sm text-slate-500">Carregando…</p>
+        ) : (
+          <div className="mt-4 overflow-x-auto">
+            <Table>
+              <thead>
+                <tr>
+                  <Th>Nome</Th>
+                  <Th>E-mail</Th>
+                  <Th>Perfil</Th>
+                  <Th>Comissão</Th>
+                  <Th>Status</Th>
+                  <Th>Ações</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((u) => (
+                  <tr key={u.id}>
+                    <Td className="font-medium text-[var(--hub-blue-dark)]">
+                      {u.name}
+                    </Td>
+                    <Td className="text-slate-600 text-sm">{u.email}</Td>
+                    <Td>
+                      <Badge tone={u.accountKind === "AGENCY_OWNER" ? "warning" : "muted"}>
+                        {u.accountKind === "AGENCY_OWNER" ? "Dono" : "Vendedor"}
+                      </Badge>
+                    </Td>
+                    <Td>
+                      {editingId === u.id ? (
+                        <div className="flex items-center gap-2">
+                          <Select
+                            value={editType}
+                            onChange={(e) =>
+                              setEditType(e.target.value as "pct" | "fixed" | "none")
+                            }
+                            className="w-24 text-xs"
+                          >
+                            <option value="pct">%</option>
+                            <option value="fixed">Fixo</option>
+                            <option value="none">Nenhuma</option>
+                          </Select>
+                          {editType === "pct" && (
+                            <Input
+                              className="w-20 text-xs"
+                              placeholder="5"
+                              value={editPct}
+                              onChange={(e) => setEditPct(e.target.value)}
+                            />
+                          )}
+                          {editType === "fixed" && (
+                            <Input
                               className="w-24 text-xs"
-                            >
-                              <option value="pct">%</option>
-                              <option value="fixed">Fixo</option>
-                              <option value="none">Nenhuma</option>
-                            </Select>
-                            {editType === "pct" && (
-                              <Input
-                                className="w-20 text-xs"
-                                placeholder="5"
-                                value={editPct}
-                                onChange={(e) => setEditPct(e.target.value)}
-                              />
-                            )}
-                            {editType === "fixed" && (
-                              <Input
-                                className="w-24 text-xs"
-                                placeholder="200,00"
-                                value={editFixed}
-                                onChange={(e) => setEditFixed(e.target.value)}
-                              />
-                            )}
-                            <Button
-                              type="button"
-                              className="text-xs px-2 py-1"
-                              onClick={() => handleSaveCommission(u)}
-                            >
-                              Salvar
-                            </Button>
-                            <button
-                              type="button"
-                              className="text-xs text-slate-500 hover:text-slate-700"
-                              onClick={() => setEditingId(null)}
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        ) : (
+                              placeholder="200,00"
+                              value={editFixed}
+                              onChange={(e) => setEditFixed(e.target.value)}
+                            />
+                          )}
+                          <Button
+                            type="button"
+                            className="text-xs px-2 py-1"
+                            onClick={() => handleSaveCommission(u)}
+                          >
+                            Salvar
+                          </Button>
                           <button
                             type="button"
-                            className="text-sm text-slate-700 hover:text-[var(--hub-blue)] underline-offset-2 hover:underline"
-                            onClick={() => startEdit(u)}
+                            className="text-xs text-slate-500 hover:text-slate-700"
+                            onClick={() => setEditingId(null)}
                           >
-                            {commissionLabel(u)}
+                            ✕
                           </button>
-                        )}
-                      </Td>
-                      <Td>
-                        <Badge tone={u.active ? "success" : "danger"}>
-                          {u.active ? "Ativo" : "Inativo"}
-                        </Badge>
-                      </Td>
-                      <Td>
+                        </div>
+                      ) : (
                         <button
                           type="button"
-                          className="text-xs text-slate-500 hover:text-[var(--hub-blue)]"
-                          onClick={() => handleToggleActive(u)}
+                          className="text-sm text-slate-700 hover:text-[var(--hub-blue)] underline-offset-2 hover:underline"
+                          onClick={() => startEdit(u)}
                         >
-                          {u.active ? "Desativar" : "Ativar"}
+                          {commissionLabel(u)}
                         </button>
-                      </Td>
-                    </tr>
-                  ))}
-                  {users.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={6}
-                        className="border-b border-[var(--hub-border)] px-4 py-6 text-center text-sm text-slate-500"
+                      )}
+                    </Td>
+                    <Td>
+                      <Badge tone={u.active ? "success" : "danger"}>
+                        {u.active ? "Ativo" : "Inativo"}
+                      </Badge>
+                    </Td>
+                    <Td>
+                      <button
+                        type="button"
+                        className="text-xs text-slate-500 hover:text-[var(--hub-blue)]"
+                        onClick={() => handleToggleActive(u)}
                       >
-                        Nenhum usuário cadastrado.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </Table>
-            </div>
-          )}
-        </Card>
-
-        {/* Formulário novo usuário */}
-        <Card className="h-fit">
-          <CardTitle>Novo usuário</CardTitle>
-          <form onSubmit={handleCreate} className="mt-4 space-y-3">
-            <div>
-              <Label htmlFor="nome">Nome</Label>
-              <Input
-                id="nome"
-                required
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="email-u">E-mail</Label>
-              <Input
-                id="email-u"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="senha">Senha (mín. 6 caracteres)</Label>
-              <Input
-                id="senha"
-                type="password"
-                required
-                minLength={6}
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="role">Perfil</Label>
-              <Select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value as UserRole)}
-              >
-                <option value="SELLER">Vendedor</option>
-                <option value="OWNER">Dono</option>
-              </Select>
-            </div>
-            {role === "SELLER" && (
-              <>
-                <div>
-                  <Label htmlFor="comm-type">Tipo de comissão</Label>
-                  <Select
-                    id="comm-type"
-                    value={commissionType}
-                    onChange={(e) =>
-                      setCommissionType(e.target.value as "pct" | "fixed" | "none")
-                    }
-                  >
-                    <option value="pct">Percentual (%)</option>
-                    <option value="fixed">Valor fixo (R$)</option>
-                    <option value="none">Sem comissão</option>
-                  </Select>
-                </div>
-                {commissionType === "pct" && (
-                  <div>
-                    <Label htmlFor="comm-pct">Percentual (%)</Label>
-                    <Input
-                      id="comm-pct"
-                      inputMode="decimal"
-                      placeholder="5"
-                      value={commissionPct}
-                      onChange={(e) => setCommissionPct(e.target.value)}
-                    />
-                  </div>
+                        {u.active ? "Desativar" : "Ativar"}
+                      </button>
+                    </Td>
+                  </tr>
+                ))}
+                {users.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="border-b border-[var(--hub-border)] px-4 py-6 text-center text-sm text-slate-500"
+                    >
+                      Nenhum membro cadastrado.
+                    </td>
+                  </tr>
                 )}
-                {commissionType === "fixed" && (
-                  <div>
-                    <Label htmlFor="comm-fixed">Valor fixo (R$)</Label>
-                    <Input
-                      id="comm-fixed"
-                      inputMode="decimal"
-                      placeholder="200,00"
-                      value={commissionFixed}
-                      onChange={(e) => setCommissionFixed(e.target.value)}
-                    />
-                  </div>
-                )}
-              </>
-            )}
-            <Button type="submit" className="w-full" disabled={saving}>
-              {saving ? "Criando…" : "Criar usuário"}
-            </Button>
-          </form>
-        </Card>
-      </div>
+              </tbody>
+            </Table>
+          </div>
+        )}
+      </Card>
     </div>
   );
 }

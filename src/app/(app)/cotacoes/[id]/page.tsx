@@ -24,7 +24,7 @@ import { BackButton } from "@/components/ui/back-button";
 import { EditarCotacaoModal } from "@/components/cotacao/EditarCotacaoModal";
 import { EnviarWhatsAppModal } from "@/components/cotacao/EnviarWhatsAppModal";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
-import { listSellersRemote } from "@/lib/api/users-remote";
+import { listSalesAgentsRemote } from "@/lib/api/users-remote";
 import type { ApiUserResponse } from "@/lib/api/auth-types";
 import type { CotacaoStatus } from "@/types";
 
@@ -49,7 +49,7 @@ export default function CotacaoDetalhePage() {
   useEffect(() => {
     if (!isOwner || !token || !getAgenciaHubApiBaseUrl()) return;
     let cancelled = false;
-    void listSellersRemote(token)
+    void listSalesAgentsRemote(token)
       .then((rows) => {
         if (!cancelled) setSellers(rows);
       })
@@ -61,7 +61,7 @@ export default function CotacaoDetalhePage() {
     };
   }, [isOwner, token]);
 
-  /** Vendedores da API + o dono logado (não costuma vir em `/users/sellers`). */
+  /** Agentes da API + o dono logado (não costuma vir em `/users/sales-agents`). */
   const sellerOptions = useMemo((): ApiUserResponse[] => {
     if (!isOwner || !user) return sellers;
     const map = new Map(sellers.map((s) => [s.id, s]));
@@ -70,7 +70,7 @@ export default function CotacaoDetalhePage() {
         id: user.id,
         name: `${user.nome} (dono)`,
         email: user.email,
-        role: "OWNER",
+        accountKind: "AGENCY_OWNER",
         active: true,
         commissionPct: null,
         commissionFixed: null,

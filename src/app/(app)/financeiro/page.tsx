@@ -8,6 +8,7 @@ import {
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/page-header";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -176,37 +177,29 @@ export default function FinanceiroPage() {
 
   return (
     <div className="space-y-8">
-      {/* Cabeçalho */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--hub-blue-dark)]">
-            Financeiro
-          </h1>
-          <p className="mt-1 text-slate-600">
-            Lançamentos manuais com categorias, contas bancárias e fluxo de caixa.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="secondary"
-            className="text-xs"
-            onClick={handleExportarResumo}
-          >
-            <DownloadIcon className="mr-1.5 h-4 w-4" />
-            Exportar Resumo
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            className="text-xs"
-            onClick={handleExportarLancamentos}
-          >
-            <DownloadIcon className="mr-1.5 h-4 w-4" />
-            Exportar Lançamentos
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Financeiro"
+        description="Lançamentos manuais com categorias, contas bancárias e fluxo de caixa."
+      >
+        <Button
+          type="button"
+          variant="secondary"
+          className="text-xs"
+          onClick={handleExportarResumo}
+        >
+          <DownloadIcon className="mr-1.5 h-4 w-4" />
+          Exportar Resumo
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          className="text-xs"
+          onClick={handleExportarLancamentos}
+        >
+          <DownloadIcon className="mr-1.5 h-4 w-4" />
+          Exportar Lançamentos
+        </Button>
+      </PageHeader>
 
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">

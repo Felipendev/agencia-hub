@@ -86,7 +86,7 @@ function VerifyEmailForm() {
             email,
             nome: "Usuário",
             empresa: "Minha Agência",
-            role: "OWNER",
+            accountKind: "AGENCY_OWNER",
           }),
         );
         router.replace("/dashboard");
@@ -120,7 +120,7 @@ function VerifyEmailForm() {
             email: data.email,
             nome: data.name,
             empresa: data.agencyName || "AgênciasHub",
-            role: data.role,
+            accountKind: data.accountKind,
             linkPublicCode: data.publicLinkCode,
           }),
         );

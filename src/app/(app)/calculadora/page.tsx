@@ -24,6 +24,7 @@ import {
   type TabelasMilhas,
 } from "@/lib/tabelas-milhas";
 import { ResultadoCiaCard } from "./_resultado-cia";
+import { PageHeader } from "@/components/layout/page-header";
 
 type TipoTrecho = "ida_volta" | "so_ida" | "preco_unico";
 
@@ -338,16 +339,17 @@ export default function CalculadoraMilhasPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--hub-blue-dark)]">Calculadora de Milhas</h1>
-          <p className="mt-0.5 text-sm text-slate-500">Compare opcoes de voo e gere o comparativo para o cliente.</p>
-        </div>
-        <Link href="/calculadora/milheiro"
-          className="rounded-lg border border-[var(--hub-border)] px-3 py-2 text-xs font-medium text-slate-600 hover:border-[var(--hub-blue)] hover:text-[var(--hub-blue)]">
+      <PageHeader
+        title="Calculadora de Milhas"
+        description="Compare opções de voo e gere o comparativo para o cliente."
+      >
+        <Link
+          href="/calculadora/milheiro"
+          className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] px-3 py-2 text-xs font-medium text-[var(--hub-text-secondary)] hover:border-[var(--hub-blue)] hover:text-[var(--hub-blue)]"
+        >
           Precificar milheiro
         </Link>
-      </div>
+      </PageHeader>
 
       {/* Barra de filtros */}
       <Card>

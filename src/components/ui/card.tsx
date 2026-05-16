@@ -1,7 +1,7 @@
 export function Card({
   children,
   className = "",
-  padding = "p-6",
+  padding = "p-5",
 }: {
   children: React.ReactNode;
   className?: string;
@@ -9,7 +9,7 @@ export function Card({
 }) {
   return (
     <div
-      className={`rounded-xl border border-[var(--hub-border)] bg-white shadow-[0_1px_3px_rgba(15,52,96,0.06)] ${padding} ${className}`}
+      className={`rounded-[var(--hub-radius-lg)] border border-[var(--hub-border)] bg-white shadow-[var(--hub-shadow-sm)] ${padding} ${className}`}
     >
       {children}
     </div>
@@ -24,10 +24,22 @@ export function CardTitle({
   className?: string;
 }) {
   return (
-    <h2
-      className={`text-base font-semibold text-[var(--hub-blue-dark)] ${className}`}
-    >
+    <h2 className={`text-sm font-semibold text-[var(--hub-text-primary)] ${className}`}>
       {children}
     </h2>
+  );
+}
+
+export function CardDescription({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <p className={`mt-0.5 text-xs text-[var(--hub-text-muted)] ${className}`}>
+      {children}
+    </p>
   );
 }
