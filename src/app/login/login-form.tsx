@@ -33,8 +33,12 @@ export function LoginForm() {
     const result = await login(email, password);
     setLoading(false);
     if (!result.ok) {
-      if (result.error?.includes("Verifique seu e-mail")) {
-        router.push(`/cadastro/verificar?email=${encodeURIComponent(email.trim())}`);
+      const isUnverified =
+        result.code === "EMAIL_NOT_VERIFIED" ||
+        result.error?.toLowerCase().includes("verif");
+      if (isUnverified) {
+        const verifyEmail = result.email ?? email.trim();
+        router.push(`/cadastro/verificar?email=${encodeURIComponent(verifyEmail)}`);
         return;
       }
       setError(result.error ?? "Erro ao entrar.");

@@ -19,7 +19,7 @@ const STORAGE_TOKEN = "agencia-hub-token";
 type AuthContextValue = {
   user: UsuarioSessao | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string; code?: string; email?: string }>;
   logout: () => void;
   isReady: boolean;
   isOwner: boolean;
@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = useCallback(
-    async (email: string, password: string): Promise<{ ok: boolean; error?: string }> => {
+    async (email: string, password: string): Promise<{ ok: boolean; error?: string; code?: string; email?: string }> => {
       const trimmed = email.trim();
       if (!trimmed || !password) {
         return { ok: false, error: "Preencha e-mail e senha." };
@@ -110,10 +110,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const data = (await res.json().catch(() => null)) as ApiLoginResponse | null;
 
           if (!res.ok || !data?.token) {
-            const msg =
-              (data as { message?: string } | null)?.message ??
-              "Credenciais inválidas.";
-            return { ok: false, error: msg };
+            const errData = data as { message?: string; code?: string; email?: string } | null;
+            const msg   = errData?.message ?? "Credenciais inválidas.";
+            const code  = errData?.code;
+            const email = errData?.email;
+            return { ok: false, error: msg, code, email };
           }
 
           const sessao: UsuarioSessao = {
