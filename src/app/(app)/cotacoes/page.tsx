@@ -190,7 +190,7 @@ export default function CotacoesPage() {
   }, [isReady, hasRemoteApi, syncCotacoesFromApi, token]);
 
   if (!isReady) {
-    return <p className="text-sm text-slate-600">Carregando…</p>;
+    return <p className="text-sm text-[var(--hub-text-secondary)]">Carregando…</p>;
   }
 
   return (
@@ -210,11 +210,11 @@ export default function CotacoesPage() {
       <SolicitacaoSubmissionsBanner />
 
       {hasRemoteApi ?
-        <div className="rounded-xl border border-sky-200 bg-sky-50/90 px-4 py-4 shadow-sm">
+        <div className="rounded-[var(--hub-radius-lg)] border border-sky-200 bg-sky-50/90 px-4 py-4 shadow-sm">
           <p className="text-sm font-semibold text-[var(--hub-blue-dark)]">
             Atualizar lista do servidor
           </p>
-          <p className="mt-1 text-xs text-slate-600">
+          <p className="mt-1 text-xs text-[var(--hub-text-secondary)]">
             Use os filtros abaixo e clique em &quot;Atualizar lista&quot; para buscar
             novamente no servidor. A busca por cliente acima continua refinando o
             quadro localmente.
@@ -269,7 +269,7 @@ export default function CotacoesPage() {
         </div>
       : null}
 
-      <div className="rounded-xl border border-[var(--hub-border)] bg-white p-4 shadow-sm">
+      <div className="rounded-[var(--hub-radius-lg)] border border-[var(--hub-border)] bg-white p-4 shadow-sm">
         <div className="flex flex-col gap-4 border-b border-[var(--hub-border)] pb-4">
           <div>
             <Label htmlFor="fc-busca">Cliente</Label>

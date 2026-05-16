@@ -58,7 +58,7 @@ function CiaCard({
   }
 
   return (
-    <div className="rounded-xl border border-[var(--hub-border)] bg-white p-4">
+    <div className="rounded-[var(--hub-radius-lg)] border border-[var(--hub-border)] bg-white p-4">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         {editando ? (
@@ -72,7 +72,7 @@ function CiaCard({
               type="color"
               value={cia.cor ?? "#000000"}
               onChange={(e) => onChange({ ...cia, nome, faixas, cor: e.target.value })}
-              className="h-7 w-8 cursor-pointer rounded border border-slate-200 p-0.5"
+              className="h-7 w-8 cursor-pointer rounded border border-[var(--hub-border)] p-0.5"
               title="Cor da CIA"
             />
           </div>
@@ -93,7 +93,7 @@ function CiaCard({
             {faixas.map((f, i) => (
               <div key={i} className="grid grid-cols-[1fr_1fr_1fr_auto] gap-1.5 items-end">
                 <div>
-                  <p className="mb-0.5 text-[10px] text-slate-400">De (milhas)</p>
+                  <p className="mb-0.5 text-[10px] text-[var(--hub-text-muted)]">De (milhas)</p>
                   <Input
                     inputMode="numeric"
                     value={f.de}
@@ -104,7 +104,7 @@ function CiaCard({
                   />
                 </div>
                 <div>
-                  <p className="mb-0.5 text-[10px] text-slate-400">Ate (milhas)</p>
+                  <p className="mb-0.5 text-[10px] text-[var(--hub-text-muted)]">Ate (milhas)</p>
                   <Input
                     inputMode="numeric"
                     value={f.ate >= 9999999 ? "" : f.ate}
@@ -117,7 +117,7 @@ function CiaCard({
                   />
                 </div>
                 <div>
-                  <p className="mb-0.5 text-[10px] text-slate-400">R$/1000 milhas</p>
+                  <p className="mb-0.5 text-[10px] text-[var(--hub-text-muted)]">R$/1000 milhas</p>
                   <Input
                     inputMode="decimal"
                     value={f.valorPorMilheiro || ""}
@@ -135,7 +135,7 @@ function CiaCard({
                   type="button"
                   onClick={() => removeFaixa(i)}
                   disabled={faixas.length <= 1}
-                  className="mb-0.5 h-8 w-8 rounded text-slate-400 hover:text-red-500 disabled:opacity-30"
+                  className="mb-0.5 h-8 w-8 rounded text-[var(--hub-text-muted)] hover:text-red-500 disabled:opacity-30"
                 >
                   ×
                 </button>
@@ -153,10 +153,10 @@ function CiaCard({
           <div className="space-y-1">
             {cia.faixas.map((f, i) => (
               <div key={i} className="flex items-center justify-between text-xs">
-                <span className="text-slate-500">{formatarFaixa(f)}</span>
+                <span className="text-[var(--hub-text-muted)]">{formatarFaixa(f)}</span>
                 <span className="font-semibold tabular-nums text-[var(--hub-blue-dark)]">
                   R$ {f.valorPorMilheiro.toFixed(2).replace(".", ",")}
-                  <span className="ml-1 font-normal text-slate-400">/1000</span>
+                  <span className="ml-1 font-normal text-[var(--hub-text-muted)]">/1000</span>
                 </span>
               </div>
             ))}
@@ -184,7 +184,7 @@ function CiaCard({
           <button
             type="button"
             onClick={() => setEditando(true)}
-            className="w-full rounded-lg border border-[var(--hub-border)] py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-[var(--hub-blue)] hover:text-[var(--hub-blue)]"
+            className="w-full rounded-[var(--hub-radius)] border border-[var(--hub-border)] py-1.5 text-xs font-medium text-[var(--hub-text-secondary)] transition-colors hover:border-[var(--hub-blue)] hover:text-[var(--hub-blue)]"
           >
             Editar
           </button>
@@ -228,7 +228,7 @@ export default function PrecificarMilheiroPage() {
   }
 
   if (!tabelas) {
-    return <p className="text-sm text-slate-500">Carregando...</p>;
+    return <p className="text-sm text-[var(--hub-text-muted)]">Carregando...</p>;
   }
 
   return (
@@ -239,7 +239,7 @@ export default function PrecificarMilheiroPage() {
           <h1 className="text-2xl font-bold text-[var(--hub-blue-dark)]">
             Precificar Milheiro
           </h1>
-          <p className="mt-1 max-w-xl text-sm text-slate-500">
+          <p className="mt-1 max-w-xl text-sm text-[var(--hub-text-muted)]">
             Defina o valor de cada 1.000 milhas por companhia e faixa de quantidade.
             Esses valores sao usados automaticamente na calculadora.
           </p>
@@ -248,7 +248,7 @@ export default function PrecificarMilheiroPage() {
           <button
             type="button"
             onClick={handleReset}
-            className="rounded-lg border border-[var(--hub-border)] px-3 py-2 text-xs text-slate-500 hover:border-slate-400 hover:text-slate-700"
+            className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] px-3 py-2 text-xs text-[var(--hub-text-muted)] hover:border-[var(--hub-blue-muted)] hover:text-[var(--hub-text-primary)]"
           >
             Restaurar padrao
           </button>
@@ -279,7 +279,7 @@ export default function PrecificarMilheiroPage() {
         <button
           type="button"
           onClick={addCia}
-          className="flex min-h-[120px] items-center justify-center rounded-xl border-2 border-dashed border-slate-200 text-sm text-slate-400 transition-colors hover:border-[var(--hub-blue)] hover:text-[var(--hub-blue)]"
+          className="flex min-h-[120px] items-center justify-center rounded-[var(--hub-radius-lg)] border-2 border-dashed border-[var(--hub-border)] text-sm text-[var(--hub-text-muted)] transition-colors hover:border-[var(--hub-blue)] hover:text-[var(--hub-blue)]"
         >
           + Adicionar CIA
         </button>
@@ -290,22 +290,22 @@ export default function PrecificarMilheiroPage() {
         <h2 className="mb-3 text-base font-semibold text-[var(--hub-blue-dark)]">
           Taxas de bagagem nacional (R$ por mala)
         </h2>
-        <div className="overflow-x-auto rounded-xl border border-[var(--hub-border)] bg-white">
+        <div className="overflow-x-auto rounded-[var(--hub-radius-lg)] border border-[var(--hub-border)] bg-white">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[var(--hub-border)] bg-slate-50">
-                <th className="px-4 py-3 text-left font-semibold text-slate-600">CIA</th>
-                <th className="px-4 py-3 text-right font-semibold text-slate-600">Antes</th>
-                <th className="px-4 py-3 text-right font-semibold text-slate-600">Check-in</th>
-                <th className="px-4 py-3 text-right font-semibold text-slate-600">Aeroporto</th>
-                <th className="px-4 py-3 text-right font-semibold text-slate-600">Depois 48h</th>
+              <tr className="border-b border-[var(--hub-border)] bg-[var(--hub-bg-subtle)]">
+                <th className="px-4 py-3 text-left font-semibold text-[var(--hub-text-secondary)]">CIA</th>
+                <th className="px-4 py-3 text-right font-semibold text-[var(--hub-text-secondary)]">Antes</th>
+                <th className="px-4 py-3 text-right font-semibold text-[var(--hub-text-secondary)]">Check-in</th>
+                <th className="px-4 py-3 text-right font-semibold text-[var(--hub-text-secondary)]">Aeroporto</th>
+                <th className="px-4 py-3 text-right font-semibold text-[var(--hub-text-secondary)]">Depois 48h</th>
               </tr>
             </thead>
             <tbody>
               {tabelas.bagagens.map((b, i) => (
                 <tr
                   key={b.id}
-                  className={i % 2 === 0 ? "bg-white" : "bg-slate-50/50"}
+                  className={i % 2 === 0 ? "bg-white" : "bg-[var(--hub-bg-subtle)]/50"}
                 >
                   <td className="px-4 py-3 font-medium text-[var(--hub-blue-dark)]">
                     {b.nome}
@@ -331,7 +331,7 @@ export default function PrecificarMilheiroPage() {
                             setTabelas(novas);
                             salvarTabelas(novas);
                           }}
-                          className="w-20 rounded border border-transparent bg-transparent px-1 py-0.5 text-right text-sm tabular-nums text-slate-800 focus:border-[var(--hub-blue)] focus:bg-white focus:outline-none"
+                          className="w-20 rounded border border-transparent bg-transparent px-1 py-0.5 text-right text-sm tabular-nums text-[var(--hub-text-primary)] focus:border-[var(--hub-blue)] focus:bg-white focus:outline-none"
                         />
                       </td>
                     ),
@@ -341,7 +341,7 @@ export default function PrecificarMilheiroPage() {
             </tbody>
           </table>
         </div>
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-2 text-xs text-[var(--hub-text-muted)]">
           Clique em qualquer valor para editar. Salvo automaticamente.
         </p>
       </div>

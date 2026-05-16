@@ -15,7 +15,7 @@ type Props = {
 export function ResultadoCiaCard({ resultado: r, qtdPessoas, temMala, corCia }: Props) {
   return (
     <div
-      className="rounded-xl border-2 border-[var(--hub-border)] bg-white p-4"
+      className="rounded-[var(--hub-radius-lg)] border-2 border-[var(--hub-border)] bg-white p-4"
       style={corCia ? { borderLeftColor: corCia, borderLeftWidth: "4px" } : {}}
     >
       {/* Header */}
@@ -31,7 +31,7 @@ export function ResultadoCiaCard({ resultado: r, qtdPessoas, temMala, corCia }: 
           </div>
         </div>
         <div className="text-right">
-          <p className="text-[10px] text-slate-400">Total grupo</p>
+          <p className="text-[10px] text-[var(--hub-text-muted)]">Total grupo</p>
           <p className="text-xl font-bold text-[var(--hub-blue-dark)] tabular-nums">
             {fmtBRL(temMala ? r.precoTotalComMala : r.precoTotalSemMala)}
           </p>
@@ -39,23 +39,23 @@ export function ResultadoCiaCard({ resultado: r, qtdPessoas, temMala, corCia }: 
       </div>
 
       {/* Detalhes — o que o cliente ve */}
-      <div className="mt-3 space-y-1.5 rounded-lg bg-white/80 p-3 text-sm">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+      <div className="mt-3 space-y-1.5 rounded-[var(--hub-radius)] bg-white/80 p-3 text-sm">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--hub-text-muted)]">
           O que o cliente ve
         </p>
         <div className="flex items-center justify-between">
-          <span className="text-slate-600">Passagens ({qtdPessoas} pax)</span>
+          <span className="text-[var(--hub-text-secondary)]">Passagens ({qtdPessoas} pax)</span>
           <span className="font-semibold tabular-nums">{fmtBRL(r.precoTotalSemMala)}</span>
         </div>
         {r.totalMalas > 0 && (
           <div className="flex items-center justify-between">
-            <span className="text-slate-600">Bagagens</span>
+            <span className="text-[var(--hub-text-secondary)]">Bagagens</span>
             <span className="font-semibold tabular-nums">{fmtBRL(r.totalMalas)}</span>
           </div>
         )}
         {r.totalMalas > 0 && (
           <div className="flex items-center justify-between border-t border-slate-100 pt-1.5">
-            <span className="font-semibold text-slate-700">Total</span>
+            <span className="font-semibold text-[var(--hub-text-primary)]">Total</span>
             <span className="font-bold tabular-nums text-[var(--hub-blue-dark)]">{fmtBRL(r.precoTotalComMala)}</span>
           </div>
         )}
@@ -63,15 +63,15 @@ export function ResultadoCiaCard({ resultado: r, qtdPessoas, temMala, corCia }: 
 
       {/* Detalhes internos (agencia) */}
       <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
-        <div className="rounded-lg bg-white/60 p-2">
-          <p className="text-[10px] uppercase text-slate-400">Por pessoa</p>
+        <div className="rounded-[var(--hub-radius)] bg-white/60 p-2">
+          <p className="text-[10px] uppercase text-[var(--hub-text-muted)]">Por pessoa</p>
           <p className="mt-0.5 font-semibold tabular-nums">{fmtBRL(r.precoPorPessoaSemMala)}</p>
         </div>
-        <div className="rounded-lg bg-white/60 p-2">
-          <p className="text-[10px] uppercase text-slate-400">Taxas</p>
+        <div className="rounded-[var(--hub-radius)] bg-white/60 p-2">
+          <p className="text-[10px] uppercase text-[var(--hub-text-muted)]">Taxas</p>
           <p className="mt-0.5 font-semibold tabular-nums">{fmtBRL(r.detalhes.taxasPorPessoa)}</p>
         </div>
-        <div className="rounded-lg bg-emerald-50 p-2">
+        <div className="rounded-[var(--hub-radius)] bg-emerald-50 p-2">
           <p className="text-[10px] uppercase text-emerald-600">Lucro total</p>
           <p className="mt-0.5 font-semibold tabular-nums text-emerald-700">{fmtBRL(r.lucroTotal)}</p>
         </div>

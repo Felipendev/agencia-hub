@@ -127,7 +127,7 @@ export function AbaEndereco() {
   if (loading) {
     return (
       <Card>
-        <p className="p-4 text-sm text-slate-500">Carregando…</p>
+        <p className="p-4 text-sm text-[var(--hub-text-muted)]">Carregando…</p>
       </Card>
     );
   }

@@ -62,7 +62,7 @@ export function AbaSeguranca() {
       <div className="max-w-md space-y-4 p-1">
         <div>
           <h3 className="text-base font-semibold text-[var(--hub-blue-dark)]">Alterar senha</h3>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-[var(--hub-text-muted)]">
             Após alterar a senha, você será desconectado e precisará fazer login novamente.
           </p>
         </div>

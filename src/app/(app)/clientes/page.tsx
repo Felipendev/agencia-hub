@@ -127,7 +127,7 @@ export default function ClientesPage() {
   }
 
   if (!isReady) {
-    return <p className="text-sm text-slate-600">Carregando…</p>;
+    return <p className="text-sm text-[var(--hub-text-secondary)]">Carregando…</p>;
   }
 
   return (
@@ -199,14 +199,14 @@ export default function ClientesPage() {
                     </Link>
                   </Td>
                   <Td>
-                    <div className="text-slate-800">{c.email}</div>
-                    <div className="text-xs text-slate-500">{c.telefone}</div>
+                    <div className="text-[var(--hub-text-primary)]">{c.email}</div>
+                    <div className="text-xs text-[var(--hub-text-muted)]">{c.telefone}</div>
                   </Td>
                   <Td>{c.destinoInteresse}</Td>
                   <Td>
                     <Badge tone="muted">{CLIENTE_STATUS_LABELS[c.status]}</Badge>
                   </Td>
-                  <Td className="whitespace-nowrap text-slate-600">
+                  <Td className="whitespace-nowrap text-[var(--hub-text-secondary)]">
                     {formatDateBR(c.createdAt)}
                   </Td>
                   <Td>
@@ -214,7 +214,7 @@ export default function ClientesPage() {
                       type="button"
                       title="Excluir cliente"
                       onClick={() => handleDeleteRequest(c.id)}
-                      className="rounded p-1 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                      className="rounded p-1 text-[var(--hub-text-muted)] transition-colors hover:bg-red-50 hover:text-red-500"
                     >
                       <TrashIcon className="h-4 w-4" />
                     </button>
@@ -224,7 +224,7 @@ export default function ClientesPage() {
             </tbody>
           </Table>
           {filtrados.length === 0 ? (
-            <p className="mt-4 text-center text-sm text-slate-500">
+            <p className="mt-4 text-center text-sm text-[var(--hub-text-muted)]">
               Nenhum cliente encontrado com os filtros atuais.
             </p>
           ) : null}

@@ -101,13 +101,13 @@ function OpcaoVooForm({
 
   return (
     <div
-      className={`rounded-xl border-2 bg-white p-4 transition-all ${opcao.selecionada ? "border-[var(--hub-blue)]" : "border-[var(--hub-border)] opacity-60"}`}
+      className={`rounded-[var(--hub-radius-lg)] border-2 bg-white p-4 transition-all ${opcao.selecionada ? "border-[var(--hub-blue)]" : "border-[var(--hub-border)] opacity-60"}`}
       style={cia?.cor ? { borderLeftColor: cia.cor, borderLeftWidth: "4px" } : {}}
     >
       <div className="flex items-center gap-3">
         <input type="checkbox" checked={opcao.selecionada}
           onChange={(e) => set({ selecionada: e.target.checked })}
-          className="h-4 w-4 rounded border-slate-300 accent-[var(--hub-blue)]"
+          className="h-4 w-4 rounded border-[var(--hub-border)] accent-[var(--hub-blue)]"
           title="Incluir na cotacao" />
         {/* Nome colorido da CIA como prefixo */}
         {cia?.cor && (
@@ -183,13 +183,13 @@ function OpcaoVooForm({
       </div>
 
       <div className="mt-3 border-t border-slate-100 pt-3">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Lucro</p>
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--hub-text-muted)]">Lucro</p>
         <div className="flex flex-wrap items-center gap-3">
           <label className="flex items-center gap-1.5 text-xs">
             <input type="checkbox" checked={opcao.lucroConfig.usarPct}
               onChange={(e) => set({ lucroConfig: { ...opcao.lucroConfig, usarPct: e.target.checked } })}
               className="accent-[var(--hub-blue)]" />
-            <span className="text-slate-600">%</span>
+            <span className="text-[var(--hub-text-secondary)]">%</span>
             <Input inputMode="decimal" value={opcao.lucroConfig.pct}
               onChange={(e) => set({ lucroConfig: { ...opcao.lucroConfig, pct: parseFloat(e.target.value.replace(",", ".")) || 0 } })}
               disabled={!opcao.lucroConfig.usarPct} className="h-7 w-16 text-xs" />
@@ -198,13 +198,13 @@ function OpcaoVooForm({
             <input type="checkbox" checked={opcao.lucroConfig.usarFixo}
               onChange={(e) => set({ lucroConfig: { ...opcao.lucroConfig, usarFixo: e.target.checked } })}
               className="accent-[var(--hub-blue)]" />
-            <span className="text-slate-600">R$ fixo</span>
+            <span className="text-[var(--hub-text-secondary)]">R$ fixo</span>
             <Input inputMode="decimal" value={opcao.lucroConfig.fixo || ""}
               onChange={(e) => set({ lucroConfig: { ...opcao.lucroConfig, fixo: parseFloat(e.target.value.replace(",", ".")) || 0 } })}
               disabled={!opcao.lucroConfig.usarFixo} className="h-7 w-20 text-xs" />
           </label>
           {milheiroSugerido > 0 && (
-            <span className="text-[10px] text-slate-400">Milheiro: R${milheiroSugerido}/1000</span>
+            <span className="text-[10px] text-[var(--hub-text-muted)]">Milheiro: R${milheiroSugerido}/1000</span>
           )}
         </div>
       </div>
@@ -335,7 +335,7 @@ export default function CalculadoraMilhasPage() {
   const temMala = opcoes.some((o) => o.qtdMalas > 0 && o.valorMala > 0);
   const selecionadas = opcoes.filter((o) => o.selecionada);
 
-  if (!tabelas) return <p className="text-sm text-slate-500">Carregando...</p>;
+  if (!tabelas) return <p className="text-sm text-[var(--hub-text-muted)]">Carregando...</p>;
 
   return (
     <div className="space-y-5">
@@ -393,9 +393,9 @@ export default function CalculadoraMilhasPage() {
         {/* Opcoes */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-slate-700">
+            <p className="text-sm font-semibold text-[var(--hub-text-primary)]">
               Opcoes de voo
-              <span className="ml-2 text-xs font-normal text-slate-400">(marque as que deseja incluir na cotacao)</span>
+              <span className="ml-2 text-xs font-normal text-[var(--hub-text-muted)]">(marque as que deseja incluir na cotacao)</span>
             </p>
             <button type="button" onClick={addOpcao}
               className="text-xs font-medium text-[var(--hub-blue)] hover:underline">
@@ -417,8 +417,8 @@ export default function CalculadoraMilhasPage() {
                   <p className="font-semibold text-[var(--hub-blue-dark)]">
                     {origem && destino ? `${origem} -> ${destino}` : "Comparativo"}
                   </p>
-                  {clienteId && <p className="text-slate-500">{clientes.find((c) => c.id === clienteId)?.nome}</p>}
-                  <p className="text-slate-500">
+                  {clienteId && <p className="text-[var(--hub-text-muted)]">{clientes.find((c) => c.id === clienteId)?.nome}</p>}
+                  <p className="text-[var(--hub-text-muted)]">
                     {qtdPessoas} passageiro{qtdPessoas > 1 ? "s" : ""}
                     {dataIda && ` · ${new Date(dataIda + "T12:00:00").toLocaleDateString("pt-BR")}`}
                     {dataVolta && ` -> ${new Date(dataVolta + "T12:00:00").toLocaleDateString("pt-BR")}`}
@@ -439,8 +439,8 @@ export default function CalculadoraMilhasPage() {
             <Card>
               <div className="flex flex-col items-center justify-center py-10 text-center">
                 <p className="text-3xl">✈️</p>
-                <p className="mt-3 text-sm font-medium text-slate-600">Preencha as opcoes e clique em Calcular</p>
-                <p className="mt-1 text-xs text-slate-400">Apenas as opcoes marcadas serao calculadas</p>
+                <p className="mt-3 text-sm font-medium text-[var(--hub-text-secondary)]">Preencha as opcoes e clique em Calcular</p>
+                <p className="mt-1 text-xs text-[var(--hub-text-muted)]">Apenas as opcoes marcadas serao calculadas</p>
               </div>
             </Card>
           )}
