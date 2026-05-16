@@ -145,7 +145,7 @@ function ToastItem({
 
   return (
     <div
-      className={`pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg border ${border} ${bg} p-4 shadow-lg transition-all duration-300 ${
+      className={`pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-[var(--hub-radius)] border ${border} ${bg} p-4 shadow-lg transition-all duration-300 ${
         isExiting
           ? "translate-x-full opacity-0"
           : "translate-x-0 opacity-100"

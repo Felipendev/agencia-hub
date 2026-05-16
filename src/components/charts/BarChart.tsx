@@ -22,7 +22,7 @@ export function BarChart({
   if (data.length === 0 || data.every((d) => d.value === 0)) {
     return (
       <div
-        className="flex items-center justify-center text-sm text-slate-400"
+        className="flex items-center justify-center text-sm text-[var(--hub-text-muted)]"
         style={{ height }}
       >
         {emptyMessage}
@@ -57,7 +57,7 @@ export function BarChart({
                 }}
               />
               {/* Label */}
-              <span className="mt-1 w-full truncate text-center text-[10px] text-slate-500">
+              <span className="mt-1 w-full truncate text-center text-[10px] text-[var(--hub-text-muted)]">
                 {d.label}
               </span>
             </div>

@@ -65,13 +65,13 @@ export default function MinhasComissoesPage() {
   }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
-    return <p className="text-sm text-slate-600">Carregando comissões…</p>;
+    return <p className="text-sm text-[var(--hub-text-secondary)]">Carregando comissões…</p>;
   }
 
   if (!dashboard) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <p className="text-slate-500">
+        <p className="text-[var(--hub-text-muted)]">
           Não foi possível carregar os dados de comissão.
         </p>
       </div>
@@ -102,20 +102,20 @@ export default function MinhasComissoesPage() {
       {/* Summary cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
-          <p className="text-sm font-medium text-slate-600">Comissão acumulada</p>
+          <p className="text-sm font-medium text-[var(--hub-text-secondary)]">Comissão acumulada</p>
           <p className="mt-1 text-2xl font-bold text-emerald-600">
             {formatBRL(dashboard.totalCommissionEarned)}
           </p>
         </Card>
         <Card>
-          <p className="text-sm font-medium text-slate-600">Comissão pendente</p>
+          <p className="text-sm font-medium text-[var(--hub-text-secondary)]">Comissão pendente</p>
           <p className="mt-1 text-2xl font-bold text-amber-600">
             {formatBRL(dashboard.pendingCommission)}
           </p>
-          <p className="mt-1 text-xs text-slate-500">Cotações em aberto</p>
+          <p className="mt-1 text-xs text-[var(--hub-text-muted)]">Cotações em aberto</p>
         </Card>
         <Card>
-          <p className="text-sm font-medium text-slate-600">Minha taxa</p>
+          <p className="text-sm font-medium text-[var(--hub-text-secondary)]">Minha taxa</p>
           <p className="mt-1 text-2xl font-bold text-[var(--hub-blue-dark)]">
             {commissionPct != null
               ? `${commissionPct}%`
@@ -137,14 +137,14 @@ export default function MinhasComissoesPage() {
         )}
 
         {quotations.length === 0 ? (
-          <p className="mt-4 text-sm text-slate-500">
+          <p className="mt-4 text-sm text-[var(--hub-text-muted)]">
             Nenhuma cotação aprovada ainda. Quando suas cotações forem aprovadas, as comissões aparecerão aqui.
           </p>
         ) : (
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[var(--hub-border)] text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+                <tr className="border-b border-[var(--hub-border)] text-left text-xs font-medium uppercase tracking-wide text-[var(--hub-text-muted)]">
                   <th className="pb-2 pr-4">Título</th>
                   <th className="pb-2 pr-4">Cliente</th>
                   <th className="pb-2 pr-4 text-right">Valor Total</th>
@@ -155,11 +155,11 @@ export default function MinhasComissoesPage() {
               </thead>
               <tbody className="divide-y divide-[var(--hub-border)]">
                 {quotations.map((q) => (
-                  <tr key={q.id} className="hover:bg-slate-50">
+                  <tr key={q.id} className="hover:bg-[var(--hub-bg-subtle)]">
                     <td className="py-3 pr-4 font-medium text-[var(--hub-blue-dark)]">
                       {q.title}
                     </td>
-                    <td className="py-3 pr-4 text-slate-600">
+                    <td className="py-3 pr-4 text-[var(--hub-text-secondary)]">
                       {q.customerName}
                     </td>
                     <td className="py-3 pr-4 text-right tabular-nums">

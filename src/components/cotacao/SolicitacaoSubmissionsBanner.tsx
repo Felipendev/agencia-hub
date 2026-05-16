@@ -190,7 +190,7 @@ export function SolicitacaoSubmissionsBanner() {
 
   return (
     <>
-      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 shadow-sm">
+      <div className="rounded-[var(--hub-radius-lg)] border border-amber-200 bg-amber-50 px-4 py-3 shadow-sm">
         <p className="text-sm font-semibold text-amber-950">
           {list.length === 1
             ? "1 solicitação recebida pelo link público"
@@ -204,11 +204,11 @@ export function SolicitacaoSubmissionsBanner() {
           {list.map((s) => (
             <li
               key={s.id}
-              className="flex flex-col gap-2 rounded-lg border border-amber-200/80 bg-white/80 px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-2 rounded-[var(--hub-radius)] border border-amber-200/80 bg-white/80 px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
             >
               <div>
-                <span className="font-medium text-slate-900">{s.nome}</span>
-                <span className="ml-2 text-xs text-slate-500">
+                <span className="font-medium text-[var(--hub-text-primary)]">{s.nome}</span>
+                <span className="ml-2 text-xs text-[var(--hub-text-muted)]">
                   {new Date(s.createdAt).toLocaleString("pt-BR")} · {s.slug}
                   {s.referralSellerName ?
                     ` · ref.: ${s.referralSellerName}`

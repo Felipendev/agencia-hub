@@ -113,7 +113,7 @@ export default function DashboardPage() {
   }, [lancamentos, isReady]);
 
   if (!isReady) {
-    return <div className="text-sm text-slate-600">Carregando dados…</div>;
+    return <div className="text-sm text-[var(--hub-text-secondary)]">Carregando dados…</div>;
   }
 
   const resumo = computeFinanceiroResumo(lancamentos);
@@ -262,7 +262,7 @@ export default function DashboardPage() {
                   <p className="font-medium text-[var(--hub-blue-dark)]">
                     {l.descricao}
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-[var(--hub-text-muted)]">
                     {formatDateBR(l.data)} ·{" "}
                     {LANCAMENTO_CATEGORIA_LABELS[l.categoria]}
                   </p>
@@ -299,7 +299,7 @@ export default function DashboardPage() {
                 >
                   {c.nome}
                 </Link>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--hub-text-muted)]">
                   {c.destinoInteresse} ·{" "}
                   <Badge tone="muted">{CLIENTE_STATUS_LABELS[c.status]}</Badge>
                 </p>
@@ -332,7 +332,7 @@ export default function DashboardPage() {
                 >
                   {c.titulo}
                 </Link>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[var(--hub-text-muted)]">
                   Validade {formatDateBR(c.validade)} ·{" "}
                   <Badge tone="muted">{COTACAO_STATUS_LABELS[c.status]}</Badge>
                 </p>

@@ -28,10 +28,10 @@ export function NotificationBell() {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="relative rounded-lg p-2 transition-colors hover:bg-slate-100"
+        className="relative rounded-[var(--hub-radius)] p-2 transition-colors hover:bg-[var(--hub-bg-subtle)]"
         aria-label="Notificações"
       >
-        <BellIcon className="h-5 w-5 text-slate-600" />
+        <BellIcon className="h-5 w-5 text-[var(--hub-text-secondary)]" />
         {unreadCount > 0 && (
           <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">
             {unreadCount > 9 ? "9+" : unreadCount}
@@ -40,7 +40,7 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl border border-[var(--hub-border)] bg-white shadow-xl sm:w-96">
+        <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-[var(--hub-radius-lg)] border border-[var(--hub-border)] bg-white shadow-xl sm:w-96">
           <div className="flex items-center justify-between border-b border-[var(--hub-border)] px-4 py-3">
             <h3 className="font-semibold text-[var(--hub-blue-dark)]">
               Notificações
@@ -61,7 +61,7 @@ export function NotificationBell() {
                   onClick={() => {
                     clearAll();
                   }}
-                  className="text-xs text-slate-500 hover:underline"
+                  className="text-xs text-[var(--hub-text-muted)] hover:underline"
                 >
                   Limpar
                 </button>
@@ -71,7 +71,7 @@ export function NotificationBell() {
 
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-slate-500">
+              <div className="px-4 py-8 text-center text-sm text-[var(--hub-text-muted)]">
                 Nenhuma notificação no momento
               </div>
             ) : (
@@ -90,7 +90,7 @@ export function NotificationBell() {
                           markAsRead(n.id);
                           setOpen(false);
                         }}
-                        className="block px-4 py-3 transition-colors hover:bg-slate-50"
+                        className="block px-4 py-3 transition-colors hover:bg-[var(--hub-bg-subtle)]"
                       >
                         <NotificationContent notification={n} />
                       </Link>
@@ -125,8 +125,8 @@ function NotificationContent({
       <p className="text-sm font-semibold text-[var(--hub-blue-dark)]">
         {notification.title}
       </p>
-      <p className="mt-0.5 text-sm text-slate-700">{notification.message}</p>
-      <p className="mt-1 text-xs text-slate-500">{timeAgo}</p>
+      <p className="mt-0.5 text-sm text-[var(--hub-text-primary)]">{notification.message}</p>
+      <p className="mt-1 text-xs text-[var(--hub-text-muted)]">{timeAgo}</p>
     </div>
   );
 }

@@ -105,9 +105,9 @@ export function SolicitacaoSocialPanel({ links }: { links: LinkSocialItem[] }) {
       className="relative flex flex-col gap-3"
       aria-label="Canais de contato da agência"
     >
-      <div className="flex items-end justify-between gap-2 border-b border-slate-200/80 pb-3">
+      <div className="flex items-end justify-between gap-2 border-b border-[var(--hub-border)]/80 pb-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--hub-text-muted)]">
             Contato
           </p>
           <p className="text-sm font-semibold text-[var(--hub-blue-dark)]">
@@ -135,21 +135,21 @@ export function SolicitacaoSocialPanel({ links }: { links: LinkSocialItem[] }) {
                 href={l.url.trim()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`group flex items-center gap-3 rounded-2xl border border-slate-200/90 bg-gradient-to-br ${tone} px-3 py-3 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--hub-blue-muted)] hover:shadow-md`}
+                className={`group flex items-center gap-3 rounded-[var(--hub-radius-xl)] border border-[var(--hub-border)]/90 bg-gradient-to-br ${tone} px-3 py-3 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--hub-blue-muted)] hover:shadow-md`}
               >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-[var(--hub-blue)] shadow-inner ring-1 ring-slate-100 transition group-hover:text-[var(--hub-blue-dark)]">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--hub-radius-lg)] bg-white text-[var(--hub-blue)] shadow-inner ring-1 ring-slate-100 transition group-hover:text-[var(--hub-blue-dark)]">
                   <IconForTipo tipo={l.tipo} />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-slate-900">
+                  <span className="block truncate text-sm font-medium text-[var(--hub-text-primary)]">
                     {label}
                   </span>
-                  <span className="mt-0.5 block truncate text-xs text-slate-500">
+                  <span className="mt-0.5 block truncate text-xs text-[var(--hub-text-muted)]">
                     Abrir em nova aba
                   </span>
                 </span>
                 <span
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition group-hover:bg-[var(--hub-yellow)] group-hover:text-[var(--hub-blue-dark)]"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--hub-bg-subtle)] text-[var(--hub-text-muted)] transition group-hover:bg-[var(--hub-yellow)] group-hover:text-[var(--hub-blue-dark)]"
                   aria-hidden
                 >
                   <svg

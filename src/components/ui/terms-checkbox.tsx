@@ -16,7 +16,7 @@ export function TermsCheckbox({ checked, onChange }: TermsCheckboxProps) {
         onChange={(e) => onChange(e.target.checked)}
         className="mt-0.5 h-4 w-4 rounded border-[var(--hub-border)] text-[var(--hub-blue)] focus:ring-[var(--hub-blue)]/20"
       />
-      <span className="text-sm text-slate-600">
+      <span className="text-sm text-[var(--hub-text-secondary)]">
         Li e aceito os{" "}
         <Link
           href="/termos"

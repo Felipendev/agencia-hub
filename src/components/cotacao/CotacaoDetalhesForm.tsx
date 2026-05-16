@@ -158,14 +158,14 @@ export function CotacaoDetalhesForm({
         </summary>
         <div className="mt-3 space-y-3">
           <div>
-            <span className="text-xs font-medium uppercase text-slate-500">
+            <span className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">
               Serviços desejados
             </span>
             <div className="mt-2 flex flex-wrap gap-2">
               {SERVICOS_DESEJADOS_OPTIONS.map((s) => (
                 <label
                   key={s.id}
-                  className="flex cursor-pointer items-center gap-1.5 rounded border border-slate-200 bg-slate-50 px-2 py-1 text-xs"
+                  className="flex cursor-pointer items-center gap-1.5 rounded border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-2 py-1 text-xs"
                 >
                   <input
                     type="checkbox"
@@ -188,7 +188,7 @@ export function CotacaoDetalhesForm({
             </div>
             <div className="sm:col-span-2 xl:col-span-3">
               <Label>Destinos (trechos)</Label>
-              <p className="mb-2 text-xs text-slate-500">
+              <p className="mb-2 text-xs text-[var(--hub-text-muted)]">
                 Adicione quantos trechos precisar, ex.: São Paulo — Madri,
                 Madri — Lisboa… Esse texto compõe o destino na ficha da
                 cotação (abaixo do título), ao juntar os trechos preenchidos.
@@ -474,14 +474,14 @@ export function CotacaoDetalhesForm({
             </Select>
           </div>
           <div>
-            <span className="text-xs font-medium text-slate-500">
+            <span className="text-xs font-medium text-[var(--hub-text-muted)]">
               Comodidades desejadas
             </span>
             <div className="mt-2 flex flex-wrap gap-2">
               {COMODIDADES_HOTEL_OPTIONS.map((label) => (
                 <label
                   key={label}
-                  className="flex cursor-pointer items-center gap-1 rounded border border-slate-200 px-2 py-1 text-xs"
+                  className="flex cursor-pointer items-center gap-1 rounded border border-[var(--hub-border)] px-2 py-1 text-xs"
                 >
                   <input
                     type="checkbox"

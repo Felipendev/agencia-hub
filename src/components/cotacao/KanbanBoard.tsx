@@ -90,12 +90,12 @@ export function KanbanBoard({ cotacoes, clientes, onMove, onDelete }: Props) {
     return (
       <div
         key={id}
-        className={`flex min-h-[200px] min-w-[260px] max-w-[320px] flex-1 flex-col rounded-xl border transition-all duration-150 ${
+        className={`flex min-h-[200px] min-w-[260px] max-w-[320px] flex-1 flex-col rounded-[var(--hub-radius-lg)] border transition-all duration-150 ${
           isOver
             ? "border-[var(--hub-blue)] bg-sky-50 shadow-md ring-2 ring-[var(--hub-blue)]/30"
             : isDragging
-              ? "border-slate-300 bg-slate-100/80"
-              : "border-[var(--hub-border)] bg-slate-50/80"
+              ? "border-[var(--hub-border)] bg-[var(--hub-bg-subtle)]/80"
+              : "border-[var(--hub-border)] bg-[var(--hub-bg-subtle)]/80"
         }`}
         onDragOver={(e) => handleDragOver(e, id)}
         onDragLeave={handleDragLeave}
@@ -128,7 +128,7 @@ export function KanbanBoard({ cotacoes, clientes, onMove, onDelete }: Props) {
             </div>
           ))}
           {isOver && draggingId && (
-            <div className="rounded-lg border-2 border-dashed border-[var(--hub-blue)]/50 bg-sky-100/50 p-4 text-center text-xs font-medium text-[var(--hub-blue)]">
+            <div className="rounded-[var(--hub-radius)] border-2 border-dashed border-[var(--hub-blue)]/50 bg-sky-100/50 p-4 text-center text-xs font-medium text-[var(--hub-blue)]">
               Soltar aqui
             </div>
           )}
@@ -140,7 +140,7 @@ export function KanbanBoard({ cotacoes, clientes, onMove, onDelete }: Props) {
   return (
     <div className="space-y-6">
       {draggingId !== null && (
-        <p className="text-center text-xs text-slate-500">
+        <p className="text-center text-xs text-[var(--hub-text-muted)]">
           Arraste para uma coluna para mover a cotação
         </p>
       )}
@@ -150,7 +150,7 @@ export function KanbanBoard({ cotacoes, clientes, onMove, onDelete }: Props) {
         )}
       </div>
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--hub-text-muted)]">
           Arquivo
         </p>
         <div className="flex gap-3 overflow-x-auto pb-2">

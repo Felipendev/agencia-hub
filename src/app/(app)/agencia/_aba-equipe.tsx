@@ -81,9 +81,9 @@ export function AbaEquipe({ token }: Props) {
           </Link>
         </div>
         {loading ? (
-          <p className="text-sm text-slate-500">Carregando...</p>
+          <p className="text-sm text-[var(--hub-text-muted)]">Carregando...</p>
         ) : !token ? (
-          <p className="text-sm text-slate-500">Configure a URL da API para gerenciar usuários.</p>
+          <p className="text-sm text-[var(--hub-text-muted)]">Configure a URL da API para gerenciar usuários.</p>
         ) : (
           <div className="overflow-x-auto">
             <Table>
@@ -94,7 +94,7 @@ export function AbaEquipe({ token }: Props) {
                 {users.map((u) => (
                   <tr key={u.id}>
                     <Td className="font-medium text-[var(--hub-blue-dark)]">{u.name}</Td>
-                    <Td className="text-sm text-slate-600">{u.email}</Td>
+                    <Td className="text-sm text-[var(--hub-text-secondary)]">{u.email}</Td>
                     <Td><Badge tone={u.accountKind === "AGENCY_OWNER" ? "warning" : "muted"}>{u.accountKind === "AGENCY_OWNER" ? "Dono" : "Vendedor"}</Badge></Td>
                     <Td>
                       {editingId === u.id ? (
@@ -107,24 +107,24 @@ export function AbaEquipe({ token }: Props) {
                           {editType === "pct" && <Input className="w-16 text-xs" placeholder="5" value={editPct} onChange={(e) => setEditPct(e.target.value)} />}
                           {editType === "fixed" && <Input className="w-20 text-xs" placeholder="200" value={editFixed} onChange={(e) => setEditFixed(e.target.value)} />}
                           <button type="button" onClick={() => handleSaveComm(u)} className="rounded bg-[var(--hub-blue)] px-2 py-1 text-xs text-white">OK</button>
-                          <button type="button" onClick={() => setEditingId(null)} className="text-xs text-slate-400">x</button>
+                          <button type="button" onClick={() => setEditingId(null)} className="text-xs text-[var(--hub-text-muted)]">x</button>
                         </div>
                       ) : (
-                        <button type="button" onClick={() => startEdit(u)} className="text-sm text-slate-700 hover:text-[var(--hub-blue)] hover:underline">
+                        <button type="button" onClick={() => startEdit(u)} className="text-sm text-[var(--hub-text-primary)] hover:text-[var(--hub-blue)] hover:underline">
                           {commLabel(u)}
                         </button>
                       )}
                     </Td>
                     <Td><Badge tone={u.active ? "success" : "danger"}>{u.active ? "Ativo" : "Inativo"}</Badge></Td>
                     <Td>
-                      <button type="button" onClick={() => handleToggle(u)} className="text-xs text-slate-500 hover:text-[var(--hub-blue)]">
+                      <button type="button" onClick={() => handleToggle(u)} className="text-xs text-[var(--hub-text-muted)] hover:text-[var(--hub-blue)]">
                         {u.active ? "Desativar" : "Ativar"}
                       </button>
                     </Td>
                   </tr>
                 ))}
                 {users.length === 0 && (
-                  <tr><td colSpan={6} className="border-b border-[var(--hub-border)] px-4 py-6 text-center text-sm text-slate-500">Nenhum usuário cadastrado.</td></tr>
+                  <tr><td colSpan={6} className="border-b border-[var(--hub-border)] px-4 py-6 text-center text-sm text-[var(--hub-text-muted)]">Nenhum usuário cadastrado.</td></tr>
                 )}
               </tbody>
             </Table>

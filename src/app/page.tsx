@@ -8,7 +8,7 @@ export default function LandingPage() {
       <header className="relative z-10 border-b border-white/10">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 lg:px-8">
           <div className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--hub-yellow)] text-sm font-bold text-[var(--hub-blue-dark)]">
+            <span className="flex h-9 w-9 items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-yellow)] text-sm font-bold text-[var(--hub-blue-dark)]">
               AH
             </span>
             <span className="text-lg font-bold text-white">AgênciasHub</span>
@@ -60,7 +60,7 @@ export default function LandingPage() {
                 <Link href="/login">
                   <button
                     type="button"
-                    className="rounded-lg border border-white/20 bg-white/5 px-6 py-3.5 text-base font-semibold text-white transition-all hover:bg-white/10 hover:border-white/30"
+                    className="rounded-[var(--hub-radius)] border border-white/20 bg-white/5 px-6 py-3.5 text-base font-semibold text-white transition-all hover:bg-white/10 hover:border-white/30"
                   >
                     Já tenho conta
                   </button>
@@ -72,8 +72,8 @@ export default function LandingPage() {
             <div className="mt-16 hidden flex-1 lg:block">
               <div className="relative">
                 {/* Main dashboard mockup */}
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-1 shadow-2xl shadow-black/40 backdrop-blur-sm">
-                  <div className="rounded-xl bg-[#111d33] p-6">
+                <div className="rounded-[var(--hub-radius-xl)] border border-white/10 bg-white/5 p-1 shadow-2xl shadow-black/40 backdrop-blur-sm">
+                  <div className="rounded-[var(--hub-radius-lg)] bg-[#111d33] p-6">
                     {/* Top bar */}
                     <div className="flex items-center justify-between border-b border-white/10 pb-4">
                       <div className="flex items-center gap-2">
@@ -85,21 +85,21 @@ export default function LandingPage() {
                     </div>
                     {/* Dashboard content */}
                     <div className="mt-4 grid grid-cols-3 gap-3">
-                      <div className="rounded-lg bg-white/5 p-3">
+                      <div className="rounded-[var(--hub-radius)] bg-white/5 p-3">
                         <div className="text-[10px] text-white/40">Cotações</div>
                         <div className="mt-1 text-lg font-bold text-white">24</div>
                         <div className="mt-2 h-1.5 w-full rounded-full bg-white/10">
                           <div className="h-full w-3/4 rounded-full bg-[var(--hub-yellow)]" />
                         </div>
                       </div>
-                      <div className="rounded-lg bg-white/5 p-3">
+                      <div className="rounded-[var(--hub-radius)] bg-white/5 p-3">
                         <div className="text-[10px] text-white/40">Clientes</div>
                         <div className="mt-1 text-lg font-bold text-white">156</div>
                         <div className="mt-2 h-1.5 w-full rounded-full bg-white/10">
                           <div className="h-full w-2/3 rounded-full bg-sky-400" />
                         </div>
                       </div>
-                      <div className="rounded-lg bg-white/5 p-3">
+                      <div className="rounded-[var(--hub-radius)] bg-white/5 p-3">
                         <div className="text-[10px] text-white/40">Faturamento</div>
                         <div className="mt-1 text-lg font-bold text-emerald-400">R$ 48k</div>
                         <div className="mt-2 h-1.5 w-full rounded-full bg-white/10">
@@ -108,7 +108,7 @@ export default function LandingPage() {
                       </div>
                     </div>
                     {/* Chart area */}
-                    <div className="mt-4 rounded-lg bg-white/5 p-4">
+                    <div className="mt-4 rounded-[var(--hub-radius)] bg-white/5 p-4">
                       <div className="flex items-end justify-between gap-1 h-20">
                         {[40, 65, 45, 80, 55, 90, 70, 85, 60, 95, 75, 88].map((h, i) => (
                           <div
@@ -123,7 +123,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Floating cards */}
-                <div className="absolute -left-8 top-8 rounded-xl border border-white/10 bg-[#111d33]/90 p-3 shadow-xl backdrop-blur-sm animate-[float_6s_ease-in-out_infinite]">
+                <div className="absolute -left-8 top-8 rounded-[var(--hub-radius-lg)] border border-white/10 bg-[#111d33]/90 p-3 shadow-xl backdrop-blur-sm animate-[float_6s_ease-in-out_infinite]">
                   <div className="flex items-center gap-2">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-500/20">
                       <svg className="h-4 w-4 text-sky-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -138,7 +138,7 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                <div className="absolute -right-4 bottom-16 rounded-xl border border-white/10 bg-[#111d33]/90 p-3 shadow-xl backdrop-blur-sm animate-[float_5s_ease-in-out_infinite_1s]">
+                <div className="absolute -right-4 bottom-16 rounded-[var(--hub-radius-lg)] border border-white/10 bg-[#111d33]/90 p-3 shadow-xl backdrop-blur-sm animate-[float_5s_ease-in-out_infinite_1s]">
                   <div className="flex items-center gap-2">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20">
                       <svg className="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -231,9 +231,9 @@ export default function LandingPage() {
               ].map((feature, i) => (
                 <div
                   key={i}
-                  className="group rounded-xl border border-white/10 bg-white/5 p-6 transition-all hover:border-[var(--hub-yellow)]/30 hover:bg-white/[0.07]"
+                  className="group rounded-[var(--hub-radius-lg)] border border-white/10 bg-white/5 p-6 transition-all hover:border-[var(--hub-yellow)]/30 hover:bg-white/[0.07]"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hub-yellow)]/10 text-[var(--hub-yellow)] transition-colors group-hover:bg-[var(--hub-yellow)]/20">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-yellow)]/10 text-[var(--hub-yellow)] transition-colors group-hover:bg-[var(--hub-yellow)]/20">
                     {feature.icon}
                   </div>
                   <h3 className="mt-4 text-base font-semibold text-white">
@@ -273,7 +273,7 @@ export default function LandingPage() {
       <footer className="border-t border-white/10 py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 sm:flex-row lg:px-8">
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--hub-yellow)] text-[10px] font-bold text-[var(--hub-blue-dark)]">
+            <span className="flex h-7 w-7 items-center justify-center rounded-[var(--hub-radius-sm)] bg-[var(--hub-yellow)] text-[10px] font-bold text-[var(--hub-blue-dark)]">
               AH
             </span>
             <span className="text-sm font-semibold text-white/60">AgênciasHub</span>

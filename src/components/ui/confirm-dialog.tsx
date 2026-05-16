@@ -63,7 +63,7 @@ export function ConfirmDialog({
       <div
         ref={panelRef}
         tabIndex={-1}
-        className="relative z-10 w-full max-w-md rounded-xl border border-[var(--hub-border)] bg-white p-6 shadow-xl outline-none"
+        className="relative z-10 w-full max-w-md rounded-[var(--hub-radius-lg)] border border-[var(--hub-border)] bg-white p-6 shadow-xl outline-none"
       >
         <h2
           id="confirm-dialog-title"
@@ -73,7 +73,7 @@ export function ConfirmDialog({
         </h2>
         <p
           id="confirm-dialog-message"
-          className="mt-2 text-sm text-slate-600"
+          className="mt-2 text-sm text-[var(--hub-text-secondary)]"
         >
           {message}
         </p>

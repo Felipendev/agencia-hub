@@ -193,7 +193,7 @@ export function SolicitacaoPublicView({ slug }: Props) {
 
   if (loadError) {
     return (
-      <div className="mx-auto max-w-5xl px-5 py-16 text-center text-slate-600 sm:px-8">
+      <div className="mx-auto max-w-5xl px-5 py-16 text-center text-[var(--hub-text-secondary)] sm:px-8">
         <p>{loadError}</p>
       </div>
     );
@@ -201,7 +201,7 @@ export function SolicitacaoPublicView({ slug }: Props) {
 
   if (!config) {
     return (
-      <div className="mx-auto max-w-5xl px-5 py-16 text-center text-slate-600 sm:px-8">
+      <div className="mx-auto max-w-5xl px-5 py-16 text-center text-[var(--hub-text-secondary)] sm:px-8">
         <p>Carregando formulário…</p>
       </div>
     );
@@ -210,7 +210,7 @@ export function SolicitacaoPublicView({ slug }: Props) {
   if (sucesso) {
     return (
       <div className="mx-auto max-w-5xl px-5 py-16 text-center sm:px-8">
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-10">
+        <div className="rounded-[var(--hub-radius-xl)] border border-emerald-200 bg-emerald-50 px-6 py-10">
           <h2 className="text-xl font-bold text-emerald-900">
             Recebemos sua solicitação
           </h2>
@@ -227,7 +227,7 @@ export function SolicitacaoPublicView({ slug }: Props) {
   return (
     <div className="mx-auto w-full max-w-[92rem] px-5 py-10 sm:px-8 lg:px-12 lg:py-14">
       <header className="mb-12 lg:mb-14">
-        <div className="relative overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-gradient-to-br from-white via-white to-sky-50/40 p-7 shadow-[0_22px_60px_-18px_rgba(15,40,64,0.12)] sm:p-9 lg:p-10">
+        <div className="relative overflow-hidden rounded-[1.75rem] border border-[var(--hub-border)]/80 bg-gradient-to-br from-white via-white to-sky-50/40 p-7 shadow-[0_22px_60px_-18px_rgba(15,40,64,0.12)] sm:p-9 lg:p-10">
           <div
             className="pointer-events-none absolute -left-24 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-[var(--hub-yellow)]/[0.12] blur-3xl"
             aria-hidden
@@ -254,19 +254,19 @@ export function SolicitacaoPublicView({ slug }: Props) {
                     className="h-auto max-h-32 w-auto max-w-[200px] shrink-0 object-contain sm:max-h-36"
                   />
                 ) : (
-                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--hub-yellow)] to-amber-300/90 text-xl font-bold text-[var(--hub-blue-dark)] shadow-md ring-2 ring-white/80">
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-[var(--hub-radius-xl)] bg-gradient-to-br from-[var(--hub-yellow)] to-amber-300/90 text-xl font-bold text-[var(--hub-blue-dark)] shadow-md ring-2 ring-white/80">
                     {config.nomeMarca.slice(0, 2).toUpperCase()}
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--hub-text-muted)]">
                     {config.nomeMarca}
                   </p>
                   <h1 className="mt-2 text-balance text-3xl font-bold leading-tight text-[var(--hub-blue-dark)] sm:text-4xl lg:text-[2.35rem]">
                     {config.tituloPagina}
                   </h1>
                   {config.textoIntro ? (
-                    <p className="mt-4 max-w-3xl text-pretty text-base leading-relaxed text-slate-600 sm:text-[1.05rem]">
+                    <p className="mt-4 max-w-3xl text-pretty text-base leading-relaxed text-[var(--hub-text-secondary)] sm:text-[1.05rem]">
                       {config.textoIntro}
                     </p>
                   ) : null}
@@ -315,9 +315,9 @@ export function SolicitacaoPublicView({ slug }: Props) {
               type="checkbox"
               checked={lembrar}
               onChange={(e) => setLembrar(e.target.checked)}
-              className="h-4 w-4 rounded border-slate-300"
+              className="h-4 w-4 rounded border-[var(--hub-border)]"
             />
-            <label htmlFor="sp-lem" className="text-sm text-slate-700">
+            <label htmlFor="sp-lem" className="text-sm text-[var(--hub-text-primary)]">
               Lembrar meus dados neste dispositivo
             </label>
           </div>
@@ -357,7 +357,7 @@ export function SolicitacaoPublicView({ slug }: Props) {
         </div>
       </form>
 
-      <p className="mt-10 text-pretty text-xs text-slate-500 sm:text-sm lg:max-w-4xl">
+      <p className="mt-10 text-pretty text-xs text-[var(--hub-text-muted)] sm:text-sm lg:max-w-4xl">
         Envio seguro — seus dados são usados apenas para contato sobre este
         orçamento.
       </p>

@@ -182,7 +182,7 @@ export function AbaFormulario() {
   if (!isReady) {
     return (
       <Card>
-        <p className="p-4 text-sm text-slate-500">Carregando sessão…</p>
+        <p className="p-4 text-sm text-[var(--hub-text-muted)]">Carregando sessão…</p>
       </Card>
     );
   }
@@ -200,7 +200,7 @@ export function AbaFormulario() {
   if (!config) {
     return (
       <Card>
-        <p className="p-4 text-sm text-slate-500">{error ?? "Carregando…"}</p>
+        <p className="p-4 text-sm text-[var(--hub-text-muted)]">{error ?? "Carregando…"}</p>
       </Card>
     );
   }
@@ -227,7 +227,7 @@ export function AbaFormulario() {
               href={publicUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-[var(--hub-blue)] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[var(--hub-blue-dark)] transition-colors"
+              className="inline-flex items-center gap-2 rounded-[var(--hub-radius)] bg-[var(--hub-blue)] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[var(--hub-blue-dark)] transition-colors"
             >
               <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
                 <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
@@ -236,15 +236,15 @@ export function AbaFormulario() {
               Visualizar formulário
             </a>
           </div>
-          <div className="flex items-center gap-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2">
-            <code className="flex-1 break-all text-xs text-slate-700">{publicUrl}</code>
+          <div className="flex items-center gap-2 rounded-[var(--hub-radius)] border border-sky-200 bg-sky-50 px-3 py-2">
+            <code className="flex-1 break-all text-xs text-[var(--hub-text-primary)]">{publicUrl}</code>
             <button type="button" onClick={() => navigator.clipboard.writeText(publicUrl).then(() => toast.success("Link copiado!"))}
               className="shrink-0 rounded border border-sky-300 bg-white px-3 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-100 transition-colors">
               Copiar link
             </button>
           </div>
           {user?.id ? (
-            <p className="mt-2 text-xs leading-relaxed text-slate-600">
+            <p className="mt-2 text-xs leading-relaxed text-[var(--hub-text-secondary)]">
               O link copiado inclui <code className="rounded bg-white/90 px-1 py-0.5 text-[11px]">?vendedor=</code>{" "}
               com o seu usuário: solicitações enviadas por esse endereço ficam atribuídas a você no painel.
               Para um link sem atribuição, remova manualmente o trecho{" "}
@@ -263,7 +263,7 @@ export function AbaFormulario() {
               <Input id="fc-slug" value={config.slug} className="font-mono"
                 placeholder="ex: minha-agencia"
                 onChange={(e) => setConfig({ ...config, slug: e.target.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '') })} />
-              <p className="mt-1 text-xs text-slate-400">Usado na URL do formulário público. Apenas letras minúsculas, números e hífen.</p>
+              <p className="mt-1 text-xs text-[var(--hub-text-muted)]">Usado na URL do formulário público. Apenas letras minúsculas, números e hífen.</p>
             </div>
             <div>
               <Label htmlFor="fc-marca">Nome da marca</Label>
@@ -282,7 +282,7 @@ export function AbaFormulario() {
             </div>
             <div className="sm:col-span-2">
               <Label>Logo do formulário</Label>
-              <p className="mb-2 text-xs text-slate-400">
+              <p className="mb-2 text-xs text-[var(--hub-text-muted)]">
                 Por padrão, o formulário usa a logo da agência. Envie uma imagem aqui apenas se quiser usar uma logo diferente no formulário público.
               </p>
               <Input type="file" accept="image/*" className="text-sm" onChange={onLogoFile} />
@@ -304,13 +304,13 @@ export function AbaFormulario() {
             <div className="mb-2 flex items-center justify-between">
               <p className="text-sm font-semibold text-[var(--hub-blue-dark)]">Links de contato</p>
               <button type="button" onClick={addLink}
-                className="rounded border border-[var(--hub-border)] bg-white px-3 py-1 text-xs font-medium hover:bg-slate-50">
+                className="rounded border border-[var(--hub-border)] bg-white px-3 py-1 text-xs font-medium hover:bg-[var(--hub-bg-subtle)]">
                 + Adicionar
               </button>
             </div>
             <div className="space-y-2">
               {config.linksSociais.map((l) => (
-                <div key={l.id} className="grid gap-2 rounded-lg border border-slate-200 p-2 sm:grid-cols-[140px_1fr_auto]">
+                <div key={l.id} className="grid gap-2 rounded-[var(--hub-radius)] border border-[var(--hub-border)] p-2 sm:grid-cols-[140px_1fr_auto]">
                   <Select value={l.tipo} onChange={(e) => updateLink(l.id, { tipo: e.target.value as LinkSocialTipo })}>
                     {TIPOS_LINK.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
                   </Select>
@@ -321,14 +321,14 @@ export function AbaFormulario() {
                   </button>
                 </div>
               ))}
-              {config.linksSociais.length === 0 && <p className="text-xs text-slate-400">Nenhum link cadastrado.</p>}
+              {config.linksSociais.length === 0 && <p className="text-xs text-[var(--hub-text-muted)]">Nenhum link cadastrado.</p>}
             </div>
           </div>
 
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex justify-end pt-2">
             <div className="flex items-center gap-3">
-              <p className={`text-xs ${error ? "text-red-600" : "text-slate-500"}`}>
+              <p className={`text-xs ${error ? "text-red-600" : "text-[var(--hub-text-muted)]"}`}>
                 {saving ? "Salvando..." : error ? "Erro ao salvar" : hasUnsavedChanges ? "Alterações pendentes" : savedAgoText}
               </p>
               <Button type="button" onClick={() => void handleSave()} disabled={saving}>

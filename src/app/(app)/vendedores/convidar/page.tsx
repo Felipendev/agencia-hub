@@ -67,7 +67,7 @@ export default function InviteSellersPage() {
   if (user?.accountKind !== "AGENCY_OWNER") {
     return (
       <div className="flex h-64 items-center justify-center">
-        <p className="text-slate-500">Acesso restrito ao dono da agência.</p>
+        <p className="text-[var(--hub-text-muted)]">Acesso restrito ao dono da agência.</p>
       </div>
     );
   }
@@ -117,7 +117,7 @@ export default function InviteSellersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-[var(--hub-blue-dark)]">Convidar Vendedores</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-[var(--hub-text-muted)]">
           Envie convites por e-mail para vendedores se cadastrarem na sua agência.
         </p>
       </div>
@@ -146,9 +146,9 @@ export default function InviteSellersPage() {
       <Card>
         <p className="mb-4 text-sm font-semibold text-[var(--hub-blue-dark)]">Convites enviados</p>
         {loading ? (
-          <p className="text-sm text-slate-500">Carregando...</p>
+          <p className="text-sm text-[var(--hub-text-muted)]">Carregando...</p>
         ) : invitations.length === 0 ? (
-          <p className="text-sm text-slate-500">Nenhum convite enviado ainda.</p>
+          <p className="text-sm text-[var(--hub-text-muted)]">Nenhum convite enviado ainda.</p>
         ) : (
           <div className="overflow-x-auto">
             <Table>
@@ -167,7 +167,7 @@ export default function InviteSellersPage() {
                     <Td>
                       <Badge tone={statusTone(inv.status)}>{statusLabel(inv.status)}</Badge>
                     </Td>
-                    <Td className="text-sm text-slate-600">
+                    <Td className="text-sm text-[var(--hub-text-secondary)]">
                       {new Date(inv.expiresAt).toLocaleDateString("pt-BR")}
                     </Td>
                     <Td>

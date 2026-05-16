@@ -76,19 +76,19 @@ export function EditarClienteModal({ cliente, open, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-xl border border-[var(--hub-border)] bg-white shadow-2xl">
+      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-[var(--hub-radius-lg)] border border-[var(--hub-border)] bg-white shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[var(--hub-border)] px-6 py-4">
           <div>
             <h2 className="text-lg font-bold text-[var(--hub-blue-dark)]">
               Editar Cliente
             </h2>
-            <p className="text-sm text-slate-500">{cliente.nome}</p>
+            <p className="text-sm text-[var(--hub-text-muted)]">{cliente.nome}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+            className="rounded-[var(--hub-radius)] p-1.5 text-[var(--hub-text-muted)] transition-colors hover:bg-[var(--hub-bg-subtle)] hover:text-[var(--hub-text-secondary)]"
             aria-label="Fechar"
           >
             <XIcon className="h-5 w-5" />
@@ -100,7 +100,7 @@ export function EditarClienteModal({ cliente, open, onClose }: Props) {
           <div className="space-y-5">
             {/* Dados principais */}
             <fieldset className="space-y-3">
-              <legend className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <legend className="text-xs font-semibold uppercase tracking-wide text-[var(--hub-text-muted)]">
                 Dados principais
               </legend>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -199,7 +199,7 @@ export function EditarClienteModal({ cliente, open, onClose }: Props) {
 
             {/* Observações */}
             <fieldset className="space-y-3">
-              <legend className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <legend className="text-xs font-semibold uppercase tracking-wide text-[var(--hub-text-muted)]">
                 Notas
               </legend>
               <div>

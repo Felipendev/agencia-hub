@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ClientePicker } from "@/components/cliente/ClientePicker";
 import { BackButton } from "@/components/ui/back-button";
+import { PageHeader } from "@/components/layout/page-header";
 import type { CotacaoDetalhes } from "@/types";
 
 export default function NovaCotacaoPage() {
@@ -93,20 +94,17 @@ export default function NovaCotacaoPage() {
   }
 
   if (!isReady) {
-    return <p className="text-sm text-slate-600">Carregando…</p>;
+    return <p className="text-sm text-[var(--hub-text-secondary)]">Carregando…</p>;
   }
 
   return (
     <div className="mx-auto w-full max-w-[92rem] space-y-8 px-1 sm:px-0">
       <div>
         <BackButton href="/cotacoes" label="Cotações" />
-        <h1 className="mt-4 text-2xl font-bold text-[var(--hub-blue-dark)] sm:text-3xl">
-          Nova cotação
-        </h1>
-        <p className="mt-1 max-w-3xl text-sm text-slate-600 sm:text-base">
-          Mesma largura e estilo de leitura do formulário público enviado ao
-          cliente — preencha com calma.
-        </p>
+        <PageHeader
+          title="Nova cotação"
+          description="Mesma largura e estilo de leitura do formulário público enviado ao cliente — preencha com calma."
+        />
       </div>
 
       <form
@@ -180,11 +178,11 @@ export default function NovaCotacaoPage() {
               <input
                 id="nova-prio"
                 type="checkbox"
-                className="h-4 w-4 rounded border-slate-300"
+                className="h-4 w-4 rounded border-[var(--hub-border)]"
                 checked={prioridade}
                 onChange={(e) => setPrioridade(e.target.checked)}
               />
-              <label htmlFor="nova-prio" className="text-sm text-slate-700">
+              <label htmlFor="nova-prio" className="text-sm text-[var(--hub-text-primary)]">
                 Marcar como prioridade
               </label>
             </div>
@@ -212,7 +210,7 @@ export default function NovaCotacaoPage() {
         <div className="flex flex-wrap justify-end gap-2 border-t border-[var(--hub-border)] pt-4">
           <Link
             href="/cotacoes"
-            className="inline-flex items-center justify-center rounded-lg border border-[var(--hub-blue-muted)] bg-white px-4 py-2.5 text-sm text-[var(--hub-blue)] transition-colors hover:bg-slate-50"
+            className="inline-flex items-center justify-center rounded-[var(--hub-radius)] border border-[var(--hub-blue-muted)] bg-white px-4 py-2.5 text-sm text-[var(--hub-blue)] transition-colors hover:bg-[var(--hub-bg-subtle)]"
           >
             Cancelar
           </Link>

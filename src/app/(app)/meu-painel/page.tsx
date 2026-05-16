@@ -50,13 +50,13 @@ export default function MeuPainelPage() {
   }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
-    return <p className="text-sm text-slate-600">Carregando painel…</p>;
+    return <p className="text-sm text-[var(--hub-text-secondary)]">Carregando painel…</p>;
   }
 
   if (!data) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <p className="text-slate-500">
+        <p className="text-[var(--hub-text-muted)]">
           Configure a URL da API para ver seu painel.
         </p>
       </div>
@@ -99,7 +99,7 @@ export default function MeuPainelPage() {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-600">
+              <p className="text-sm font-medium text-[var(--hub-text-secondary)]">
                 Comissão potencial (cotações em aberto)
               </p>
               <p className="mt-1 text-2xl font-bold text-amber-600">
@@ -108,7 +108,7 @@ export default function MeuPainelPage() {
             </div>
             <div className="text-4xl">💰</div>
           </div>
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-[var(--hub-text-muted)]">
             Valor estimado se todas as cotações em aberto forem aprovadas.
           </p>
         </Card>
@@ -132,7 +132,7 @@ export default function MeuPainelPage() {
                   {formatBRL(data.salesAgent.commissionFixed!)} fixo por cotação aprovada
                 </p>
               )}
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[var(--hub-text-muted)]">
                 Definido pelo dono da agência
               </p>
             </div>
@@ -153,7 +153,7 @@ export default function MeuPainelPage() {
         </div>
 
         {data.recentQuotations.length === 0 ? (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-[var(--hub-text-muted)]">
             Nenhuma cotação atribuída a você ainda.
           </p>
         ) : (
@@ -173,7 +173,7 @@ export default function MeuPainelPage() {
                     >
                       {q.title}
                     </Link>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-[var(--hub-text-muted)]">
                       {q.customerName} · Validade {formatDateBR(q.validUntil)}
                     </p>
                   </div>
