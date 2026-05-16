@@ -39,7 +39,7 @@ export default function VendedoresPage() {
   if (user?.accountKind !== "AGENCY_OWNER") {
     return (
       <div className="flex h-64 items-center justify-center">
-        <p className="text-slate-500">Acesso restrito ao dono da agência.</p>
+        <p className="text-[var(--hub-text-muted)]">Acesso restrito ao dono da agência.</p>
       </div>
     );
   }
@@ -117,7 +117,7 @@ export default function VendedoresPage() {
       <Card>
         <CardTitle>Membros</CardTitle>
         {loading ? (
-          <p className="mt-4 text-sm text-slate-500">Carregando…</p>
+          <p className="mt-4 text-sm text-[var(--hub-text-muted)]">Carregando…</p>
         ) : (
           <div className="mt-4 overflow-x-auto">
             <Table>
@@ -137,7 +137,7 @@ export default function VendedoresPage() {
                     <Td className="font-medium text-[var(--hub-blue-dark)]">
                       {u.name}
                     </Td>
-                    <Td className="text-slate-600 text-sm">{u.email}</Td>
+                    <Td className="text-[var(--hub-text-secondary)] text-sm">{u.email}</Td>
                     <Td>
                       <Badge tone={u.accountKind === "AGENCY_OWNER" ? "warning" : "muted"}>
                         {u.accountKind === "AGENCY_OWNER" ? "Dono" : "Vendedor"}
@@ -182,7 +182,7 @@ export default function VendedoresPage() {
                           </Button>
                           <button
                             type="button"
-                            className="text-xs text-slate-500 hover:text-slate-700"
+                            className="text-xs text-[var(--hub-text-muted)] hover:text-[var(--hub-text-primary)]"
                             onClick={() => setEditingId(null)}
                           >
                             ✕
@@ -191,7 +191,7 @@ export default function VendedoresPage() {
                       ) : (
                         <button
                           type="button"
-                          className="text-sm text-slate-700 hover:text-[var(--hub-blue)] underline-offset-2 hover:underline"
+                          className="text-sm text-[var(--hub-text-primary)] hover:text-[var(--hub-blue)] underline-offset-2 hover:underline"
                           onClick={() => startEdit(u)}
                         >
                           {commissionLabel(u)}
@@ -206,7 +206,7 @@ export default function VendedoresPage() {
                     <Td>
                       <button
                         type="button"
-                        className="text-xs text-slate-500 hover:text-[var(--hub-blue)]"
+                        className="text-xs text-[var(--hub-text-muted)] hover:text-[var(--hub-blue)]"
                         onClick={() => handleToggleActive(u)}
                       >
                         {u.active ? "Desativar" : "Ativar"}
@@ -218,7 +218,7 @@ export default function VendedoresPage() {
                   <tr>
                     <td
                       colSpan={6}
-                      className="border-b border-[var(--hub-border)] px-4 py-6 text-center text-sm text-slate-500"
+                      className="border-b border-[var(--hub-border)] px-4 py-6 text-center text-sm text-[var(--hub-text-muted)]"
                     >
                       Nenhum membro cadastrado.
                     </td>

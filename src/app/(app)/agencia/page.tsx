@@ -8,6 +8,7 @@ import { AbaEndereco } from "./_aba-endereco";
 import { AbaFormulario } from "./_aba-formulario";
 import { AbaEquipe } from "./_aba-equipe";
 import { AbaSeguranca } from "./_aba-seguranca";
+import { PageHeader } from "@/components/layout/page-header";
 
 type Aba = "agencia" | "endereco" | "formulario" | "equipe" | "seguranca";
 
@@ -40,19 +41,17 @@ export default function AgenciaPage() {
   if (user?.accountKind !== "AGENCY_OWNER") {
     return (
       <div className="flex h-64 items-center justify-center">
-        <p className="text-slate-500">Acesso restrito ao gestor da agência.</p>
+        <p className="text-[var(--hub-text-muted)]">Acesso restrito ao gestor da agência.</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-[var(--hub-blue-dark)]">Agência</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Gerencie os dados da sua agência, formulário público e equipe.
-        </p>
-      </div>
+      <PageHeader
+        title="Agência"
+        description="Gerencie os dados da sua agência, formulário público e equipe."
+      />
 
       {/* Abas */}
       <div className="flex gap-1 overflow-x-auto border-b border-[var(--hub-border)]">
@@ -64,7 +63,7 @@ export default function AgenciaPage() {
             className={`whitespace-nowrap px-4 py-2.5 text-sm font-medium transition-colors ${
               aba === a.id
                 ? "border-b-2 border-[var(--hub-blue)] text-[var(--hub-blue)]"
-                : "text-slate-500 hover:text-slate-700"
+                : "text-[var(--hub-text-muted)] hover:text-[var(--hub-text-secondary)]"
             }`}
           >
             {a.label}

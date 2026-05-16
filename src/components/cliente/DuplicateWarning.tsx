@@ -14,7 +14,7 @@ export function DuplicateWarning({ matches, mode = "warn" }: Props) {
 
   return (
     <div
-      className={`rounded-lg border px-4 py-3 text-sm ${
+      className={`rounded-[var(--hub-radius)] border px-4 py-3 text-sm ${
         isBlock
           ? "border-red-200 bg-red-50 text-red-900"
           : "border-amber-200 bg-amber-50 text-amber-900"

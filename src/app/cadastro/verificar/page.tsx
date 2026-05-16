@@ -139,8 +139,8 @@ function VerifyEmailForm() {
   if (!email) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-[var(--hub-blue-dark)] via-[var(--hub-blue)] to-[#1a5080] px-4">
-        <div className="w-full max-w-md rounded-2xl border border-white/15 bg-white p-8 shadow-xl text-center">
-          <p className="text-slate-600">E-mail não informado.</p>
+        <div className="w-full max-w-md rounded-[var(--hub-radius-xl)] border border-white/15 bg-white p-8 shadow-xl text-center">
+          <p className="text-[var(--hub-text-secondary)]">E-mail não informado.</p>
           <Link href="/cadastro" className="mt-4 inline-block font-medium text-[var(--hub-blue)] hover:underline">
             Voltar ao cadastro
           </Link>
@@ -156,17 +156,17 @@ function VerifyEmailForm() {
           href="/"
           className="mb-8 flex items-center gap-2 text-white/90 hover:text-white"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hub-yellow)] text-sm font-bold text-[var(--hub-blue-dark)]">
+          <span className="flex h-10 w-10 items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-yellow)] text-sm font-bold text-[var(--hub-blue-dark)]">
             AH
           </span>
           <span className="text-xl font-bold">AgênciasHub</span>
         </Link>
 
-        <div className="w-full max-w-md rounded-2xl border border-white/15 bg-white p-8 shadow-xl">
+        <div className="w-full max-w-md rounded-[var(--hub-radius-xl)] border border-white/15 bg-white p-8 shadow-xl">
           <h1 className="text-xl font-bold text-[var(--hub-blue-dark)]">
             Verificar e-mail
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-[var(--hub-text-secondary)]">
             Enviamos um código de 6 dígitos para{" "}
             <span className="font-medium text-[var(--hub-blue-dark)]">{email}</span>
           </p>

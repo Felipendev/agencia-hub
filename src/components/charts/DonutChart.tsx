@@ -24,7 +24,7 @@ export function DonutChart({
   if (total === 0) {
     return (
       <div
-        className="flex items-center justify-center text-sm text-slate-400"
+        className="flex items-center justify-center text-sm text-[var(--hub-text-muted)]"
         style={{ height: size }}
       >
         {emptyMessage}
@@ -106,8 +106,8 @@ export function DonutChart({
               className="h-2.5 w-2.5 shrink-0 rounded-full"
               style={{ backgroundColor: s.color }}
             />
-            <span className="flex-1 truncate text-slate-700">{s.label}</span>
-            <span className="font-semibold tabular-nums text-slate-900">
+            <span className="flex-1 truncate text-[var(--hub-text-primary)]">{s.label}</span>
+            <span className="font-semibold tabular-nums text-[var(--hub-text-primary)]">
               {(s.pct * 100).toFixed(0)}%
             </span>
           </li>

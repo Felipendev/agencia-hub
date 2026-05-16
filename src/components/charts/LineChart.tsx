@@ -23,7 +23,7 @@ export function LineChart({
   if (data.length < 2 || data.every((d) => d.value === 0)) {
     return (
       <div
-        className="flex items-center justify-center text-sm text-slate-400"
+        className="flex items-center justify-center text-sm text-[var(--hub-text-muted)]"
         style={{ height }}
       >
         {emptyMessage}
@@ -104,7 +104,7 @@ export function LineChart({
       {/* Labels do eixo X */}
       <div className="flex justify-between px-1">
         {data.map((d, i) => (
-          <span key={i} className="text-[10px] text-slate-500">
+          <span key={i} className="text-[10px] text-[var(--hub-text-muted)]">
             {d.label}
           </span>
         ))}

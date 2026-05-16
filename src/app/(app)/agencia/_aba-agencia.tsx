@@ -177,7 +177,7 @@ export function AbaAgencia() {
   }
 
   if (loading) {
-    return <Card><p className="text-sm text-slate-500 p-1">Carregando...</p></Card>;
+    return <Card><p className="text-sm text-[var(--hub-text-muted)] p-1">Carregando...</p></Card>;
   }
 
   return (
@@ -192,10 +192,10 @@ export function AbaAgencia() {
               <img
                 src={logoPreview}
                 alt="Logo da agência"
-                className="h-16 w-16 rounded-lg border border-[var(--hub-border)] object-contain"
+                className="h-16 w-16 rounded-[var(--hub-radius)] border border-[var(--hub-border)] object-contain"
               />
             ) : (
-              <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-xs text-slate-400">
+              <div className="flex h-16 w-16 items-center justify-center rounded-[var(--hub-radius)] border border-dashed border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] text-xs text-[var(--hub-text-muted)]">
                 Logo
               </div>
             )}
@@ -204,9 +204,9 @@ export function AbaAgencia() {
                 type="file"
                 accept=".png,.jpg,.jpeg,.svg"
                 onChange={handleLogoChange}
-                className="text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--hub-blue)] file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-[var(--hub-blue-dark)]"
+                className="text-sm text-[var(--hub-text-secondary)] file:mr-3 file:rounded-[var(--hub-radius)] file:border-0 file:bg-[var(--hub-blue)] file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-[var(--hub-blue-dark)]"
               />
-              <p className="text-xs text-slate-400">PNG, JPG ou SVG. Máximo 2MB.</p>
+              <p className="text-xs text-[var(--hub-text-muted)]">PNG, JPG ou SVG. Máximo 2MB.</p>
             </div>
           </div>
         </div>
@@ -250,7 +250,7 @@ export function AbaAgencia() {
               onChange={(e) => setData((prev) => ({ ...prev, commercialEmail: e.target.value }))}
               placeholder="contato@agencia.com"
             />
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-[var(--hub-text-muted)]">
               Alterações no e-mail comercial requerem verificação.
             </p>
           </div>

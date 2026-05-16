@@ -16,6 +16,7 @@ import {
 } from "@/lib/constants";
 import { TimelineView } from "@/components/timeline/TimelineView";
 import { BackButton } from "@/components/ui/back-button";
+import { PageHeader } from "@/components/layout/page-header";
 import { EditarClienteModal } from "@/components/cliente/EditarClienteModal";
 
 export default function ClienteDetalhePage() {
@@ -28,12 +29,12 @@ export default function ClienteDetalhePage() {
   const cotacoesDoCliente = cotacoes.filter((q) => q.clienteId === id);
 
   if (!isReady) {
-    return <p className="text-sm text-slate-600">Carregando…</p>;
+    return <p className="text-sm text-[var(--hub-text-secondary)]">Carregando…</p>;
   }
 
   if (!cliente) {
     return (
-      <div className="space-y-4 rounded-xl border border-amber-200 bg-amber-50 p-6 text-amber-900">
+      <div className="space-y-4 rounded-[var(--hub-radius-lg)] border border-amber-200 bg-amber-50 p-6 text-amber-900">
         <BackButton href="/clientes" label="Clientes" />
         <p className="font-medium">Cliente não encontrado.</p>
       </div>
@@ -43,29 +44,19 @@ export default function ClienteDetalhePage() {
   return (
     <>
       <div className="space-y-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <BackButton href="/clientes" label="Clientes" />
-            <h1 className="mt-4 text-2xl font-bold text-[var(--hub-blue-dark)]">
-              {cliente.nome}
-            </h1>
-            <p className="mt-1 text-slate-600">
-              Cadastrado em {formatDateBR(cliente.createdAt)}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Badge tone="warning">{CLIENTE_STATUS_LABELS[cliente.status]}</Badge>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setEditOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <EditIcon className="h-4 w-4" />
-              Editar cliente
-            </Button>
-          </div>
-        </div>
+        <BackButton href="/clientes" label="Clientes" />
+        <PageHeader title={cliente.nome} description={`Cadastrado em ${formatDateBR(cliente.createdAt)}`}>
+          <Badge tone="warning">{CLIENTE_STATUS_LABELS[cliente.status]}</Badge>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setEditOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <EditIcon className="h-4 w-4" />
+            Editar cliente
+          </Button>
+        </PageHeader>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
@@ -73,7 +64,7 @@ export default function ClienteDetalhePage() {
           <dl className="mt-4 space-y-3 text-sm">
             {/* E-mail */}
             <div>
-              <dt className="text-xs font-medium uppercase text-slate-500">E-mail</dt>
+              <dt className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">E-mail</dt>
               <dd>
                 {cliente.email ? (
                   <a
@@ -83,14 +74,14 @@ export default function ClienteDetalhePage() {
                     {cliente.email}
                   </a>
                 ) : (
-                  <span className="text-slate-400">—</span>
+                  <span className="text-[var(--hub-text-muted)]">—</span>
                 )}
               </dd>
             </div>
 
             {/* Telefone */}
             <div>
-              <dt className="text-xs font-medium uppercase text-slate-500">Telefone</dt>
+              <dt className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">Telefone</dt>
               <dd>
                 {cliente.telefone ? (
                   <a
@@ -100,14 +91,14 @@ export default function ClienteDetalhePage() {
                     {cliente.telefone}
                   </a>
                 ) : (
-                  <span className="text-slate-400">—</span>
+                  <span className="text-[var(--hub-text-muted)]">—</span>
                 )}
               </dd>
             </div>
 
             {/* WhatsApp */}
             <div>
-              <dt className="text-xs font-medium uppercase text-slate-500">WhatsApp</dt>
+              <dt className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">WhatsApp</dt>
               <dd>
                 {(() => {
                   const waNum = cliente.whatsapp || cliente.telefone;
@@ -130,7 +121,7 @@ export default function ClienteDetalhePage() {
                       {cliente.whatsapp || cliente.telefone}
                     </a>
                   ) : (
-                    <span className="text-slate-400">—</span>
+                    <span className="text-[var(--hub-text-muted)]">—</span>
                   );
                 })()}
               </dd>
@@ -139,15 +130,15 @@ export default function ClienteDetalhePage() {
             {/* Rede social */}
             {cliente.redeSocial && (
               <div>
-                <dt className="text-xs font-medium uppercase text-slate-500">Rede social</dt>
-                <dd className="text-slate-700">{cliente.redeSocial}</dd>
+                <dt className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">Rede social</dt>
+                <dd className="text-[var(--hub-text-primary)]">{cliente.redeSocial}</dd>
               </div>
             )}
 
             {/* Site */}
             {cliente.site && (
               <div>
-                <dt className="text-xs font-medium uppercase text-slate-500">Site</dt>
+                <dt className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">Site</dt>
                 <dd>
                   <a
                     href={cliente.site.startsWith("http") ? cliente.site : `https://${cliente.site}`}
@@ -163,15 +154,15 @@ export default function ClienteDetalhePage() {
 
             {/* Destino de interesse */}
             <div>
-              <dt className="text-xs font-medium uppercase text-slate-500">Destino de interesse</dt>
-              <dd className="text-slate-700">{cliente.destinoInteresse || "—"}</dd>
+              <dt className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">Destino de interesse</dt>
+              <dd className="text-[var(--hub-text-primary)]">{cliente.destinoInteresse || "—"}</dd>
             </div>
 
             {/* Canal de venda */}
             {cliente.canalVenda && (
               <div>
-                <dt className="text-xs font-medium uppercase text-slate-500">Canal de venda</dt>
-                <dd className="capitalize text-slate-700">
+                <dt className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">Canal de venda</dt>
+                <dd className="capitalize text-[var(--hub-text-primary)]">
                   {cliente.canalVenda.replace(/_/g, " ")}
                 </dd>
               </div>
@@ -180,19 +171,19 @@ export default function ClienteDetalhePage() {
             {/* Data de nascimento */}
             {cliente.dataNascimento && (
               <div>
-                <dt className="text-xs font-medium uppercase text-slate-500">Nascimento</dt>
-                <dd className="text-slate-700">{formatDateBR(cliente.dataNascimento)}</dd>
+                <dt className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">Nascimento</dt>
+                <dd className="text-[var(--hub-text-primary)]">{formatDateBR(cliente.dataNascimento)}</dd>
               </div>
             )}
 
             {/* Contato de emergência */}
             {(cliente.emergenciaNome || cliente.emergenciaTelefone) && (
               <div>
-                <dt className="text-xs font-medium uppercase text-slate-500">Emergência</dt>
-                <dd className="text-slate-700">
+                <dt className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">Emergência</dt>
+                <dd className="text-[var(--hub-text-primary)]">
                   {cliente.emergenciaNome}
                   {cliente.emergenciaTelefone && (
-                    <span className="ml-2 text-slate-500">
+                    <span className="ml-2 text-[var(--hub-text-muted)]">
                       · {cliente.emergenciaTelefone}
                     </span>
                   )}
@@ -202,9 +193,9 @@ export default function ClienteDetalhePage() {
 
             {/* Observações */}
             <div>
-              <dt className="text-xs font-medium uppercase text-slate-500">Observações</dt>
-              <dd className="whitespace-pre-wrap text-slate-700">
-                {cliente.observacoes || <span className="text-slate-400">—</span>}
+              <dt className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">Observações</dt>
+              <dd className="whitespace-pre-wrap text-[var(--hub-text-primary)]">
+                {cliente.observacoes || <span className="text-[var(--hub-text-muted)]">—</span>}
               </dd>
             </div>
           </dl>
@@ -221,7 +212,7 @@ export default function ClienteDetalhePage() {
             </Link>
           </div>
           {cotacoesDoCliente.length === 0 ? (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-[var(--hub-text-muted)]">
               Nenhuma cotação ainda.{" "}
               <Link
                 href={`/cotacoes/nova?clienteId=${cliente.id}`}
@@ -240,14 +231,14 @@ export default function ClienteDetalhePage() {
                   >
                     {q.titulo}
                   </Link>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-[var(--hub-text-muted)]">
                     {q.destino} · validade {formatDateBR(q.validade)}
                   </p>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
                     <Badge tone="muted">
                       {COTACAO_STATUS_LABELS[q.status]}
                     </Badge>
-                    <span className="text-sm font-semibold tabular-nums text-slate-800">
+                    <span className="text-sm font-semibold tabular-nums text-[var(--hub-text-primary)]">
                       {formatBRL(q.valorTotal)}
                     </span>
                   </div>

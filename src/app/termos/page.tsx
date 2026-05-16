@@ -2,11 +2,11 @@ import Link from "next/link";
 
 export default function TermosPage() {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[var(--hub-bg-subtle)]">
       <header className="border-b border-[var(--hub-border)] bg-white">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--hub-yellow)] text-xs font-bold text-[var(--hub-blue-dark)]">
+            <span className="flex h-8 w-8 items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-yellow)] text-xs font-bold text-[var(--hub-blue-dark)]">
               AH
             </span>
             <span className="text-lg font-bold text-[var(--hub-blue-dark)]">AgênciasHub</span>
@@ -24,9 +24,9 @@ export default function TermosPage() {
         <h1 className="text-2xl font-bold text-[var(--hub-blue-dark)]">
           Termos de Uso
         </h1>
-        <p className="mt-2 text-sm text-slate-500">Última atualização: Janeiro 2025 — Versão 1.0.0</p>
+        <p className="mt-2 text-sm text-[var(--hub-text-muted)]">Última atualização: Janeiro 2025 — Versão 1.0.0</p>
 
-        <div className="mt-8 space-y-6 text-sm leading-relaxed text-slate-700">
+        <div className="mt-8 space-y-6 text-sm leading-relaxed text-[var(--hub-text-primary)]">
           <section>
             <h2 className="text-base font-semibold text-[var(--hub-blue-dark)]">1. Partes e Objeto</h2>
             <p className="mt-2">

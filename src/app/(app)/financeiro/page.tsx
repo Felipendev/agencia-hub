@@ -172,7 +172,7 @@ export default function FinanceiroPage() {
   }
 
   if (!isReady) {
-    return <p className="text-sm text-slate-600">Carregando…</p>;
+    return <p className="text-sm text-[var(--hub-text-secondary)]">Carregando…</p>;
   }
 
   return (
@@ -315,7 +315,7 @@ export default function FinanceiroPage() {
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             aba === "lancamentos"
               ? "border-b-2 border-[var(--hub-blue)] text-[var(--hub-blue)]"
-              : "text-slate-500 hover:text-slate-700"
+              : "text-[var(--hub-text-muted)] hover:text-[var(--hub-text-primary)]"
           }`}
         >
           Lançamentos
@@ -326,7 +326,7 @@ export default function FinanceiroPage() {
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             aba === "fluxo"
               ? "border-b-2 border-[var(--hub-blue)] text-[var(--hub-blue)]"
-              : "text-slate-500 hover:text-slate-700"
+              : "text-[var(--hub-text-muted)] hover:text-[var(--hub-text-primary)]"
           }`}
         >
           Fluxo de caixa
@@ -377,10 +377,10 @@ export default function FinanceiroPage() {
                             {LANCAMENTO_STATUS_LABELS[l.status]}
                           </Badge>
                         </Td>
-                        <Td className="text-slate-600">
+                        <Td className="text-[var(--hub-text-secondary)]">
                           {l.clienteId ? nomeCliente.get(l.clienteId) ?? "—" : "—"}
                         </Td>
-                        <Td className="text-slate-500 text-xs">
+                        <Td className="text-[var(--hub-text-muted)] text-xs">
                           {l.contaBancaria ?? "—"}
                         </Td>
                         <Td
@@ -396,7 +396,7 @@ export default function FinanceiroPage() {
                 </tbody>
               </Table>
               {filtrados.length === 0 && (
-                <p className="mt-4 text-center text-sm text-slate-500">
+                <p className="mt-4 text-center text-sm text-[var(--hub-text-muted)]">
                   Nenhum lançamento com os filtros atuais.
                 </p>
               )}
@@ -518,13 +518,13 @@ export default function FinanceiroPage() {
         <div className="space-y-6">
           <Card>
             <CardTitle>Fluxo de caixa mensal</CardTitle>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-[var(--hub-text-muted)]">
               Entradas e saídas agrupadas por mês, com saldo acumulado. Lançamentos
               cancelados são excluídos.
             </p>
 
             {fluxo.length === 0 ? (
-              <p className="mt-6 text-center text-sm text-slate-500">
+              <p className="mt-6 text-center text-sm text-[var(--hub-text-muted)]">
                 Nenhum lançamento no período selecionado.
               </p>
             ) : (
@@ -571,7 +571,7 @@ export default function FinanceiroPage() {
                   </tbody>
                   {/* Totais */}
                   <tfoot>
-                    <tr className="border-t-2 border-[var(--hub-border)] bg-slate-50">
+                    <tr className="border-t-2 border-[var(--hub-border)] bg-[var(--hub-bg-subtle)]">
                       <Td className="font-bold text-[var(--hub-blue-dark)]">
                         Total
                       </Td>
@@ -591,7 +591,7 @@ export default function FinanceiroPage() {
                         {resumoFiltrado.saldo >= 0 ? "+" : ""}
                         {formatBRL(resumoFiltrado.saldo)}
                       </Td>
-                      <Td className="text-right text-slate-400 text-xs">
+                      <Td className="text-right text-[var(--hub-text-muted)] text-xs">
                         —
                       </Td>
                     </tr>
@@ -605,7 +605,7 @@ export default function FinanceiroPage() {
           {contas.length > 0 && (
             <Card>
               <CardTitle>Saldo por conta bancária</CardTitle>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-[var(--hub-text-muted)]">
                 Lançamentos confirmados agrupados por conta.
               </p>
               <div className="mt-4 overflow-x-auto">

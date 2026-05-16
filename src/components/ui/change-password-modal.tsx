@@ -69,11 +69,11 @@ export function ChangePasswordModal() {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+      <div className="w-full max-w-md rounded-[var(--hub-radius-xl)] bg-white p-8 shadow-2xl">
         <h2 className="text-xl font-bold text-[var(--hub-blue-dark)]">
           Alterar senha obrigatória
         </h2>
-        <p className="mt-2 text-sm text-slate-600">
+        <p className="mt-2 text-sm text-[var(--hub-text-secondary)]">
           Por segurança, você precisa definir uma nova senha antes de continuar usando o sistema.
         </p>
 

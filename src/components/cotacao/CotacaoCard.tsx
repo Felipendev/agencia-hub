@@ -30,7 +30,7 @@ function ActionButton({
       type="button"
       title={title}
       onClick={onClick}
-      className="group/btn relative flex h-7 w-7 items-center justify-center rounded text-slate-400 transition-colors hover:bg-slate-100 hover:text-[var(--hub-blue)]"
+      className="group/btn relative flex h-7 w-7 items-center justify-center rounded text-[var(--hub-text-muted)] transition-colors hover:bg-[var(--hub-bg-subtle)] hover:text-[var(--hub-blue)]"
     >
       {children}
       <span className="pointer-events-none absolute bottom-full left-1/2 mb-1.5 hidden -translate-x-1/2 whitespace-nowrap rounded bg-slate-800 px-2 py-1 text-[11px] font-medium text-white group-hover/btn:block">
@@ -58,14 +58,14 @@ export function CotacaoCard({ cotacao, cliente, onDragStart, onDragEnd, onDelete
         draggable
         onDragStart={(e) => onDragStart(e, cotacao.id)}
         onDragEnd={onDragEnd}
-        className="cursor-grab rounded-lg border border-[var(--hub-border)] bg-white p-3 shadow-sm transition-shadow active:cursor-grabbing active:shadow-lg"
+        className="cursor-grab rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white p-3 shadow-sm transition-shadow active:cursor-grabbing active:shadow-lg"
       >
         {/* Linha superior: data + responsável + valor */}
         <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+          <div className="flex items-center gap-1.5 text-xs text-[var(--hub-text-muted)]">
             <span>{formatDateBR(created)}</span>
-            <span className="text-slate-300">·</span>
-            <span className="max-w-[90px] truncate font-medium text-slate-600">
+            <span className="text-[var(--hub-border)]">·</span>
+            <span className="max-w-[90px] truncate font-medium text-[var(--hub-text-secondary)]">
               {cotacao.responsavel}
             </span>
           </div>
@@ -81,18 +81,18 @@ export function CotacaoCard({ cotacao, cliente, onDragStart, onDragEnd, onDelete
 
         {/* Status */}
         <div className="mt-1.5">
-          <span className="inline-flex rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700">
+          <span className="inline-flex rounded border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--hub-text-primary)]">
             {COTACAO_STATUS_LABELS[cotacao.status]}
           </span>
         </div>
 
         {/* Cliente */}
-        <p className="mt-1.5 text-sm text-slate-700">{cliente?.nome ?? "—"}</p>
+        <p className="mt-1.5 text-sm text-[var(--hub-text-primary)]">{cliente?.nome ?? "—"}</p>
 
         {(cotacao.origemCriacao ||
           cotacao.criadoPorNome ||
           cotacao.vendedorNome) && (
-          <p className="mt-1 text-[10px] leading-snug text-slate-500">
+          <p className="mt-1 text-[10px] leading-snug text-[var(--hub-text-muted)]">
             {cotacao.origemCriacao === "formulario_publico" ?
               "Formulário público"
             : cotacao.origemCriacao === "interna" ?
@@ -114,7 +114,7 @@ export function CotacaoCard({ cotacao, cliente, onDragStart, onDragEnd, onDelete
             {cotacao.tags.map((t) => (
               <span
                 key={t}
-                className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] text-slate-600"
+                className="rounded border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-1.5 py-0.5 text-[10px] text-[var(--hub-text-secondary)]"
               >
                 #{t}
               </span>
@@ -124,7 +124,7 @@ export function CotacaoCard({ cotacao, cliente, onDragStart, onDragEnd, onDelete
 
         {/* Barra de ações */}
         <div
-          className="mt-3 flex items-center justify-end gap-0.5 border-t border-slate-100 pt-2"
+          className="mt-3 flex items-center justify-end gap-0.5 border-t border-[var(--hub-border)] pt-2"
           onClick={(e) => e.stopPropagation()}
         >
           {cliente && (

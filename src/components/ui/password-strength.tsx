@@ -41,15 +41,15 @@ export function PasswordStrengthIndicator({ password }: PasswordStrengthIndicato
           <div
             key={i}
             className={`h-1.5 flex-1 rounded-full transition-colors ${
-              i <= score ? colors[level] : "bg-slate-200"
+              i <= score ? colors[level] : "bg-[var(--hub-border)]"
             }`}
           />
         ))}
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-xs text-slate-500">Mínimo 8 caracteres</span>
+        <span className="text-xs text-[var(--hub-text-muted)]">Mínimo 8 caracteres</span>
         {password.length > 0 && (
-          <span className="text-xs text-slate-500">{labels[level]}</span>
+          <span className="text-xs text-[var(--hub-text-muted)]">{labels[level]}</span>
         )}
       </div>
     </div>

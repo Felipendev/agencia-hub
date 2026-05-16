@@ -154,7 +154,7 @@ export default function ConvitePage() {
   if (inviteError) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-[var(--hub-blue-dark)] via-[var(--hub-blue)] to-[#1a5080] px-4">
-        <div className="w-full max-w-md rounded-2xl border border-white/15 bg-white p-8 shadow-xl text-center">
+        <div className="w-full max-w-md rounded-[var(--hub-radius-xl)] border border-white/15 bg-white p-8 shadow-xl text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
             <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -163,7 +163,7 @@ export default function ConvitePage() {
           <h1 className="text-lg font-bold text-[var(--hub-blue-dark)]">
             Convite inválido
           </h1>
-          <p className="mt-2 text-sm text-slate-600">{inviteError.message}</p>
+          <p className="mt-2 text-sm text-[var(--hub-text-secondary)]">{inviteError.message}</p>
           <Link
             href="/login"
             className="mt-6 inline-block font-medium text-[var(--hub-blue)] hover:underline"
@@ -183,17 +183,17 @@ export default function ConvitePage() {
           href="/"
           className="mb-8 flex items-center gap-2 text-white/90 hover:text-white"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--hub-yellow)] text-sm font-bold text-[var(--hub-blue-dark)]">
+          <span className="flex h-10 w-10 items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-yellow)] text-sm font-bold text-[var(--hub-blue-dark)]">
             AH
           </span>
           <span className="text-xl font-bold">AgênciasHub</span>
         </Link>
 
-        <div className="w-full max-w-md rounded-2xl border border-white/15 bg-white p-8 shadow-xl">
+        <div className="w-full max-w-md rounded-[var(--hub-radius-xl)] border border-white/15 bg-white p-8 shadow-xl">
           <h1 className="text-xl font-bold text-[var(--hub-blue-dark)]">
             Cadastro via convite
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-[var(--hub-text-secondary)]">
             Você foi convidado para a agência{" "}
             <span className="font-medium text-[var(--hub-blue-dark)]">
               {inviteData?.agencyName}
@@ -208,7 +208,7 @@ export default function ConvitePage() {
                 type="email"
                 value={inviteData?.email || ""}
                 disabled
-                className="bg-slate-50"
+                className="bg-[var(--hub-bg-subtle)]"
               />
             </div>
 
@@ -266,7 +266,7 @@ export default function ConvitePage() {
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-slate-500">
+          <p className="mt-6 text-center text-sm text-[var(--hub-text-muted)]">
             Já tem uma conta?{" "}
             <Link
               href="/login"
