@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, Th, Td } from "@/components/ui/table";
 import { PageHeader } from "@/components/layout/page-header";
 import { formatBRL } from "@/lib/format";
-import { listUsersRemote, updateUserRemote } from "@/lib/api/users-remote";
+import { listSalesAgentsRemote, updateUserRemote } from "@/lib/api/users-remote";
 import type { ApiUserResponse } from "@/lib/api/auth-types";
 
 export default function VendedoresPage() {
@@ -30,8 +30,25 @@ export default function VendedoresPage() {
 
   useEffect(() => {
     if (!token) return;
-    listUsersRemote(token)
-      .then(setUsers)
+    // /users/sales-agents retorna somente agentes da agência do token
+    listSalesAgentsRemote(token)
+      .then((agents) => {
+        // dono logado não vem no endpoint de agentes — adicionamos no topo
+        const owner: ApiUserResponse | null = user
+          ? {
+              id: user.id,
+              name: user.nome,
+              email: user.email,
+              accountKind: "AGENCY_OWNER",
+              active: true,
+              commissionPct: null,
+              commissionFixed: null,
+              createdAt: "",
+            }
+          : null;
+        const deduped = agents.filter((a) => a.id !== user?.id);
+        setUsers(owner ? [owner, ...deduped] : deduped);
+      })
       .catch(() => toast.error("Erro ao carregar usuários."))
       .finally(() => setLoading(false));
   }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
