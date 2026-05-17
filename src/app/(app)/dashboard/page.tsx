@@ -12,7 +12,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BarChart } from "@/components/charts/BarChart";
-import { LineChart } from "@/components/charts/LineChart";
+import { AreaChart } from "@/components/charts/AreaChart";
 import { DonutChart } from "@/components/charts/DonutChart";
 import { formatBRL, formatDateBR } from "@/lib/format";
 import {
@@ -37,28 +37,32 @@ export default function DashboardPage() {
 
   // --- Dados para gráficos ---
 
-  // Faturamento por mês (últimos 6 meses)
-  const faturamentoPorMes = useMemo(() => {
+  // Receita vs Despesas por mês (últimos 12 meses)
+  const receitaVsDespesas = useMemo(() => {
     if (!isReady) return [];
-    const meses: Record<string, number> = {};
     const hoje = new Date();
-    for (let i = 5; i >= 0; i--) {
+    const meses: Record<string, { receita: number; despesa: number }> = {};
+    for (let i = 11; i >= 0; i--) {
       const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      meses[key] = 0;
+      meses[key] = { receita: 0, despesa: 0 };
     }
     for (const l of lancamentos) {
-      if (l.tipo === "entrada" && l.status === "confirmado") {
+      if (l.status === "confirmado") {
         const key = l.data.slice(0, 7);
-        if (key in meses) meses[key] += l.valor;
+        if (key in meses) {
+          if (l.tipo === "entrada") meses[key].receita += l.valor;
+          else meses[key].despesa += l.valor;
+        }
       }
     }
-    return Object.entries(meses).map(([, value], i) => {
+    return Object.entries(meses).map(([, v], i) => {
       const d = new Date();
-      d.setMonth(d.getMonth() - (5 - i));
+      d.setMonth(d.getMonth() - (11 - i));
       return {
         label: d.toLocaleDateString("pt-BR", { month: "short" }),
-        value,
+        receita: v.receita,
+        despesa: v.despesa,
       };
     });
   }, [lancamentos, isReady]);
@@ -79,19 +83,36 @@ export default function DashboardPage() {
       }));
   }, [cotacoes, isReady]);
 
-  // Top destinos (bar)
-  const topDestinos = useMemo(() => {
+  // Faturamento por categoria (entradas confirmadas)
+  const faturamentoPorCategoria = useMemo(() => {
     if (!isReady) return [];
-    const counts: Record<string, number> = {};
-    for (const c of cotacoes) {
-      const dest = c.destino.split(/[/,·]/)[0].trim();
-      if (dest) counts[dest] = (counts[dest] ?? 0) + 1;
+    const COLORS: Record<string, string> = {
+      pacote_vendido: "#0EA5E9",
+      comissao: "#10B981",
+      hospedagem: "#8B5CF6",
+      passagem: "#F59E0B",
+      milhas: "#F97316",
+      marketing: "#EF4444",
+      operacional: "#06B6D4",
+      reembolso: "#94A3B8",
+      outros: "#64748B",
+    };
+    const totals: Record<string, number> = {};
+    for (const l of lancamentos) {
+      if (l.tipo === "entrada" && l.status === "confirmado") {
+        totals[l.categoria] = (totals[l.categoria] ?? 0) + l.valor;
+      }
     }
-    return Object.entries(counts)
+    return Object.entries(totals)
+      .filter(([, v]) => v > 0)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 6)
-      .map(([label, value]) => ({ label, value, color: "#0369a1" }));
-  }, [cotacoes, isReady]);
+      .map(([cat, value]) => ({
+        label:
+          LANCAMENTO_CATEGORIA_LABELS[cat as keyof typeof LANCAMENTO_CATEGORIA_LABELS] ?? cat,
+        value,
+        color: COLORS[cat] ?? "#94A3B8",
+      }));
+  }, [lancamentos, isReady]);
 
   // Despesas por categoria (bar)
   const despesasPorCategoria = useMemo(() => {
@@ -192,14 +213,29 @@ export default function DashboardPage() {
       {/* Gráficos */}
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <CardTitle>Faturamento mensal (últimos 6 meses)</CardTitle>
-          <div className="mt-4">
-            <LineChart
-              data={faturamentoPorMes}
-              height={180}
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <CardTitle>Receita vs Despesas</CardTitle>
+              <p className="mt-0.5 text-xs text-[var(--hub-text-muted)]">Últimos 12 meses</p>
+            </div>
+          </div>
+          <div className="mt-3">
+            <AreaChart
+              data={receitaVsDespesas}
+              height={220}
               formatValue={formatBRL}
               emptyMessage="Nenhum lançamento confirmado ainda"
             />
+          </div>
+          <div className="mt-3 flex gap-5">
+            <div className="flex items-center gap-1.5">
+              <span className="block h-0.5 w-3 rounded" style={{ backgroundColor: "#0EA5E9" }} />
+              <span className="text-xs text-[var(--hub-text-muted)]">Receita</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="block h-0.5 w-3 rounded" style={{ backgroundColor: "#F97316" }} />
+              <span className="text-xs text-[var(--hub-text-muted)]">Despesas</span>
+            </div>
           </div>
         </Card>
 
@@ -217,12 +253,16 @@ export default function DashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <CardTitle>Top destinos</CardTitle>
+          <div>
+            <CardTitle>Faturamento por Categoria</CardTitle>
+            <p className="mt-0.5 text-xs text-[var(--hub-text-muted)]">Distribuição de receita</p>
+          </div>
           <div className="mt-4">
-            <BarChart
-              data={topDestinos}
-              height={160}
-              emptyMessage="Nenhuma cotação cadastrada"
+            <DonutChart
+              data={faturamentoPorCategoria}
+              size={130}
+              formatValue={formatBRL}
+              emptyMessage="Nenhuma receita confirmada"
             />
           </div>
         </Card>
