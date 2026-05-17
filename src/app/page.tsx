@@ -1,18 +1,14 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Logo, LogoMarkOnly } from "@/components/ui/logo";
 
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[#0a1628]">
+    <div className="flex min-h-screen flex-col bg-[#0B1B2B]">
       {/* Header */}
       <header className="relative z-10 border-b border-white/10">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 lg:px-8">
-          <div className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-yellow)] text-sm font-bold text-[var(--hub-blue-dark)]">
-              AH
-            </span>
-            <span className="text-lg font-bold text-white">AgênciasHub</span>
-          </div>
+          <Logo variant="dark" size="md" href="/" />
           <nav className="hidden items-center gap-6 text-sm font-medium text-white/70 md:flex">
             <a href="#funcionalidades" className="hover:text-white transition-colors">Funcionalidades</a>
             <a href="#planos" className="hover:text-white transition-colors">Planos</a>
@@ -28,7 +24,9 @@ export default function LandingPage() {
               Entrar
             </Link>
             <Link href="/cadastro">
-              <Button className="!py-2 text-sm">Criar conta grátis</Button>
+              <Button className="!py-2 text-sm !bg-[var(--hub-yellow)] !text-[var(--hub-blue-dark)] hover:!bg-[var(--hub-yellow-hover)]">
+                Criar conta grátis
+              </Button>
             </Link>
           </div>
         </div>
@@ -37,10 +35,9 @@ export default function LandingPage() {
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative overflow-hidden">
-          {/* Background gradient + glow effects */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a1628] via-[#0f2240] to-[#0a1628]" />
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-[var(--hub-blue)]/10 blur-[120px]" />
-          <div className="absolute right-0 top-0 h-[400px] w-[400px] rounded-full bg-[var(--hub-yellow)]/5 blur-[100px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0B1B2B] via-[#102030] to-[#0B1B2B]" />
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-[var(--hub-blue)]/15 blur-[120px]" />
+          <div className="absolute right-0 top-0 h-[400px] w-[400px] rounded-full bg-[var(--hub-yellow)]/8 blur-[100px]" />
 
           <div className="relative mx-auto max-w-6xl px-4 py-20 lg:flex lg:items-center lg:gap-16 lg:py-32 lg:px-8">
             {/* Left: Text content */}
@@ -53,7 +50,7 @@ export default function LandingPage() {
               </p>
               <div className="mt-10 flex flex-wrap gap-4">
                 <Link href="/cadastro">
-                  <Button className="!px-8 !py-3.5 text-base shadow-lg shadow-[var(--hub-yellow)]/20">
+                  <Button className="!px-8 !py-3.5 text-base !bg-[var(--hub-yellow)] !text-[var(--hub-blue-dark)] shadow-lg shadow-[var(--hub-yellow)]/30 hover:!bg-[var(--hub-yellow-hover)]">
                     Criar conta
                   </Button>
                 </Link>
@@ -73,13 +70,13 @@ export default function LandingPage() {
               <div className="relative">
                 {/* Main dashboard mockup */}
                 <div className="rounded-[var(--hub-radius-xl)] border border-white/10 bg-white/5 p-1 shadow-2xl shadow-black/40 backdrop-blur-sm">
-                  <div className="rounded-[var(--hub-radius-lg)] bg-[#111d33] p-6">
+                  <div className="rounded-[var(--hub-radius-lg)] bg-[#0d1f33] p-6">
                     {/* Top bar */}
                     <div className="flex items-center justify-between border-b border-white/10 pb-4">
                       <div className="flex items-center gap-2">
                         <div className="h-3 w-3 rounded-full bg-red-400/60" />
-                        <div className="h-3 w-3 rounded-full bg-yellow-400/60" />
-                        <div className="h-3 w-3 rounded-full bg-green-400/60" />
+                        <div className="h-3 w-3 rounded-full bg-[var(--hub-yellow)]/60" />
+                        <div className="h-3 w-3 rounded-full bg-emerald-400/60" />
                       </div>
                       <div className="h-4 w-32 rounded bg-white/10" />
                     </div>
@@ -123,7 +120,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Floating cards */}
-                <div className="absolute -left-8 top-8 rounded-[var(--hub-radius-lg)] border border-white/10 bg-[#111d33]/90 p-3 shadow-xl backdrop-blur-sm animate-[float_6s_ease-in-out_infinite]">
+                <div className="absolute -left-8 top-8 rounded-[var(--hub-radius-lg)] border border-white/10 bg-[#0d1f33]/90 p-3 shadow-xl backdrop-blur-sm animate-[float_6s_ease-in-out_infinite]">
                   <div className="flex items-center gap-2">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-500/20">
                       <svg className="h-4 w-4 text-sky-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -138,7 +135,7 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                <div className="absolute -right-4 bottom-16 rounded-[var(--hub-radius-lg)] border border-white/10 bg-[#111d33]/90 p-3 shadow-xl backdrop-blur-sm animate-[float_5s_ease-in-out_infinite_1s]">
+                <div className="absolute -right-4 bottom-16 rounded-[var(--hub-radius-lg)] border border-white/10 bg-[#0d1f33]/90 p-3 shadow-xl backdrop-blur-sm animate-[float_5s_ease-in-out_infinite_1s]">
                   <div className="flex items-center gap-2">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20">
                       <svg className="h-4 w-4 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -260,7 +257,7 @@ export default function LandingPage() {
             </p>
             <div className="mt-10 flex justify-center gap-4">
               <Link href="/contato">
-                <Button className="!px-10 !py-4 text-base shadow-lg shadow-[var(--hub-yellow)]/20">
+                <Button className="!px-10 !py-4 text-base !bg-[var(--hub-yellow)] !text-[var(--hub-blue-dark)] shadow-lg shadow-[var(--hub-yellow)]/30 hover:!bg-[var(--hub-yellow-hover)]">
                   Entrar em contato
                 </Button>
               </Link>
@@ -272,12 +269,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-white/10 py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 sm:flex-row lg:px-8">
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-[var(--hub-radius-sm)] bg-[var(--hub-yellow)] text-[10px] font-bold text-[var(--hub-blue-dark)]">
-              AH
-            </span>
-            <span className="text-sm font-semibold text-white/60">AgênciasHub</span>
-          </div>
+          <Logo variant="dark" size="sm" href="/" />
           <div className="flex gap-6 text-sm text-white/40">
             <Link href="/termos" className="hover:text-white/70 transition-colors">Termos de Uso</Link>
             <Link href="/privacidade" className="hover:text-white/70 transition-colors">Privacidade</Link>

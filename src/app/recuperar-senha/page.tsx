@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Logo } from "@/components/ui/logo";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,15 +64,7 @@ export default function RecuperarSenhaPage() {
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-[var(--hub-blue-dark)] via-[var(--hub-blue)] to-[#1a5080]">
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
-        <Link
-          href="/"
-          className="mb-8 flex items-center gap-2 text-white/90 hover:text-white"
-        >
-          <span className="flex h-10 w-10 items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-yellow)] text-sm font-bold text-[var(--hub-blue-dark)]">
-            AH
-          </span>
-          <span className="text-xl font-bold">AgênciasHub</span>
-        </Link>
+        <div className="mb-8"><Logo variant="dark" size="lg" href="/" /></div>
 
         <div className="w-full max-w-md rounded-[var(--hub-radius-xl)] border border-white/15 bg-white p-8 shadow-xl">
           <h1 className="text-xl font-bold text-[var(--hub-blue-dark)]">

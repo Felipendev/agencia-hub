@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Logo } from "@/components/ui/logo";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,12 +28,7 @@ export default function ContatoPage() {
     <div className="min-h-screen bg-[var(--hub-bg-subtle)]">
       <header className="border-b border-[var(--hub-border)] bg-white">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-yellow)] text-xs font-bold text-[var(--hub-blue-dark)]">
-              AH
-            </span>
-            <span className="text-lg font-bold text-[var(--hub-blue-dark)]">AgênciasHub</span>
-          </Link>
+          <Logo variant="light" size="md" href="/" />
           <Link
             href="/login"
             className="text-sm font-medium text-[var(--hub-blue)] hover:underline"

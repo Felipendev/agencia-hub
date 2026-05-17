@@ -1,31 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  /* Brand */
-  --hub-blue: #1e3a5f;
-  --hub-blue-dark: #0f2840;
-  --hub-blue-muted: #c5d4e3;
-  --hub-yellow: #f5c518;
-  --hub-yellow-hover: #e6b400;
+  /* Brand — Navy + Amber (Compass palette) */
+  --hub-blue: #122336;
+  --hub-blue-dark: #0B1B2B;
+  --hub-blue-muted: #7A9BB5;
+  --hub-yellow: #E0A458;
+  --hub-yellow-hover: #CB8D3C;
 
-  /* Surface */
-  --hub-bg: #f6f8fa;
-  --hub-bg-subtle: #eef1f5;
-  --hub-border: #dde1e7;
-  --hub-border-strong: #c4cad4;
+  /* Surface — warm off-white */
+  --hub-bg: #F5F1EA;
+  --hub-bg-subtle: #EDE8DD;
+  --hub-border: #DDD8CE;
+  --hub-border-strong: #C8C0B2;
   --background: #ffffff;
-  --foreground: #0f2840;
+  --foreground: #0B1B2B;
 
   /* Text */
-  --hub-text-primary: #0f2840;
-  --hub-text-secondary: #4b5563;
-  --hub-text-muted: #6b7280;
+  --hub-text-primary: #0B1B2B;
+  --hub-text-secondary: #3D5466;
+  --hub-text-muted: #6B7D8E;
 
   /* Shadows — Stripe-style: crisp, directional */
-  --hub-shadow-xs: 0 1px 2px rgba(15, 40, 64, 0.06);
-  --hub-shadow-sm: 0 1px 3px rgba(15, 40, 64, 0.08), 0 1px 2px rgba(15, 40, 64, 0.06);
-  --hub-shadow-md: 0 4px 6px -1px rgba(15, 40, 64, 0.08), 0 2px 4px -1px rgba(15, 40, 64, 0.05);
-  --hub-shadow-lg: 0 10px 15px -3px rgba(15, 40, 64, 0.1), 0 4px 6px -2px rgba(15, 40, 64, 0.05);
+  --hub-shadow-xs: 0 1px 2px rgba(11, 27, 43, 0.06);
+  --hub-shadow-sm: 0 1px 3px rgba(11, 27, 43, 0.08), 0 1px 2px rgba(11, 27, 43, 0.06);
+  --hub-shadow-md: 0 4px 6px -1px rgba(11, 27, 43, 0.08), 0 2px 4px -1px rgba(11, 27, 43, 0.05);
+  --hub-shadow-lg: 0 10px 15px -3px rgba(11, 27, 43, 0.1), 0 4px 6px -2px rgba(11, 27, 43, 0.05);
 
   /* Radius */
   --hub-radius-sm: 6px;
@@ -37,14 +37,14 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-manrope);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
 body {
   background: var(--hub-bg);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-manrope), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -68,4 +68,16 @@ body {
 }
 .animate-fade-in-up {
   animation: fadeInUp 0.2s ease-out both;
+}
+
+/* Compass needle rotation animation */
+@keyframes needleSpin {
+  0%   { transform: rotate(0deg); }
+  15%  { transform: rotate(355deg); }
+  30%  { transform: rotate(358deg); }
+  100% { transform: rotate(358deg); }
+}
+.animate-compass-needle {
+  transform-origin: center;
+  animation: needleSpin 4s ease-in-out infinite;
 }

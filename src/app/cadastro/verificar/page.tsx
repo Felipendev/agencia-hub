@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/ui/logo";
 import { VerificationCodeInput } from "@/components/ui/verification-code-input";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
 import { useAuth } from "@/contexts/auth-context";
@@ -237,12 +238,7 @@ function VerifyEmailForm() {
       </div>
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
         {/* Logo */}
-        <Link href="/" className="mb-8 flex items-center gap-2 text-white/90 hover:text-white transition-colors">
-          <span className="flex h-10 w-10 items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-yellow)] text-sm font-bold text-[var(--hub-blue-dark)]">
-            AH
-          </span>
-          <span className="text-xl font-bold">AgênciasHub</span>
-        </Link>
+        <div className="mb-8"><Logo variant="dark" size="lg" href="/" /></div>
 
         <div className="w-full max-w-md rounded-[var(--hub-radius-xl)] border border-white/15 bg-white p-8 shadow-xl">
           {/* Icon */}

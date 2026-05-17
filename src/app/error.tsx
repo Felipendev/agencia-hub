@@ -10,7 +10,7 @@ export default function ErrorPage({
   reset: () => void;
 }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#0a1628] px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#0B1B2B] px-4">
       <div className="w-full max-w-md text-center">
         {/* Icon */}
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-500/10">
