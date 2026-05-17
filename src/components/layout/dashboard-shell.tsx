@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -195,9 +196,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <aside className="hidden w-56 shrink-0 flex-col bg-[var(--hub-blue-dark)] text-white lg:flex">
         {/* Logo */}
         <div className="flex h-14 items-center gap-2.5 border-b border-white/8 px-4">
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--hub-radius-sm)] bg-[var(--hub-yellow)] text-[10px] font-black text-[var(--hub-blue-dark)]">
-            AH
-          </span>
+          <Image src="/compass.svg" alt="Compass" width={28} height={28} className="shrink-0" />
           <div className="min-w-0">
             <p className="text-[9px] font-semibold uppercase tracking-widest text-white/40">AgênciasHub</p>
             <p className="truncate text-xs font-semibold leading-tight text-white/90">{empresa}</p>
@@ -252,7 +251,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         }`}
       >
         <div className="flex h-14 items-center justify-between border-b border-white/8 px-4">
-          <span className="text-sm font-bold tracking-tight text-white/90">AgênciasHub</span>
+          <div className="flex items-center gap-2">
+            <Image src="/compass.svg" alt="Compass" width={24} height={24} />
+            <span className="text-sm font-bold tracking-tight text-white/90">AgênciasHub</span>
+          </div>
           <button
             type="button"
             className="rounded-[var(--hub-radius-sm)] p-1.5 text-white/60 hover:bg-white/10 hover:text-white"

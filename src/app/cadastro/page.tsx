@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -101,9 +102,7 @@ export default function CadastroPage() {
           href="/"
           className="mb-8 flex items-center gap-2 text-white/90 hover:text-white"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-yellow)] text-sm font-bold text-[var(--hub-blue-dark)]">
-            AH
-          </span>
+          <Image src="/compass.svg" alt="Compass" width={40} height={40} />
           <span className="text-xl font-bold">AgênciasHub</span>
         </Link>
 

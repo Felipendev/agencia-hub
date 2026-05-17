@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -57,9 +58,7 @@ export function LoginForm() {
       <div className="hidden lg:flex lg:w-[420px] lg:shrink-0 lg:flex-col lg:justify-between bg-[var(--hub-blue-dark)] px-10 py-12">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-yellow)] text-xs font-black text-[var(--hub-blue-dark)]">
-              AH
-            </span>
+            <Image src="/compass.svg" alt="Compass" width={36} height={36} />
             <span className="text-lg font-bold tracking-tight text-white">AgênciasHub</span>
           </div>
           <div className="mt-16">
@@ -95,9 +94,9 @@ export function LoginForm() {
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
         {/* Logo mobile */}
         <Link href="/" className="mb-8 flex items-center gap-2 lg:hidden">
-          <span className="flex h-9 w-9 items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-blue-dark)] text-xs font-black text-white">
-            AH
-          </span>
+          <div className="flex h-9 w-9 items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-blue-dark)]">
+            <Image src="/compass.svg" alt="Compass" width={28} height={28} />
+          </div>
           <span className="text-lg font-bold text-[var(--hub-text-primary)]">AgênciasHub</span>
         </Link>
 
