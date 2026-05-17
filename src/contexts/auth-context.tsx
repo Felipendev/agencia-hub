@@ -50,7 +50,25 @@ function deleteCookie(name: string) {
 
 const ROLE_COOKIE = "ah_role";
 
-// ─── Storage helpers ──────────────────────────────────────────────────────────
+// ─── JWT helpers ─────────────────────────────────────────────────────────────
+
+/** Returns the token's expiry timestamp in ms, or null if unreadable. */
+function readJwtExp(token: string): number | null {
+  try {
+    const b64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(atob(b64)) as { exp?: number };
+    return typeof payload.exp === "number" ? payload.exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
+function isTokenExpired(token: string): boolean {
+  const exp = readJwtExp(token);
+  return exp !== null && exp < Date.now();
+}
+
+// ─── Storage helpers ─────────────────────────────────────────────────────────
 
 function readUserFromStorage(): UsuarioSessao | null {
   try {
@@ -102,10 +120,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const u = readUserFromStorage();
     const t = readTokenFromStorage();
-    if (u) {
-      setUser(u);
-      setToken(t);
-      setCookie(AUTH_COOKIE, "1", 7);
+    if (u && t) {
+      if (isTokenExpired(t)) {
+        clearSession();
+      } else {
+        setUser(u);
+        setToken(t);
+        setCookie(AUTH_COOKIE, "1", 7);
+      }
     }
     setIsReady(true);
   }, []);
@@ -216,6 +238,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setToken(null);
   }, []);
+
+  // Listen for 401 responses dispatched by apiFetch and log the user out
+  useEffect(() => {
+    function handleUnauthorized() { logout(); }
+    window.addEventListener("auth:unauthorized", handleUnauthorized);
+    return () => window.removeEventListener("auth:unauthorized", handleUnauthorized);
+  }, [logout]);
 
   const isOwner = user?.accountKind === "AGENCY_OWNER";
   const isSeller = user?.accountKind === "SALES_AGENT";
