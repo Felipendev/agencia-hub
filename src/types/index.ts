@@ -203,9 +203,9 @@ export interface OpcaoVooCotacao {
 export interface UsuarioSessao {
   id: string;
   nome: string;
-  empresa: string;
+  empresa?: string;
   email: string;
-  accountKind: "AGENCY_OWNER" | "SALES_AGENT";
+  accountKind: "AGENCY_OWNER" | "SALES_AGENT" | "PLATFORM_ADMIN";
   agencyId?: string;
   agencyName?: string;
   agencyStatus?: string;
