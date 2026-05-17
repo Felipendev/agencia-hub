@@ -33,6 +33,10 @@ export function LoginForm() {
     const result = await login(email, password);
     setLoading(false);
     if (!result.ok) {
+      if (result.code === "ACCOUNT_DELETION_PENDING") {
+        setError("Esta conta está em processo de exclusão. Entre em contato com o suporte: suporte@agenciashub.com.br");
+        return;
+      }
       const isUnverified =
         result.code === "EMAIL_NOT_VERIFIED" ||
         result.error?.toLowerCase().includes("verif");

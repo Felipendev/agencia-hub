@@ -1,4 +1,4 @@
-export type AccountKind = "AGENCY_OWNER" | "SALES_AGENT";
+export type AccountKind = "AGENCY_OWNER" | "SALES_AGENT" | "PLATFORM_ADMIN";
 
 export type ApiLoginRequest = {
   email: string;
