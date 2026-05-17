@@ -1,10 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useNotifications } from "@/contexts/notification-context";
+import { useAuth } from "@/contexts/auth-context";
 import type { NotifPrefs } from "@/lib/notif-prefs";
 import {
   Bell,
   FileText,
+  Mail,
   Users,
   Wallet,
   CheckCircle2,
@@ -167,6 +170,43 @@ function DiasPicker({
 export function AbaNotificacoes() {
   const { prefs, updatePrefs, notifications, unreadCount, markAllAsRead, clearAll } =
     useNotifications();
+  const { token } = useAuth();
+
+  const [emailSubmissao, setEmailSubmissao] = useState(true);
+  const [emailSaving, setEmailSaving] = useState(false);
+
+  useEffect(() => {
+    if (!token) return;
+    void fetch("/api/app/profile/notification-prefs", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((d: unknown) => {
+        const dto = d as { notifEmailSubmissao?: boolean };
+        if (typeof dto.notifEmailSubmissao === "boolean") {
+          setEmailSubmissao(dto.notifEmailSubmissao);
+        }
+      })
+      .catch(() => {/* mantém padrão true */});
+  }, [token]);
+
+  async function saveEmailSubmissao(value: boolean) {
+    setEmailSubmissao(value);
+    if (!token) return;
+    setEmailSaving(true);
+    try {
+      await fetch("/api/app/profile/notification-prefs", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ notifEmailSubmissao: value }),
+      });
+    } finally {
+      setEmailSaving(false);
+    }
+  }
 
   function patchVencendo(patch: Partial<NotifPrefs["cotacaoVencendo"]>) {
     updatePrefs({
@@ -224,9 +264,9 @@ export function AbaNotificacoes() {
       <div className="flex gap-3 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3">
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
         <p className="text-xs leading-relaxed text-sky-800">
-          As notificações são verificadas automaticamente ao carregar a aplicação. As preferências
-          são salvas localmente neste navegador. Desativar uma regra impede que novos alertas
-          sejam gerados — notificações já existentes permanecem até você limpá-las.
+          As notificações do sininho são verificadas a cada 30 segundos e salvas neste navegador.
+          A preferência de e-mail é salva na sua conta e vale em qualquer dispositivo.
+          Desativar uma regra impede que novos alertas sejam gerados — os existentes permanecem até você limpá-los.
         </p>
       </div>
 
@@ -290,11 +330,28 @@ export function AbaNotificacoes() {
           iconBg="bg-violet-50"
           iconColor="text-violet-600"
           title="Nova solicitação recebida"
-          description="Alerta quando um cliente preenche o formulário de cotação publicado no seu link."
+          description="Alerta no sininho quando um cliente preenche o formulário de cotação publicado no seu link."
           badge="Ativo por padrão"
           enabled={prefs.submissaoNova.enabled}
           onToggle={(v) => updatePrefs({ submissaoNova: { enabled: v } })}
-        />
+        >
+          <div className="flex items-center justify-between rounded-lg border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-3 py-2.5">
+            <div className="flex items-center gap-2">
+              <Mail className="h-3.5 w-3.5 text-[var(--hub-text-muted)]" />
+              <span className="text-xs text-[var(--hub-text-secondary)]">
+                Receber também por e-mail
+              </span>
+              {emailSaving && (
+                <span className="text-[10px] text-[var(--hub-text-muted)]">Salvando…</span>
+              )}
+            </div>
+            <Toggle
+              id="toggle-email-submissao"
+              checked={emailSubmissao}
+              onChange={(v) => void saveEmailSubmissao(v)}
+            />
+          </div>
+        </RuleCard>
       </div>
 
       {/* ── Clientes ───────────────────────────────────────────────────── */}
