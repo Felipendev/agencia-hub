@@ -14,6 +14,7 @@ function VerifyEmailForm() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
   const codeFromUrl = searchParams.get("code") || "";
+  const linkToken = searchParams.get("t") || "";   // opaque JWT from email button
 
   const { applySession } = useAuth();
   const [code, setCode] = useState(codeFromUrl);
@@ -31,6 +32,49 @@ function VerifyEmailForm() {
     }, 1000);
     return () => clearInterval(timer);
   }, [resendCooldown]);
+
+  async function handleVerifyByLink(token: string) {
+    setError("");
+    setLoading(true);
+    try {
+      const base = getAgenciaHubApiBaseUrl();
+      if (!base) {
+        applySession(
+          { id: "mock-owner", email: email || "usuario@demo.com", nome: "Usuário", empresa: "Minha Agência", accountKind: "AGENCY_OWNER" },
+          "mock-token",
+        );
+        router.replace("/dashboard");
+        return;
+      }
+      const res = await fetch(`${base}/auth/verify-email-link`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        const errData = data as { message?: string } | null;
+        setError(errData?.message ?? "Link inválido ou expirado. Use o código abaixo.");
+        return;
+      }
+      if (data?.token) {
+        const sessao: UsuarioSessao = {
+          id: data.userId,
+          email: data.email,
+          nome: data.name,
+          empresa: data.agencyName || "AgênciasHub",
+          accountKind: data.accountKind,
+          linkPublicCode: data.publicLinkCode,
+        };
+        applySession(sessao, data.token);
+      }
+      router.replace("/dashboard");
+    } catch {
+      setError("Erro de conexão com o servidor.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleVerify(verifyCode: string) {
     setError("");
@@ -81,9 +125,13 @@ function VerifyEmailForm() {
     }
   }
 
-  // Auto-submit if code arrives via URL (magic link)
+  // Auto-submit: opaque link token takes priority, fallback to plain code+email
   useEffect(() => {
-    if (codeFromUrl.length === 6 && !autoSubmittedRef.current && email) {
+    if (autoSubmittedRef.current) return;
+    if (linkToken) {
+      autoSubmittedRef.current = true;
+      void handleVerifyByLink(linkToken);
+    } else if (codeFromUrl.length === 6 && email) {
       autoSubmittedRef.current = true;
       void handleVerify(codeFromUrl);
     }
@@ -133,6 +181,32 @@ function VerifyEmailForm() {
   }
 
   const gradient = "bg-gradient-to-br from-[var(--hub-blue-dark)] via-[var(--hub-blue)] to-[#1a5080]";
+
+  // Acess via link token: show loading while auto-submit runs
+  if (!email && linkToken) {
+    return (
+      <div className={`flex min-h-screen flex-col items-center justify-center ${gradient} px-4`}>
+        <div className="w-full max-w-md rounded-[var(--hub-radius-xl)] border border-white/15 bg-white p-8 shadow-xl text-center space-y-4">
+          {error ? (
+            <>
+              <div className="rounded-[var(--hub-radius)] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+              <Link href="/cadastro" className="inline-block font-medium text-[var(--hub-blue)] hover:underline text-sm">
+                Voltar ao cadastro
+              </Link>
+            </>
+          ) : (
+            <>
+              <svg className="mx-auto h-8 w-8 animate-spin text-[var(--hub-blue)]" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+              <p className="text-sm text-[var(--hub-text-secondary)]">Verificando seu e-mail…</p>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   if (!email) {
     return (
