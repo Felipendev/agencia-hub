@@ -22,6 +22,13 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import type { CotacaoDetalhes } from "@/types";
 
+export type CamposObrigatoriosErro = {
+  origem?: boolean;
+  destinos?: boolean;
+  dataIda?: boolean;
+  dataVolta?: boolean;
+};
+
 export type CotacaoDetalhesFormProps = {
   det: CotacaoDetalhes;
   onToggleServico: (id: string) => void;
@@ -31,7 +38,11 @@ export type CotacaoDetalhesFormProps = {
   secoesAbertas?: boolean;
   /** Página pública: celular em "Contato e pagamento" é o único campo de celular obrigatório */
   contatoCelularObrigatorio?: boolean;
+  /** Campos obrigatórios que devem ser destacados em vermelho após tentativa de envio */
+  errosCampos?: CamposObrigatoriosErro;
 };
+
+const ERR_INPUT = "!border-red-400 !ring-1 !ring-red-300 focus:!border-red-500 focus:!ring-red-300";
 
 export function CotacaoDetalhesForm({
   det,
@@ -40,6 +51,7 @@ export function CotacaoDetalhesForm({
   onPatch,
   secoesAbertas = false,
   contatoCelularObrigatorio = false,
+  errosCampos = {},
 }: CotacaoDetalhesFormProps) {
   const detailsProps = secoesAbertas ? { open: true as const } : {};
   const [cupomBusy, setCupomBusy] = useState(false);
@@ -179,20 +191,33 @@ export function CotacaoDetalhesForm({
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 xl:gap-6">
             <div>
-              <Label htmlFor="cdf-orig">Origem (cidade / aeroporto)</Label>
+              <Label htmlFor="cdf-orig">
+                Origem (cidade / aeroporto){" "}
+                {errosCampos.origem !== undefined && <span className="text-red-500">*</span>}
+              </Label>
               <Input
                 id="cdf-orig"
                 value={det.origem}
                 onChange={(e) => applyPatch({ origem: e.target.value })}
+                className={errosCampos.origem ? ERR_INPUT : ""}
               />
+              {errosCampos.origem && (
+                <p className="mt-1 text-xs text-red-500">Informe a cidade ou aeroporto de origem.</p>
+              )}
             </div>
             <div className="sm:col-span-2 xl:col-span-3">
-              <Label>Destinos (trechos)</Label>
+              <Label>
+                Destinos (trechos){" "}
+                {errosCampos.destinos !== undefined && <span className="text-red-500">*</span>}
+              </Label>
               <p className="mb-2 text-xs text-[var(--hub-text-muted)]">
                 Adicione quantos trechos precisar, ex.: São Paulo — Madri,
                 Madri — Lisboa… Esse texto compõe o destino na ficha da
                 cotação (abaixo do título), ao juntar os trechos preenchidos.
               </p>
+              {errosCampos.destinos && (
+                <p className="mb-2 text-xs text-red-500">Informe ao menos um destino.</p>
+              )}
               <div className="space-y-2">
                 {det.destinosTrechos.map((trecho, i) => (
                   <div key={i} className="flex gap-2">
@@ -201,6 +226,7 @@ export function CotacaoDetalhesForm({
                       placeholder="Origem — Destino"
                       value={trecho}
                       onChange={(e) => setTrecho(i, e.target.value)}
+                      className={errosCampos.destinos && i === 0 ? ERR_INPUT : ""}
                     />
                     <Button
                       type="button"
@@ -224,22 +250,36 @@ export function CotacaoDetalhesForm({
               </div>
             </div>
             <div>
-              <Label htmlFor="cdf-di">Data ida</Label>
+              <Label htmlFor="cdf-di">
+                Data ida{" "}
+                {errosCampos.dataIda !== undefined && <span className="text-red-500">*</span>}
+              </Label>
               <Input
                 id="cdf-di"
                 type="date"
                 value={det.dataIda}
                 onChange={(e) => applyPatch({ dataIda: e.target.value })}
+                className={errosCampos.dataIda ? ERR_INPUT : ""}
               />
+              {errosCampos.dataIda && (
+                <p className="mt-1 text-xs text-red-500">Informe a data de ida.</p>
+              )}
             </div>
             <div>
-              <Label htmlFor="cdf-dv">Data volta</Label>
+              <Label htmlFor="cdf-dv">
+                Data volta{" "}
+                {errosCampos.dataVolta !== undefined && <span className="text-red-500">*</span>}
+              </Label>
               <Input
                 id="cdf-dv"
                 type="date"
                 value={det.dataVolta}
                 onChange={(e) => applyPatch({ dataVolta: e.target.value })}
+                className={errosCampos.dataVolta ? ERR_INPUT : ""}
               />
+              {errosCampos.dataVolta && (
+                <p className="mt-1 text-xs text-red-500">Informe a data de volta.</p>
+              )}
             </div>
             <div className="sm:col-span-2 xl:col-span-3">
               <div className="grid gap-3 sm:grid-cols-2">

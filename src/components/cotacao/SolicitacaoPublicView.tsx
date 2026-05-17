@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { CotacaoDetalhesForm } from "@/components/cotacao/CotacaoDetalhesForm";
+import type { CamposObrigatoriosErro } from "@/components/cotacao/CotacaoDetalhesForm";
 import { SolicitacaoSocialPanel } from "@/components/cotacao/SolicitacaoSocialRow";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,8 +17,6 @@ import { isUuid } from "@/lib/api/quotation-mapper";
 import { emptyCotacaoDetalhes } from "@/lib/cotacao-defaults";
 import type { CotacaoDetalhes } from "@/types";
 import type { SolicitacaoPublicaConfig } from "@/types/solicitacao-publica";
-
-const LEMBRETE_KEY = "agencia-hub-solicitacao-lembrete";
 
 function referralSellerIdFromCurrentUrl(): string | undefined {
   if (typeof window === "undefined") return undefined;
@@ -37,41 +36,14 @@ export function SolicitacaoPublicView({ slug }: Props) {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
-  const [lembrar, setLembrar] = useState(false);
+  const [consentimento, setConsentimento] = useState(false);
+  const [erroConsentimento, setErroConsentimento] = useState(false);
   const [observacoes, setObservacoes] = useState("");
   const [det, setDet] = useState<CotacaoDetalhes>(() => emptyCotacaoDetalhes());
   const [enviando, setEnviando] = useState(false);
   const [sucesso, setSucesso] = useState(false);
   const [erroEnvio, setErroEnvio] = useState<string | null>(null);
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(LEMBRETE_KEY);
-      if (raw) {
-        const p = JSON.parse(raw) as {
-          nome?: string;
-          email?: string;
-          telefone?: string;
-          celular?: string;
-        };
-        if (p.nome) setNome(p.nome);
-        if (p.email) setEmail(p.email);
-        const cel = p.celular ?? p.telefone;
-        if (cel) {
-          const digits = brPhoneDigits(cel);
-          setDet((d) => ({
-            ...d,
-            celular: digits,
-            whatsapp: digits,
-            whatsappIgualCelular: true,
-          }));
-        }
-        setLembrar(true);
-      }
-    } catch {
-      /* ignore */
-    }
-  }, []);
+  const [errosCampos, setErrosCampos] = useState<CamposObrigatoriosErro>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -119,38 +91,49 @@ export function SolicitacaoPublicView({ slug }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErroEnvio(null);
+
+    // ── Validação client-side ────────────────────────────────────────────────
+    const temTrecho = det.destinosTrechos.some((t) => t.trim());
+    const erros: CamposObrigatoriosErro = {
+      origem:    !det.origem.trim()  ? true : undefined,
+      destinos:  !temTrecho          ? true : undefined,
+      dataIda:   !det.dataIda.trim() ? true : undefined,
+      dataVolta: !det.dataVolta.trim() ? true : undefined,
+    };
+    const temErrosCampos = Object.values(erros).some(Boolean);
+    setErrosCampos(erros);
+
     if (!nome.trim()) {
       setErroEnvio("Informe seu nome completo.");
       return;
     }
     if (!isValidBrazilianPhone(det.celular)) {
-      setErroEnvio(
-        "Informe um celular válido com DDD na seção Contato e pagamento.",
-      );
+      setErroEnvio("Informe um celular válido com DDD na seção Contato e pagamento.");
       return;
     }
-    const whatsappDigits = det.whatsappIgualCelular
-      ? det.celular
-      : det.whatsapp;
-    if (
-      !det.whatsappIgualCelular &&
-      whatsappDigits.length > 0 &&
-      !isValidBrazilianPhone(whatsappDigits)
-    ) {
-      setErroEnvio("Informe um número de WhatsApp válido ou marque “mesmo número”.");
+    const whatsappDigits = det.whatsappIgualCelular ? det.celular : det.whatsapp;
+    if (!det.whatsappIgualCelular && whatsappDigits.length > 0 && !isValidBrazilianPhone(whatsappDigits)) {
+      setErroEnvio('Informe um número de WhatsApp válido ou marque "mesmo número".');
       return;
     }
+    if (temErrosCampos) {
+      setErroEnvio("Preencha os campos obrigatórios marcados com *.");
+      return;
+    }
+    if (!consentimento) {
+      setErroConsentimento(true);
+      setErroEnvio("É necessário autorizar o uso dos seus dados para continuar.");
+      return;
+    }
+    setErroConsentimento(false);
+
     setEnviando(true);
     try {
       const celularFinal = brPhoneDigits(det.celular);
       const whatsFinal = det.whatsappIgualCelular
         ? celularFinal
         : brPhoneDigits(det.whatsapp) || celularFinal;
-      const detalhes: CotacaoDetalhes = {
-        ...det,
-        celular: celularFinal,
-        whatsapp: whatsFinal,
-      };
+      const detalhes: CotacaoDetalhes = { ...det, celular: celularFinal, whatsapp: whatsFinal };
       const body: Record<string, unknown> = {
         slug,
         nome: nome.trim(),
@@ -159,6 +142,7 @@ export function SolicitacaoPublicView({ slug }: Props) {
         detalhes,
         observacoes: observacoes.trim(),
         sellerPublicCode,
+        consentimentoLgpd: true,
       };
       const ref = referralSellerIdFromCurrentUrl();
       if (ref) body.referralSellerId = ref;
@@ -167,27 +151,19 @@ export function SolicitacaoPublicView({ slug }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = (await res.json().catch(() => ({}))) as {
-        error?: string;
-      };
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
         throw new Error(data.error ?? "Falha ao enviar.");
       }
-      if (lembrar) {
-        localStorage.setItem(
-          LEMBRETE_KEY,
-          JSON.stringify({
-            nome: nome.trim(),
-            email: email.trim(),
-            celular: celularFinal,
-          }),
-        );
-      } else {
-        localStorage.removeItem(LEMBRETE_KEY);
-      }
       setSucesso(true);
     } catch (err) {
-      setErroEnvio(err instanceof Error ? err.message : "Erro ao enviar.");
+      const msg = err instanceof Error ? err.message : "";
+      // Traduz erros de rede que chegam em inglês do browser
+      if (!msg || /failed to fetch|network|load failed/i.test(msg)) {
+        setErroEnvio("Erro de conexão. Verifique sua internet e tente novamente.");
+      } else {
+        setErroEnvio(msg);
+      }
     } finally {
       setEnviando(false);
     }
@@ -311,18 +287,6 @@ export function SolicitacaoPublicView({ slug }: Props) {
               autoComplete="email"
             />
           </div>
-          <div className="flex items-center gap-2 sm:col-span-2 xl:col-span-3">
-            <input
-              id="sp-lem"
-              type="checkbox"
-              checked={lembrar}
-              onChange={(e) => setLembrar(e.target.checked)}
-              className="h-4 w-4 rounded border-[var(--hub-border)]"
-            />
-            <label htmlFor="sp-lem" className="text-sm text-[var(--hub-text-primary)]">
-              Lembrar meus dados neste dispositivo
-            </label>
-          </div>
         </div>
 
         <div className="mt-6 border-t border-[var(--hub-border)] pt-2">
@@ -333,6 +297,7 @@ export function SolicitacaoPublicView({ slug }: Props) {
             onPatch={patchDet}
             secoesAbertas
             contatoCelularObrigatorio
+            errosCampos={errosCampos}
           />
         </div>
 
@@ -348,6 +313,33 @@ export function SolicitacaoPublicView({ slug }: Props) {
           />
         </div>
 
+        {/* ── Consentimento LGPD ─────────────────────────────── */}
+        <div className={`mt-6 rounded-lg border p-4 ${erroConsentimento ? "border-red-300 bg-red-50" : "border-[var(--hub-border)] bg-[var(--hub-bg-subtle)]"}`}>
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              id="sp-lgpd"
+              type="checkbox"
+              checked={consentimento}
+              onChange={(e) => {
+                setConsentimento(e.target.checked);
+                if (e.target.checked) setErroConsentimento(false);
+              }}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--hub-border)] accent-[var(--hub-primary)]"
+            />
+            <span className={`text-sm leading-relaxed ${erroConsentimento ? "text-red-700" : "text-[var(--hub-text-secondary)]"}`}>
+              Autorizo o uso dos meus dados pessoais (nome, e-mail, telefone e informações de viagem) por{" "}
+              <strong className="text-[var(--hub-text-primary)]">{config?.nomeMarca || "esta agência"}</strong>{" "}
+              para elaboração da cotação solicitada, envio de comunicações sobre promoções e futuros contatos,
+              em conformidade com a Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018).
+            </span>
+          </label>
+          {erroConsentimento && (
+            <p className="mt-2 text-xs font-medium text-red-600">
+              É necessário autorizar o uso dos seus dados para continuar.
+            </p>
+          )}
+        </div>
+
         {erroEnvio ? (
           <p className="mt-3 text-sm font-medium text-red-600">{erroEnvio}</p>
         ) : null}
@@ -358,11 +350,6 @@ export function SolicitacaoPublicView({ slug }: Props) {
           </Button>
         </div>
       </form>
-
-      <p className="mt-10 text-pretty text-xs text-[var(--hub-text-muted)] sm:text-sm lg:max-w-4xl">
-        Envio seguro — seus dados são usados apenas para contato sobre este
-        orçamento.
-      </p>
     </div>
   );
 }

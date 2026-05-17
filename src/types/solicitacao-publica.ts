@@ -45,4 +45,6 @@ export type SolicitacaoPublicSubmission = {
   observacoes: string;
   /** Código público do vendedor (query ?vendedor=), quando o envio veio de link pessoal. */
   sellerPublicCode?: string | null;
+  /** Consentimento LGPD — true quando o cliente marcou a checkbox antes de enviar */
+  consentimentoLgpd?: boolean;
 };

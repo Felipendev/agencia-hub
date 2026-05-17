@@ -19,6 +19,8 @@ type Body = {
   referralSellerId?: string;
   /** Código público do vendedor em ?vendedor= quando não for UUID */
   sellerPublicCode?: string | null;
+  /** Consentimento LGPD — obrigatório no formulário público */
+  consentimentoLgpd?: boolean;
 };
 
 export async function POST(request: Request) {
@@ -75,6 +77,7 @@ export async function POST(request: Request) {
     telefone: telefoneDigits,
     detalhes: det,
     observacoes: body.observacoes ?? "",
+    consentimentoLgpd: body.consentimentoLgpd === true,
     ...(referralSellerId ? { referralSellerId } : {}),
     ...(sellerPublicCode ? { sellerPublicCode } : {}),
   };
@@ -140,6 +143,7 @@ export async function POST(request: Request) {
       observacoes: body.observacoes ?? "",
       referralSellerId,
       sellerPublicCode,
+      consentimentoLgpd: body.consentimentoLgpd === true,
     });
     return NextResponse.json({ ok: true, id: created.id });
   } catch (err) {

@@ -257,50 +257,16 @@ export function LinkSolicitacaoModal({
             </div>
 
             <p className="text-xs leading-relaxed text-[var(--hub-text-secondary)]">
-              {sellerPublicCode?.trim() ?
-                <>
-                  O link inclui{" "}
-                  <code className="rounded bg-[var(--hub-bg-subtle)] px-1 text-[11px]">?vendedor=</code>{" "}
-                  com seu código público para atribuir envios a você. Remova esse parâmetro
-                  para um link genérico da agência.
-                </>
-              : user?.id && isUuid(user.id) ?
-                <>
-                  O link inclui{" "}
-                  <code className="rounded bg-[var(--hub-bg-subtle)] px-1 text-[11px]">?vendedor=</code>{" "}
-                  com o seu usuário para que envios fiquem associados a você. Remova esse
-                  parâmetro da URL para um link genérico da agência.
-                </>
-              : "Compartilhe este endereço com clientes; o identificador do slug pode ser personalizado abaixo."}
+              Compartilhe este link com seus clientes para receber solicitações de cotação diretamente no painel.
             </p>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] p-3">
-                <p className="text-xs text-[var(--hub-text-secondary)]">
-                  Crie identificadores diferentes para afiliados ou canais (salve
-                  em Personalizar alterando o campo do link).
-                </p>
-                <Button
-                  type="button"
-                  className="mt-3 w-full text-sm"
-                  onClick={() => setView("customize")}
-                >
-                  Criar / ajustar link
-                </Button>
-              </div>
-              <div className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] p-3">
-                <p className="text-xs text-[var(--hub-text-secondary)]">
-                  Logo, textos e ícones de contato com links clicáveis.
-                </p>
-                <Button
-                  type="button"
-                  className="mt-3 w-full text-sm"
-                  onClick={() => setView("customize")}
-                >
-                  Personalizar o formulário
-                </Button>
-              </div>
-            </div>
+            <Button
+              type="button"
+              className="w-full text-sm"
+              onClick={() => setView("customize")}
+            >
+              Personalizar o formulário
+            </Button>
 
             {loadError ? (
               <p className="text-sm text-amber-700">{loadError}</p>

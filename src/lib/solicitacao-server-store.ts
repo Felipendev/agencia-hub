@@ -21,7 +21,7 @@ const defaultConfigs: Record<string, SolicitacaoPublicaConfig> = {
     slug: "demo",
     tituloPagina: "Solicitação de Orçamento",
     textoIntro:
-      "Preencha os dados abaixo em poucos minutos. Nossa equipe retorna o mais rápido possível, priorizando viagens com datas mais próximas.",
+      "Preencha os dados abaixo em poucos minutos. Nossa equipe retorna o mais rápido possível.",
     logoDataUrl: null,
     nomeMarca: "AgenciaHub",
     linksSociais: [
@@ -104,6 +104,7 @@ export async function addSubmission(input: {
   observacoes: string;
   referralSellerId?: string;
   sellerPublicCode?: string | null;
+  consentimentoLgpd?: boolean;
 }): Promise<SolicitacaoPublicSubmission> {
   const data = await readRaw();
   const row: SolicitacaoPublicSubmission = {
@@ -117,6 +118,7 @@ export async function addSubmission(input: {
     observacoes: input.observacoes.trim(),
     referralSellerId: input.referralSellerId ?? null,
     sellerPublicCode: input.sellerPublicCode?.trim() || null,
+    consentimentoLgpd: input.consentimentoLgpd === true,
   };
   data.submissions.unshift(row);
   await writeRaw(data);
