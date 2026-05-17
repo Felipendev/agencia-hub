@@ -66,7 +66,17 @@ export function SolicitacaoSubmissionsBanner() {
   useEffect(() => {
     if (!isReady) return;
     void refresh();
+    const id = setInterval(() => void refresh(), 30_000);
+    return () => clearInterval(id);
   }, [isReady, refresh]);
+
+  useEffect(() => {
+    function onVisible() {
+      if (document.visibilityState === "visible") void refresh();
+    }
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [refresh]);
 
   useEffect(() => {
     if (!isReady || !hasRemoteApi || !token) return;
