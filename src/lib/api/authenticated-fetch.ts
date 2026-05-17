@@ -2,7 +2,8 @@ import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
 
 /**
  * Wrapper de fetch que injeta o Bearer token automaticamente.
- * Lança erro se a resposta não for ok.
+ * Despacha o evento 'auth:unauthorized' em window quando o servidor retorna 401,
+ * sinalizando ao AuthProvider para encerrar a sessão.
  */
 export async function apiFetch<T>(
   path: string,
@@ -26,6 +27,11 @@ export async function apiFetch<T>(
   const parsed = await res.json().catch(() => null);
 
   if (!res.ok) {
+    if (res.status === 401) {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+      }
+    }
     const msg =
       parsed && typeof parsed === "object" && "message" in parsed
         ? (parsed as { message: string }).message
