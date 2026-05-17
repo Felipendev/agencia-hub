@@ -54,13 +54,9 @@ export function LinkSolicitacaoModal({
     const slugPart = (config?.slug ?? "").trim();
     if (!slugPart) return "";
     let url = `${window.location.origin}/solicitacao/${encodeURIComponent(slugPart)}`;
+    // Only append ?vendedor= when there's a proper opaque code (never expose UUIDs)
     if (sellerPublicCode?.trim()) {
       url += `?vendedor=${encodeURIComponent(sellerPublicCode.trim())}`;
-    } else {
-      const uid = user?.id?.trim();
-      if (uid && isUuid(uid)) {
-        url += `?vendedor=${encodeURIComponent(uid)}`;
-      }
     }
     return url;
   }, [config?.slug, sellerPublicCode, user?.id]);

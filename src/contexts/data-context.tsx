@@ -19,6 +19,7 @@ import { createQuotationRemote } from "@/lib/api/create-quotation-remote";
 import { updateQuotationRemote } from "@/lib/api/update-quotation-remote";
 import { createFinancialEntryRemote } from "@/lib/api/create-financial-entry-remote";
 import { updateFinancialEntryRemote } from "@/lib/api/update-financial-entry-remote";
+import { deleteFinancialEntryRemote } from "@/lib/api/delete-financial-entry-remote";
 import { useAuth } from "@/contexts/auth-context";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
 import { listQuotationsRemote } from "@/lib/api/list-quotations-remote";
@@ -148,6 +149,7 @@ export type DataContextValue = {
     l: Omit<LancamentoFinanceiro, "id">,
   ) => Promise<LancamentoFinanceiro>;
   updateLancamento: (id: string, patch: Partial<LancamentoFinanceiro>) => void;
+  deleteLancamento: (id: string) => Promise<void>;
   addCotacao: (
     c: Omit<Cotacao, "id" | "createdAt" | "updatedAt">,
   ) => Promise<Cotacao>;
@@ -298,6 +300,18 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  const deleteLancamento = useCallback(
+    async (id: string) => {
+      setData((d) => ({ ...d, lancamentos: d.lancamentos.filter((x) => x.id !== id) }));
+      try {
+        await deleteFinancialEntryRemote(id, token);
+      } catch (e) {
+        console.warn("[agencia-hub] Falha ao excluir lançamento na API.", e);
+      }
+    },
+    [token],
+  );
+
   const addCotacao = useCallback(
     async (c: Omit<Cotacao, "id" | "createdAt" | "updatedAt">) => {
       const now = new Date().toISOString();
@@ -399,7 +413,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           search: params?.search?.trim() || undefined,
           token: params?.token,
         });
-        setData((d) => ({ ...d, cotacoes: list }));
+        setData((d) => {
+          // Keep locally-created cotações (non-UUID IDs) not yet synced to the API
+          const apiIds = new Set(list.map((c) => c.id));
+          const localOnly = d.cotacoes.filter((c) => !isUuid(c.id) && !apiIds.has(c.id));
+          return { ...d, cotacoes: [...list, ...localOnly] };
+        });
       } catch (e) {
         console.warn(
           "[agencia-hub] Falha ao listar cotações na API (lista local inalterada).",
@@ -419,6 +438,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       checkDuplicate,
       addLancamento,
       updateLancamento,
+      deleteLancamento,
       addCotacao,
       updateCotacao,
       resetDemoData,
@@ -434,6 +454,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       checkDuplicate,
       addLancamento,
       updateLancamento,
+      deleteLancamento,
       addCotacao,
       updateCotacao,
       resetDemoData,

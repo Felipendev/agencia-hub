@@ -30,7 +30,9 @@ type Props = { slug: string };
 
 export function SolicitacaoPublicView({ slug }: Props) {
   const searchParams = useSearchParams();
-  const sellerPublicCode = searchParams.get("vendedor")?.trim() || null;
+  const vendedorParam = searchParams.get("vendedor")?.trim() || null;
+  // Se ?vendedor= contém um UUID, é um referralSellerId (tratado separadamente); não enviar como sellerPublicCode
+  const sellerPublicCode = vendedorParam && !isUuid(vendedorParam) ? vendedorParam : null;
   const [config, setConfig] = useState<SolicitacaoPublicaConfig | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [nome, setNome] = useState("");

@@ -211,15 +211,7 @@ export default function CotacoesPage() {
 
       {hasRemoteApi ?
         <div className="rounded-[var(--hub-radius-lg)] border border-sky-200 bg-sky-50/90 px-4 py-4 shadow-sm">
-          <p className="text-sm font-semibold text-[var(--hub-blue-dark)]">
-            Atualizar lista do servidor
-          </p>
-          <p className="mt-1 text-xs text-[var(--hub-text-secondary)]">
-            Use os filtros abaixo e clique em &quot;Atualizar lista&quot; para buscar
-            novamente no servidor. A busca por cliente acima continua refinando o
-            quadro localmente.
-          </p>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <Label htmlFor="api-st">Status</Label>
               <Select
