@@ -48,6 +48,8 @@ function deleteCookie(name: string) {
   document.cookie = `${name}=; path=/; max-age=0`;
 }
 
+const ROLE_COOKIE = "ah_role";
+
 // ─── Storage helpers ──────────────────────────────────────────────────────────
 
 function readUserFromStorage(): UsuarioSessao | null {
@@ -78,6 +80,7 @@ function persistSession(user: UsuarioSessao, token: string) {
   localStorage.setItem(STORAGE_USER, JSON.stringify(user));
   localStorage.setItem(STORAGE_TOKEN, token);
   setCookie(AUTH_COOKIE, "1", 7);
+  setCookie(ROLE_COOKIE, user.accountKind, 7);
 }
 
 function clearSession() {
@@ -85,6 +88,7 @@ function clearSession() {
   localStorage.removeItem(STORAGE_TOKEN);
   clearAppData();
   deleteCookie(AUTH_COOKIE);
+  deleteCookie(ROLE_COOKIE);
 }
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
