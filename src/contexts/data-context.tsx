@@ -14,6 +14,7 @@ import {
   seedLancamentos,
 } from "@/data/seed";
 import { createCustomerRemote, DuplicateCustomerError } from "@/lib/api/create-customer-remote";
+import { softDeleteCustomer } from "@/lib/api/soft-delete-remote";
 import { createQuotationRemote } from "@/lib/api/create-quotation-remote";
 import { updateQuotationRemote } from "@/lib/api/update-quotation-remote";
 import { createFinancialEntryRemote } from "@/lib/api/create-financial-entry-remote";
@@ -140,6 +141,7 @@ export type DataContextValue = {
   cotacoes: Cotacao[];
   addCliente: (c: Omit<Cliente, "id" | "createdAt">) => Promise<Cliente>;
   updateCliente: (id: string, patch: Partial<Cliente>) => void;
+  deleteCliente: (id: string) => Promise<void>;
   /** Verifica duplicidade antes de criar/editar. `excludeId` = próprio id ao editar. */
   checkDuplicate: (email: string, telefone: string, excludeId?: string) => ClienteDuplicateCheck;
   addLancamento: (
@@ -161,18 +163,30 @@ export type DataContextValue = {
 const DataContext = createContext<DataContextValue | null>(null);
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [data, setData] = useState<Stored>(() => ({
     clientes: seedClientes,
     lancamentos: seedLancamentos,
     cotacoes: seedCotacoes,
   }));
   const [isReady, setIsReady] = useState(false);
+  const hasRemoteApi = Boolean(getAgenciaHubApiBaseUrl());
 
+  // Initial load
   useEffect(() => {
     setData(loadStored());
     setIsReady(true);
   }, []);
+
+  // Reset data when the signed-in user changes (login / logout / account switch)
+  const prevUserIdRef = { current: user?.id };
+  useEffect(() => {
+    if (!isReady) return;
+    if (user?.id === prevUserIdRef.current) return;
+    prevUserIdRef.current = user?.id;
+    setData(loadStored());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, isReady]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -214,6 +228,17 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       ),
     }));
   }, []);
+
+  const deleteCliente = useCallback(async (id: string) => {
+    if (hasRemoteApi && token && isUuid(id)) {
+      await softDeleteCustomer(id, token);
+    }
+    setData((d) => ({
+      ...d,
+      clientes: d.clientes.filter((c) => c.id !== id),
+      cotacoes: d.cotacoes.filter((c) => c.clienteId !== id),
+    }));
+  }, [token, hasRemoteApi]);
 
   const checkDuplicate = useCallback(
     (email: string, telefone: string, excludeId?: string): ClienteDuplicateCheck =>
@@ -358,8 +383,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     saveStored(fresh);
   }, []);
 
-  const hasRemoteApi = Boolean(getAgenciaHubApiBaseUrl());
-
   const syncCotacoesFromApi = useCallback(
     async (params?: SyncCotacoesFromApiParams) => {
       if (!getAgenciaHubApiBaseUrl()) return;
@@ -392,6 +415,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       ...data,
       addCliente,
       updateCliente,
+      deleteCliente,
       checkDuplicate,
       addLancamento,
       updateLancamento,
@@ -406,6 +430,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       data,
       addCliente,
       updateCliente,
+      deleteCliente,
       checkDuplicate,
       addLancamento,
       updateLancamento,

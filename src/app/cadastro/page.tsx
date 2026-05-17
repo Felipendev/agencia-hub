@@ -80,14 +80,12 @@ export default function CadastroPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
-        const msg =
-          data && typeof data === "object" && "message" in data
-            ? (data as { message: string }).message
-            : "Erro ao criar conta. Tente novamente.";
-        setError(msg);
+        const errData = data as { message?: string; code?: string } | null;
+        setError(errData?.message ?? "Erro ao criar conta. Tente novamente.");
         return;
       }
 
+      // Some backends return 200 or 201 — both are success
       router.push(`/cadastro/verificar?email=${encodeURIComponent(email.trim())}`);
     } catch {
       setError("Erro de conexão com o servidor.");

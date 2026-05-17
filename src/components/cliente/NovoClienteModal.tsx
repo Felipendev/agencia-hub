@@ -34,6 +34,7 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onCreated: (cliente: Cliente) => void;
+  keepOpenAfterSave?: boolean;
 };
 
 type TabId =
@@ -194,7 +195,7 @@ function TipoSwitch({
   );
 }
 
-export function NovoClienteModal({ open, onClose, onCreated }: Props) {
+export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave = false }: Props) {
   const { addCliente } = useData();
   const toast = useToast();
   const [tab, setTab] = useState<TabId>("contato");
@@ -302,9 +303,8 @@ export function NovoClienteModal({ open, onClose, onCreated }: Props) {
     onClose();
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!nome.trim()) return;
+  async function handleSubmit(): Promise<boolean> {
+    if (!nome.trim()) return false;
 
     const anyTipo =
       tipoPassageiro || tipoCliente || tipoFornecedor || tipoRepresentante;
@@ -381,14 +381,17 @@ export function NovoClienteModal({ open, onClose, onCreated }: Props) {
         endereco: end,
       });
       onCreated(novo);
+      toast.success(`Cliente "${novo.nome}" cadastrado!`);
       reset();
-      onClose();
+      if (!keepOpenAfterSave) onClose();
+      return true;
     } catch (e) {
       if (e instanceof DuplicateCustomerError) {
         toast.error(e.message);
       } else {
         toast.error("Erro ao salvar cliente. Tente novamente.");
       }
+      return false;
     }
   }
 
@@ -419,7 +422,7 @@ export function NovoClienteModal({ open, onClose, onCreated }: Props) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-5 pb-5 pt-4">
+        <div className="px-5 pb-5 pt-4">
           <div className="space-y-4 border-b border-[var(--hub-border)] pb-4">
             <div className="flex flex-wrap items-start gap-3">
               <div className="min-w-0 flex-1">
@@ -1035,11 +1038,22 @@ export function NovoClienteModal({ open, onClose, onCreated }: Props) {
 
           <div className="mt-6 flex justify-end gap-2 border-t border-[var(--hub-border)] pt-4">
             <Button type="button" variant="secondary" onClick={handleClose}>
-              Cancelar
+              {keepOpenAfterSave ? "Fechar" : "Cancelar"}
             </Button>
-            <Button type="submit">Salvar</Button>
+            {keepOpenAfterSave && (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={async () => { const ok = await handleSubmit(); if (ok) onClose(); }}
+              >
+                Salvar e fechar
+              </Button>
+            )}
+            <Button type="button" onClick={handleSubmit}>
+              {keepOpenAfterSave ? "Salvar e adicionar outro" : "Salvar"}
+            </Button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

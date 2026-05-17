@@ -16,11 +16,20 @@ const AUTH_COOKIE   = "ah_auth";
 const STORAGE_USER  = "agencia-hub-user";
 const STORAGE_TOKEN = "agencia-hub-token";
 
+// All app data keys that must be wiped when the user session changes
+const APP_DATA_KEYS = [
+  "agencia-hub-data",
+  "agencia-hub-notifications",
+  "agencia-hub-dismissed-cotacoes",
+];
+
 type AuthContextValue = {
   user: UsuarioSessao | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string; code?: string; email?: string }>;
   logout: () => void;
+  /** Update auth context state after an out-of-band verification (e.g. email verify page). */
+  applySession: (user: UsuarioSessao, token: string) => void;
   isReady: boolean;
   isOwner: boolean;
   isSeller: boolean;
@@ -59,6 +68,12 @@ function readTokenFromStorage(): string | null {
   }
 }
 
+function clearAppData() {
+  for (const key of APP_DATA_KEYS) {
+    localStorage.removeItem(key);
+  }
+}
+
 function persistSession(user: UsuarioSessao, token: string) {
   localStorage.setItem(STORAGE_USER, JSON.stringify(user));
   localStorage.setItem(STORAGE_TOKEN, token);
@@ -68,6 +83,7 @@ function persistSession(user: UsuarioSessao, token: string) {
 function clearSession() {
   localStorage.removeItem(STORAGE_USER);
   localStorage.removeItem(STORAGE_TOKEN);
+  clearAppData();
   deleteCookie(AUTH_COOKIE);
 }
 
@@ -78,6 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
 
+  // Initialise from localStorage
   useEffect(() => {
     const u = readUserFromStorage();
     const t = readTokenFromStorage();
@@ -89,8 +106,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsReady(true);
   }, []);
 
+  // Cross-tab sync: when the token changes in another tab, mirror the session
+  useEffect(() => {
+    function handleStorage(e: StorageEvent) {
+      if (e.key !== STORAGE_TOKEN) return;
+      if (e.newValue) {
+        const u = readUserFromStorage();
+        if (u) {
+          setUser(u);
+          setToken(e.newValue);
+          setCookie(AUTH_COOKIE, "1", 7);
+        }
+      } else {
+        setUser(null);
+        setToken(null);
+      }
+    }
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  const applySession = useCallback((sessao: UsuarioSessao, tok: string) => {
+    clearAppData();
+    persistSession(sessao, tok);
+    setUser(sessao);
+    setToken(tok);
+  }, []);
+
   const login = useCallback(
-    async (email: string, password: string): Promise<{ ok: boolean; error?: string }> => {
+    async (email: string, password: string): Promise<{ ok: boolean; error?: string; code?: string; email?: string }> => {
       const trimmed = email.trim();
       if (!trimmed || !password) {
         return { ok: false, error: "Preencha e-mail e senha." };
@@ -110,10 +154,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const data = (await res.json().catch(() => null)) as ApiLoginResponse | null;
 
           if (!res.ok || !data?.token) {
-            const msg =
-              (data as { message?: string } | null)?.message ??
-              "Credenciais inválidas.";
-            return { ok: false, error: msg };
+            const errData = data as { message?: string; code?: string; email?: string } | null;
+            const msg   = errData?.message ?? "Credenciais inválidas.";
+            const code  = errData?.code;
+            const email = errData?.email;
+            return { ok: false, error: msg, code, email };
           }
 
           const sessao: UsuarioSessao = {
@@ -132,6 +177,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             linkPublicCode: data.publicLinkCode,
           };
 
+          clearAppData();
           persistSession(sessao, data.token);
           setUser(sessao);
           setToken(data.token);
@@ -152,6 +198,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         accountKind: "AGENCY_OWNER",
       };
       const mockToken = "mock-token";
+      clearAppData();
       persistSession(sessao, mockToken);
       setUser(sessao);
       setToken(mockToken);
@@ -170,8 +217,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isSeller = user?.accountKind === "SALES_AGENT";
 
   const value = useMemo(
-    () => ({ user, token, login, logout, isReady, isOwner, isSeller }),
-    [user, token, login, logout, isReady, isOwner, isSeller],
+    () => ({ user, token, login, logout, applySession, isReady, isOwner, isSeller }),
+    [user, token, login, logout, applySession, isReady, isOwner, isSeller],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
