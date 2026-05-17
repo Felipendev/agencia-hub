@@ -63,7 +63,7 @@ export default function GlobalError({
 
           <div style={{ marginTop: "2rem", display: "flex", gap: "0.75rem" }}>
             <button
-              onClick={reset}
+              onClick={() => { window.location.reload(); }}
               style={{
                 padding: "0.625rem 1.5rem",
                 borderRadius: "0.5rem",

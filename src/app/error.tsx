@@ -1,14 +1,28 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function ErrorPage({
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    console.error("[ErrorBoundary]", error);
+  }, [error]);
+
+  function handleRetry() {
+    router.refresh();
+    reset();
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#0B1B2B] px-4">
       <div className="w-full max-w-md text-center">
@@ -38,7 +52,7 @@ export default function ErrorPage({
         </p>
 
         <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-          <Button onClick={reset} className="w-full sm:w-auto">
+          <Button onClick={handleRetry} className="w-full sm:w-auto">
             Tentar novamente
           </Button>
           <Link href="/">
