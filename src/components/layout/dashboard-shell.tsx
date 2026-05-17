@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { TrialBanner } from "@/components/ui/trial-banner";
 import { TermsAcceptanceModal } from "@/components/ui/terms-acceptance-modal";
 import { ChangePasswordModal } from "@/components/ui/change-password-modal";
+import { IdleTimeout } from "@/components/idle-timeout";
 
 const iconMap = {
   layout:   IconLayout,
@@ -186,6 +187,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-[var(--hub-bg)]">
+      <IdleTimeout />
       <TermsAcceptanceModal />
       <ChangePasswordModal />
 

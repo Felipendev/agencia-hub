@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
-import { useAuth } from "@/contexts/auth-context";
 import { filterClientes, useData } from "@/contexts/data-context";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
@@ -18,22 +17,17 @@ import { NovoClienteModal } from "@/components/cliente/NovoClienteModal";
 import { formatDateBR } from "@/lib/format";
 import { exportarClientesCSV } from "@/lib/csv-export";
 import { DownloadIcon, TrashIcon } from "@/components/icons";
-import { softDeleteCustomer } from "@/lib/api/soft-delete-remote";
 import { CLIENTE_STATUS_LABELS } from "@/lib/constants";
-import { isUuid } from "@/lib/api/quotation-mapper";
 import type { ClienteStatus } from "@/types";
 
 export default function ClientesPage() {
-  const { clientes, isReady, hasRemoteApi } = useData();
-  const { token } = useAuth();
+  const { clientes, isReady, deleteCliente } = useData();
   const toast = useToast();
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<ClienteStatus | "todos">("todos");
   const [novoClienteOpen, setNovoClienteOpen] = useState(false);
-
-  // ── Soft-delete state ──────────────────────────────────────────────────────
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [locallyDeleted, setLocallyDeleted] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
 
   const handleDeleteRequest = useCallback((id: string) => {
     setDeleteTarget(id);
@@ -41,29 +35,25 @@ export default function ClientesPage() {
 
   const handleDeleteConfirm = useCallback(async () => {
     if (!deleteTarget) return;
-    if (hasRemoteApi && token && isUuid(deleteTarget)) {
-      try {
-        await softDeleteCustomer(deleteTarget, token);
-        toast.success("Cliente excluído com sucesso.");
-        setLocallyDeleted((prev) => new Set(prev).add(deleteTarget));
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Erro ao excluir cliente.");
-      }
-    } else {
-      // Modo local (ou registro legado sem UUID): esconde da listagem
-      setLocallyDeleted((prev) => new Set(prev).add(deleteTarget));
+    setDeleting(true);
+    try {
+      await deleteCliente(deleteTarget);
       toast.success("Cliente excluído com sucesso.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erro ao excluir cliente.");
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(null);
     }
-    setDeleteTarget(null);
-  }, [deleteTarget, token, hasRemoteApi, toast]);
+  }, [deleteTarget, deleteCliente, toast]);
 
   const handleDeleteCancel = useCallback(() => {
     setDeleteTarget(null);
   }, []);
 
   const filtrados = useMemo(
-    () => filterClientes(clientes, q, statusFilter).filter((c) => !locallyDeleted.has(c.id)),
-    [clientes, q, statusFilter, locallyDeleted],
+    () => filterClientes(clientes, q, statusFilter),
+    [clientes, q, statusFilter],
   );
 
   function handleExportar() {
