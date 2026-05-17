@@ -98,6 +98,15 @@ export function LoginForm() {
         </Link>
 
         <div className="w-full max-w-[380px]">
+          <Link
+            href="/"
+            className="mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--hub-text-muted)] hover:text-[var(--hub-text-secondary)] transition-colors"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+            </svg>
+            Página inicial
+          </Link>
           <h1 className="text-2xl font-bold tracking-tight text-[var(--hub-text-primary)]">
             Entrar
           </h1>

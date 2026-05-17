@@ -6,6 +6,8 @@ import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { VerificationCodeInput } from "@/components/ui/verification-code-input";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
+import { useAuth } from "@/contexts/auth-context";
+import type { UsuarioSessao } from "@/types";
 
 function VerifyEmailForm() {
   const router = useRouter();
@@ -13,6 +15,7 @@ function VerifyEmailForm() {
   const email = searchParams.get("email") || "";
   const codeFromUrl = searchParams.get("code") || "";
 
+  const { applySession } = useAuth();
   const [code, setCode] = useState(codeFromUrl);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,16 +39,9 @@ function VerifyEmailForm() {
     try {
       const base = getAgenciaHubApiBaseUrl();
       if (!base) {
-        localStorage.setItem("agencia-hub-token", "mock-token");
-        localStorage.setItem(
-          "agencia-hub-user",
-          JSON.stringify({
-            id: "mock-owner",
-            email,
-            nome: "Usuário",
-            empresa: "Minha Agência",
-            accountKind: "AGENCY_OWNER",
-          }),
+        applySession(
+          { id: "mock-owner", email, nome: "Usuário", empresa: "Minha Agência", accountKind: "AGENCY_OWNER" },
+          "mock-token",
         );
         router.replace("/dashboard");
         return;
@@ -66,19 +62,15 @@ function VerifyEmailForm() {
       }
 
       if (data?.token) {
-        localStorage.setItem("agencia-hub-token", data.token);
-        localStorage.setItem(
-          "agencia-hub-user",
-          JSON.stringify({
-            id: data.userId,
-            email: data.email,
-            nome: data.name,
-            empresa: data.agencyName || "AgênciasHub",
-            accountKind: data.accountKind,
-            linkPublicCode: data.publicLinkCode,
-          }),
-        );
-        document.cookie = `ah_auth=1; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+        const sessao: UsuarioSessao = {
+          id: data.userId,
+          email: data.email,
+          nome: data.name,
+          empresa: data.agencyName || "AgênciasHub",
+          accountKind: data.accountKind,
+          linkPublicCode: data.publicLinkCode,
+        };
+        applySession(sessao, data.token);
       }
 
       router.replace("/dashboard");
@@ -157,6 +149,18 @@ function VerifyEmailForm() {
 
   return (
     <div className={`flex min-h-screen flex-col ${gradient}`}>
+      {/* Back button */}
+      <div className="px-4 pt-4">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition-colors"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+          </svg>
+          Página inicial
+        </Link>
+      </div>
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
         {/* Logo */}
         <Link href="/" className="mb-8 flex items-center gap-2 text-white/90 hover:text-white transition-colors">
