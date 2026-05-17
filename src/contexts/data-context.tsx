@@ -424,6 +424,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           "[agencia-hub] Falha ao listar cotações na API (lista local inalterada).",
           e,
         );
+        // Repropaga para que os chamadores possam exibir mensagem ao usuário
+        throw e;
       }
     },
     [],

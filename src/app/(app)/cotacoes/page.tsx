@@ -221,17 +221,21 @@ export default function CotacoesPage() {
       filtroClienteIds?.length === 1 && isUuid(filtroClienteIds[0]) ?
         filtroClienteIds[0]
       : undefined;
-    void syncCotacoesFromApi({
+    syncCotacoesFromApi({
       status: filtroApiStatus || undefined,
       search: filtroApiBusca.trim() || undefined,
       customerId: cust,
       token,
+    }).catch(() => {
+      toast.error("Não foi possível carregar as cotações. Tente novamente em instantes.");
     });
   }
 
   useEffect(() => {
     if (!isReady || !hasRemoteApi) return;
-    void syncCotacoesFromApi({ token });
+    syncCotacoesFromApi({ token }).catch(() => {
+      toast.error("Não foi possível carregar as cotações. Tente novamente em instantes.");
+    });
   }, [isReady, hasRemoteApi, syncCotacoesFromApi, token]);
 
   const hasActiveFilters =
