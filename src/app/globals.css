@@ -1,83 +1,131 @@
 @import "tailwindcss";
 
 :root {
-  /* Brand — Navy + Amber (Compass palette) */
-  --hub-blue: #122336;
-  --hub-blue-dark: #0B1B2B;
-  --hub-blue-muted: #7A9BB5;
-  --hub-yellow: #E0A458;
-  --hub-yellow-hover: #CB8D3C;
+  /* ── Brand ─────────────────────────────────────────── */
+  --hub-brand-dark: #0B1B2B;      /* sidebar, dark surfaces  */
+  --hub-brand-mid:  #122336;      /* sidebar hover           */
+  --hub-brand-muted:#7A9BB5;      /* muted brand             */
+  --hub-yellow:     #E0A458;      /* amber accent (brand)    */
+  --hub-yellow-hover:#CB8D3C;
 
-  /* Surface — warm off-white */
-  --hub-bg: #F5F1EA;
-  --hub-bg-subtle: #EDE8DD;
-  --hub-border: #DDD8CE;
-  --hub-border-strong: #C8C0B2;
-  --background: #ffffff;
-  --foreground: #0B1B2B;
+  /* ── TravelDesk app palette ─────────────────────────── */
+  --hub-bg:         #F8FAFC;      /* main background (ice white) */
+  --hub-bg-subtle:  #F1F5F9;      /* secondary surfaces       */
+  --hub-border:     #E2E8F0;      /* borders                  */
+  --hub-border-strong: #CBD5E1;
+  --hub-card:       #FFFFFF;      /* card background          */
+  --hub-primary:    #0EA5E9;      /* interactive / sky teal   */
+  --hub-primary-muted: #E0F2FE;   /* primary tinted bg        */
+  --background:     #FFFFFF;
+  --foreground:     #1E293B;
 
-  /* Text */
-  --hub-text-primary: #0B1B2B;
-  --hub-text-secondary: #3D5466;
-  --hub-text-muted: #6B7D8E;
+  /* ── Text ───────────────────────────────────────────── */
+  --hub-text-primary:   #1E293B;
+  --hub-text-secondary: #64748B;
+  --hub-text-muted:     #94A3B8;
 
-  /* Shadows — Stripe-style: crisp, directional */
-  --hub-shadow-xs: 0 1px 2px rgba(11, 27, 43, 0.06);
-  --hub-shadow-sm: 0 1px 3px rgba(11, 27, 43, 0.08), 0 1px 2px rgba(11, 27, 43, 0.06);
-  --hub-shadow-md: 0 4px 6px -1px rgba(11, 27, 43, 0.08), 0 2px 4px -1px rgba(11, 27, 43, 0.05);
-  --hub-shadow-lg: 0 10px 15px -3px rgba(11, 27, 43, 0.1), 0 4px 6px -2px rgba(11, 27, 43, 0.05);
+  /* ── Status ─────────────────────────────────────────── */
+  --hub-success:    #10B981;
+  --hub-warning:    #F59E0B;
+  --hub-danger:     #EF4444;
+  --hub-info:       #0EA5E9;
 
-  /* Radius */
+  /* ── Shadows ─────────────────────────────────────────── */
+  --hub-shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
+  --hub-shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+  --hub-shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+  --hub-shadow-lg: 0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.04);
+
+  /* ── Radius ──────────────────────────────────────────── */
   --hub-radius-sm: 6px;
-  --hub-radius: 8px;
+  --hub-radius:    8px;
   --hub-radius-lg: 12px;
   --hub-radius-xl: 16px;
+
+  /* Backwards-compat aliases */
+  --hub-blue:      var(--hub-brand-dark);
+  --hub-blue-dark: var(--hub-brand-dark);
+  --hub-blue-muted:var(--hub-brand-muted);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-manrope);
+  --font-sans: var(--font-jakarta);
   --font-mono: var(--font-jetbrains-mono);
 }
 
 body {
   background: var(--hub-bg);
   color: var(--foreground);
-  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-family: var(--font-jakarta), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar — fina, discreta */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+/* ── Scrollbar ────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--hub-border-strong); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--hub-blue-muted); }
+::-webkit-scrollbar-thumb:hover { background: var(--hub-text-muted); }
 
-/* Landing page floating animation */
+/* ── Animations ───────────────────────────────────────── */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  50%       { transform: translateY(-10px); }
 }
 
-/* Fade-in suave para conteúdo de página */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.animate-fade-in-up {
-  animation: fadeInUp 0.2s ease-out both;
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-/* Compass needle rotation animation */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
 @keyframes needleSpin {
   0%   { transform: rotate(0deg); }
   15%  { transform: rotate(355deg); }
   30%  { transform: rotate(358deg); }
   100% { transform: rotate(358deg); }
 }
-.animate-compass-needle {
-  transform-origin: center;
-  animation: needleSpin 4s ease-in-out infinite;
+
+/* ── Animation classes ────────────────────────────────── */
+.animate-fade-in-up  { animation: fadeInUp  0.22s cubic-bezier(0.23, 1, 0.32, 1) both; }
+.animate-fade-in     { animation: fadeIn    0.18s ease-out both; }
+.animate-scale-in    { animation: scaleIn   0.20s cubic-bezier(0.23, 1, 0.32, 1) both; }
+.animate-slide-right { animation: slideInRight 0.25s cubic-bezier(0.23, 1, 0.32, 1) both; }
+.animate-compass-needle { transform-origin: center; animation: needleSpin 4s ease-in-out infinite; }
+
+/* ── Stagger delays ───────────────────────────────────── */
+.stagger-1 { animation-delay:   0ms; }
+.stagger-2 { animation-delay:  40ms; }
+.stagger-3 { animation-delay:  80ms; }
+.stagger-4 { animation-delay: 120ms; }
+.stagger-5 { animation-delay: 160ms; }
+.stagger-6 { animation-delay: 200ms; }
+
+/* ── KPI counter animation ────────────────────────────── */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-count-up { animation: countUp 0.4s cubic-bezier(0.23, 1, 0.32, 1) both; }
+
+/* ── Chart bar grow animation ─────────────────────────── */
+@keyframes growUp {
+  from { transform: scaleY(0); transform-origin: bottom; }
+  to   { transform: scaleY(1); transform-origin: bottom; }
 }
