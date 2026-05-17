@@ -90,10 +90,60 @@ function contasUnicas(lancamentos: LancamentoFinanceiro[]): string[] {
 type Aba = "lancamentos" | "fluxo";
 
 export default function FinanceiroPage() {
-  const { clientes, lancamentos, addLancamento, isReady } = useData();
+  const { clientes, lancamentos, addLancamento, updateLancamento, deleteLancamento, isReady } = useData();
   const toast = useToast();
 
   const [aba, setAba] = useState<Aba>("lancamentos");
+
+  // Edit modal state
+  const [editando, setEditando] = useState<LancamentoFinanceiro | null>(null);
+  const [editDescricao, setEditDescricao] = useState("");
+  const [editTipo, setEditTipo] = useState<LancamentoTipo>("entrada");
+  const [editCategoria, setEditCategoria] = useState<LancamentoCategoria>("pacote_vendido");
+  const [editValor, setEditValor] = useState("");
+  const [editData, setEditData] = useState("");
+  const [editStatus, setEditStatus] = useState<LancamentoStatus>("confirmado");
+  const [editClienteId, setEditClienteId] = useState("");
+  const [editConta, setEditConta] = useState("");
+
+  function abrirEditar(l: LancamentoFinanceiro) {
+    setEditando(l);
+    setEditDescricao(l.descricao);
+    setEditTipo(l.tipo);
+    setEditCategoria(l.categoria);
+    setEditValor(String(l.valor));
+    setEditData(l.data.slice(0, 10));
+    setEditStatus(l.status);
+    setEditClienteId(l.clienteId ?? "");
+    setEditConta(l.contaBancaria ?? "");
+  }
+
+  function fecharEditar() { setEditando(null); }
+
+  function handleSalvarEdicao(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editando) return;
+    const v = Math.abs(parseFloat(editValor.replace(",", ".")) || 0);
+    if (!editDescricao.trim() || v === 0) return;
+    updateLancamento(editando.id, {
+      descricao: editDescricao.trim(),
+      tipo: editTipo,
+      categoria: editCategoria,
+      valor: v,
+      data: editData,
+      status: editStatus,
+      clienteId: editClienteId || undefined,
+      contaBancaria: editConta.trim() || undefined,
+    });
+    toast.success("Lançamento atualizado!");
+    fecharEditar();
+  }
+
+  async function handleExcluir(l: LancamentoFinanceiro) {
+    if (!confirm(`Excluir "${l.descricao}"? Esta ação não pode ser desfeita.`)) return;
+    await deleteLancamento(l.id);
+    toast.success("Lançamento excluído.");
+  }
 
   // Filtros
   const [tipoF, setTipoF] = useState<LancamentoTipo | "todos">("todos");
@@ -177,6 +227,69 @@ export default function FinanceiroPage() {
 
   return (
     <div className="space-y-8">
+
+      {/* ── Modal de edição ─────────────────────────────── */}
+      {editando && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-[var(--hub-radius-xl)] border border-[var(--hub-border)] bg-white p-6 shadow-xl">
+            <h2 className="mb-4 text-lg font-bold text-[var(--hub-blue-dark)]">Editar lançamento</h2>
+            <form onSubmit={handleSalvarEdicao} className="space-y-3">
+              <div>
+                <Label htmlFor="ed-desc">Descrição</Label>
+                <Input id="ed-desc" required value={editDescricao} onChange={(e) => setEditDescricao(e.target.value)} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="ed-tipo">Tipo</Label>
+                  <Select id="ed-tipo" value={editTipo} onChange={(e) => setEditTipo(e.target.value as LancamentoTipo)}>
+                    <option value="entrada">Entrada</option>
+                    <option value="saida">Saída</option>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="ed-valor">Valor (R$)</Label>
+                  <Input id="ed-valor" required value={editValor} onChange={(e) => setEditValor(e.target.value)} placeholder="0,00" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="ed-data">Data</Label>
+                  <Input id="ed-data" type="date" required value={editData} onChange={(e) => setEditData(e.target.value)} />
+                </div>
+                <div>
+                  <Label htmlFor="ed-status">Status</Label>
+                  <Select id="ed-status" value={editStatus} onChange={(e) => setEditStatus(e.target.value as LancamentoStatus)}>
+                    {(Object.keys(LANCAMENTO_STATUS_LABELS) as LancamentoStatus[]).map((s) => (
+                      <option key={s} value={s}>{LANCAMENTO_STATUS_LABELS[s]}</option>
+                    ))}
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="ed-cat">Categoria</Label>
+                <Select id="ed-cat" value={editCategoria} onChange={(e) => setEditCategoria(e.target.value as LancamentoCategoria)}>
+                  {(Object.keys(LANCAMENTO_CATEGORIA_LABELS) as LancamentoCategoria[]).map((c) => (
+                    <option key={c} value={c}>{LANCAMENTO_CATEGORIA_LABELS[c]}</option>
+                  ))}
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="ed-cli">Cliente (opcional)</Label>
+                <ClientePicker id="ed-cli" label="" clientes={clientes} value={editClienteId} onChange={(id) => setEditClienteId(id)} />
+              </div>
+              <div>
+                <Label htmlFor="ed-conta">Conta bancária (opcional)</Label>
+                <Input id="ed-conta" value={editConta} onChange={(e) => setEditConta(e.target.value)} placeholder="Ex.: Nubank" />
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="secondary" onClick={fecharEditar}>Cancelar</Button>
+                <Button type="submit">Salvar</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <PageHeader
         title="Financeiro"
         description="Lançamentos manuais com categorias, contas bancárias e fluxo de caixa."
@@ -350,6 +463,7 @@ export default function FinanceiroPage() {
                     <Th>Cliente</Th>
                     <Th>Conta</Th>
                     <Th className="text-right">Valor</Th>
+                    <Th />
                   </tr>
                 </thead>
                 <tbody>
@@ -390,6 +504,22 @@ export default function FinanceiroPage() {
                         >
                           {l.tipo === "entrada" ? "+" : "−"}
                           {formatBRL(l.valor)}
+                        </Td>
+                        <Td className="whitespace-nowrap text-right">
+                          <button
+                            type="button"
+                            onClick={() => abrirEditar(l)}
+                            className="mr-2 text-xs text-[var(--hub-blue)] hover:underline"
+                          >
+                            Editar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void handleExcluir(l)}
+                            className="text-xs text-red-600 hover:underline"
+                          >
+                            Excluir
+                          </button>
                         </Td>
                       </tr>
                     ))}
