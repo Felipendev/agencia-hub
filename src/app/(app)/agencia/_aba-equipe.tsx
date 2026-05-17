@@ -9,14 +9,16 @@ import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, Th, Td } from "@/components/ui/table";
 import { formatBRL } from "@/lib/format";
-import { listUsersRemote, updateUserRemote } from "@/lib/api/users-remote";
+import { listSalesAgentsRemote, updateUserRemote } from "@/lib/api/users-remote";
+import { useAuth } from "@/contexts/auth-context";
 import type { ApiUserResponse } from "@/lib/api/auth-types";
 
 type Props = { token: string | null };
 
 export function AbaEquipe({ token }: Props) {
   const toast = useToast();
-  const [users, setUsers] = useState<ApiUserResponse[]>([]);
+  const { user: currentUser } = useAuth();
+  const [agents, setAgents] = useState<ApiUserResponse[]>([]);
   const [loading, setLoading] = useState(!!token);
 
   // Edição inline de comissão
@@ -27,17 +29,35 @@ export function AbaEquipe({ token }: Props) {
 
   useEffect(() => {
     if (!token) return;
-    listUsersRemote(token)
-      .then(setUsers)
+    // /users/sales-agents retorna somente agentes da agência do token
+    listSalesAgentsRemote(token)
+      .then(setAgents)
       .catch(() => toast.error("Erro ao carregar usuários."))
       .finally(() => setLoading(false));
   }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // O dono logado não costuma vir no endpoint de agentes — adicionamos manualmente
+  const users: ApiUserResponse[] = currentUser
+    ? [
+        {
+          id: currentUser.id,
+          name: currentUser.nome,
+          email: currentUser.email,
+          accountKind: "AGENCY_OWNER",
+          active: true,
+          commissionPct: null,
+          commissionFixed: null,
+          createdAt: "",
+        },
+        ...agents.filter((a) => a.id !== currentUser.id),
+      ]
+    : agents;
 
   async function handleToggle(u: ApiUserResponse) {
     if (!token) return;
     try {
       const updated = await updateUserRemote(u.id, { active: !u.active }, token);
-      setUsers((p) => p.map((x) => x.id === u.id ? updated : x));
+      setAgents((p) => p.map((x) => x.id === u.id ? updated : x));
       toast.success(updated.active ? "Ativado." : "Desativado.");
     } catch { toast.error("Erro ao atualizar."); }
   }
@@ -49,7 +69,7 @@ export function AbaEquipe({ token }: Props) {
         commissionPct: editType === "pct" && editPct ? parseFloat(editPct) : null,
         commissionFixed: editType === "fixed" && editFixed ? parseFloat(editFixed.replace(",", ".")) : null,
       }, token);
-      setUsers((p) => p.map((x) => x.id === u.id ? updated : x));
+      setAgents((p) => p.map((x) => x.id === u.id ? updated : x));
       setEditingId(null);
       toast.success("Comissão atualizada.");
     } catch { toast.error("Erro ao atualizar comissão."); }
