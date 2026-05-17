@@ -1,5 +1,6 @@
 "use client";
 
+import { Logo } from "@/components/ui/logo";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -26,10 +27,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Top nav */}
       <header className="border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--hub-yellow)] text-xs font-black text-[var(--hub-blue-dark)]">
-            AH
-          </span>
-          <span className="text-sm font-bold text-white tracking-tight">AgênciasHub</span>
+          <Logo variant="dark" size="sm" href={null} />
           <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/60 font-medium">
             Admin
           </span>

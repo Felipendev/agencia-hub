@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/ui/logo";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
@@ -57,10 +57,7 @@ export function LoginForm() {
       {/* ── Painel lateral (desktop) ─────────────────────────── */}
       <div className="hidden lg:flex lg:w-[420px] lg:shrink-0 lg:flex-col lg:justify-between bg-[var(--hub-blue-dark)] px-10 py-12">
         <div>
-          <div className="flex items-center gap-2.5">
-            <Image src="/compass.svg" alt="Compass" width={36} height={36} />
-            <span className="text-lg font-bold tracking-tight text-white">AgênciasHub</span>
-          </div>
+          <Logo variant="dark" size="md" href="/" />
           <div className="mt-16">
             <p className="text-3xl font-bold leading-snug text-white">
               Gerencie sua agência com clareza.
@@ -93,12 +90,9 @@ export function LoginForm() {
       {/* ── Formulário ──────────────────────────────────────── */}
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
         {/* Logo mobile */}
-        <Link href="/" className="mb-8 flex items-center gap-2 lg:hidden">
-          <div className="flex h-9 w-9 items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-blue-dark)]">
-            <Image src="/compass.svg" alt="Compass" width={28} height={28} />
-          </div>
-          <span className="text-lg font-bold text-[var(--hub-text-primary)]">AgênciasHub</span>
-        </Link>
+        <div className="mb-8 lg:hidden">
+          <Logo variant="light" size="md" href="/" />
+        </div>
 
         <div className="w-full max-w-[380px]">
           <Link

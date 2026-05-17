@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Logo, LogoMarkOnly } from "@/components/ui/logo";
 
 export default function LandingPage() {
   return (
@@ -8,10 +8,7 @@ export default function LandingPage() {
       {/* Header */}
       <header className="relative z-10 border-b border-white/10">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 lg:px-8">
-          <div className="flex items-center gap-2.5">
-            <Image src="/compass.svg" alt="Compass" width={36} height={36} className="shrink-0" />
-            <span className="text-lg font-bold tracking-tight text-white">AgênciasHub</span>
-          </div>
+          <Logo variant="dark" size="md" href="/" />
           <nav className="hidden items-center gap-6 text-sm font-medium text-white/70 md:flex">
             <a href="#funcionalidades" className="hover:text-white transition-colors">Funcionalidades</a>
             <a href="#planos" className="hover:text-white transition-colors">Planos</a>
@@ -27,7 +24,9 @@ export default function LandingPage() {
               Entrar
             </Link>
             <Link href="/cadastro">
-              <Button className="!py-2 text-sm !bg-[var(--hub-yellow)] !text-[var(--hub-blue-dark)] hover:!bg-[var(--hub-yellow-hover)]">Criar conta grátis</Button>
+              <Button className="!py-2 text-sm !bg-[var(--hub-yellow)] !text-[var(--hub-blue-dark)] hover:!bg-[var(--hub-yellow-hover)]">
+                Criar conta grátis
+              </Button>
             </Link>
           </div>
         </div>
@@ -36,43 +35,23 @@ export default function LandingPage() {
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative overflow-hidden">
-          {/* Background gradient + glow effects */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#0B1B2B] via-[#102030] to-[#0B1B2B]" />
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-[var(--hub-blue)]/15 blur-[120px]" />
           <div className="absolute right-0 top-0 h-[400px] w-[400px] rounded-full bg-[var(--hub-yellow)]/8 blur-[100px]" />
 
-          {/* Compass rose decorative background */}
-          <div className="absolute right-1/4 top-1/2 -translate-y-1/2 h-[500px] w-[500px] opacity-[0.03] pointer-events-none">
-            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="100" cy="100" r="95" stroke="white" strokeWidth="1"/>
-              <circle cx="100" cy="100" r="70" stroke="white" strokeWidth="0.5"/>
-              <circle cx="100" cy="100" r="45" stroke="white" strokeWidth="0.5"/>
-              <path d="M100 10 L108 100 L100 190 L92 100 Z" fill="white"/>
-              <path d="M10 100 L100 92 L190 100 L100 108 Z" fill="white"/>
-              <path d="M100 35 L104 70 L100 100 L96 70 Z" fill="white" opacity="0.5"/>
-              <path d="M100 100 L130 104 L165 100 L130 96 Z" fill="white" opacity="0.5"/>
-              <path d="M100 100 L70 104 L35 100 L70 96 Z" fill="white" opacity="0.5"/>
-              <path d="M100 100 L104 130 L100 165 L96 130 Z" fill="white" opacity="0.5"/>
-            </svg>
-          </div>
-
           <div className="relative mx-auto max-w-6xl px-4 py-20 lg:flex lg:items-center lg:gap-16 lg:py-32 lg:px-8">
             {/* Left: Text content */}
             <div className="max-w-xl flex-1">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--hub-yellow)]/30 bg-[var(--hub-yellow)]/10 px-3 py-1 text-xs font-medium text-[var(--hub-yellow)]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--hub-yellow)]" />
-                Gestão inteligente para agências de viagem
-              </div>
               <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-white lg:text-5xl xl:text-6xl">
-                Encontre o norte da sua agência de viagens
+                Simplicidade na gestão da sua agência
               </h1>
               <p className="mt-5 text-lg leading-relaxed text-white/70">
-                Clientes, cotações, financeiro e equipe — tudo em um único painel. O rumo da sua agência, sempre claro.
+                Tenha o controle total da sua agência de viagens. Clientes, cotações, financeiro e equipe — tudo em um único painel inteligente.
               </p>
               <div className="mt-10 flex flex-wrap gap-4">
                 <Link href="/cadastro">
                   <Button className="!px-8 !py-3.5 text-base !bg-[var(--hub-yellow)] !text-[var(--hub-blue-dark)] shadow-lg shadow-[var(--hub-yellow)]/30 hover:!bg-[var(--hub-yellow-hover)]">
-                    Definir meu rumo
+                    Criar conta
                   </Button>
                 </Link>
                 <Link href="/login">
@@ -83,21 +62,6 @@ export default function LandingPage() {
                     Já tenho conta
                   </button>
                 </Link>
-              </div>
-
-              {/* Cardinal points onboarding hint */}
-              <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {[
-                  { point: "N", label: "Clientes", color: "text-white" },
-                  { point: "L", label: "Cotações", color: "text-[var(--hub-yellow)]" },
-                  { point: "S", label: "Milhas", color: "text-white" },
-                  { point: "O", label: "Financeiro", color: "text-white" },
-                ].map(({ point, label, color }) => (
-                  <div key={point} className="flex items-center gap-2 text-white/50">
-                    <span className={`font-mono text-xs font-semibold ${color}`}>{point}</span>
-                    <span className="text-xs">{label}</span>
-                  </div>
-                ))}
               </div>
             </div>
 
@@ -185,9 +149,11 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                {/* Compass decoration */}
-                <div className="absolute -right-2 -top-6 opacity-30">
-                  <Image src="/compass.svg" alt="" width={48} height={48} aria-hidden="true" />
+                {/* Airplane SVG */}
+                <div className="absolute -right-2 -top-6 text-white/20">
+                  <svg className="h-12 w-12" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
+                  </svg>
                 </div>
               </div>
             </div>
@@ -198,7 +164,7 @@ export default function LandingPage() {
         <section id="funcionalidades" className="relative border-t border-white/5">
           <div className="mx-auto max-w-6xl px-4 py-20 lg:px-8">
             <h2 className="text-center text-2xl font-bold text-white lg:text-3xl">
-              Cada rota, sob controle
+              Tudo que sua agência precisa
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-center text-white/50">
               Ferramentas pensadas para o dia a dia de agências de viagem e agentes autônomos.
@@ -206,7 +172,6 @@ export default function LandingPage() {
             <div className="mt-14 grid gap-6 md:grid-cols-3">
               {[
                 {
-                  point: "N",
                   icon: (
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
@@ -216,7 +181,6 @@ export default function LandingPage() {
                   desc: "Carteira organizada com destinos de interesse, histórico e status. Encontre qualquer cliente em segundos.",
                 },
                 {
-                  point: "L",
                   icon: (
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
@@ -226,7 +190,6 @@ export default function LandingPage() {
                   desc: "Kanban visual com drag-and-drop. Crie, acompanhe e envie cotações profissionais por WhatsApp.",
                 },
                 {
-                  point: "S",
                   icon: (
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
@@ -236,17 +199,15 @@ export default function LandingPage() {
                   desc: "Entradas, saídas, comissões e saldo em tempo real. Saiba exatamente quanto sua agência fatura.",
                 },
                 {
-                  point: "O",
                   icon: (
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
                     </svg>
                   ),
                   title: "Equipe de Vendedores",
-                  desc: "Convide agentes, acompanhe comissões e gerencie permissões. Cada um vê apenas sua rota.",
+                  desc: "Convide vendedores, acompanhe comissões e gerencie permissões. Cada um vê apenas seus dados.",
                 },
                 {
-                  point: "NE",
                   icon: (
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
@@ -256,7 +217,6 @@ export default function LandingPage() {
                   desc: "Dados isolados por agência, criptografia, verificação por e-mail e conformidade com a LGPD.",
                 },
                 {
-                  point: "SE",
                   icon: (
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
@@ -270,11 +230,8 @@ export default function LandingPage() {
                   key={i}
                   className="group rounded-[var(--hub-radius-lg)] border border-white/10 bg-white/5 p-6 transition-all hover:border-[var(--hub-yellow)]/30 hover:bg-white/[0.07]"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-yellow)]/10 text-[var(--hub-yellow)] transition-colors group-hover:bg-[var(--hub-yellow)]/20">
-                      {feature.icon}
-                    </div>
-                    <span className="font-mono text-[10px] font-semibold tracking-widest text-white/20">{feature.point}</span>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[var(--hub-radius)] bg-[var(--hub-yellow)]/10 text-[var(--hub-yellow)] transition-colors group-hover:bg-[var(--hub-yellow)]/20">
+                    {feature.icon}
                   </div>
                   <h3 className="mt-4 text-base font-semibold text-white">
                     {feature.title}
@@ -290,16 +247,13 @@ export default function LandingPage() {
 
         {/* CTA Section */}
         <section id="planos" className="relative border-t border-white/5">
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--hub-blue-dark)]/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[var(--hub-blue-dark)]/50 to-transparent" />
           <div className="relative mx-auto max-w-6xl px-4 py-20 text-center lg:px-8">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center">
-              <Image src="/compass.svg" alt="Compass" width={56} height={56} />
-            </div>
             <h2 className="text-2xl font-bold text-white lg:text-3xl">
-              Pronto para encontrar seu norte?
+              Pronto para transformar sua agência?
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-white/50">
-              Entre em contato para saber mais sobre a plataforma e traçar a rota da sua agência.
+              Entre em contato para saber mais sobre a plataforma.
             </p>
             <div className="mt-10 flex justify-center gap-4">
               <Link href="/contato">
@@ -315,10 +269,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-white/10 py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 sm:flex-row lg:px-8">
-          <div className="flex items-center gap-2.5">
-            <Image src="/compass.svg" alt="Compass" width={24} height={24} />
-            <span className="text-sm font-semibold text-white/60">AgênciasHub</span>
-          </div>
+          <Logo variant="dark" size="sm" href="/" />
           <div className="flex gap-6 text-sm text-white/40">
             <Link href="/termos" className="hover:text-white/70 transition-colors">Termos de Uso</Link>
             <Link href="/privacidade" className="hover:text-white/70 transition-colors">Privacidade</Link>

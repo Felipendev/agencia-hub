@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/ui/logo";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
@@ -98,13 +98,9 @@ export default function CadastroPage() {
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-[var(--hub-blue-dark)] via-[var(--hub-blue)] to-[#1a5080]">
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
-        <Link
-          href="/"
-          className="mb-8 flex items-center gap-2 text-white/90 hover:text-white"
-        >
-          <Image src="/compass.svg" alt="Compass" width={40} height={40} />
-          <span className="text-xl font-bold">AgênciasHub</span>
-        </Link>
+        <div className="mb-8">
+          <Logo variant="dark" size="lg" href="/" />
+        </div>
 
         <div className="w-full max-w-md rounded-[var(--hub-radius-xl)] border border-white/15 bg-white p-8 shadow-xl">
           <h1 className="text-xl font-bold text-[var(--hub-blue-dark)]">
