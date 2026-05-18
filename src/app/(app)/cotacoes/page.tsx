@@ -10,6 +10,7 @@ import { Select } from "@/components/ui/select";
 import { KanbanBoard } from "@/components/cotacao/KanbanBoard";
 import { LinkSolicitacaoModal } from "@/components/cotacao/LinkSolicitacaoModal";
 import { SolicitacaoSubmissionsBanner } from "@/components/cotacao/SolicitacaoSubmissionsBanner";
+import { SolicitacoesRecebidasList } from "@/components/cotacao/SolicitacoesRecebidasList";
 import { useToast } from "@/components/ui/toast";
 import { softDeleteQuotation } from "@/lib/api/soft-delete-remote";
 import { isUuid } from "@/lib/api/quotation-mapper";
@@ -543,6 +544,9 @@ export default function CotacoesPage() {
           onDelete={handleDeleteRequest}
         />
       </div>
+
+      {/* ── Solicitações recebidas (lista compacta) ────────────────────── */}
+      <SolicitacoesRecebidasList />
 
       {/* ── Dialogs ─────────────────────────────────────────────────────── */}
       <ConfirmDialog
