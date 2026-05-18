@@ -23,6 +23,7 @@ import { Select } from "@/components/ui/select";
 import type { CotacaoDetalhes } from "@/types";
 
 export type CamposObrigatoriosErro = {
+  celular?: boolean;
   origem?: boolean;
   destinos?: boolean;
   dataIda?: boolean;
@@ -193,7 +194,7 @@ export function CotacaoDetalhesForm({
             <div>
               <Label htmlFor="cdf-orig">
                 Origem (cidade / aeroporto){" "}
-                {errosCampos.origem !== undefined && <span className="text-red-500">*</span>}
+                {contatoCelularObrigatorio && <span className="text-red-500">*</span>}
               </Label>
               <Input
                 id="cdf-orig"
@@ -208,7 +209,7 @@ export function CotacaoDetalhesForm({
             <div className="sm:col-span-2 xl:col-span-3">
               <Label>
                 Destinos (trechos){" "}
-                {errosCampos.destinos !== undefined && <span className="text-red-500">*</span>}
+                {contatoCelularObrigatorio && <span className="text-red-500">*</span>}
               </Label>
               <p className="mb-2 text-xs text-[var(--hub-text-muted)]">
                 Adicione quantos trechos precisar, ex.: São Paulo — Madri,
@@ -252,7 +253,7 @@ export function CotacaoDetalhesForm({
             <div>
               <Label htmlFor="cdf-di">
                 Data ida{" "}
-                {errosCampos.dataIda !== undefined && <span className="text-red-500">*</span>}
+                {contatoCelularObrigatorio && <span className="text-red-500">*</span>}
               </Label>
               <Input
                 id="cdf-di"
@@ -266,20 +267,13 @@ export function CotacaoDetalhesForm({
               )}
             </div>
             <div>
-              <Label htmlFor="cdf-dv">
-                Data volta{" "}
-                {errosCampos.dataVolta !== undefined && <span className="text-red-500">*</span>}
-              </Label>
+              <Label htmlFor="cdf-dv">Data volta</Label>
               <Input
                 id="cdf-dv"
                 type="date"
                 value={det.dataVolta}
                 onChange={(e) => applyPatch({ dataVolta: e.target.value })}
-                className={errosCampos.dataVolta ? ERR_INPUT : ""}
               />
-              {errosCampos.dataVolta && (
-                <p className="mt-1 text-xs text-red-500">Informe a data de volta.</p>
-              )}
             </div>
             <div className="sm:col-span-2 xl:col-span-3">
               <div className="grid gap-3 sm:grid-cols-2">
@@ -558,7 +552,7 @@ export function CotacaoDetalhesForm({
           <div className="sm:col-span-2 xl:col-span-3">
             <Label htmlFor="cdf-cel">
               Celular (Brasil)
-              {contatoCelularObrigatorio ? " *" : ""}
+              {contatoCelularObrigatorio ? <span className="text-red-500"> *</span> : null}
             </Label>
             <Input
               id="cdf-cel"
@@ -570,8 +564,8 @@ export function CotacaoDetalhesForm({
               onChange={(e) => setCelularRaw(e.target.value)}
               aria-invalid={!celularOk}
               className={
-                contatoCelularObrigatorio && det.celular.length === 0
-                  ? "border-red-400/90"
+                errosCampos.celular === true
+                  ? ERR_INPUT
                   : det.celular.length > 0
                     ? celularOk
                       ? "border-emerald-400/80"
@@ -579,10 +573,9 @@ export function CotacaoDetalhesForm({
                     : undefined
               }
             />
-            {((contatoCelularObrigatorio && det.celular.length === 0) ||
-              (det.celular.length > 0 && !celularOk)) ? (
+            {(errosCampos.celular === true || (det.celular.length > 0 && !celularOk)) ? (
               <p className="mt-1 text-xs text-red-600">
-                {contatoCelularObrigatorio && det.celular.length === 0
+                {errosCampos.celular === true && det.celular.length === 0
                   ? "Informe o celular com DDD."
                   : "Informe DDD + número com 10 ou 11 dígitos (celular com 9)."}
               </p>

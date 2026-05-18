@@ -88,27 +88,48 @@ export function SolicitacaoPublicView({ slug }: Props) {
     });
   }, []);
 
+  // Limpa o erro de cada campo assim que for corretamente preenchido
+  useEffect(() => {
+    if (det.origem.trim())
+      setErrosCampos((p) => (p.origem ? { ...p, origem: false } : p));
+  }, [det.origem]);
+
+  useEffect(() => {
+    if (det.destinosTrechos.some((t) => t.trim()))
+      setErrosCampos((p) => (p.destinos ? { ...p, destinos: false } : p));
+  }, [det.destinosTrechos]);
+
+  useEffect(() => {
+    if (det.dataIda.trim())
+      setErrosCampos((p) => (p.dataIda ? { ...p, dataIda: false } : p));
+  }, [det.dataIda]);
+
+  useEffect(() => {
+    if (isValidBrazilianPhone(det.celular)) {
+      setErrosCampos((p) => (p.celular ? { ...p, celular: false } : p));
+      setErroEnvio((p) =>
+        p === "Preencha os campos obrigatórios marcados com *." ? null : p,
+      );
+    }
+  }, [det.celular]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErroEnvio(null);
 
     // ── Validação client-side ────────────────────────────────────────────────
     const temTrecho = det.destinosTrechos.some((t) => t.trim());
+    const celularValido = isValidBrazilianPhone(det.celular);
     const erros: CamposObrigatoriosErro = {
-      origem:    !det.origem.trim()  ? true : undefined,
-      destinos:  !temTrecho          ? true : undefined,
-      dataIda:   !det.dataIda.trim() ? true : undefined,
-      dataVolta: !det.dataVolta.trim() ? true : undefined,
+      celular:  !celularValido           ? true : undefined,
+      origem:   !det.origem.trim()       ? true : undefined,
+      destinos: !temTrecho               ? true : undefined,
+      dataIda:  !det.dataIda.trim()      ? true : undefined,
     };
-    const temErrosCampos = Object.values(erros).some(Boolean);
     setErrosCampos(erros);
 
     if (!nome.trim()) {
       setErroEnvio("Informe seu nome completo.");
-      return;
-    }
-    if (!isValidBrazilianPhone(det.celular)) {
-      setErroEnvio("Informe um celular válido com DDD na seção Contato e pagamento.");
       return;
     }
     const whatsappDigits = det.whatsappIgualCelular ? det.celular : det.whatsapp;
@@ -116,13 +137,12 @@ export function SolicitacaoPublicView({ slug }: Props) {
       setErroEnvio('Informe um número de WhatsApp válido ou marque "mesmo número".');
       return;
     }
-    if (temErrosCampos) {
+    if (Object.values(erros).some(Boolean)) {
       setErroEnvio("Preencha os campos obrigatórios marcados com *.");
       return;
     }
     if (!consentimento) {
       setErroConsentimento(true);
-      setErroEnvio("É necessário autorizar o uso dos seus dados para continuar.");
       return;
     }
     setErroConsentimento(false);
@@ -322,7 +342,10 @@ export function SolicitacaoPublicView({ slug }: Props) {
               checked={consentimento}
               onChange={(e) => {
                 setConsentimento(e.target.checked);
-                if (e.target.checked) setErroConsentimento(false);
+                if (e.target.checked) {
+                  setErroConsentimento(false);
+                  setErroEnvio(null);
+                }
               }}
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--hub-border)] accent-[var(--hub-primary)]"
             />

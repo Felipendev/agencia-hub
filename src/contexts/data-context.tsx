@@ -21,7 +21,7 @@ import { createFinancialEntryRemote } from "@/lib/api/create-financial-entry-rem
 import { updateFinancialEntryRemote } from "@/lib/api/update-financial-entry-remote";
 import { deleteFinancialEntryRemote } from "@/lib/api/delete-financial-entry-remote";
 import { useAuth } from "@/contexts/auth-context";
-import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
+import { getHasRemoteApi } from "@/lib/api/agencia-hub-env";
 import { listQuotationsRemote } from "@/lib/api/list-quotations-remote";
 import { listCustomersRemote } from "@/lib/api/list-customers-remote";
 import { cotacaoStatusToApi, isUuid } from "@/lib/api/quotation-mapper";
@@ -105,7 +105,7 @@ function stripSeedDataWhenRemote(data: Stored, hasApi: boolean): Stored {
 }
 
 function loadStored(): Stored {
-  const hasApi = Boolean(getAgenciaHubApiBaseUrl());
+  const hasApi = getHasRemoteApi();
   const empty: Stored = { clientes: [], lancamentos: [], cotacoes: [] };
   const fallback: Stored = hasApi ? empty : {
     clientes: seedClientes,
@@ -174,7 +174,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     cotacoes: seedCotacoes,
   }));
   const [isReady, setIsReady] = useState(false);
-  const hasRemoteApi = Boolean(getAgenciaHubApiBaseUrl());
+  const hasRemoteApi = getHasRemoteApi();
 
   // Initial load
   useEffect(() => {
@@ -389,7 +389,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   }, [token]);
 
   const resetDemoData = useCallback(() => {
-    const hasApi = Boolean(getAgenciaHubApiBaseUrl());
+    const hasApi = getHasRemoteApi();
     const fresh: Stored = {
       clientes: hasApi ? [] : seedClientes,
       lancamentos: hasApi ? [] : seedLancamentos,
@@ -401,7 +401,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   const syncCotacoesFromApi = useCallback(
     async (params?: SyncCotacoesFromApiParams) => {
-      if (!getAgenciaHubApiBaseUrl()) return;
+      if (!getHasRemoteApi()) return;
       try {
         const list = await listQuotationsRemote({
           customerId:
@@ -434,7 +434,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   );
 
   const syncClientesFromApi = useCallback(async () => {
-    if (!getAgenciaHubApiBaseUrl() || !token) return;
+    if (!getHasRemoteApi() || !token) return;
     try {
       const list = await listCustomersRemote(token);
       setData((d) => ({ ...d, clientes: list }));
