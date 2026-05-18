@@ -287,7 +287,7 @@ export function SolicitacaoPublicView({ slug }: Props) {
       >
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 xl:gap-6">
           <div className="sm:col-span-2 xl:col-span-3">
-            <Label htmlFor="sp-nome">Seu nome completo *</Label>
+            <Label htmlFor="sp-nome">Seu nome completo <span className="text-red-500">*</span></Label>
             <Input
               id="sp-nome"
               required

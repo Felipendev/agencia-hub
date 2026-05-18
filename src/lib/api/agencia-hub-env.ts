@@ -17,5 +17,8 @@ export function getAgenciaHubApiBaseUrl(): string | null {
  * nunca expõe a URL real no bundle.
  */
 export function getHasRemoteApi(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_HAS_REMOTE_API?.trim());
+  return Boolean(
+    process.env.NEXT_PUBLIC_HAS_REMOTE_API?.trim() ||
+    process.env.NEXT_PUBLIC_AGENCIA_HUB_API_URL?.trim(),
+  );
 }
