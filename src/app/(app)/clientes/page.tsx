@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { filterClientes, useData } from "@/contexts/data-context";
+import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/components/ui/toast";
+import { FunilBadge } from "@/components/cliente/FunilBadge";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { NovoClienteModal } from "@/components/cliente/NovoClienteModal";
 import { EditarClienteModal } from "@/components/cliente/EditarClienteModal";
@@ -141,6 +143,7 @@ function ClienteRow({
           >
             {CLIENTE_STATUS_LABELS[c.status]}
           </span>
+            <FunilBadge value={c.avaliacao} />
         </div>
         <p className="truncate text-xs text-[var(--hub-text-muted)]">
           {c.email}
@@ -223,12 +226,13 @@ function DetailPanel({
             >
               {c.nome}
             </Link>
-            <div className="mt-1 flex justify-center">
+            <div className="mt-1 flex flex-wrap justify-center gap-1">
               <span
                 className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${BADGE_CLASS_BY_STATUS[c.status]}`}
               >
                 {CLIENTE_STATUS_LABELS[c.status]}
               </span>
+              <FunilBadge value={c.avaliacao} showLabel />
             </div>
           </div>
         </div>
@@ -344,8 +348,14 @@ function EmptyDetailState() {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ClientesPage() {
-  const { clientes, isReady, deleteCliente } = useData();
+  const { clientes, isReady, deleteCliente, syncClientesFromApi, hasRemoteApi } = useData();
+  const { token } = useAuth();
   const toast = useToast();
+
+  useEffect(() => {
+    if (!isReady || !hasRemoteApi || !token) return;
+    void syncClientesFromApi();
+  }, [isReady, hasRemoteApi, token, syncClientesFromApi]);
 
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<ClienteStatus | "todos">("todos");

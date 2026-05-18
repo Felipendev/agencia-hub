@@ -174,7 +174,7 @@ export function SolicitacaoSubmissionsBanner() {
           : undefined,
       });
 
-      await fetch(
+      const delRes = await fetch(
         `/api/app/solicitacao-submissions?id=${encodeURIComponent(selectedSubmission.id)}`,
         {
           method: "DELETE",
@@ -182,6 +182,9 @@ export function SolicitacaoSubmissionsBanner() {
           headers: { ...authHeaders() },
         },
       );
+      if (!delRes.ok) {
+        console.warn("[banner] Falha ao remover submissão:", delRes.status);
+      }
 
       toast.success("Cotação importada com sucesso!");
       setSelectedSubmission(null);

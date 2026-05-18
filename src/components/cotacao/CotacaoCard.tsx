@@ -7,6 +7,7 @@ import { formatBRL, formatDateBR } from "@/lib/format";
 import { EditarCotacaoModal } from "@/components/cotacao/EditarCotacaoModal";
 import { EnviarWhatsAppModal } from "@/components/cotacao/EnviarWhatsAppModal";
 import { EditIcon, EyeIcon, UserIcon, TagIcon, WhatsAppIcon, TrashIcon } from "@/components/icons";
+import { FunilBadge } from "@/components/cliente/FunilBadge";
 
 type Props = {
   cotacao: Cotacao;
@@ -88,6 +89,7 @@ export function CotacaoCard({ cotacao, cliente, onDragStart, onDragEnd, onDelete
 
         {/* Cliente */}
         <p className="mt-1.5 text-sm text-[var(--hub-text-primary)]">{cliente?.nome ?? "—"}</p>
+        <FunilBadge value={cliente?.avaliacao} />
 
         {(cotacao.origemCriacao ||
           cotacao.criadoPorNome ||

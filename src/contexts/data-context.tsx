@@ -23,6 +23,7 @@ import { deleteFinancialEntryRemote } from "@/lib/api/delete-financial-entry-rem
 import { useAuth } from "@/contexts/auth-context";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
 import { listQuotationsRemote } from "@/lib/api/list-quotations-remote";
+import { listCustomersRemote } from "@/lib/api/list-customers-remote";
 import { cotacaoStatusToApi, isUuid } from "@/lib/api/quotation-mapper";
 import { mergeCotacaoDetalhes, migrateCotacao } from "@/lib/cotacao-migrate";
 import { generateId } from "@/lib/format";
@@ -160,6 +161,7 @@ export type DataContextValue = {
   hasRemoteApi: boolean;
   /** Carrega cotações do backend e substitui a lista em memória (e localStorage). */
   syncCotacoesFromApi: (params?: SyncCotacoesFromApiParams) => Promise<void>;
+  syncClientesFromApi: () => Promise<void>;
 };
 
 const DataContext = createContext<DataContextValue | null>(null);
@@ -431,6 +433,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  const syncClientesFromApi = useCallback(async () => {
+    if (!getAgenciaHubApiBaseUrl() || !token) return;
+    try {
+      const list = await listCustomersRemote(token);
+      setData((d) => ({ ...d, clientes: list }));
+    } catch (e) {
+      console.warn("[agencia-hub] Falha ao listar clientes da API.", e);
+    }
+  }, [token]);
+
   const value = useMemo<DataContextValue>(
     () => ({
       ...data,
@@ -447,6 +459,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       isReady,
       hasRemoteApi,
       syncCotacoesFromApi,
+      syncClientesFromApi,
     }),
     [
       data,
@@ -463,6 +476,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       isReady,
       hasRemoteApi,
       syncCotacoesFromApi,
+      syncClientesFromApi,
     ],
   );
 

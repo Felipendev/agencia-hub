@@ -436,12 +436,6 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
                   className="mt-1"
                 />
               </div>
-              <div className="shrink-0 pt-6">
-                <ClassificacaoHub
-                  value={avaliacao}
-                  onChange={setAvaliacao}
-                />
-              </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
@@ -828,6 +822,10 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
                       ))}
                     </Select>
                   </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm font-medium text-[var(--hub-blue-dark)]">Etapa no funil de vendas</p>
+                  <ClassificacaoHub value={avaliacao} onChange={setAvaliacao} />
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
