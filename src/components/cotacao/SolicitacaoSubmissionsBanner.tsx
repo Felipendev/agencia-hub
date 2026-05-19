@@ -27,7 +27,7 @@ function saveDismissedIds(ids: Set<string>) {
 
 export function SolicitacaoSubmissionsBanner() {
   const { list, selectedSubmission, setSelectedSubmission, handleImport, mergedClientes } =
-    useSolicitacaoSubmissions({ poll: true });
+    useSolicitacaoSubmissions({ poll: false });
 
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(loadDismissedIds);
 

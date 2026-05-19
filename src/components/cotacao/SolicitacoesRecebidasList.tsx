@@ -1,14 +1,31 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ImportarSubmissaoModal } from "@/components/cotacao/ImportarSubmissaoModal";
 import { useSolicitacaoSubmissions } from "@/hooks/useSolicitacaoSubmissions";
 import { useData } from "@/contexts/data-context";
 import { COTACAO_STATUS_LABELS } from "@/lib/constants";
-import { Inbox, ChevronLeft, ChevronRight } from "lucide-react";
+import { Inbox, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import type { CotacaoStatus } from "@/types";
 import type { SolicitacaoPublicSubmission } from "@/types/solicitacao-publica";
+
+const DISMISSED_KEY = "solicitacoes-recebidas-dismissed";
+
+function loadDismissed(): Set<string> {
+  try {
+    const raw = typeof window !== "undefined" ? localStorage.getItem(DISMISSED_KEY) : null;
+    return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function saveDismissed(ids: Set<string>) {
+  try {
+    localStorage.setItem(DISMISSED_KEY, JSON.stringify([...ids]));
+  } catch { /* ignore */ }
+}
 
 type PendingItem = {
   kind: "pending";
@@ -52,33 +69,54 @@ export function SolicitacoesRecebidasList() {
     useSolicitacaoSubmissions({ poll: true });
   const { cotacoes, clientes } = useData();
   const [page, setPage] = useState(1);
+  const [dismissed, setDismissed] = useState<Set<string>>(loadDismissed);
 
-  // Set of submission IDs that are pending (not yet imported)
-  const pendingIds = useMemo(() => new Set(list.map((s) => s.id)), [list]);
+  const dismiss = useCallback((id: string) => {
+    setDismissed((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      saveDismissed(next);
+      return next;
+    });
+  }, []);
+
+  // IDs of submissions that were already imported into cotacoes
+  const importedPublicIds = useMemo(
+    () =>
+      new Set(
+        cotacoes
+          .filter((c) => c.origemCriacao === "formulario_publico" && c.publicSubmissionId)
+          .map((c) => c.publicSubmissionId!),
+      ),
+    [cotacoes],
+  );
 
   const combined = useMemo<ListItem[]>(() => {
-    // Pending submissions
-    const pending: PendingItem[] = list.map((s) => ({
-      kind: "pending",
-      id: s.id,
-      nome: s.nome,
-      createdAt: s.createdAt,
-      slug: s.slug,
-      referralInfo: s.referralSellerName
-        ? s.referralSellerName
-        : s.sellerPublicCode
-          ? s.sellerPublicCode
-          : "",
-      submission: s,
-    }));
+    // Pending submissions: skip ones already imported or locally dismissed
+    const pending: PendingItem[] = list
+      .filter((s) => !importedPublicIds.has(s.id) && !dismissed.has(s.id))
+      .map((s) => ({
+        kind: "pending",
+        id: s.id,
+        nome: s.nome,
+        createdAt: s.createdAt,
+        slug: s.slug,
+        referralInfo: s.referralSellerName
+          ? s.referralSellerName
+          : s.sellerPublicCode
+            ? s.sellerPublicCode
+            : "",
+        submission: s,
+      }));
 
-    // Imported cotações from the public form
+    // Imported cotações from the public form (exclude dismissed)
+    const pendingIds = new Set(list.map((s) => s.id));
     const imported: ImportedItem[] = cotacoes
       .filter(
         (c) =>
           c.origemCriacao === "formulario_publico" &&
-          // Don't duplicate a submission that is still pending
-          !pendingIds.has(c.publicSubmissionId ?? ""),
+          !pendingIds.has(c.publicSubmissionId ?? "") &&
+          !dismissed.has(c.publicSubmissionId ?? ""),
       )
       .map((c) => {
         const cliente = clientes.find((cl) => cl.id === c.clienteId);
@@ -94,11 +132,10 @@ export function SolicitacoesRecebidasList() {
       });
 
     // Merge and sort newest first
-    const all = [...pending, ...imported].sort(
+    return [...pending, ...imported].sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
-    return all;
-  }, [list, cotacoes, clientes, pendingIds]);
+  }, [list, cotacoes, clientes, importedPublicIds, dismissed]);
 
   const totalPages = Math.ceil(combined.length / PAGE_SIZE);
   const pageItems = combined.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -142,6 +179,14 @@ export function SolicitacoesRecebidasList() {
                   >
                     Importar
                   </Button>
+                  <button
+                    type="button"
+                    title="Marcar como concluído"
+                    className="shrink-0 rounded p-1 text-[var(--hub-text-muted)] hover:bg-emerald-50 hover:text-emerald-700"
+                    onClick={() => dismiss(item.id)}
+                  >
+                    <Check className="h-4 w-4" />
+                  </button>
                 </>
               ) : (
                 <span className={statusStyle(item.cotacaoStatus)}>

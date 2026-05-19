@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useData } from "@/contexts/data-context";
+import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,26 +10,28 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { XIcon } from "@/components/icons";
+import { CotacaoDetalhesForm } from "@/components/cotacao/CotacaoDetalhesForm";
 import { COTACAO_STATUS_LABELS } from "@/lib/constants";
-import { SERVICOS_DESEJADOS_OPTIONS } from "@/lib/cotacao-options";
 import { formatBRL } from "@/lib/format";
-import type { Cotacao, CotacaoStatus } from "@/types";
+import { listSalesAgentsRemote } from "@/lib/api/users-remote";
+import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
+import type { ApiUserResponse } from "@/lib/api/auth-types";
+import type { Cotacao, CotacaoDetalhes, CotacaoStatus } from "@/types";
 
 // Funil principal (sem arquivo)
 const FUNIL_STEPS: { id: CotacaoStatus; label: string; color: string }[] = [
-  { id: "aguardando",        label: "Aguardando",         color: "bg-[var(--hub-text-muted)]" },
-  { id: "em_cotacao",        label: "Em cotação",          color: "bg-amber-400" },
-  { id: "aguardando_cliente",label: "Aguard. cliente",     color: "bg-sky-500"   },
-  { id: "aprovado",          label: "Aprovado",            color: "bg-emerald-500"},
-  { id: "reprovado",         label: "Reprovado",           color: "bg-red-500"   },
+  { id: "aguardando",         label: "Aguardando",      color: "bg-[var(--hub-text-muted)]" },
+  { id: "em_cotacao",         label: "Em cotação",       color: "bg-amber-400" },
+  { id: "aguardando_cliente", label: "Aguard. cliente",  color: "bg-sky-500"   },
+  { id: "aprovado",           label: "Aprovado",         color: "bg-emerald-500"},
+  { id: "reprovado",          label: "Reprovado",        color: "bg-red-500"   },
 ];
 
-type Tab = "geral" | "viagem" | "passageiros" | "observacoes";
+type Tab = "geral" | "detalhes" | "observacoes";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "geral",       label: "Geral"       },
-  { id: "viagem",      label: "Viagem"      },
-  { id: "passageiros", label: "Passageiros" },
+  { id: "geral",       label: "Geral"      },
+  { id: "detalhes",    label: "Detalhes"   },
   { id: "observacoes", label: "Observações" },
 ];
 
@@ -40,6 +43,7 @@ type Props = {
 
 export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
   const { clientes, updateCotacao } = useData();
+  const { token, user } = useAuth();
   const toast = useToast();
   const [tab, setTab] = useState<Tab>("geral");
 
@@ -52,25 +56,45 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
   const [responsavel, setResponsavel] = useState(cotacao.responsavel);
   const [prioridade,  setPrioridade]  = useState(cotacao.prioridade);
   const [tags,        setTags]        = useState(cotacao.tags.join(", "));
+  const [dataInicio,  setDataInicio]  = useState(cotacao.dataInicioViagem ?? "");
+  const [dataFim,     setDataFim]     = useState(cotacao.dataFimViagem ?? "");
 
-  // --- Aba Viagem ---
-  const [origem,       setOrigem]       = useState(cotacao.detalhes.origem);
-  const [destino,      setDestino]      = useState(cotacao.destino);
-  const [dataIda,      setDataIda]      = useState(cotacao.detalhes.dataIda);
-  const [dataVolta,    setDataVolta]    = useState(cotacao.detalhes.dataVolta);
-  const [dataInicio,   setDataInicio]   = useState(cotacao.dataInicioViagem ?? "");
-  const [dataFim,      setDataFim]      = useState(cotacao.dataFimViagem ?? "");
-  const [servicos,     setServicos]     = useState<string[]>(cotacao.detalhes.servicosDesejados ?? []);
-
-  // --- Aba Passageiros ---
-  const [adultos,  setAdultos]  = useState(cotacao.detalhes.adultos);
-  const [criancas, setCriancas] = useState(cotacao.detalhes.criancas);
-  const [bebes,    setBebes]    = useState(cotacao.detalhes.bebes);
-  const [idadesCriancas, setIdadesCriancas] = useState(cotacao.detalhes.idadesCriancas);
+  // --- Aba Detalhes ---
+  const [det, setDet] = useState<CotacaoDetalhes>(cotacao.detalhes);
 
   // --- Aba Observações ---
-  const [observacoes,    setObservacoes]    = useState(cotacao.observacoes);
-  const [detalhesViagem, setDetalhesViagem] = useState(cotacao.detalhes.destinoForm);
+  const [observacoes, setObservacoes] = useState(cotacao.observacoes);
+
+  // --- Sellers (for responsável select) ---
+  const isOwner = user?.accountKind === "AGENCY_OWNER";
+  const [sellers, setSellers] = useState<ApiUserResponse[]>([]);
+
+  useEffect(() => {
+    if (!isOwner || !token || !getAgenciaHubApiBaseUrl()) return;
+    let cancelled = false;
+    void listSalesAgentsRemote(token)
+      .then((rows) => { if (!cancelled) setSellers(rows); })
+      .catch(() => { if (!cancelled) setSellers([]); });
+    return () => { cancelled = true; };
+  }, [isOwner, token]);
+
+  const teamOptions = useMemo((): ApiUserResponse[] => {
+    if (!isOwner || !user) return sellers;
+    const map = new Map(sellers.map((s) => [s.id, s]));
+    if (!map.has(user.id)) {
+      map.set(user.id, {
+        id: user.id,
+        name: `${user.nome} (dono)`,
+        email: user.email,
+        accountKind: "AGENCY_OWNER",
+        active: true,
+        commissionPct: null,
+        commissionFixed: null,
+        createdAt: "",
+      });
+    }
+    return [...map.values()].sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+  }, [sellers, user, isOwner]);
 
   // Sincroniza ao abrir
   useEffect(() => {
@@ -85,32 +109,39 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
     setResponsavel(cotacao.responsavel);
     setPrioridade(cotacao.prioridade);
     setTags(cotacao.tags.join(", "));
-    setOrigem(cotacao.detalhes.origem);
-    setDestino(cotacao.destino);
-    setDataIda(cotacao.detalhes.dataIda);
-    setDataVolta(cotacao.detalhes.dataVolta);
     setDataInicio(cotacao.dataInicioViagem ?? "");
     setDataFim(cotacao.dataFimViagem ?? "");
-    setServicos(cotacao.detalhes.servicosDesejados ?? []);
-    setAdultos(cotacao.detalhes.adultos);
-    setCriancas(cotacao.detalhes.criancas);
-    setBebes(cotacao.detalhes.bebes);
-    setIdadesCriancas(cotacao.detalhes.idadesCriancas);
+    setDet(cotacao.detalhes);
     setObservacoes(cotacao.observacoes);
-    setDetalhesViagem(cotacao.detalhes.destinoForm);
   }, [open, cotacao]);
 
   const clienteSelecionado = useMemo(
     () => clientes.find((c) => c.id === clienteId),
-    [clientes, clienteId]
+    [clientes, clienteId],
   );
 
   if (!open) return null;
 
   function toggleServico(id: string) {
-    setServicos((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-    );
+    setDet((d) => {
+      const set = new Set(d.servicosDesejados);
+      if (set.has(id)) set.delete(id);
+      else set.add(id);
+      return { ...d, servicosDesejados: [...set] };
+    });
+  }
+
+  function toggleComodidade(label: string) {
+    setDet((d) => {
+      const set = new Set(d.comodidadesHospedagem);
+      if (set.has(label)) set.delete(label);
+      else set.add(label);
+      return { ...d, comodidadesHospedagem: [...set] };
+    });
+  }
+
+  function patchDet(patch: Partial<CotacaoDetalhes>) {
+    setDet((d) => ({ ...d, ...patch }));
   }
 
   function handleSave() {
@@ -119,31 +150,27 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
 
     const v = parseFloat(valorTotal.replace(",", ".")) || 0;
     const tagList = tags.split(/[,#]/).map((t) => t.trim()).filter(Boolean);
+    const destino =
+      det.destinosTrechos.filter((x) => x.trim()).join(" · ") ||
+      det.destinoForm.trim() ||
+      cotacao.destino;
 
     updateCotacao(cotacao.id, {
-      titulo:          titulo.trim(),
+      titulo:           titulo.trim(),
       clienteId,
-      destino:         destino.trim(),
+      destino,
       status,
-      valorTotal:      v,
+      valorTotal:       v,
       validade,
-      responsavel:     responsavel.trim() || "Equipe",
+      responsavel:      responsavel.trim() || "Equipe",
       prioridade,
-      tags:            tagList,
-      observacoes:     observacoes.trim(),
+      tags:             tagList,
+      observacoes:      observacoes.trim(),
       dataInicioViagem: dataInicio || undefined,
       dataFimViagem:    dataFim    || undefined,
       detalhes: {
-        ...cotacao.detalhes,
-        origem,
-        destinoForm:       destino.trim(),
-        dataIda,
-        dataVolta,
-        servicosDesejados: servicos,
-        adultos,
-        criancas,
-        bebes,
-        idadesCriancas,
+        ...det,
+        destinoForm: destino,
       },
     });
     toast.success("Cotação atualizada com sucesso!");
@@ -328,11 +355,28 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
                 </div>
                 <div>
                   <Label htmlFor="eq-resp">Responsável</Label>
-                  <Input
-                    id="eq-resp"
-                    value={responsavel}
-                    onChange={(e) => setResponsavel(e.target.value)}
-                  />
+                  {teamOptions.length > 0 ? (
+                    <Select
+                      id="eq-resp"
+                      value={responsavel}
+                      onChange={(e) => setResponsavel(e.target.value)}
+                    >
+                      {!teamOptions.some((o) => o.name === responsavel) && responsavel && (
+                        <option value={responsavel}>{responsavel}</option>
+                      )}
+                      {teamOptions.map((o) => (
+                        <option key={o.id} value={o.name}>
+                          {o.name}
+                        </option>
+                      ))}
+                    </Select>
+                  ) : (
+                    <Input
+                      id="eq-resp"
+                      value={responsavel}
+                      onChange={(e) => setResponsavel(e.target.value)}
+                    />
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="eq-tags">Tags (vírgula)</Label>
@@ -341,62 +385,6 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
                     placeholder="Europa, Lua de mel"
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <label className="flex cursor-pointer items-center gap-3 rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-4 py-3">
-                <input
-                  type="checkbox"
-                  checked={prioridade}
-                  onChange={(e) => setPrioridade(e.target.checked)}
-                  className="h-4 w-4 rounded border-[var(--hub-border)] accent-[var(--hub-yellow)]"
-                />
-                <span className="text-sm font-medium text-[var(--hub-text-primary)]">
-                  Marcar como prioridade
-                </span>
-              </label>
-            </div>
-          )}
-
-          {/* Aba: Viagem */}
-          {tab === "viagem" && (
-            <div className="space-y-4">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div>
-                  <Label htmlFor="eq-origem">Origem</Label>
-                  <Input
-                    id="eq-origem"
-                    placeholder="Ex.: São Paulo (GRU)"
-                    value={origem}
-                    onChange={(e) => setOrigem(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="eq-destino">Destino</Label>
-                  <Input
-                    id="eq-destino"
-                    placeholder="Ex.: Lisboa / Porto"
-                    value={destino}
-                    onChange={(e) => setDestino(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="eq-ida">Data de ida</Label>
-                  <Input
-                    id="eq-ida"
-                    type="date"
-                    value={dataIda}
-                    onChange={(e) => setDataIda(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="eq-volta">Data de volta</Label>
-                  <Input
-                    id="eq-volta"
-                    type="date"
-                    value={dataVolta}
-                    onChange={(e) => setDataVolta(e.target.value)}
                   />
                 </div>
                 <div>
@@ -419,91 +407,29 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
                 </div>
               </div>
 
-              <div>
-                <Label>Serviços desejados</Label>
-                <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                  {SERVICOS_DESEJADOS_OPTIONS.map((s) => {
-                    const checked = servicos.includes(s.id);
-                    return (
-                      <label
-                        key={s.id}
-                        className={`flex cursor-pointer items-center gap-2 rounded-[var(--hub-radius)] border px-3 py-2 text-sm transition-colors ${
-                          checked
-                            ? "border-[var(--hub-blue)] bg-sky-50 text-[var(--hub-blue-dark)]"
-                            : "border-[var(--hub-border)] bg-white text-[var(--hub-text-secondary)] hover:border-[var(--hub-border)]"
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => toggleServico(s.id)}
-                          className="h-3.5 w-3.5 accent-[var(--hub-blue)]"
-                        />
-                        {s.label}
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
+              <label className="flex cursor-pointer items-center gap-3 rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-4 py-3">
+                <input
+                  type="checkbox"
+                  checked={prioridade}
+                  onChange={(e) => setPrioridade(e.target.checked)}
+                  className="h-4 w-4 rounded border-[var(--hub-border)] accent-[var(--hub-yellow)]"
+                />
+                <span className="text-sm font-medium text-[var(--hub-text-primary)]">
+                  Marcar como prioridade
+                </span>
+              </label>
             </div>
           )}
 
-          {/* Aba: Passageiros */}
-          {tab === "passageiros" && (
-            <div className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-3">
-                {[
-                  { label: "Adultos",                  value: adultos,  set: setAdultos  },
-                  { label: "Crianças (2 a 11 anos)",   value: criancas, set: setCriancas },
-                  { label: "Bebês (0 a 23 meses)",     value: bebes,    set: setBebes    },
-                ].map(({ label, value, set }) => (
-                  <div key={label}>
-                    <Label>{label}</Label>
-                    <div className="mt-1 flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => set(Math.max(0, value - 1))}
-                        className="flex h-8 w-8 items-center justify-center rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white text-lg font-bold text-[var(--hub-text-secondary)] hover:bg-[var(--hub-bg-subtle)]"
-                      >
-                        −
-                      </button>
-                      <span className="w-8 text-center text-lg font-semibold tabular-nums text-[var(--hub-blue-dark)]">
-                        {value}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => set(value + 1)}
-                        className="flex h-8 w-8 items-center justify-center rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white text-lg font-bold text-[var(--hub-text-secondary)] hover:bg-[var(--hub-bg-subtle)]"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {criancas > 0 && (
-                <div>
-                  <Label htmlFor="eq-idades">Idades das crianças</Label>
-                  <Input
-                    id="eq-idades"
-                    placeholder="Ex.: 5 anos, 8 anos"
-                    value={idadesCriancas}
-                    onChange={(e) => setIdadesCriancas(e.target.value)}
-                  />
-                </div>
-              )}
-
-              <div className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-4 py-3 text-sm text-[var(--hub-text-secondary)]">
-                Total:{" "}
-                <span className="font-semibold text-[var(--hub-blue-dark)]">
-                  {adultos + criancas + bebes} passageiro{adultos + criancas + bebes !== 1 ? "s" : ""}
-                </span>
-                {" "}({adultos} adulto{adultos !== 1 ? "s" : ""}
-                {criancas > 0 ? `, ${criancas} criança${criancas !== 1 ? "s" : ""}` : ""}
-                {bebes > 0 ? `, ${bebes} bebê${bebes !== 1 ? "s" : ""}` : ""})
-              </div>
-            </div>
+          {/* Aba: Detalhes */}
+          {tab === "detalhes" && (
+            <CotacaoDetalhesForm
+              det={det}
+              onToggleServico={toggleServico}
+              onToggleComodidade={toggleComodidade}
+              onPatch={patchDet}
+              secoesAbertas
+            />
           )}
 
           {/* Aba: Observações */}
@@ -513,20 +439,10 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
                 <Label htmlFor="eq-obs">Observações internas</Label>
                 <Textarea
                   id="eq-obs"
-                  rows={4}
+                  rows={6}
                   placeholder="Notas para a equipe, condições especiais…"
                   value={observacoes}
                   onChange={(e) => setObservacoes(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="eq-det">Detalhes da viagem (para o cliente)</Label>
-                <Textarea
-                  id="eq-det"
-                  rows={4}
-                  placeholder="Roteiro, inclusões, exclusões, termos…"
-                  value={detalhesViagem}
-                  onChange={(e) => setDetalhesViagem(e.target.value)}
                 />
               </div>
             </div>
