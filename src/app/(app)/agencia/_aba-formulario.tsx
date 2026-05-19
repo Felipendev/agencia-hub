@@ -91,11 +91,11 @@ export function AbaFormulario() {
     if (typeof window === "undefined" || !config?.slug) return "";
     const base = `${window.location.origin}/solicitacao/${config.slug}`;
     if (user?.accountKind === "SALES_AGENT" && user.linkPublicCode?.trim()) {
-      return `${base}?vendedor=${encodeURIComponent(user.linkPublicCode.trim())}`;
+      return `${base}?seller=${encodeURIComponent(user.linkPublicCode.trim())}`;
     }
     const uid = user?.id?.trim();
     if (uid && isUuid(uid)) {
-      return `${base}?vendedor=${encodeURIComponent(uid)}`;
+      return `${base}?seller=${encodeURIComponent(uid)}`;
     }
     return base;
   }, [config?.slug, user?.id, user?.accountKind, user?.linkPublicCode]);
@@ -245,10 +245,10 @@ export function AbaFormulario() {
           </div>
           {user?.id ? (
             <p className="mt-2 text-xs leading-relaxed text-[var(--hub-text-secondary)]">
-              O link copiado inclui <code className="rounded bg-white/90 px-1 py-0.5 text-[11px]">?vendedor=</code>{" "}
+              O link copiado inclui <code className="rounded bg-white/90 px-1 py-0.5 text-[11px]">?seller=</code>{" "}
               com o seu usuário: solicitações enviadas por esse endereço ficam atribuídas a você no painel.
               Para um link sem atribuição, remova manualmente o trecho{" "}
-              <code className="rounded bg-white/90 px-1 text-[11px]">?vendedor=…</code> da URL.
+              <code className="rounded bg-white/90 px-1 text-[11px]">?seller=…</code> da URL.
             </p>
           ) : null}
         </div>

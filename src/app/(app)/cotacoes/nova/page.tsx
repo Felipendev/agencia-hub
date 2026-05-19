@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useData } from "@/contexts/data-context";
 import { emptyCotacaoDetalhes } from "@/lib/cotacao-defaults";
@@ -10,17 +10,51 @@ import { Button } from "@/components/ui/button";
 import { CotacaoDetalhesForm } from "@/components/cotacao/CotacaoDetalhesForm";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ClientePicker } from "@/components/cliente/ClientePicker";
 import { BackButton } from "@/components/ui/back-button";
 import { PageHeader } from "@/components/layout/page-header";
+import { listSalesAgentsRemote } from "@/lib/api/users-remote";
+import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
+import type { ApiUserResponse } from "@/lib/api/auth-types";
 import type { CotacaoDetalhes } from "@/types";
 
 export default function NovaCotacaoPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const { clientes, addCotacao, isReady } = useData();
+
+  const isOwner = user?.accountKind === "AGENCY_OWNER";
+  const [sellers, setSellers] = useState<ApiUserResponse[]>([]);
+
+  useEffect(() => {
+    if (!isOwner || !token || !getAgenciaHubApiBaseUrl()) return;
+    let cancelled = false;
+    void listSalesAgentsRemote(token)
+      .then((rows) => { if (!cancelled) setSellers(rows); })
+      .catch(() => { if (!cancelled) setSellers([]); });
+    return () => { cancelled = true; };
+  }, [isOwner, token]);
+
+  const teamOptions = useMemo((): ApiUserResponse[] => {
+    if (!isOwner || !user) return sellers;
+    const map = new Map(sellers.map((s) => [s.id, s]));
+    if (!map.has(user.id)) {
+      map.set(user.id, {
+        id: user.id,
+        name: `${user.nome} (dono)`,
+        email: user.email,
+        accountKind: "AGENCY_OWNER",
+        active: true,
+        commissionPct: null,
+        commissionFixed: null,
+        createdAt: "",
+      });
+    }
+    return [...map.values()].sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+  }, [sellers, user, isOwner]);
 
   /** `null` = seguir só a URL; string = escolha explícita no picker (inclui ""). */
   const [clienteIdDraft, setClienteIdDraft] = useState<string | null>(null);
@@ -159,11 +193,25 @@ export default function NovaCotacaoPage() {
             </div>
             <div>
               <Label htmlFor="nova-resp">Responsável</Label>
-              <Input
-                id="nova-resp"
-                value={responsavel}
-                onChange={(e) => setResponsavel(e.target.value)}
-              />
+              {teamOptions.length > 0 ? (
+                <Select
+                  id="nova-resp"
+                  value={responsavel}
+                  onChange={(e) => setResponsavel(e.target.value)}
+                >
+                  {teamOptions.map((o) => (
+                    <option key={o.id} value={o.name}>
+                      {o.name}
+                    </option>
+                  ))}
+                </Select>
+              ) : (
+                <Input
+                  id="nova-resp"
+                  value={responsavel}
+                  onChange={(e) => setResponsavel(e.target.value)}
+                />
+              )}
             </div>
             <div className="sm:col-span-2 xl:col-span-2">
               <Label htmlFor="nova-tags">Tags (# separadas por vírgula)</Label>

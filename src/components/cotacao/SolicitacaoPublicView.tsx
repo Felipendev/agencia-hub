@@ -20,17 +20,18 @@ import type { SolicitacaoPublicaConfig } from "@/types/solicitacao-publica";
 
 function referralSellerIdFromCurrentUrl(): string | undefined {
   if (typeof window === "undefined") return undefined;
-  const v = new URL(window.location.href).searchParams.get("vendedor");
-  const t = (v ?? "").trim();
-  return t && isUuid(t) ? t : undefined;
+  const params = new URL(window.location.href).searchParams;
+  // Read ?seller= first; fall back to legacy ?vendedor= for circulating links
+  const v = (params.get("seller") ?? params.get("vendedor") ?? "").trim();
+  return v && isUuid(v) ? v : undefined;
 }
 
 type Props = { slug: string };
 
 export function SolicitacaoPublicView({ slug }: Props) {
   const searchParams = useSearchParams();
-  const vendedorParam = searchParams.get("vendedor")?.trim() || null;
-  // Se ?vendedor= contém um UUID, é um referralSellerId (tratado separadamente); não enviar como sellerPublicCode
+  const vendedorParam = (searchParams.get("seller") ?? searchParams.get("vendedor"))?.trim() || null;
+  // Se ?seller= (ou legado ?vendedor=) contém um UUID, é um referralSellerId (tratado separadamente); não enviar como sellerPublicCode
   const sellerPublicCode = vendedorParam && !isUuid(vendedorParam) ? vendedorParam : null;
   const [config, setConfig] = useState<SolicitacaoPublicaConfig | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);

@@ -54,15 +54,30 @@ export function LinkSolicitacaoModal({
     const slugPart = (config?.slug ?? "").trim();
     if (!slugPart) return "";
     let url = `${window.location.origin}/solicitacao/${encodeURIComponent(slugPart)}`;
-    // Only append ?vendedor= when there's a proper opaque code (never expose UUIDs)
+    // Only append ?seller= when there's a proper opaque code (never expose UUIDs)
     if (sellerPublicCode?.trim()) {
-      url += `?vendedor=${encodeURIComponent(sellerPublicCode.trim())}`;
+      url += `?seller=${encodeURIComponent(sellerPublicCode.trim())}`;
     }
     return url;
   }, [config?.slug, sellerPublicCode, user?.id]);
 
+  const isSalesAgent = user?.accountKind === "SALES_AGENT";
+
   const loadConfig = useCallback(async () => {
     setLoadError(null);
+    // SALES_AGENT cannot access agency config — read from localStorage cache only
+    if (isSalesAgent) {
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem(LOCAL_CONFIG_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw) as SolicitacaoPublicaConfig;
+            if (parsed?.slug) { setConfig(parsed); return; }
+          }
+        } catch { /* ignore */ }
+      }
+      return;
+    }
     try {
       const headers: Record<string, string> = {};
       if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -94,7 +109,7 @@ export function LinkSolicitacaoModal({
       }
       setLoadError("Não foi possível carregar as configurações.");
     }
-  }, [token]);
+  }, [token, isSalesAgent]);
 
   useEffect(() => {
     if (!open) {
@@ -260,13 +275,15 @@ export function LinkSolicitacaoModal({
               Compartilhe este link com seus clientes para receber solicitações de cotação diretamente no painel.
             </p>
 
-            <Button
-              type="button"
-              className="w-full text-sm"
-              onClick={() => setView("customize")}
-            >
-              Personalizar o formulário
-            </Button>
+            {!isSalesAgent && (
+              <Button
+                type="button"
+                className="w-full text-sm"
+                onClick={() => setView("customize")}
+              >
+                Personalizar o formulário
+              </Button>
+            )}
 
             {loadError ? (
               <p className="text-sm text-amber-700">{loadError}</p>
