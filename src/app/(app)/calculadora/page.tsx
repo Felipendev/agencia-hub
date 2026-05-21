@@ -93,7 +93,29 @@ function OpcaoVooForm({
   onRemove: () => void;
   canRemove: boolean;
 }) {
+  const [taxasStr, setTaxasStr] = useState(() =>
+    opcao.taxas > 0 ? String(opcao.taxas).replace(".", ",") : ""
+  );
+  const [malaStr, setMalaStr] = useState(() =>
+    opcao.valorMala > 0 ? String(opcao.valorMala).replace(".", ",") : ""
+  );
+  const [pctStr, setPctStr] = useState(() =>
+    opcao.lucroConfig.pct > 0 ? String(opcao.lucroConfig.pct).replace(".", ",") : ""
+  );
+  const [fixoStr, setFixoStr] = useState(() =>
+    opcao.lucroConfig.fixo > 0 ? String(opcao.lucroConfig.fixo).replace(".", ",") : ""
+  );
+
   function set(patch: Partial<OpcaoVoo>) { onChange({ ...opcao, ...patch }); }
+
+  function handleDecimal(
+    str: string,
+    setStr: (s: string) => void,
+    updater: (v: number) => void,
+  ) {
+    setStr(str);
+    updater(parseFloat(str.replace(",", ".")) || 0);
+  }
 
   const cia = tabelas.cias.find((c) => c.id === opcao.ciaId);
   const milhasTotal = opcao.tipoTrecho === "ida_volta" ? opcao.milhasIda + opcao.milhasVolta : opcao.milhasIda;
@@ -167,13 +189,13 @@ function OpcaoVooForm({
         )}
         <div>
           <Label>Taxas (R$)</Label>
-          <Input inputMode="decimal" placeholder="Ex: 31.73" value={opcao.taxas || ""}
-            onChange={(e) => set({ taxas: parseFloat(e.target.value.replace(",", ".")) || 0 })} />
+          <Input inputMode="decimal" placeholder="Ex: 31,73" value={taxasStr}
+            onChange={(e) => handleDecimal(e.target.value, setTaxasStr, (v) => set({ taxas: v }))} />
         </div>
         <div>
           <Label>Mala (R$)</Label>
-          <Input inputMode="decimal" placeholder="Ex: 130" value={opcao.valorMala || ""}
-            onChange={(e) => set({ valorMala: parseFloat(e.target.value.replace(",", ".")) || 0 })} />
+          <Input inputMode="decimal" placeholder="Ex: 130" value={malaStr}
+            onChange={(e) => handleDecimal(e.target.value, setMalaStr, (v) => set({ valorMala: v }))} />
         </div>
         <div>
           <Label>Qtd. malas</Label>
@@ -190,8 +212,8 @@ function OpcaoVooForm({
               onChange={(e) => set({ lucroConfig: { ...opcao.lucroConfig, usarPct: e.target.checked } })}
               className="accent-[var(--hub-blue)]" />
             <span className="text-[var(--hub-text-secondary)]">%</span>
-            <Input inputMode="decimal" value={opcao.lucroConfig.pct}
-              onChange={(e) => set({ lucroConfig: { ...opcao.lucroConfig, pct: parseFloat(e.target.value.replace(",", ".")) || 0 } })}
+            <Input inputMode="decimal" value={pctStr}
+              onChange={(e) => handleDecimal(e.target.value, setPctStr, (v) => set({ lucroConfig: { ...opcao.lucroConfig, pct: v } }))}
               disabled={!opcao.lucroConfig.usarPct} className="h-7 w-16 text-xs" />
           </label>
           <label className="flex items-center gap-1.5 text-xs">
@@ -199,8 +221,8 @@ function OpcaoVooForm({
               onChange={(e) => set({ lucroConfig: { ...opcao.lucroConfig, usarFixo: e.target.checked } })}
               className="accent-[var(--hub-blue)]" />
             <span className="text-[var(--hub-text-secondary)]">R$ fixo</span>
-            <Input inputMode="decimal" value={opcao.lucroConfig.fixo || ""}
-              onChange={(e) => set({ lucroConfig: { ...opcao.lucroConfig, fixo: parseFloat(e.target.value.replace(",", ".")) || 0 } })}
+            <Input inputMode="decimal" value={fixoStr}
+              onChange={(e) => handleDecimal(e.target.value, setFixoStr, (v) => set({ lucroConfig: { ...opcao.lucroConfig, fixo: v } }))}
               disabled={!opcao.lucroConfig.usarFixo} className="h-7 w-20 text-xs" />
           </label>
           {milheiroSugerido > 0 && (
