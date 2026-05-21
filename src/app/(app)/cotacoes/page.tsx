@@ -233,7 +233,7 @@ export default function CotacoesPage() {
   }
 
   useEffect(() => {
-    if (!isReady || !hasRemoteApi) return;
+    if (!isReady || !hasRemoteApi || !token) return;
     syncCotacoesFromApi({ token }).catch(() => {
       toast.error("Não foi possível carregar as cotações. Tente novamente em instantes.");
     });
