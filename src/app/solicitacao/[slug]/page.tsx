@@ -1,7 +1,33 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { SolicitacaoPublicView } from "@/components/cotacao/SolicitacaoPublicView";
+import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
+import { getPublicConfig } from "@/lib/solicitacao-server-store";
 
 type PageProps = { params: Promise<{ slug: string }> };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const decodedSlug = decodeURIComponent(slug);
+  let nomeMarca = "Agência de viagens";
+  try {
+    const base = getAgenciaHubApiBaseUrl();
+    if (base) {
+      const res = await fetch(`${base}/public/solicitacao-config/${encodeURIComponent(decodedSlug)}`);
+      if (res.ok) {
+        const data = await res.json() as { nomeMarca?: string };
+        if (data.nomeMarca) nomeMarca = data.nomeMarca;
+      }
+    } else {
+      const config = await getPublicConfig(decodedSlug);
+      if (config.nomeMarca) nomeMarca = config.nomeMarca;
+    }
+  } catch { /* fallback já definido */ }
+  return {
+    title: `Solicitar orçamento — ${nomeMarca}`,
+    description: `Preencha o formulário para solicitar sua cotação de viagem com ${nomeMarca}.`,
+  };
+}
 
 export default async function SolicitacaoPublicPage({ params }: PageProps) {
   const { slug } = await params;

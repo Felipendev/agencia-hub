@@ -183,8 +183,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       }
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     pushNotifs(novas);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cotacoes, isReady, dismissed, prefs.cotacaoVencendo, prefs.cotacaoVencida]);
 
   // ── 2. Cotação aprovada ─────────────────────────────────────────────────────
@@ -212,8 +212,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }
 
     prevApprovedIds.current = new Set(approved.map((c) => c.id));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     pushNotifs(novas);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cotacoes, isReady, dismissed, prefs.cotacaoAprovada.enabled]);
 
   // ── 3. Novo cliente ─────────────────────────────────────────────────────────
@@ -240,8 +240,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }
 
     prevClienteIds.current = new Set(clientes.map((c) => c.id));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     pushNotifs(novas);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientes, isReady, dismissed, prefs.clienteNovo.enabled]);
 
   // ── 4. Lançamento confirmado ────────────────────────────────────────────────
@@ -273,8 +273,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }
 
     prevLancamentoIds.current = new Set(confirmados.map((l) => l.id));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     pushNotifs(novas);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lancamentos, isReady, dismissed, prefs.lancamentoConfirmado.enabled]);
 
   // Mark first-render complete AFTER all effects above have run
@@ -332,7 +332,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     void checkSubmissions();
     const id = setInterval(() => void checkSubmissions(), 30_000);
     return () => clearInterval(id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady, token, dismissed, prefs.submissaoNova.enabled]);
 
   // ── Actions ─────────────────────────────────────────────────────────────────

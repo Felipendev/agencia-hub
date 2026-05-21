@@ -104,7 +104,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
     setTitulo(cotacao.titulo);
     setClienteId(cotacao.clienteId);
     setStatus(cotacao.status);
-    setValorTotal(String(cotacao.valorTotal));
+    setValorTotal(cotacao.valorTotal > 0 ? String(cotacao.valorTotal).replace(".", ",") : "");
     setValidade(cotacao.validade);
     setResponsavel(cotacao.responsavel);
     setPrioridade(cotacao.prioridade);

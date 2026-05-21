@@ -363,15 +363,12 @@ export default function ClientesPage() {
   const [novoClienteOpen, setNovoClienteOpen] = useState(false);
   const [editarCliente, setEditarCliente] = useState<Cliente | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
-
   const handleDeleteRequest = useCallback((id: string) => {
     setDeleteTarget(id);
   }, []);
 
   const handleDeleteConfirm = useCallback(async () => {
     if (!deleteTarget) return;
-    setDeleting(true);
     try {
       await deleteCliente(deleteTarget);
       toast.success("Cliente excluído com sucesso.");
@@ -381,7 +378,6 @@ export default function ClientesPage() {
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erro ao excluir cliente.");
     } finally {
-      setDeleting(false);
       setDeleteTarget(null);
     }
   }, [deleteTarget, deleteCliente, toast, selectedCliente]);

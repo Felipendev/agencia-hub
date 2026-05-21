@@ -4,9 +4,7 @@
  * Global error boundary — catches errors in the root layout itself.
  * Must include its own <html> and <body> tags since the root layout may have crashed.
  */
-export default function GlobalError({
-  reset,
-}: {
+export default function GlobalError({}: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {

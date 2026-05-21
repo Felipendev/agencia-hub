@@ -26,6 +26,11 @@ function CiaCard({
 }) {
   const [editando, setEditando] = useState(false);
   const [faixas, setFaixas] = useState<FaixaMilheiro[]>(cia.faixas);
+  const [milheiroStrs, setMilheiroStrs] = useState<string[]>(() =>
+    cia.faixas.map((f) =>
+      f.valorPorMilheiro > 0 ? String(f.valorPorMilheiro).replace(".", ",") : ""
+    )
+  );
   const [nome, setNome] = useState(cia.nome);
 
   function salvar() {
@@ -35,12 +40,22 @@ function CiaCard({
 
   function cancelar() {
     setFaixas(cia.faixas);
+    setMilheiroStrs(
+      cia.faixas.map((f) =>
+        f.valorPorMilheiro > 0 ? String(f.valorPorMilheiro).replace(".", ",") : ""
+      )
+    );
     setNome(cia.nome);
     setEditando(false);
   }
 
   function updateFaixa(i: number, patch: Partial<FaixaMilheiro>) {
     setFaixas((prev) => prev.map((f, idx) => (idx === i ? { ...f, ...patch } : f)));
+  }
+
+  function updateMilheiroStr(i: number, str: string) {
+    setMilheiroStrs((prev) => prev.map((s, idx) => (idx === i ? str : s)));
+    updateFaixa(i, { valorPorMilheiro: parseFloat(str.replace(",", ".")) || 0 });
   }
 
   function addFaixa() {
@@ -50,11 +65,13 @@ function CiaCard({
       ...prev,
       { de: novoInicio, ate: 9999999, valorPorMilheiro: 0 },
     ]);
+    setMilheiroStrs((prev) => [...prev, ""]);
   }
 
   function removeFaixa(i: number) {
     if (faixas.length <= 1) return;
     setFaixas((prev) => prev.filter((_, idx) => idx !== i));
+    setMilheiroStrs((prev) => prev.filter((_, idx) => idx !== i));
   }
 
   return (
@@ -120,14 +137,9 @@ function CiaCard({
                   <p className="mb-0.5 text-[10px] text-[var(--hub-text-muted)]">R$/1000 milhas</p>
                   <Input
                     inputMode="decimal"
-                    value={f.valorPorMilheiro || ""}
+                    value={milheiroStrs[i] ?? ""}
                     placeholder="0"
-                    onChange={(e) =>
-                      updateFaixa(i, {
-                        valorPorMilheiro:
-                          parseFloat(e.target.value.replace(",", ".")) || 0,
-                      })
-                    }
+                    onChange={(e) => updateMilheiroStr(i, e.target.value)}
                     className="h-8 text-xs"
                   />
                 </div>
@@ -196,10 +208,25 @@ function CiaCard({
 
 // ─── Página ───────────────────────────────────────────────────────────────────
 
+function buildBagagemStrs(t: TabelasMilhas): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const b of t.bagagens) {
+    for (const campo of ["antes", "checkin", "aeroporto", "depois48h"] as const) {
+      const v = b.bagagem[campo];
+      map[`${b.id}:${campo}`] = v > 0 ? String(v).replace(".", ",") : "0";
+    }
+  }
+  return map;
+}
+
 export default function PrecificarMilheiroPage() {
   const router = useRouter();
   const toast = useToast();
   const [tabelas, setTabelas] = useState<TabelasMilhas | null>(() => carregarTabelas());
+  const [bagagemStrs, setBagagemStrs] = useState<Record<string, string>>(() => {
+    const t = carregarTabelas();
+    return t ? buildBagagemStrs(t) : {};
+  });
 
   function updateCia(id: string, updated: CiaMilheiro) {
     if (!tabelas) return;
@@ -224,6 +251,7 @@ export default function PrecificarMilheiroPage() {
   function handleReset() {
     const padrao = resetarTabelas();
     setTabelas(padrao);
+    setBagagemStrs(buildBagagemStrs(padrao));
     toast.success("Tabelas restauradas para os valores padrao.");
   }
 
@@ -314,12 +342,16 @@ export default function PrecificarMilheiroPage() {
                     (campo) => (
                       <td key={campo} className="px-4 py-3 text-right">
                         <input
-                          type="number"
-                          min={0}
-                          step={0.01}
-                          value={b.bagagem[campo]}
+                          type="text"
+                          inputMode="decimal"
+                          value={bagagemStrs[`${b.id}:${campo}`] ?? ""}
                           onChange={(e) => {
-                            const val = parseFloat(e.target.value) || 0;
+                            const str = e.target.value;
+                            setBagagemStrs((prev) => ({
+                              ...prev,
+                              [`${b.id}:${campo}`]: str,
+                            }));
+                            const val = parseFloat(str.replace(",", ".")) || 0;
                             const novas: TabelasMilhas = {
                               ...tabelas,
                               bagagens: tabelas.bagagens.map((bg) =>

@@ -109,13 +109,14 @@ export function SolicitacoesRecebidasList() {
         submission: s,
       }));
 
-    // Imported cotações from the public form (exclude dismissed)
-    const pendingIds = new Set(list.map((s) => s.id));
+    // Imported cotações from the public form (exclude dismissed).
+    // Do NOT filter by pendingIds: if the submission DELETE failed after the cotação was
+    // created, both would exist simultaneously, making both invisible (phantom state).
+    // Preferring the cotação ("imported") keeps it visible until the user dismisses it.
     const imported: ImportedItem[] = cotacoes
       .filter(
         (c) =>
           c.origemCriacao === "formulario_publico" &&
-          !pendingIds.has(c.publicSubmissionId ?? "") &&
           !dismissed.has(c.publicSubmissionId ?? ""),
       )
       .map((c) => {

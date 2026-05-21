@@ -8,7 +8,7 @@ import {
 import {
   TrendingUp, TrendingDown, Wallet, Clock,
   ArrowUpRight, ArrowDownRight, Plus, Download,
-  Filter, Calendar, Edit2, Trash2, X, ChevronRight,
+  Filter, Edit2, Trash2, X,
 } from "lucide-react";
 import { computeFinanceiroResumo, useData } from "@/contexts/data-context";
 import { useToast } from "@/components/ui/toast";
@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { ClientePicker } from "@/components/cliente/ClientePicker";
 import { formatBRL, formatDateBR } from "@/lib/format";
-import { exportarLancamentosCSV, exportarResumoFinanceiroCSV } from "@/lib/csv-export";
+import { exportarLancamentosCSV } from "@/lib/csv-export";
 import { LANCAMENTO_CATEGORIA_LABELS, LANCAMENTO_STATUS_LABELS } from "@/lib/constants";
 import type {
   LancamentoCategoria, LancamentoFinanceiro, LancamentoStatus, LancamentoTipo,
