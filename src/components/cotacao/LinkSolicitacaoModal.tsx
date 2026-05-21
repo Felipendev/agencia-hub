@@ -8,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { IconX } from "@/components/icons";
 import { generateId } from "@/lib/format";
-import { isUuid } from "@/lib/api/quotation-mapper";
 import { isValidSolicitacaoSlug } from "@/lib/solicitacao-slug";
 import { useAuth } from "@/contexts/auth-context";
 import type {
@@ -59,7 +58,7 @@ export function LinkSolicitacaoModal({
       url += `?seller=${encodeURIComponent(sellerPublicCode.trim())}`;
     }
     return url;
-  }, [config?.slug, sellerPublicCode, user?.id]);
+  }, [config?.slug, sellerPublicCode]);
 
   const isSalesAgent = user?.accountKind === "SALES_AGENT";
 

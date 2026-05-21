@@ -94,7 +94,6 @@ export function gerarHtmlCotacao(
 
   // ── Roteiro ──
   const trechos = d.destinosTrechos.filter((x) => x.trim()).join(" → ") || d.destinoForm || "";
-  const roteiro = [d.origem, trechos].filter(Boolean).join(" → ");
 
   // ── Passageiros ──
   const paxParts = [`${d.adultos} adulto${d.adultos !== 1 ? "s" : ""}`];
@@ -105,18 +104,10 @@ export function gerarHtmlCotacao(
   const flexIda = d.flexibilidadeIda ? lbl(FLEX_LABELS, d.flexibilidadeIda) + (d.flexibilidadeIda === "outro" && d.flexibilidadeIdaOutro ? `: ${d.flexibilidadeIdaOutro}` : "") : "";
   const flexVolta = d.flexibilidadeVolta ? lbl(FLEX_LABELS, d.flexibilidadeVolta) + (d.flexibilidadeVolta === "outro" && d.flexibilidadeVoltaOutro ? `: ${d.flexibilidadeVoltaOutro}` : "") : "";
 
-  // ── Bagagem ──
-  const bagagem = d.malasDespachadas
-    ? `${d.qtdMalas ? d.qtdMalas + " " : ""}mala${d.qtdMalas === "1" ? "" : "s"} despachada${d.qtdMalas === "1" ? "" : "s"}${d.bagagemEspecial ? " + bagagem especial" : ""}`
-    : d.bagagemEspecial ? "Somente bagagem especial" : "Sem bagagem despachada";
-
   // ── Pagamento ──
   const pagamento = d.formaPagamento === "outro" && d.formaPagamentoOutro
     ? d.formaPagamentoOutro
     : d.formaPagamento ? lbl(PAGAMENTO_LABELS, d.formaPagamento) : "";
-
-  // ── WhatsApp ──
-  const whatsapp = d.whatsappIgualCelular ? d.celular : d.whatsapp;
 
   // ── Hospedagem ──
   const hospedagemStr = [

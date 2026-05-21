@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Logo, LogoMarkOnly } from "@/components/ui/logo";
+import { Logo } from "@/components/ui/logo";
 
 export default function LandingPage() {
   return (

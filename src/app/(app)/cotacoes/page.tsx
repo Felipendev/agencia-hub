@@ -100,7 +100,7 @@ export default function CotacoesPage() {
   const [filtroAgente, setFiltroAgente] = useState("");
   const [busca, setBusca] = useState("");
   const [filtroApiStatus, setFiltroApiStatus] = useState<CotacaoStatus | "">("");
-  const [filtroApiBusca, setFiltroApiBusca] = useState("");
+  const [filtroApiBusca] = useState("");
 
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const toast = useToast();
@@ -237,7 +237,7 @@ export default function CotacoesPage() {
     syncCotacoesFromApi({ token }).catch(() => {
       toast.error("Não foi possível carregar as cotações. Tente novamente em instantes.");
     });
-  }, [isReady, hasRemoteApi, syncCotacoesFromApi, token]);
+  }, [isReady, hasRemoteApi, syncCotacoesFromApi, token, toast]);
 
   const hasActiveFilters =
     filtroClienteIds !== null ||

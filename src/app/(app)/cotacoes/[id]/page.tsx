@@ -54,7 +54,16 @@ export default function CotacaoDetalhePage() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [waModalOpen, setWaModalOpen] = useState(false);
   const [sellers, setSellers] = useState<ApiUserResponse[]>([]);
-  const [nomeAgencia, setNomeAgencia] = useState("Agência");
+  const [nomeAgencia, setNomeAgencia] = useState(() => {
+    try {
+      const raw = localStorage.getItem("agencia-hub-solicitacao-config");
+      if (raw) {
+        const parsed = JSON.parse(raw) as { nomeMarca?: string };
+        if (parsed?.nomeMarca) return parsed.nomeMarca;
+      }
+    } catch { /* ignore */ }
+    return "Agência";
+  });
 
   useEffect(() => {
     if (!isOwner || !token || !getAgenciaHubApiBaseUrl()) return;
@@ -92,15 +101,8 @@ export default function CotacaoDetalhePage() {
     );
   }, [sellers, user, isOwner]);
 
-  // Agency name for print/PDF — read from localStorage cache first, fallback to API
+  // Agency name for print/PDF — localStorage read is in useState initializer; fallback to API
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("agencia-hub-solicitacao-config");
-      if (raw) {
-        const parsed = JSON.parse(raw) as { nomeMarca?: string };
-        if (parsed?.nomeMarca) { setNomeAgencia(parsed.nomeMarca); return; }
-      }
-    } catch { /* ignore */ }
     if (!token) return;
     const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
     fetch("/api/app/solicitacao-config", { credentials: "include", headers })
