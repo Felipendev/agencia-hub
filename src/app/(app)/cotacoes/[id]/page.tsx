@@ -17,7 +17,15 @@ import { DownloadIcon, EditIcon, WhatsAppIcon } from "@/components/icons";
 import { formatDateBR, formatDateTimeBR } from "@/lib/format";
 import { imprimirCotacao, baixarCotacaoHtml } from "@/lib/pdf-generator";
 import { COTACAO_STATUS_LABELS } from "@/lib/constants";
-import { labelFormaPagamento } from "@/lib/cotacao-options";
+import {
+  labelFormaPagamento,
+  SERVICOS_DESEJADOS_OPTIONS,
+  FLEXIBILIDADE_OPTIONS,
+  HORARIO_SAIDA_OPTIONS,
+  PREFERENCIA_VOO_OPTIONS,
+  COMUNICACAO_OPTIONS,
+  HOSPEDAGEM_CATEGORIA_OPTIONS,
+} from "@/lib/cotacao-options";
 import { formatBrPhoneDisplay } from "@/lib/br-phone";
 import { TimelineView } from "@/components/timeline/TimelineView";
 import { BackButton } from "@/components/ui/back-button";
@@ -46,6 +54,7 @@ export default function CotacaoDetalhePage() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [waModalOpen, setWaModalOpen] = useState(false);
   const [sellers, setSellers] = useState<ApiUserResponse[]>([]);
+  const [nomeAgencia, setNomeAgencia] = useState("Agência");
 
   useEffect(() => {
     if (!isOwner || !token || !getAgenciaHubApiBaseUrl()) return;
@@ -82,6 +91,25 @@ export default function CotacaoDetalhePage() {
       a.name.localeCompare(b.name, "pt-BR"),
     );
   }, [sellers, user, isOwner]);
+
+  // Agency name for print/PDF — read from localStorage cache first, fallback to API
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("agencia-hub-solicitacao-config");
+      if (raw) {
+        const parsed = JSON.parse(raw) as { nomeMarca?: string };
+        if (parsed?.nomeMarca) { setNomeAgencia(parsed.nomeMarca); return; }
+      }
+    } catch { /* ignore */ }
+    if (!token) return;
+    const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
+    fetch("/api/app/solicitacao-config", { credentials: "include", headers })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { config?: { nomeMarca?: string } } | null) => {
+        if (data?.config?.nomeMarca) setNomeAgencia(data.config.nomeMarca);
+      })
+      .catch(() => {});
+  }, [token]);
 
   useEffect(() => {
     if (!cotacao) return;
@@ -135,7 +163,7 @@ export default function CotacaoDetalhePage() {
   function handleImprimir() {
     if (!cliente) { toast.error("Cliente nao encontrado"); return; }
     try {
-      imprimirCotacao(cotacao!, cliente, "AgênciasHub");
+      imprimirCotacao(cotacao!, cliente, nomeAgencia);
       toast.success("Abrindo janela de impressao...");
     } catch {
       toast.error("Erro ao abrir impressao. Verifique se popups estao permitidos.");
@@ -145,7 +173,7 @@ export default function CotacaoDetalhePage() {
   function handleBaixarHtml() {
     if (!cliente) { toast.error("Cliente nao encontrado"); return; }
     try {
-      baixarCotacaoHtml(cotacao!, cliente, "AgênciasHub");
+      baixarCotacaoHtml(cotacao!, cliente, nomeAgencia);
       toast.success("Download iniciado!");
     } catch {
       toast.error("Erro ao baixar arquivo");
@@ -313,80 +341,219 @@ export default function CotacaoDetalhePage() {
         </Card>
       </div>
 
-      {/* Ficha do formulario */}
+      {/* Ficha da solicitação */}
       <Card>
-        <CardTitle>Ficha do formulario (solicitacao de orcamento)</CardTitle>
-        <div className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-          <div>
-            <p className="text-xs uppercase text-[var(--hub-text-muted)]">Servicos</p>
-            <p className="text-[var(--hub-blue-dark)]">
-              {d.servicosDesejados.length ? d.servicosDesejados.join(", ") : "—"}
-            </p>
+        <CardTitle>Solicitação do cliente</CardTitle>
+
+        {/* Serviços — destaque visual */}
+        {d.servicosDesejados.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {d.servicosDesejados.map((s) => {
+              const label = SERVICOS_DESEJADOS_OPTIONS.find((o) => o.id === s)?.label ?? s;
+              return (
+                <span
+                  key={s}
+                  className="rounded-full bg-sky-50 px-3 py-0.5 text-xs font-semibold text-sky-700 ring-1 ring-sky-200"
+                >
+                  {label}
+                </span>
+              );
+            })}
           </div>
-          <div>
-            <p className="text-xs uppercase text-[var(--hub-text-muted)]">Origem → destinos</p>
-            <p>
-              {d.origem || "—"}
-              {d.destinosTrechos.some((x) => x.trim()) ? (
-                <> → {d.destinosTrechos.map((x) => x.trim()).filter(Boolean).join(" · ")}</>
-              ) : d.destinoForm ? (
-                <> → {d.destinoForm}</>
-              ) : " — "}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs uppercase text-[var(--hub-text-muted)]">Datas ida / volta</p>
-            <p>
-              {d.dataIda ? formatDateBR(d.dataIda) : "—"} · {d.dataVolta ? formatDateBR(d.dataVolta) : "—"}
-            </p>
-          </div>
-          {((d.flexibilidadeIda === "outro" && d.flexibilidadeIdaOutro.trim()) ||
-            (d.flexibilidadeVolta === "outro" && d.flexibilidadeVoltaOutro.trim())) && (
-            <div className="sm:col-span-2">
-              <p className="text-xs uppercase text-[var(--hub-text-muted)]">Flexibilidade (outro)</p>
-              <p>
-                Ida: {d.flexibilidadeIda === "outro" ? d.flexibilidadeIdaOutro.trim() || "—" : "—"} ·
-                Volta: {d.flexibilidadeVolta === "outro" ? d.flexibilidadeVoltaOutro.trim() || "—" : "—"}
-              </p>
-            </div>
-          )}
-          <div>
-            <p className="text-xs uppercase text-[var(--hub-text-muted)]">Passageiros</p>
-            <p>
-              {d.adultos} adultos · {d.criancas} criancas · {d.bebes} bebes
-              {d.idadesCriancas ? ` (${d.idadesCriancas})` : ""}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs uppercase text-[var(--hub-text-muted)]">Pagamento / milhas</p>
-            <p>
-              {d.formaPagamento === "outro" && d.formaPagamentoOutro.trim()
-                ? `Outro: ${d.formaPagamentoOutro}`
-                : d.formaPagamento ? labelFormaPagamento(d.formaPagamento) : "—"}{" "}
-              · Milhas: {d.usaMilhas ? "sim" : "nao"}
-            </p>
-          </div>
-          {d.cupomCodigo.trim() && (
+        )}
+
+        {/* ── Roteiro ── */}
+        <div className="mt-5">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-[var(--hub-text-muted)]">Roteiro</p>
+          <div className="grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-3">
             <div>
-              <p className="text-xs uppercase text-[var(--hub-text-muted)]">Cupom</p>
-              <p>
-                {d.cupomCodigo}
-                {d.cupomValidoAte ? ` (valido ate ${formatDateBR(d.cupomValidoAte)})` : ""}
+              <p className="text-xs text-[var(--hub-text-muted)]">Origem</p>
+              <p className="font-medium text-[var(--hub-blue-dark)]">{d.origem || "—"}</p>
+            </div>
+            <div className="sm:col-span-1 xl:col-span-2">
+              <p className="text-xs text-[var(--hub-text-muted)]">Destinos</p>
+              <p className="font-medium text-[var(--hub-blue-dark)]">
+                {d.destinosTrechos.filter((x) => x.trim()).join(" → ") || d.destinoForm || "—"}
               </p>
             </div>
-          )}
-          <div>
-            <p className="text-xs uppercase text-[var(--hub-text-muted)]">Celular / WhatsApp</p>
-            <p>
-              {d.celular ? formatBrPhoneDisplay(d.celular) : "—"} · WA:{" "}
-              {d.whatsappIgualCelular
-                ? "mesmo do celular"
-                : d.whatsapp ? formatBrPhoneDisplay(d.whatsapp) : "—"}
-            </p>
+            <div>
+              <p className="text-xs text-[var(--hub-text-muted)]">Data de ida</p>
+              <p className="font-medium">{d.dataIda ? formatDateBR(d.dataIda) : "—"}</p>
+            </div>
+            <div>
+              <p className="text-xs text-[var(--hub-text-muted)]">Data de volta</p>
+              <p className="font-medium">{d.dataVolta ? formatDateBR(d.dataVolta) : "—"}</p>
+            </div>
+            {d.flexibilidadeIda && (
+              <div>
+                <p className="text-xs text-[var(--hub-text-muted)]">Flexibilidade ida</p>
+                <p className="font-medium">
+                  {FLEXIBILIDADE_OPTIONS.find((o) => o.id === d.flexibilidadeIda)?.label ?? d.flexibilidadeIda}
+                  {d.flexibilidadeIda === "outro" && d.flexibilidadeIdaOutro ? `: ${d.flexibilidadeIdaOutro}` : ""}
+                </p>
+              </div>
+            )}
+            {d.flexibilidadeVolta && (
+              <div>
+                <p className="text-xs text-[var(--hub-text-muted)]">Flexibilidade volta</p>
+                <p className="font-medium">
+                  {FLEXIBILIDADE_OPTIONS.find((o) => o.id === d.flexibilidadeVolta)?.label ?? d.flexibilidadeVolta}
+                  {d.flexibilidadeVolta === "outro" && d.flexibilidadeVoltaOutro ? `: ${d.flexibilidadeVoltaOutro}` : ""}
+                </p>
+              </div>
+            )}
           </div>
-          <div>
-            <p className="text-xs uppercase text-[var(--hub-text-muted)]">Comunicacao</p>
-            <p>{d.preferenciaComunicacao || "—"}</p>
+        </div>
+
+        {/* ── Passageiros e Bagagem ── */}
+        <div className="mt-5 border-t border-[var(--hub-border)] pt-4">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-[var(--hub-text-muted)]">Passageiros e bagagem</p>
+          <div className="grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-3">
+            <div>
+              <p className="text-xs text-[var(--hub-text-muted)]">Passageiros</p>
+              <p className="font-medium">
+                {d.adultos} adulto{d.adultos !== 1 ? "s" : ""}
+                {d.criancas > 0 ? `, ${d.criancas} criança${d.criancas !== 1 ? "s" : ""}` : ""}
+                {d.bebes > 0 ? `, ${d.bebes} bebê${d.bebes !== 1 ? "s" : ""}` : ""}
+              </p>
+              {d.idadesCriancas && (
+                <p className="mt-0.5 text-xs text-[var(--hub-text-muted)]">Idades: {d.idadesCriancas}</p>
+              )}
+            </div>
+            <div>
+              <p className="text-xs text-[var(--hub-text-muted)]">Malas despachadas</p>
+              <p className="font-medium">
+                {d.malasDespachadas
+                  ? <span className="text-emerald-700">{d.qtdMalas ? `Sim — ${d.qtdMalas}` : "Sim"}</span>
+                  : <span className="text-[var(--hub-text-muted)]">Não</span>}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-[var(--hub-text-muted)]">Bagagem especial</p>
+              <p className="font-medium">
+                {d.bagagemEspecial
+                  ? <span className="text-amber-700">Sim</span>
+                  : <span className="text-[var(--hub-text-muted)]">Não</span>}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Preferências de voo ── */}
+        {(d.horarioSaidaIda || d.horarioSaidaVolta || d.preferenciaVooIda || d.preferenciaVooVolta || d.usaMilhas) && (
+          <div className="mt-5 border-t border-[var(--hub-border)] pt-4">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-[var(--hub-text-muted)]">Preferências de voo</p>
+            <div className="grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-3">
+              {d.horarioSaidaIda && (
+                <div>
+                  <p className="text-xs text-[var(--hub-text-muted)]">Horário saída (ida)</p>
+                  <p className="font-medium">{HORARIO_SAIDA_OPTIONS.find((o) => o.id === d.horarioSaidaIda)?.label ?? d.horarioSaidaIda}</p>
+                </div>
+              )}
+              {d.horarioSaidaVolta && (
+                <div>
+                  <p className="text-xs text-[var(--hub-text-muted)]">Horário saída (volta)</p>
+                  <p className="font-medium">{HORARIO_SAIDA_OPTIONS.find((o) => o.id === d.horarioSaidaVolta)?.label ?? d.horarioSaidaVolta}</p>
+                </div>
+              )}
+              {d.preferenciaVooIda && (
+                <div>
+                  <p className="text-xs text-[var(--hub-text-muted)]">Preferência voo (ida)</p>
+                  <p className="font-medium">{PREFERENCIA_VOO_OPTIONS.find((o) => o.id === d.preferenciaVooIda)?.label ?? d.preferenciaVooIda}</p>
+                </div>
+              )}
+              {d.preferenciaVooVolta && (
+                <div>
+                  <p className="text-xs text-[var(--hub-text-muted)]">Preferência voo (volta)</p>
+                  <p className="font-medium">{PREFERENCIA_VOO_OPTIONS.find((o) => o.id === d.preferenciaVooVolta)?.label ?? d.preferenciaVooVolta}</p>
+                </div>
+              )}
+              <div>
+                <p className="text-xs text-[var(--hub-text-muted)]">Uso de milhas</p>
+                <p className="font-medium">
+                  {d.usaMilhas
+                    ? <span className="text-emerald-700">Sim</span>
+                    : <span className="text-[var(--hub-text-muted)]">Não</span>}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Hospedagem ── */}
+        {(d.categoriaHospedagem || d.comodidadesHospedagem.length > 0 || d.qtdQuartos > 0) && (
+          <div className="mt-5 border-t border-[var(--hub-border)] pt-4">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-[var(--hub-text-muted)]">Hospedagem</p>
+            <div className="grid gap-3 text-sm sm:grid-cols-2">
+              {d.categoriaHospedagem && (
+                <div>
+                  <p className="text-xs text-[var(--hub-text-muted)]">Categoria</p>
+                  <p className="font-medium">{HOSPEDAGEM_CATEGORIA_OPTIONS.find((o) => o.id === d.categoriaHospedagem)?.label ?? d.categoriaHospedagem}</p>
+                </div>
+              )}
+              {d.qtdQuartos > 0 && (
+                <div>
+                  <p className="text-xs text-[var(--hub-text-muted)]">Quartos</p>
+                  <p className="font-medium">{d.qtdQuartos} quarto{d.qtdQuartos !== 1 ? "s" : ""}</p>
+                </div>
+              )}
+              {d.comodidadesHospedagem.length > 0 && (
+                <div className="sm:col-span-2">
+                  <p className="text-xs text-[var(--hub-text-muted)]">Comodidades</p>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {d.comodidadesHospedagem.map((c) => (
+                      <span key={c} className="rounded-full bg-violet-50 px-2.5 py-0.5 text-xs font-medium text-violet-700 ring-1 ring-violet-200">{c}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── Contato e Pagamento ── */}
+        <div className="mt-5 border-t border-[var(--hub-border)] pt-4">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-[var(--hub-text-muted)]">Contato e pagamento</p>
+          <div className="grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-3">
+            {d.celular && (
+              <div>
+                <p className="text-xs text-[var(--hub-text-muted)]">Celular</p>
+                <p className="font-medium">{formatBrPhoneDisplay(d.celular)}</p>
+              </div>
+            )}
+            <div>
+              <p className="text-xs text-[var(--hub-text-muted)]">WhatsApp</p>
+              <p className="font-medium">
+                {d.whatsappIgualCelular
+                  ? "Mesmo do celular"
+                  : d.whatsapp ? formatBrPhoneDisplay(d.whatsapp) : "—"}
+              </p>
+            </div>
+            {d.preferenciaComunicacao && (
+              <div>
+                <p className="text-xs text-[var(--hub-text-muted)]">Preferência de contato</p>
+                <p className="font-medium">{COMUNICACAO_OPTIONS.find((o) => o.id === d.preferenciaComunicacao)?.label ?? d.preferenciaComunicacao}</p>
+              </div>
+            )}
+            {d.formaPagamento && (
+              <div>
+                <p className="text-xs text-[var(--hub-text-muted)]">Forma de pagamento</p>
+                <p className="font-medium">
+                  {d.formaPagamento === "outro" && d.formaPagamentoOutro
+                    ? d.formaPagamentoOutro
+                    : labelFormaPagamento(d.formaPagamento)}
+                </p>
+              </div>
+            )}
+            {d.cupomCodigo.trim() && (
+              <div>
+                <p className="text-xs text-[var(--hub-text-muted)]">Cupom de desconto</p>
+                <p className="font-medium text-emerald-700">
+                  {d.cupomCodigo}
+                  {d.cupomValidoAte ? <span className="ml-1 text-xs font-normal text-[var(--hub-text-muted)]">válido até {formatDateBR(d.cupomValidoAte)}</span> : null}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </Card>
