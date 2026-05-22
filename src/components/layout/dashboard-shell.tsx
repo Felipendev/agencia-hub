@@ -62,7 +62,8 @@ const OWNER_GROUPS: NavGroup[] = [
   {
     label: "Configurações",
     items: [
-      { href: "/agencia", label: "Agência", icon: "layout" },
+      { href: "/agencia",        label: "Agência",        icon: "layout" },
+      { href: "/configuracoes",  label: "Configurações",  icon: "layout" },
     ],
   },
 ];
