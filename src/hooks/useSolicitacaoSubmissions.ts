@@ -62,7 +62,7 @@ export function useSolicitacaoSubmissions(options?: { poll?: boolean }) {
 
   // Initial fetch + optional polling
   useEffect(() => {
-    if (!isReady) return;
+    if (!isReady || !token) return;
     void refresh();
     if (!options?.poll) return;
     const id = setInterval(() => void refresh(), 30_000);

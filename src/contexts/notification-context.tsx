@@ -287,7 +287,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   // ── 5. Nova submissão pelo formulário público ────────────────────────────────
   useEffect(() => {
-    if (!isReady || !prefs.submissaoNova.enabled) return;
+    if (!isReady || !token || !prefs.submissaoNova.enabled) return;
 
     async function checkSubmissions() {
       try {
