@@ -51,7 +51,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
   const [titulo,      setTitulo]      = useState(cotacao.titulo);
   const [clienteId,   setClienteId]   = useState(cotacao.clienteId);
   const [status,      setStatus]      = useState<CotacaoStatus>(cotacao.status);
-  const [valorTotal,  setValorTotal]  = useState(String(cotacao.valorTotal));
+  const [valorTotal,  setValorTotal]  = useState(cotacao.valorTotal > 0 ? String(cotacao.valorTotal).replace(".", ",") : "");
   const [validade,    setValidade]    = useState(cotacao.validade);
   const [responsavel, setResponsavel] = useState(cotacao.responsavel);
   const [prioridade,  setPrioridade]  = useState(cotacao.prioridade);
