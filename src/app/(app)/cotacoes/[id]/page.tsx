@@ -117,7 +117,7 @@ export default function CotacaoDetalhePage() {
     if (!cotacao) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Syncing form state from derived data
     setStatusEdit(cotacao.status);
-    setValorEdit(String(cotacao.valorTotal));
+    setValorEdit(cotacao.valorTotal > 0 ? String(cotacao.valorTotal).replace(".", ",") : "");
     setValidadeEdit(cotacao.validade);
     setObsEdit(cotacao.observacoes);
   }, [cotacao]);
