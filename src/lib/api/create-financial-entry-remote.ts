@@ -23,6 +23,7 @@ function extractApiErrorMessage(
  */
 export async function createFinancialEntryRemote(
   draft: LancamentoFinanceiro,
+  token?: string | null,
 ): Promise<LancamentoFinanceiro | null> {
   const base = getAgenciaHubApiBaseUrl();
   if (!base) {
@@ -32,7 +33,10 @@ export async function createFinancialEntryRemote(
   const body = lancamentoToCreateRequest(draft);
   const res = await fetch(`${base}/financial-entries`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify(body),
   });
 
