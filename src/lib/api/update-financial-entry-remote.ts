@@ -27,6 +27,7 @@ function extractApiErrorMessage(
 export async function updateFinancialEntryRemote(
   current: LancamentoFinanceiro,
   patch: Partial<LancamentoFinanceiro>,
+  token?: string | null,
 ): Promise<LancamentoFinanceiro | null> {
   const base = getAgenciaHubApiBaseUrl();
   if (!base || !isUuid(current.id)) {
@@ -54,7 +55,10 @@ export async function updateFinancialEntryRemote(
 
   const res = await fetch(`${base}/financial-entries/${current.id}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify(body),
   });
 

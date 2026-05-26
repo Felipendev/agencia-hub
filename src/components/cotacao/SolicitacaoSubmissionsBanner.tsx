@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ImportarSubmissaoModal } from "@/components/cotacao/ImportarSubmissaoModal";
 import { useSolicitacaoSubmissions } from "@/hooks/useSolicitacaoSubmissions";
+import { useData } from "@/contexts/data-context";
 import { X } from "lucide-react";
 
 const STORAGE_KEY = "submissions-dismissed-ids";
@@ -28,10 +29,23 @@ function saveDismissedIds(ids: Set<string>) {
 export function SolicitacaoSubmissionsBanner() {
   const { list, selectedSubmission, setSelectedSubmission, handleImport, mergedClientes } =
     useSolicitacaoSubmissions({ poll: false });
+  const { cotacoes } = useData();
 
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(loadDismissedIds);
 
-  const pendingList = list.filter((s) => !dismissedIds.has(s.id));
+  const importedPublicIds = useMemo(
+    () =>
+      new Set(
+        cotacoes
+          .filter((c) => c.origemCriacao === "formulario_publico" && c.publicSubmissionId)
+          .map((c) => c.publicSubmissionId!),
+      ),
+    [cotacoes],
+  );
+
+  const pendingList = list.filter(
+    (s) => !dismissedIds.has(s.id) && !importedPublicIds.has(s.id),
+  );
 
   const handleDismiss = useCallback(() => {
     const updated = new Set([...dismissedIds, ...list.map((s) => s.id)]);

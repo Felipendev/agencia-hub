@@ -256,7 +256,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
       let novo = draft;
       try {
-        const remote = await createFinancialEntryRemote(draft);
+        const remote = await createFinancialEntryRemote(draft, token);
         if (remote) {
           novo = remote;
         }
@@ -273,7 +273,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       }));
       return novo;
     },
-    [],
+    [token],
   );
 
   const updateLancamento = useCallback(
@@ -289,7 +289,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setData((d) => {
         const current = d.lancamentos.find((x) => x.id === id);
         if (current) {
-          updateFinancialEntryRemote(current, patch).catch((e) => {
+          updateFinancialEntryRemote(current, patch, token).catch((e) => {
             console.warn(
               "[agencia-hub] Falha ao atualizar lançamento na API; mudança salva localmente.",
               e,
@@ -299,7 +299,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         return d;
       });
     },
-    [],
+    [token],
   );
 
   const deleteLancamento = useCallback(
