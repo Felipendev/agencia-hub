@@ -231,3 +231,73 @@ export function RestoreIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function IconCalculator(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+      <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M5 3h14a1 1 0 011 1v16a1 1 0 01-1 1H5a1 1 0 01-1-1V4a1 1 0 011-1zM7 7h10M8 12h1M8 16h1M12 12h1M12 16h1M16 11v6" />
+    </svg>
+  );
+}
+
+export function IconPlane(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+      <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M10.5 20.5l1.5-4 3.5-1.5-9-9-2 .5 2 5-3.5 1.5-2-1.5-1 .5 2 3 3 2 .5-1 5 2 1.5-2 5 2-1.5z" />
+      <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M14.5 3.5a2.121 2.121 0 013 3L8 16l-4-1.5L14.5 3.5z" />
+    </svg>
+  );
+}
+
+export function IconCash(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+      <rect x="2" y="6" width="20" height="12" rx="2" strokeWidth="2" />
+      <circle cx="12" cy="12" r="3" strokeWidth="2" />
+      <path strokeWidth="2" strokeLinecap="round" d="M6 9v.01M18 15v.01" />
+    </svg>
+  );
+}
+
+export function IconPlusCircle(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+      <circle cx="12" cy="12" r="9" strokeWidth="2" />
+      <path strokeWidth="2" strokeLinecap="round" d="M12 8v8M8 12h8" />
+    </svg>
+  );
+}
+
+export function IconMinusCircle(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+      <circle cx="12" cy="12" r="9" strokeWidth="2" />
+      <path strokeWidth="2" strokeLinecap="round" d="M8 12h8" />
+    </svg>
+  );
+}
+
+export function IconBuilding(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+      <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M4 21V5a1 1 0 011-1h8a1 1 0 011 1v16M14 21h6a1 1 0 001-1V10a1 1 0 00-1-1h-5M4 21h16M7.5 7h1M11.5 7h1M7.5 11h1M11.5 11h1M7.5 15h1M11.5 15h1M17 14h1M17 17h1" />
+    </svg>
+  );
+}
+
+export function IconSettingsGear(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+      <circle cx="12" cy="12" r="3" strokeWidth="2" />
+      <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+    </svg>
+  );
+}
+
+export function IconUserPlus(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+      <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M13 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM19 8v6M22 11h-6" />
+    </svg>
+  );
+}

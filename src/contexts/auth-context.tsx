@@ -213,7 +213,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // ── Mock login (sem API configurada) ──────────────────────────────────
+      // ── Mock login (somente desenvolvimento/teste) ───────────────────────
+      if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "test") {
+        return {
+          ok: false,
+          error: "Serviço de autenticação não configurado. Tente novamente mais tarde.",
+        };
+      }
       const local = trimmed.split("@")[0]?.replace(/\./g, " ") ?? "Usuário";
       const nome  = local.charAt(0).toUpperCase() + local.slice(1);
       const sessao: UsuarioSessao = {

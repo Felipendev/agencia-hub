@@ -1,7 +1,6 @@
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
 import {
   clienteToCreateRequest,
-  isProbablyValidEmail,
   mergeCustomerApiResponse,
 } from "@/lib/api/customer-mapper";
 import type { ApiCustomerResponse } from "@/lib/api/customer-types";
@@ -31,7 +30,7 @@ function extractApiError(
 }
 
 /**
- * `POST .../customers` quando a base URL está definida e o e-mail é válido.
+ * `POST .../customers` quando a base URL está definida.
  * Lança `DuplicateCustomerError` se a API retornar 409.
  */
 export async function createCustomerRemote(
@@ -39,7 +38,7 @@ export async function createCustomerRemote(
   token?: string | null,
 ): Promise<Cliente | null> {
   const base = getAgenciaHubApiBaseUrl();
-  if (!base || !isProbablyValidEmail(draft.email)) {
+  if (!base) {
     return null;
   }
 
@@ -69,7 +68,7 @@ export async function createCustomerRemote(
   }
 
   const api = parsed as ApiCustomerResponse;
-  if (!api?.id || !api.email) {
+  if (!api?.id) {
     throw new Error("Resposta da API inválida.");
   }
 

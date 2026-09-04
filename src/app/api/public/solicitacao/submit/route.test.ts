@@ -5,11 +5,13 @@ import { POST } from "./route";
 const mocks = vi.hoisted(() => ({
   getPublicConfig: vi.fn(),
   addSubmission: vi.fn(),
+  isLocalSolicitacaoStoreEnabled: vi.fn(),
 }));
 
 vi.mock("@/lib/solicitacao-server-store", () => ({
   getPublicConfig: mocks.getPublicConfig,
   addSubmission: mocks.addSubmission,
+  isLocalSolicitacaoStoreEnabled: mocks.isLocalSolicitacaoStoreEnabled,
 }));
 
 function jsonRequest(body: unknown) {
@@ -36,6 +38,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.getPublicConfig.mockResolvedValue({ slug: "demo" });
   mocks.addSubmission.mockResolvedValue({ id: "sub-1" });
+  mocks.isLocalSolicitacaoStoreEnabled.mockReturnValue(true);
 });
 
 afterEach(() => {
@@ -173,6 +176,7 @@ describe("POST /api/public/solicitacao/submit", () => {
 
   it("returns 503 na Vercel sem URL da API", async () => {
     vi.stubEnv("VERCEL", "1");
+    mocks.isLocalSolicitacaoStoreEnabled.mockReturnValue(false);
     const res = await POST(
       jsonRequest({
         slug: "demo",

@@ -90,6 +90,13 @@ export const COTACAO_STATUS_LABELS: Record<CotacaoStatus, string> = {
   cancelada: "Cancelada",
 };
 
+export const TRIP_STATUS_LABELS: Record<string, string> = {
+  UPCOMING: "Futura",
+  IN_PROGRESS: "Em andamento",
+  COMPLETED: "Concluída",
+  CANCELLED: "Cancelada",
+};
+
 export const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: "layout" as const },
   { href: "/clientes", label: "Clientes", icon: "users" as const },

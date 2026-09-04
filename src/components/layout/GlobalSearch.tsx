@@ -3,21 +3,26 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useData } from "@/contexts/data-context";
+import { useAuth } from "@/contexts/auth-context";
 import { SearchIcon, XIcon } from "@/components/icons";
 import type { Cliente, Cotacao } from "@/types";
 
+type TripHit = { id: string; customerName: string; bookingLocator: string | null; serviceType: string };
+
 type SearchResult = {
-  type: "cliente" | "cotacao";
+  type: "cliente" | "cotacao" | "viagem";
   id: string;
   title: string;
   subtitle: string;
   link: string;
-  data: Cliente | Cotacao;
+  data: Cliente | Cotacao | TripHit;
 };
 
 export function GlobalSearch() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [trips, setTrips] = useState<TripHit[]>([]);
+  const { token } = useAuth();
   const { clientes, cotacoes } = useData();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -42,8 +47,27 @@ export function GlobalSearch() {
     } else {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting query when modal closes
       setQuery("");
+      setTrips([]);
     }
   }, [open]);
+
+  // Viagens não fazem parte do data-context local; buscamos direto na API, com debounce.
+  useEffect(() => {
+    const base = process.env.NEXT_PUBLIC_AGENCIA_HUB_API_URL;
+    const term = query.trim();
+    if (!open || !base || !token || term.length < 2) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Clearing stale results when the query becomes too short/closed
+      setTrips([]);
+      return;
+    }
+    const timer = setTimeout(() => {
+      void fetch(`${base}/trips?locator=${encodeURIComponent(term)}`, { headers: { Authorization: `Bearer ${token}` } })
+        .then((response) => response.ok ? response.json() : [])
+        .then((rows: TripHit[]) => setTrips(rows))
+        .catch(() => setTrips([]));
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [query, open, token]);
 
   const results = useMemo(() => {
     if (!query.trim()) return [];
@@ -89,8 +113,20 @@ export function GlobalSearch() {
       }
     }
 
+    // Viagens (busca por localizador, feita no servidor — ver efeito acima)
+    for (const trip of trips) {
+      list.push({
+        type: "viagem",
+        id: trip.id,
+        title: trip.bookingLocator || trip.serviceType,
+        subtitle: `${trip.serviceType} · ${trip.customerName}`,
+        link: `/viagens/${trip.id}`,
+        data: trip,
+      });
+    }
+
     return list.slice(0, 20);
-  }, [query, clientes, cotacoes]);
+  }, [query, clientes, cotacoes, trips]);
 
   function handleSelect(result: SearchResult) {
     router.push(result.link);
@@ -123,7 +159,7 @@ export function GlobalSearch() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar clientes e cotações..."
+            placeholder="Buscar clientes, cotações e localizador de viagem..."
             className="flex-1 bg-transparent text-sm text-[var(--hub-blue-dark)] placeholder-slate-400 outline-none"
           />
           <button
@@ -158,10 +194,12 @@ export function GlobalSearch() {
                       className={`mt-0.5 rounded px-2 py-0.5 text-xs font-semibold ${
                         r.type === "cliente"
                           ? "bg-blue-100 text-blue-700"
-                          : "bg-amber-100 text-amber-700"
+                          : r.type === "cotacao"
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-emerald-100 text-emerald-700"
                       }`}
                     >
-                      {r.type === "cliente" ? "Cliente" : "Cotação"}
+                      {r.type === "cliente" ? "Cliente" : r.type === "cotacao" ? "Cotação" : "Viagem"}
                     </span>
                     <div className="flex-1">
                       <p className="font-medium text-[var(--hub-blue-dark)]">

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useData } from "@/contexts/data-context";
+import { useAuth } from "@/contexts/auth-context";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,10 +24,26 @@ export default function ClienteDetalhePage() {
   const params = useParams();
   const id = typeof params.id === "string" ? params.id : "";
   const { clientes, cotacoes, isReady } = useData();
+  const { token } = useAuth();
   const [editOpen, setEditOpen] = useState(false);
+  const [vendas, setVendas] = useState<Array<{ id: string; totalAmount: number; saleDate: string }>>([]);
+  const [viagens, setViagens] = useState<Array<{ id: string; serviceType: string; bookingLocator: string | null; status: string; travelStartDate: string | null }>>([]);
 
   const cliente = clientes.find((c) => c.id === id);
   const cotacoesDoCliente = cotacoes.filter((q) => q.clienteId === id);
+
+  useEffect(() => {
+    const base = process.env.NEXT_PUBLIC_AGENCIA_HUB_API_URL;
+    if (!base || !token || !id) return;
+    void fetch(`${base}/sales?customerId=${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((response) => response.ok ? response.json() : [])
+      .then((rows) => setVendas(rows))
+      .catch(() => setVendas([]));
+    void fetch(`${base}/trips?customerId=${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((response) => response.ok ? response.json() : [])
+      .then((rows) => setViagens(rows))
+      .catch(() => setViagens([]));
+  }, [id, token]);
 
   if (!isReady) {
     return <p className="text-sm text-[var(--hub-text-secondary)]">Carregando…</p>;
@@ -246,6 +263,22 @@ export default function ClienteDetalhePage() {
               ))}
             </ul>
           )}
+        </Card>
+
+        <Card>
+          <div className="mb-4 flex items-center justify-between">
+            <CardTitle>Histórico de vendas</CardTitle>
+            <Link href={`/vendas?clienteId=${cliente.id}`} className="text-sm font-medium text-[var(--hub-yellow)] hover:underline">+ Registrar venda</Link>
+          </div>
+          {vendas.length === 0 ? <p className="text-sm text-[var(--hub-text-muted)]">Nenhuma venda registrada para este cliente.</p> : <ul className="divide-y divide-[var(--hub-border)]">{vendas.map((venda) => <li key={venda.id} className="flex justify-between py-3 first:pt-0 text-sm"><span>{formatDateBR(venda.saleDate)}</span><strong>{formatBRL(Number(venda.totalAmount))}</strong></li>)}</ul>}
+        </Card>
+
+        <Card>
+          <div className="mb-4 flex items-center justify-between">
+            <CardTitle>Viagens</CardTitle>
+            <Link href={`/viagens/nova?clienteId=${cliente.id}`} className="text-sm font-medium text-[var(--hub-yellow)] hover:underline">+ Nova viagem</Link>
+          </div>
+          {viagens.length === 0 ? <p className="text-sm text-[var(--hub-text-muted)]">Nenhuma viagem registrada para este cliente.</p> : <ul className="divide-y divide-[var(--hub-border)]">{viagens.map((viagem) => <li key={viagem.id} className="py-3 first:pt-0 text-sm"><Link href={`/viagens/${viagem.id}`} className="flex justify-between hover:text-[var(--hub-blue)]"><span>{viagem.travelStartDate ? formatDateBR(viagem.travelStartDate) : "Sem data"} · {viagem.bookingLocator || "sem localizador"}</span><strong>{viagem.status}</strong></Link></li>)}</ul>}
         </Card>
       </div>
 

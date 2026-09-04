@@ -45,9 +45,16 @@ export async function updateFinancialEntryRemote(
   if (patch.clienteId !== undefined) {
     body.customerId = patch.clienteId && isUuid(patch.clienteId) ? patch.clienteId : null;
   }
+  if (patch.fornecedorId !== undefined) {
+    body.supplierId = patch.fornecedorId && isUuid(patch.fornecedorId) ? patch.fornecedorId : null;
+  }
   if (patch.contaBancaria !== undefined) {
     body.bankAccount = patch.contaBancaria?.trim() || null;
   }
+  if (patch.observacoes !== undefined) body.notes = patch.observacoes?.trim() || null;
+  if (patch.valorVenda !== undefined) body.saleAmount = patch.valorVenda;
+  if (patch.custoFornecedor !== undefined) body.supplierCost = patch.custoFornecedor;
+  if (patch.valorComissao !== undefined) body.commissionAmount = patch.valorComissao;
 
   if (Object.keys(body).length === 0) {
     return null;
