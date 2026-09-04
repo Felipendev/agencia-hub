@@ -56,6 +56,7 @@ export function GlobalSearch() {
     const base = process.env.NEXT_PUBLIC_AGENCIA_HUB_API_URL;
     const term = query.trim();
     if (!open || !base || !token || term.length < 2) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Clearing stale results when the query becomes too short/closed
       setTrips([]);
       return;
     }

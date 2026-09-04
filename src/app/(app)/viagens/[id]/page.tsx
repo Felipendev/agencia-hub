@@ -9,7 +9,6 @@ import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { BackButton } from "@/components/ui/back-button";
 import { useAuth } from "@/contexts/auth-context";
-import { useData } from "@/contexts/data-context";
 import { formatDateBR, formatDateTimeBR } from "@/lib/format";
 import { TRIP_STATUS_LABELS } from "@/lib/constants";
 
@@ -86,7 +85,7 @@ export default function ViagemDetalhePage() {
 
   return (
     <div className="space-y-6">
-      <BackButton />
+      <BackButton href="/viagens" label="Viagens" />
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[var(--hub-text-primary)]">{t.customerName}</h1>

@@ -255,6 +255,7 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
 
   useEffect(() => {
     if (!open) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting the type toggles to match the shortcut when the modal opens
     setTipoCliente(initialType === "cliente");
     setTipoFornecedor(initialType === "fornecedor");
   }, [initialType, open]);

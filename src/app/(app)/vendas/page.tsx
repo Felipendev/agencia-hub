@@ -260,8 +260,8 @@ export default function VendasPage() {
         method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ customerId, quotationId: quotationId || null, totalAmount: saleTotal, saleDate: registeredAt, recurrenceFrequency: recurrence === "ONE_TIME" ? null : recurrence, notes,
           receivables: agencyReceives > 0 ? installments.map((installment, index) => ({ number: index + 1, amount: number(installment.amount), dueDate: installment.dueDate, paymentMethod, bankAccount: receivingAccount || null })) : [],
-          items: lines.filter((line) => line.description.trim() && number(line.saleAmount) >= 0).map((line) => ({ description: line.description, itemType: "OTHER", saleAmount: number(line.saleAmount), supplierId: line.supplierId || null, supplierCost: line.supplierCost ? number(line.supplierCost) : null, customerPaysSupplierDirectly: line.direct, dueDate })),
-          commissions: commissions.filter((commission) => commission.userId && number(commission.value) >= 0 && commission.value !== "").map((commission) => ({ recipientUserId: commission.userId, calculationType: commission.kind, calculationValue: number(commission.value), dueDate })),
+          items: lines.filter((line) => line.description.trim() && number(line.saleAmount) >= 0).map((line) => ({ description: line.description, itemType: "OTHER", saleAmount: number(line.saleAmount), supplierId: line.supplierId || null, supplierCost: line.supplierCost ? number(line.supplierCost) : null, customerPaysSupplierDirectly: line.direct, dueDate: null })),
+          commissions: commissions.filter((commission) => commission.userId && number(commission.value) >= 0 && commission.value !== "").map((commission) => ({ recipientUserId: commission.userId, calculationType: commission.kind, calculationValue: number(commission.value), dueDate: null })),
         }),
       });
       if (!response.ok) { setError("Não foi possível registrar a venda. Revise os valores e tente novamente."); return; }
