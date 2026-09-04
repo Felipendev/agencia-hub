@@ -32,11 +32,17 @@ const STATUS_TONE: Record<string, "success" | "warning" | "danger" | "muted"> = 
   CANCELLED: "danger",
 };
 
+type SaleCommission = { payableId: string; saleId: string; customerId: string; customerName: string; saleDate: string; amount: number; dueDate: string | null; status: string; paidAt: string | null };
+
+const SALE_COMMISSION_STATUS_LABELS: Record<string, string> = { PENDING: "Pendente", PAID: "Paga" };
+const SALE_COMMISSION_STATUS_TONE: Record<string, "success" | "warning"> = { PENDING: "warning", PAID: "success" };
+
 export default function MinhasComissoesPage() {
   const { token } = useAuth();
   const toast = useToast();
   const [dashboard, setDashboard] = useState<ApiSalesAgentDashboardResponse | null>(null);
   const [quotations, setQuotations] = useState<ApiQuotationResponse[]>([]);
+  const [saleCommissions, setSaleCommissions] = useState<SaleCommission[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,9 +50,10 @@ export default function MinhasComissoesPage() {
 
     async function load() {
       try {
-        const [dashData, quots] = await Promise.all([
+        const [dashData, quots, saleComms] = await Promise.all([
           getSalesAgentDashboardRemote(token!),
           apiFetch<ApiQuotationResponse[]>("/quotations", {}, token),
+          apiFetch<SaleCommission[]>("/sales/commissions/mine", {}, token),
         ]);
         setDashboard(dashData);
         // Filter to show only approved/accepted quotations for commission view
@@ -54,6 +61,7 @@ export default function MinhasComissoesPage() {
           (q) => q.status === "ACCEPTED"
         );
         setQuotations(approved);
+        setSaleCommissions(saleComms);
       } catch {
         toast.error("Erro ao carregar comissões.");
       } finally {
@@ -92,11 +100,14 @@ export default function MinhasComissoesPage() {
     return 0;
   }
 
+  const saleCommissionsPending = saleCommissions.filter((c) => c.status === "PENDING").reduce((sum, c) => sum + c.amount, 0);
+  const saleCommissionsPaid = saleCommissions.filter((c) => c.status === "PAID").reduce((sum, c) => sum + c.amount, 0);
+
   return (
     <div className="space-y-8">
       <PageHeader
         title="Minhas Comissões"
-        description="Acompanhe suas comissões sobre cotações aprovadas."
+        description="Acompanhe suas comissões sobre cotações aprovadas e sobre vendas registradas."
       />
 
       {/* Summary cards */}
@@ -180,6 +191,56 @@ export default function MinhasComissoesPage() {
                     <td className="py-3">
                       <Badge tone={STATUS_TONE[q.status] ?? "muted"}>
                         {STATUS_LABELS[q.status] ?? q.status}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+
+      {/* Sale-based commissions */}
+      <Card>
+        <CardTitle>Comissões de vendas</CardTitle>
+        <p className="mt-1 text-sm text-[var(--hub-text-secondary)]">Comissões atribuídas a mim em vendas registradas no Financeiro. Só viram saída de caixa quando a agência as paga.</p>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <Card>
+            <p className="text-sm font-medium text-[var(--hub-text-secondary)]">Pendente de pagamento</p>
+            <p className="mt-1 text-2xl font-bold text-amber-600">{formatBRL(saleCommissionsPending)}</p>
+          </Card>
+          <Card>
+            <p className="text-sm font-medium text-[var(--hub-text-secondary)]">Já paga</p>
+            <p className="mt-1 text-2xl font-bold text-emerald-600">{formatBRL(saleCommissionsPaid)}</p>
+          </Card>
+        </div>
+
+        {saleCommissions.length === 0 ? (
+          <p className="mt-4 text-sm text-[var(--hub-text-muted)]">Nenhuma comissão de venda atribuída a você ainda.</p>
+        ) : (
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[var(--hub-border)] text-left text-xs font-medium uppercase tracking-wide text-[var(--hub-text-muted)]">
+                  <th className="pb-2 pr-4">Cliente</th>
+                  <th className="pb-2 pr-4">Data da venda</th>
+                  <th className="pb-2 pr-4 text-right">Valor da comissão</th>
+                  <th className="pb-2 pr-4">Previsão de pagamento</th>
+                  <th className="pb-2">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--hub-border)]">
+                {saleCommissions.map((c) => (
+                  <tr key={c.payableId} className="hover:bg-[var(--hub-bg-subtle)]">
+                    <td className="py-3 pr-4 font-medium text-[var(--hub-blue-dark)]">{c.customerName}</td>
+                    <td className="py-3 pr-4 text-[var(--hub-text-secondary)]">{c.saleDate}</td>
+                    <td className="py-3 pr-4 text-right tabular-nums font-semibold text-emerald-600">{formatBRL(c.amount)}</td>
+                    <td className="py-3 pr-4 text-[var(--hub-text-secondary)]">{c.dueDate ?? "—"}</td>
+                    <td className="py-3">
+                      <Badge tone={SALE_COMMISSION_STATUS_TONE[c.status] ?? "muted"}>
+                        {SALE_COMMISSION_STATUS_LABELS[c.status] ?? c.status}
                       </Badge>
                     </td>
                   </tr>

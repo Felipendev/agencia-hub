@@ -40,6 +40,10 @@ function VerifyEmailForm() {
     try {
       const base = getAgenciaHubApiBaseUrl();
       if (!base) {
+        if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "test") {
+          setError("Serviço de verificação não configurado. Tente novamente mais tarde.");
+          return;
+        }
         applySession(
           { id: "mock-owner", email: email || "usuario@demo.com", nome: "Usuário", empresa: "Minha Agência", accountKind: "AGENCY_OWNER" },
           "mock-token",
@@ -84,6 +88,10 @@ function VerifyEmailForm() {
     try {
       const base = getAgenciaHubApiBaseUrl();
       if (!base) {
+        if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "test") {
+          setError("Serviço de verificação não configurado. Tente novamente mais tarde.");
+          return;
+        }
         applySession(
           { id: "mock-owner", email, nome: "Usuário", empresa: "Minha Agência", accountKind: "AGENCY_OWNER" },
           "mock-token",
@@ -147,6 +155,10 @@ function VerifyEmailForm() {
     try {
       const base = getAgenciaHubApiBaseUrl();
       if (!base) {
+        if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "test") {
+          setError("Serviço de verificação não configurado. Tente novamente mais tarde.");
+          return;
+        }
         setResendCooldown(60);
         setResendSuccess(true);
         return;

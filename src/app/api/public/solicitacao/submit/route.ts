@@ -3,7 +3,11 @@ import type { CotacaoDetalhes } from "@/types";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
 import { isUuid } from "@/lib/api/quotation-mapper";
 import { brPhoneDigits, isValidBrazilianPhone } from "@/lib/br-phone";
-import { addSubmission, getPublicConfig } from "@/lib/solicitacao-server-store";
+import {
+  addSubmission,
+  getPublicConfig,
+  isLocalSolicitacaoStoreEnabled,
+} from "@/lib/solicitacao-server-store";
 import { isValidSolicitacaoSlug } from "@/lib/solicitacao-slug";
 
 export const runtime = "nodejs";
@@ -121,11 +125,11 @@ export async function POST(request: Request) {
     }
   }
 
-  if (process.env.VERCEL === "1") {
+  if (!isLocalSolicitacaoStoreEnabled()) {
     return NextResponse.json(
       {
         error:
-          "Serviço de orçamentos não configurado. Defina NEXT_PUBLIC_AGENCIA_HUB_API_URL na Vercel apontando para a API Java.",
+          "Serviço de orçamentos não configurado. Configure a API antes de receber solicitações em produção.",
       },
       { status: 503 },
     );

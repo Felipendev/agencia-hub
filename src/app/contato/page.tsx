@@ -13,15 +13,18 @@ export default function ContatoPage() {
   const [assunto, setAssunto] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [enviado, setEnviado] = useState(false);
-  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    // Simulate sending — no backend needed for now
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const subject = `[Contato AgênciasHub] ${assunto.trim()}`;
+    const body = [
+      `Nome: ${nome.trim()}`,
+      `E-mail: ${email.trim()}`,
+      "",
+      mensagem.trim(),
+    ].join("\n");
+    window.location.href = `mailto:contato@agenciashub.com.br?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     setEnviado(true);
-    setLoading(false);
   }
 
   return (
@@ -51,9 +54,9 @@ export default function ContatoPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
               </svg>
             </div>
-            <h2 className="mt-4 text-lg font-semibold text-emerald-800">Mensagem enviada!</h2>
+            <h2 className="mt-4 text-lg font-semibold text-emerald-800">E-mail pronto para envio</h2>
             <p className="mt-1 text-sm text-emerald-700">
-              Recebemos sua mensagem e retornaremos em breve.
+              Abrimos seu aplicativo de e-mail com a mensagem preenchida. Confirme o envio nele para falar conosco.
             </p>
           </div>
         ) : (
@@ -103,8 +106,8 @@ export default function ContatoPage() {
                 className="w-full rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white px-3 py-2 text-sm text-[var(--hub-blue-dark)] placeholder:text-[var(--hub-text-muted)] focus:border-[var(--hub-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--hub-blue)]/20"
               />
             </div>
-            <Button type="submit" className="w-full !py-3 text-base" disabled={loading}>
-              {loading ? "Enviando…" : "Enviar"}
+            <Button type="submit" className="w-full !py-3 text-base">
+              Abrir e-mail para envio
             </Button>
           </form>
         )}
@@ -131,7 +134,7 @@ export default function ContatoPage() {
             WhatsApp
           </a>
           <p className="text-sm text-[var(--hub-text-muted)]">
-            E-mail: <a href="o" className="font-medium text-[var(--hub-blue)] hover:underline">contato@agenciashub.com.br</a>
+            E-mail: <a href="mailto:contato@agenciashub.com.br" className="font-medium text-[var(--hub-blue)] hover:underline">contato@agenciashub.com.br</a>
           </p>
         </div>
       </main>

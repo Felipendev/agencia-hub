@@ -66,7 +66,7 @@ function statusStyle(status: CotacaoStatus | "pending"): string {
 
 export function SolicitacoesRecebidasList() {
   const { list, selectedSubmission, setSelectedSubmission, handleImport, mergedClientes } =
-    useSolicitacaoSubmissions({ poll: true });
+    useSolicitacaoSubmissions();
   const { cotacoes, clientes } = useData();
   const [page, setPage] = useState(1);
   const [dismissed, setDismissed] = useState<Set<string>>(loadDismissed);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -147,7 +147,10 @@ function KpiFinCard({
 type Aba = "lancamentos" | "graficos";
 
 export default function FinanceiroPage() {
-  const { clientes, lancamentos, addLancamento, updateLancamento, deleteLancamento, isReady } = useData();
+  const {
+    clientes, lancamentos, addLancamento, updateLancamento, deleteLancamento,
+    syncLancamentosFromApi, hasRemoteApi, isReady,
+  } = useData();
   const toast = useToast();
 
   const [aba, setAba] = useState<Aba>("lancamentos");
@@ -176,24 +179,32 @@ export default function FinanceiroPage() {
     setEditConta(l.contaBancaria ?? "");
   }
   function fecharEditar() { setEditando(null); }
-  function handleSalvarEdicao(e: React.FormEvent) {
+  async function handleSalvarEdicao(e: React.FormEvent) {
     e.preventDefault();
     if (!editando) return;
     const v = Math.abs(parseFloat(editValor.replace(",", ".")) || 0);
     if (!editDescricao.trim() || v === 0) return;
-    updateLancamento(editando.id, {
-      descricao: editDescricao.trim(), tipo: editTipo, categoria: editCategoria,
-      valor: v, data: editData, status: editStatus,
-      clienteId: editClienteId || undefined,
-      contaBancaria: editConta.trim() || undefined,
-    });
-    toast.success("Lançamento atualizado!");
-    fecharEditar();
+    try {
+      await updateLancamento(editando.id, {
+        descricao: editDescricao.trim(), tipo: editTipo, categoria: editCategoria,
+        valor: v, data: editData, status: editStatus,
+        clienteId: editClienteId || undefined,
+        contaBancaria: editConta.trim() || undefined,
+      });
+      toast.success("Lançamento atualizado!");
+      fecharEditar();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível atualizar o lançamento.");
+    }
   }
   async function handleExcluir(l: LancamentoFinanceiro) {
     if (!confirm(`Excluir "${l.descricao}"?`)) return;
-    await deleteLancamento(l.id);
-    toast.success("Lançamento excluído.");
+    try {
+      await deleteLancamento(l.id);
+      toast.success("Lançamento excluído.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível excluir o lançamento.");
+    }
   }
 
   // Filters
@@ -214,6 +225,14 @@ export default function FinanceiroPage() {
   const [status, setStatus] = useState<LancamentoStatus>("confirmado");
   const [clienteId, setClienteId] = useState("");
   const [contaBancaria, setContaBancaria] = useState("");
+  const [observacoes, setObservacoes] = useState("");
+
+  useEffect(() => {
+    if (!isReady || !hasRemoteApi) return;
+    void syncLancamentosFromApi().catch((error) => {
+      toast.error(error instanceof Error ? error.message : "Não foi possível carregar o financeiro.");
+    });
+  }, [hasRemoteApi, isReady, syncLancamentosFromApi, toast]);
 
   const nomeCliente = useMemo(() => {
     const m = new Map<string, string>();
@@ -236,20 +255,26 @@ export default function FinanceiroPage() {
   const fluxo  = useMemo(() => buildFluxoCaixa(filtrados), [filtrados]);
   const pieData = useMemo(() => buildPieData(filtrados), [filtrados]);
 
-  function handleAdd(e: React.FormEvent) {
+  async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     if (!descricao.trim()) return;
     const v = Math.abs(parseFloat(valor.replace(",", ".")) || 0);
     if (v === 0) return;
-    void addLancamento({
-      descricao: descricao.trim(), tipo, categoria, valor: v,
-      data: data.slice(0, 10), status,
-      clienteId: clienteId || undefined,
-      contaBancaria: contaBancaria.trim() || undefined,
-    });
-    setDescricao(""); setValor(""); setClienteId(""); setContaBancaria("");
-    setShowForm(false);
-    toast.success("Lançamento registrado!");
+    try {
+      await addLancamento({
+        descricao: descricao.trim(), tipo, categoria, valor: v,
+        data: data.slice(0, 10), status,
+        clienteId: clienteId || undefined,
+        contaBancaria: contaBancaria.trim() || undefined,
+        observacoes: observacoes.trim() || undefined,
+      });
+      setDescricao(""); setValor(""); setClienteId(""); setContaBancaria("");
+      setObservacoes("");
+      setShowForm(false);
+      toast.success("Lançamento registrado!");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível registrar o lançamento.");
+    }
   }
 
   if (!isReady) {
@@ -348,15 +373,14 @@ export default function FinanceiroPage() {
             <Download className="h-3.5 w-3.5" />
             Exportar
           </button>
-          <button
-            type="button"
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 rounded-[var(--hub-radius)] px-3 py-2 text-xs font-semibold shadow-[var(--hub-shadow-xs)] transition-all"
-            style={{ background: "var(--hub-yellow)", color: "var(--hub-brand-dark)" }}
-          >
+          <a href="/financeiro/receita" className="flex items-center gap-1.5 rounded-[var(--hub-radius)] bg-emerald-600 px-3 py-2 text-xs font-semibold text-white shadow-[var(--hub-shadow-xs)] transition-all hover:bg-emerald-700">
             <Plus className="h-3.5 w-3.5" />
-            Novo lançamento
-          </button>
+            Cadastrar receita
+          </a>
+          <a href="/financeiro/despesa" className="flex items-center gap-1.5 rounded-[var(--hub-radius)] bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-[var(--hub-shadow-xs)] transition-all hover:bg-red-700">
+            <Plus className="h-3.5 w-3.5" />
+            Cadastrar despesa
+          </a>
         </div>
       </div>
 
@@ -685,6 +709,13 @@ export default function FinanceiroPage() {
               </div>
               <div className="sm:col-span-2">
                 <ClientePicker id="cli-fin" label="Cliente (opcional)" clientes={clientes} value={clienteId} onChange={setClienteId} />
+              </div>
+              <div className="sm:col-span-2 rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] p-3 text-sm text-[var(--hub-text-secondary)]">
+                Este formulário registra apenas dinheiro que entrou ou saiu da conta. Para cadastrar venda, fornecedor, parcelas ou comissão, use a aba <a href="/vendas" className="font-medium text-[var(--hub-blue)] underline">Vendas</a>.
+              </div>
+              <div className="sm:col-span-2">
+                <Label htmlFor="obs-fin">Observações</Label>
+                <textarea id="obs-fin" rows={3} value={observacoes} onChange={(e) => setObservacoes(e.target.value)} className="w-full rounded-[var(--hub-radius)] border border-[var(--hub-border)] px-3 py-2 text-sm" placeholder="Detalhes extras sobre a reserva ou lançamento" />
               </div>
               <div className="flex justify-end gap-2 sm:col-span-2">
                 <Button type="button" variant="secondary" onClick={() => setShowForm(false)}>Cancelar</Button>

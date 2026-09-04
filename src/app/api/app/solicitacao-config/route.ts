@@ -2,7 +2,10 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
 import { isValidSolicitacaoSlug } from "@/lib/solicitacao-slug";
-import { upsertConfig } from "@/lib/solicitacao-server-store";
+import {
+  isLocalSolicitacaoStoreEnabled,
+  upsertConfig,
+} from "@/lib/solicitacao-server-store";
 import type { SolicitacaoPublicaConfig } from "@/types/solicitacao-publica";
 
 export const runtime = "nodejs";
@@ -116,6 +119,12 @@ export async function PUT(request: Request) {
   };
 
   if (!base) {
+    if (!isLocalSolicitacaoStoreEnabled()) {
+      return NextResponse.json(
+        { error: "Serviço de configuração não está disponível em produção." },
+        { status: 503 },
+      );
+    }
     await upsertConfig(apiBody);
     return NextResponse.json({ ok: true, config: apiBody });
   }

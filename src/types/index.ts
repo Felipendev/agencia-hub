@@ -91,7 +91,13 @@ export interface LancamentoFinanceiro {
   data: string;
   status: LancamentoStatus;
   clienteId?: string;
+  fornecedorId?: string;
   contaBancaria?: string;
+  recorrencia?: "MONTHLY" | "WEEKLY" | "YEARLY";
+  observacoes?: string;
+  valorVenda?: number;
+  custoFornecedor?: number;
+  valorComissao?: number;
 }
 
 /**

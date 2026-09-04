@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useData } from "@/contexts/data-context";
 import { useToast } from "@/components/ui/toast";
 import { DuplicateCustomerError } from "@/lib/api/create-customer-remote";
@@ -35,6 +35,7 @@ type Props = {
   onClose: () => void;
   onCreated: (cliente: Cliente) => void;
   keepOpenAfterSave?: boolean;
+  initialType?: "cliente" | "fornecedor";
 };
 
 type TabId =
@@ -195,7 +196,7 @@ function TipoSwitch({
   );
 }
 
-export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave = false }: Props) {
+export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave = false, initialType = "cliente" }: Props) {
   const { addCliente } = useData();
   const toast = useToast();
   const [tab, setTab] = useState<TabId>("contato");
@@ -251,6 +252,12 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
   );
 
   const [observacoes, setObservacoes] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+    setTipoCliente(initialType === "cliente");
+    setTipoFornecedor(initialType === "fornecedor");
+  }, [initialType, open]);
 
   function patchEndereco(patch: Partial<ClienteEndereco>) {
     setEndereco((e) => ({ ...e, ...patch }));
@@ -381,7 +388,7 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
         endereco: end,
       });
       onCreated(novo);
-      toast.success(`Cliente "${novo.nome}" cadastrado!`);
+      toast.success(`Pessoa "${novo.nome}" cadastrada!`);
       reset();
       if (!keepOpenAfterSave) onClose();
       return true;
@@ -410,7 +417,7 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
             id="novo-cli-titulo"
             className="text-lg font-bold text-[var(--hub-blue-dark)]"
           >
-            Novo cliente
+            Nova pessoa
           </h2>
           <button
             type="button"

@@ -13,7 +13,7 @@ import {
   seedCotacoes,
   seedLancamentos,
 } from "@/data/seed";
-import { createCustomerRemote, DuplicateCustomerError } from "@/lib/api/create-customer-remote";
+import { createCustomerRemote } from "@/lib/api/create-customer-remote";
 import { softDeleteCustomer } from "@/lib/api/soft-delete-remote";
 import { createQuotationRemote } from "@/lib/api/create-quotation-remote";
 import { updateQuotationRemote } from "@/lib/api/update-quotation-remote";
@@ -24,6 +24,8 @@ import { useAuth } from "@/contexts/auth-context";
 import { getHasRemoteApi } from "@/lib/api/agencia-hub-env";
 import { listQuotationsRemote } from "@/lib/api/list-quotations-remote";
 import { listCustomersRemote } from "@/lib/api/list-customers-remote";
+import { listFinancialEntriesRemote } from "@/lib/api/list-financial-entries-remote";
+import { updateCustomerRemote } from "@/lib/api/update-customer-remote";
 import { cotacaoStatusToApi, isUuid } from "@/lib/api/quotation-mapper";
 import { mergeCotacaoDetalhes, migrateCotacao } from "@/lib/cotacao-migrate";
 import { generateId } from "@/lib/format";
@@ -142,14 +144,14 @@ export type DataContextValue = {
   lancamentos: LancamentoFinanceiro[];
   cotacoes: Cotacao[];
   addCliente: (c: Omit<Cliente, "id" | "createdAt">) => Promise<Cliente>;
-  updateCliente: (id: string, patch: Partial<Cliente>) => void;
+  updateCliente: (id: string, patch: Partial<Cliente>) => Promise<void>;
   deleteCliente: (id: string) => Promise<void>;
   /** Verifica duplicidade antes de criar/editar. `excludeId` = próprio id ao editar. */
   checkDuplicate: (email: string, telefone: string, excludeId?: string) => ClienteDuplicateCheck;
   addLancamento: (
     l: Omit<LancamentoFinanceiro, "id">,
   ) => Promise<LancamentoFinanceiro>;
-  updateLancamento: (id: string, patch: Partial<LancamentoFinanceiro>) => void;
+  updateLancamento: (id: string, patch: Partial<LancamentoFinanceiro>) => Promise<void>;
   deleteLancamento: (id: string) => Promise<void>;
   addCotacao: (
     c: Omit<Cotacao, "id" | "createdAt" | "updatedAt">,
@@ -162,6 +164,8 @@ export type DataContextValue = {
   /** Carrega cotações do backend e substitui a lista em memória (e localStorage). */
   syncCotacoesFromApi: (params?: SyncCotacoesFromApiParams) => Promise<void>;
   syncClientesFromApi: () => Promise<void>;
+  /** Carrega os lançamentos da agência atual pela API. */
+  syncLancamentosFromApi: () => Promise<void>;
 };
 
 const DataContext = createContext<DataContextValue | null>(null);
@@ -205,33 +209,38 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     };
 
     let novo = draft;
-    try {
-      const remote = await createCustomerRemote(draft, token);
-      if (remote) {
-        novo = remote;
+    if (getHasRemoteApi()) {
+      if (!token) {
+        throw new Error("Sua sessão expirou. Entre novamente para cadastrar o cliente.");
       }
-    } catch (e) {
-      // Duplicidade confirmada pelo backend — propaga para o chamador tratar
-      if (e instanceof DuplicateCustomerError) throw e;
-      // Outros erros de rede: salva só localmente
-      console.warn(
-        "[agencia-hub] Falha ao criar cliente na API; usando só armazenamento local.",
-        e,
-      );
+      const remote = await createCustomerRemote(draft, token);
+      if (!remote) {
+        throw new Error("A API de clientes não está configurada.");
+      }
+      novo = remote;
     }
 
     setData((d) => ({ ...d, clientes: [novo, ...d.clientes] }));
     return novo;
   }, [token]);
 
-  const updateCliente = useCallback((id: string, patch: Partial<Cliente>) => {
+  const updateCliente = useCallback(async (id: string, patch: Partial<Cliente>) => {
+    const current = data.clientes.find((cliente) => cliente.id === id);
+    if (!current) throw new Error("Cliente não encontrado.");
+
+    let updated: Cliente = { ...current, ...patch };
+    if (getHasRemoteApi()) {
+      if (!token) throw new Error("Sua sessão expirou. Entre novamente para atualizar o cliente.");
+      updated = await updateCustomerRemote(current, patch, token);
+    }
+
     setData((d) => ({
       ...d,
-      clientes: d.clientes.map((c) =>
-        c.id === id ? { ...c, ...patch } : c,
+      clientes: d.clientes.map((cliente) =>
+        cliente.id === id ? updated : cliente,
       ),
     }));
-  }, []);
+  }, [data.clientes, token]);
 
   const deleteCliente = useCallback(async (id: string) => {
     if (hasRemoteApi && token && isUuid(id)) {
@@ -253,18 +262,17 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const addLancamento = useCallback(
     async (l: Omit<LancamentoFinanceiro, "id">) => {
       const draft: LancamentoFinanceiro = { ...l, id: generateId() };
-
       let novo = draft;
-      try {
-        const remote = await createFinancialEntryRemote(draft, token);
-        if (remote) {
-          novo = remote;
+
+      if (getHasRemoteApi()) {
+        if (!token) {
+          throw new Error("Sua sessão expirou. Entre novamente para registrar o lançamento.");
         }
-      } catch (e) {
-        console.warn(
-          "[agencia-hub] Falha ao criar lançamento na API; usando só armazenamento local.",
-          e,
-        );
+        const remote = await createFinancialEntryRemote(draft, token);
+        if (!remote) {
+          throw new Error("A API financeira não está configurada.");
+        }
+        novo = remote;
       }
 
       setData((d) => ({
@@ -277,39 +285,35 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   );
 
   const updateLancamento = useCallback(
-    (id: string, patch: Partial<LancamentoFinanceiro>) => {
+    async (id: string, patch: Partial<LancamentoFinanceiro>) => {
+      const current = data.lancamentos.find((entry) => entry.id === id);
+      if (!current) throw new Error("Lançamento não encontrado.");
+
+      let updated: LancamentoFinanceiro = { ...current, ...patch };
+      if (getHasRemoteApi()) {
+        if (!token) throw new Error("Sua sessão expirou. Entre novamente para atualizar o lançamento.");
+        const remote = await updateFinancialEntryRemote(current, patch, token);
+        if (!remote) throw new Error("Este lançamento ainda não foi sincronizado com a API.");
+        updated = remote;
+      }
+
       setData((d) => ({
         ...d,
-        lancamentos: d.lancamentos.map((x) =>
-          x.id === id ? { ...x, ...patch } : x,
-        ),
+        lancamentos: d.lancamentos.map((entry) => entry.id === id ? updated : entry),
       }));
-
-      // Sincroniza com o backend em background (fire-and-forget)
-      setData((d) => {
-        const current = d.lancamentos.find((x) => x.id === id);
-        if (current) {
-          updateFinancialEntryRemote(current, patch, token).catch((e) => {
-            console.warn(
-              "[agencia-hub] Falha ao atualizar lançamento na API; mudança salva localmente.",
-              e,
-            );
-          });
-        }
-        return d;
-      });
     },
-    [token],
+    [data.lancamentos, token],
   );
 
   const deleteLancamento = useCallback(
     async (id: string) => {
-      setData((d) => ({ ...d, lancamentos: d.lancamentos.filter((x) => x.id !== id) }));
-      try {
-        await deleteFinancialEntryRemote(id, token);
-      } catch (e) {
-        console.warn("[agencia-hub] Falha ao excluir lançamento na API.", e);
+      if (getHasRemoteApi()) {
+        if (!token) throw new Error("Sua sessão expirou. Entre novamente para excluir o lançamento.");
+        if (!isUuid(id)) throw new Error("Este lançamento ainda não foi sincronizado com a API.");
+        const deleted = await deleteFinancialEntryRemote(id, token);
+        if (!deleted) throw new Error("Não foi possível excluir o lançamento na API.");
       }
+      setData((d) => ({ ...d, lancamentos: d.lancamentos.filter((x) => x.id !== id) }));
     },
     [token],
   );
@@ -330,16 +334,15 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       };
 
       let novo = draft;
-      try {
-        const remote = await createQuotationRemote(draft, token);
-        if (remote) {
-          novo = remote;
+      if (getHasRemoteApi()) {
+        if (!token) {
+          throw new Error("Sua sessão expirou. Entre novamente para criar a cotação.");
         }
-      } catch (e) {
-        console.warn(
-          "[agencia-hub] Falha ao criar cotação na API; usando só armazenamento local.",
-          e,
-        );
+        const remote = await createQuotationRemote(draft, token);
+        if (!remote) {
+          throw new Error("A API de cotações não está configurada.");
+        }
+        novo = remote;
       }
 
       setData((d) => ({
@@ -443,6 +446,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     }
   }, [token]);
 
+  const syncLancamentosFromApi = useCallback(async () => {
+    if (!getHasRemoteApi()) return;
+    if (!token) throw new Error("Sua sessão expirou. Entre novamente para consultar o financeiro.");
+    const list = await listFinancialEntriesRemote(token);
+    setData((d) => ({ ...d, lancamentos: list }));
+  }, [token]);
+
   const value = useMemo<DataContextValue>(
     () => ({
       ...data,
@@ -460,6 +470,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       hasRemoteApi,
       syncCotacoesFromApi,
       syncClientesFromApi,
+      syncLancamentosFromApi,
     }),
     [
       data,
@@ -477,6 +488,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       hasRemoteApi,
       syncCotacoesFromApi,
       syncClientesFromApi,
+      syncLancamentosFromApi,
     ],
   );
 

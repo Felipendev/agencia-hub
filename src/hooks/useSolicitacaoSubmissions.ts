@@ -20,7 +20,7 @@ function validadeEmDias(dias: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-export function useSolicitacaoSubmissions(options?: { poll?: boolean }) {
+export function useSolicitacaoSubmissions() {
   const { token } = useAuth();
   const { clientes, addCliente, addCotacao, isReady } = useData();
   const toast = useToast();
@@ -28,6 +28,8 @@ export function useSolicitacaoSubmissions(options?: { poll?: boolean }) {
   const [selectedSubmission, setSelectedSubmission] =
     useState<SolicitacaoPublicSubmission | null>(null);
   const [remoteClientes, setRemoteClientes] = useState<Cliente[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
 
   const hasRemoteApi = getHasRemoteApi();
 
@@ -45,39 +47,31 @@ export function useSolicitacaoSubmissions(options?: { poll?: boolean }) {
   }, [token]);
 
   const refresh = useCallback(async () => {
+    setIsRefreshing(true);
+    setRefreshError(null);
     try {
       const res = await fetch("/api/app/solicitacao-submissions", {
         credentials: "include",
         headers: authHeaders(),
       });
-      if (!res.ok) return;
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = (await res.json()) as {
         submissions?: SolicitacaoPublicSubmission[];
       };
       setList(data.submissions ?? []);
-    } catch {
-      /* silent — network issues won't break the page */
+    } catch (error) {
+      setRefreshError("Não foi possível atualizar as solicitações. Tente novamente.");
+      console.warn("[submissions] Falha ao atualizar solicitações.", error);
+    } finally {
+      setIsRefreshing(false);
     }
   }, [authHeaders]);
 
-  // Initial fetch + optional polling
+  // Consulta uma vez ao abrir Cotações. Atualizações seguintes são manuais.
   useEffect(() => {
     if (!isReady || !token) return;
     void refresh();
-    if (!options?.poll) return;
-    const id = setInterval(() => void refresh(), 30_000);
-    return () => clearInterval(id);
-  }, [isReady, refresh, options?.poll]);
-
-  // Refresh on tab focus (polling mode only)
-  useEffect(() => {
-    if (!options?.poll) return;
-    function onVisible() {
-      if (document.visibilityState === "visible") void refresh();
-    }
-    document.addEventListener("visibilitychange", onVisible);
-    return () => document.removeEventListener("visibilitychange", onVisible);
-  }, [refresh, options?.poll]);
+  }, [isReady, token, refresh]);
 
   // Refresh when another instance (e.g. the banner) imports a submission
   useEffect(() => {
@@ -218,5 +212,7 @@ export function useSolicitacaoSubmissions(options?: { poll?: boolean }) {
     setSelectedSubmission,
     handleImport,
     mergedClientes,
+    isRefreshing,
+    refreshError,
   };
 }

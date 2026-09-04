@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ClientePicker } from "@/components/cliente/ClientePicker";
 import { BackButton } from "@/components/ui/back-button";
 import { PageHeader } from "@/components/layout/page-header";
+import { useToast } from "@/components/ui/toast";
 import { listSalesAgentsRemote } from "@/lib/api/users-remote";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
 import type { ApiUserResponse } from "@/lib/api/auth-types";
@@ -25,6 +26,7 @@ export default function NovaCotacaoPage() {
   const searchParams = useSearchParams();
   const { user, token } = useAuth();
   const { clientes, addCotacao, isReady } = useData();
+  const toast = useToast();
 
   const isOwner = user?.accountKind === "AGENCY_OWNER";
   const [sellers, setSellers] = useState<ApiUserResponse[]>([]);
@@ -105,26 +107,30 @@ export default function NovaCotacaoPage() {
       det.destinoForm.trim() ||
       "";
 
-    const novo = await addCotacao({
-      clienteId,
-      titulo: titulo.trim(),
-      destino: trechosDestino || "—",
-      valorTotal: v,
-      moeda: "BRL",
-      status: "aguardando",
-      validade,
-      dataInicioViagem: det.dataIda || undefined,
-      dataFimViagem: det.dataVolta || undefined,
-      observacoes: observacoes.trim(),
-      detalhes: {
-        ...det,
-        destinoForm: trechosDestino || det.destinoForm,
-      },
-      tags: tagList,
-      prioridade,
-      responsavel: responsavel.trim() || "Equipe",
-    });
-    router.push(`/cotacoes/${novo.id}`);
+    try {
+      const novo = await addCotacao({
+        clienteId,
+        titulo: titulo.trim(),
+        destino: trechosDestino || "—",
+        valorTotal: v,
+        moeda: "BRL",
+        status: "aguardando",
+        validade,
+        dataInicioViagem: det.dataIda || undefined,
+        dataFimViagem: det.dataVolta || undefined,
+        observacoes: observacoes.trim(),
+        detalhes: {
+          ...det,
+          destinoForm: trechosDestino || det.destinoForm,
+        },
+        tags: tagList,
+        prioridade,
+        responsavel: responsavel.trim() || "Equipe",
+      });
+      router.push(`/cotacoes/${novo.id}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível criar a cotação.");
+    }
   }
 
   if (!isReady) {

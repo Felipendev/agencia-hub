@@ -52,26 +52,30 @@ export function EditarClienteModal({ cliente, open, onClose }: Props) {
 
   if (!open) return null;
 
-  function handleSave() {
+  async function handleSave() {
     if (!nome.trim()) {
       toast.error("Nome é obrigatório");
       return;
     }
-    updateCliente(cliente.id, {
-      nome: nome.trim(),
-      email: email.trim(),
-      telefone: telefone.trim(),
-      whatsapp: whatsapp.trim() || undefined,
-      destinoInteresse: destinoInteresse.trim() || "—",
-      status,
-      observacoes: observacoes.trim(),
-      dataNascimento: dataNascimento || undefined,
-      redeSocial: redeSocial.trim() || undefined,
-      canalVenda: canalVenda || undefined,
-      informacoesExtras: informacoesExtras.trim() || undefined,
-    });
-    toast.success("Cliente atualizado com sucesso!");
-    onClose();
+    try {
+      await updateCliente(cliente.id, {
+        nome: nome.trim(),
+        email: email.trim(),
+        telefone: telefone.trim(),
+        whatsapp: whatsapp.trim() || undefined,
+        destinoInteresse: destinoInteresse.trim(),
+        status,
+        observacoes: observacoes.trim(),
+        dataNascimento: dataNascimento || undefined,
+        redeSocial: redeSocial.trim() || undefined,
+        canalVenda: canalVenda || undefined,
+        informacoesExtras: informacoesExtras.trim() || undefined,
+      });
+      toast.success("Cliente atualizado com sucesso!");
+      onClose();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível atualizar o cliente.");
+    }
   }
 
   return (

@@ -103,7 +103,9 @@ export default function CotacaoDetalhePage() {
 
   // Agency name for print/PDF — localStorage read is in useState initializer; fallback to API
   useEffect(() => {
-    if (!token) return;
+    // A configuração do formulário é exclusiva do dono. Vendedores usam o
+    // nome disponível na sessão/cache e nunca disparam um 403 desnecessário.
+    if (!isOwner || !token) return;
     const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
     fetch("/api/app/solicitacao-config", { credentials: "include", headers })
       .then((r) => (r.ok ? r.json() : null))
@@ -111,7 +113,7 @@ export default function CotacaoDetalhePage() {
         if (data?.config?.nomeMarca) setNomeAgencia(data.config.nomeMarca);
       })
       .catch(() => {});
-  }, [token]);
+  }, [isOwner, token]);
 
   useEffect(() => {
     if (!cotacao) return;
@@ -340,6 +342,14 @@ export default function CotacaoDetalhePage() {
               </Button>
             ))}
           </div>
+          {cotacao.status === "aprovado" && (
+            <Link
+              href={`/viagens/nova?cotacaoId=${cotacao.id}&clienteId=${cotacao.clienteId}`}
+              className="mt-4 inline-flex rounded-[var(--hub-radius)] bg-[var(--hub-blue-dark)] px-4 py-2 text-sm font-medium text-white"
+            >
+              Converter em viagem
+            </Link>
+          )}
         </Card>
       </div>
 

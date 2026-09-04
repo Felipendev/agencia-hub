@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 
@@ -19,10 +20,11 @@ function formatCountdown(seconds: number): string {
 
 export function IdleTimeout() {
   const { user, logout } = useAuth();
+  const router = useRouter();
   const [showWarning, setShowWarning]   = useState(false);
   const [secondsLeft, setSecondsLeft]   = useState(WARN_BEFORE_MS / 1000);
-  const lastActivityRef = useRef(Date.now());
   const warnedAtRef     = useRef<number | null>(null);
+  const expiredRef      = useRef(false);
   const warnTimerRef    = useRef<ReturnType<typeof setTimeout> | null>(null);
   const logoutTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countdownRef    = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -32,6 +34,15 @@ export function IdleTimeout() {
     if (logoutTimerRef.current) clearTimeout(logoutTimerRef.current);
   }, []);
 
+  const expireSession = useCallback(() => {
+    if (expiredRef.current) return;
+    expiredRef.current = true;
+    clearTimers();
+    setShowWarning(false);
+    logout();
+    router.replace("/login");
+  }, [clearTimers, logout, router]);
+
   const scheduleTimers = useCallback(() => {
     clearTimers();
     warnTimerRef.current = setTimeout(() => {
@@ -39,12 +50,12 @@ export function IdleTimeout() {
       setShowWarning(true);
     }, IDLE_LIMIT_MS - WARN_BEFORE_MS);
     logoutTimerRef.current = setTimeout(() => {
-      logout();
+      expireSession();
     }, IDLE_LIMIT_MS);
-  }, [clearTimers, logout]);
+  }, [clearTimers, expireSession]);
 
   const resetIdle = useCallback(() => {
-    lastActivityRef.current = Date.now();
+    if (expiredRef.current) return;
     if (showWarning) setShowWarning(false);
     scheduleTimers();
   }, [showWarning, scheduleTimers]);
@@ -59,7 +70,7 @@ export function IdleTimeout() {
 
     const compute = () =>
       warnedAtRef.current
-        ? Math.max(0, Math.round((warnedAtRef.current + WARN_BEFORE_MS - Date.now()) / 1000))
+        ? Math.max(0, Math.ceil((warnedAtRef.current + WARN_BEFORE_MS - Date.now()) / 1000))
         : WARN_BEFORE_MS / 1000;
 
     setSecondsLeft(compute());
@@ -70,6 +81,7 @@ export function IdleTimeout() {
   useEffect(() => {
     if (!user) return;
 
+    expiredRef.current = false;
     scheduleTimers();
 
     for (const ev of ACTIVITY_EVENTS) {
@@ -107,7 +119,7 @@ export function IdleTimeout() {
           {formatCountdown(secondsLeft)}
         </p>
         <div className="mt-5 flex gap-3">
-          <Button variant="secondary" className="flex-1" onClick={logout}>
+          <Button variant="secondary" className="flex-1" onClick={expireSession}>
             Sair agora
           </Button>
           <Button className="flex-1" onClick={resetIdle}>

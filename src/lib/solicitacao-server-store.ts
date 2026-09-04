@@ -11,6 +11,15 @@ import type {
 const DIR = path.join(process.cwd(), ".local");
 const FILE = path.join(DIR, "solicitacao-hub.json");
 
+/**
+ * O arquivo `.local/` é um auxílio de desenvolvimento/teste, nunca uma fonte
+ * de verdade em produção. Sem a API configurada, produção deve falhar de modo
+ * explícito em vez de confirmar um envio que será perdido no disco efêmero.
+ */
+export function isLocalSolicitacaoStoreEnabled(): boolean {
+  return process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
+}
+
 type Persisted = {
   configs: Record<string, SolicitacaoPublicaConfig>;
   submissions: SolicitacaoPublicSubmission[];

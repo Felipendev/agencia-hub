@@ -23,7 +23,13 @@ export type ApiCreateFinancialEntryRequest = {
   entryDate: string; // YYYY-MM-DD
   status: ApiFinancialEntryStatus;
   customerId?: string;
+  supplierId?: string;
   bankAccount?: string;
+  recurrenceFrequency?: "MONTHLY" | "WEEKLY" | "YEARLY";
+  notes?: string;
+  saleAmount?: number;
+  supplierCost?: number;
+  commissionAmount?: number;
 };
 
 export type ApiUpdateFinancialEntryRequest = {
@@ -34,7 +40,13 @@ export type ApiUpdateFinancialEntryRequest = {
   entryDate?: string;
   status?: ApiFinancialEntryStatus;
   customerId?: string;
+  supplierId?: string;
   bankAccount?: string;
+  recurrenceFrequency?: "MONTHLY" | "WEEKLY" | "YEARLY";
+  notes?: string;
+  saleAmount?: number;
+  supplierCost?: number;
+  commissionAmount?: number;
 };
 
 export type ApiFinancialEntryResponse = {
@@ -47,5 +59,13 @@ export type ApiFinancialEntryResponse = {
   status: ApiFinancialEntryStatus;
   customerId: string | null;
   customerName: string | null;
+  supplierId: string | null;
+  supplierName: string | null;
   bankAccount: string | null;
+  recurrenceFrequency: "MONTHLY" | "WEEKLY" | "YEARLY" | null;
+  notes: string | null;
+  saleAmount: number | null;
+  supplierCost: number | null;
+  commissionAmount: number | null;
+  profitAmount: number | null;
 };

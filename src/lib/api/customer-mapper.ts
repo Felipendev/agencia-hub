@@ -5,12 +5,6 @@ import type {
   ApiCustomerStatus,
 } from "@/lib/api/customer-types";
 
-/** E-mail aceito pela validação `@Email` do backend. */
-export function isProbablyValidEmail(value: string): boolean {
-  const v = value.trim();
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-}
-
 export function clienteStatusToApi(status: ClienteStatus): ApiCustomerStatus {
   const map: Record<ClienteStatus, ApiCustomerStatus> = {
     ativo: "ACTIVE",
@@ -34,16 +28,31 @@ export function apiCustomerStatusToFront(
 export function clienteToCreateRequest(
   c: Omit<Cliente, "id" | "createdAt">,
 ): ApiCreateCustomerRequest {
-  const interest =
-    c.destinoInteresse?.trim() || "—";
   return {
     name: c.nome.trim(),
-    email: c.email.trim(),
-    phone: c.telefone.trim(),
-    interestDestination: interest,
+    email: c.email.trim() || null,
+    phone: c.telefone.trim() || null,
+    interestDestination: c.destinoInteresse?.trim() || null,
     status: clienteStatusToApi(c.status),
     notes: c.observacoes?.trim() || undefined,
   };
+}
+
+/** Converte somente campos que o contrato atual de PATCH de clientes aceita. */
+export function clientePatchToApi(
+  patch: Partial<Cliente>,
+): Record<string, unknown> {
+  const body: Record<string, unknown> = {};
+  if (patch.nome !== undefined) body.name = patch.nome.trim();
+  // Campos opcionais: string vazia limpa o valor no backend; `null`/ausente significa "não alterar".
+  if (patch.email !== undefined) body.email = patch.email.trim();
+  if (patch.telefone !== undefined) body.phone = patch.telefone.trim();
+  if (patch.destinoInteresse !== undefined) {
+    body.interestDestination = patch.destinoInteresse.trim();
+  }
+  if (patch.status !== undefined) body.status = clienteStatusToApi(patch.status);
+  if (patch.observacoes !== undefined) body.notes = patch.observacoes.trim();
+  return body;
 }
 
 /** Aplica resposta HTTP mantendo campos extras que só existem no SPA. */
@@ -60,9 +69,9 @@ export function mergeCustomerApiResponse(
     ...draft,
     id: api.id,
     nome: api.name,
-    email: api.email,
-    telefone: api.phone,
-    destinoInteresse: api.interestDestination,
+    email: api.email ?? "",
+    telefone: api.phone ?? "",
+    destinoInteresse: api.interestDestination ?? "—",
     status: apiCustomerStatusToFront(api.status),
     observacoes: api.notes ?? draft.observacoes,
     createdAt,

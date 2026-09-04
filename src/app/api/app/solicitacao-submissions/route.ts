@@ -4,6 +4,7 @@ import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
 import type { CotacaoDetalhes } from "@/types";
 import type { SolicitacaoPublicSubmission } from "@/types/solicitacao-publica";
 import {
+  isLocalSolicitacaoStoreEnabled,
   listSubmissions,
   removeSubmission,
 } from "@/lib/solicitacao-server-store";
@@ -96,6 +97,12 @@ export async function GET(request: Request) {
   if (!hasCookie) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
+  if (!isLocalSolicitacaoStoreEnabled()) {
+    return NextResponse.json(
+      { error: "Serviço de solicitações não está disponível em produção." },
+      { status: 503 },
+    );
+  }
   const submissions = await listSubmissions();
   return NextResponse.json({ submissions });
 }
@@ -144,6 +151,12 @@ export async function DELETE(request: Request) {
 
   if (!hasCookie) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
+  if (!isLocalSolicitacaoStoreEnabled()) {
+    return NextResponse.json(
+      { error: "Serviço de solicitações não está disponível em produção." },
+      { status: 503 },
+    );
   }
   const ok = await removeSubmission(id);
   if (!ok) {

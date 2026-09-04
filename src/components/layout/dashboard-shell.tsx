@@ -8,9 +8,17 @@ import { NotificationBell } from "@/components/layout/NotificationBell";
 import { GlobalSearch } from "@/components/layout/GlobalSearch";
 import { Logo, LogoMarkOnly } from "@/components/ui/logo";
 import {
+  IconBuilding,
+  IconCalculator,
+  IconCash,
   IconDocument,
   IconLayout,
   IconMenu,
+  IconMinusCircle,
+  IconPlane,
+  IconPlusCircle,
+  IconSettingsGear,
+  IconUserPlus,
   IconUsers,
   IconWallet,
   IconX,
@@ -22,10 +30,18 @@ import { ChangePasswordModal } from "@/components/ui/change-password-modal";
 import { IdleTimeout } from "@/components/idle-timeout";
 
 const iconMap = {
-  layout:   IconLayout,
-  users:    IconUsers,
-  document: IconDocument,
-  wallet:   IconWallet,
+  layout:     IconLayout,
+  users:      IconUsers,
+  document:   IconDocument,
+  wallet:     IconWallet,
+  calculator: IconCalculator,
+  plane:      IconPlane,
+  cash:       IconCash,
+  plus:       IconPlusCircle,
+  minus:      IconMinusCircle,
+  building:   IconBuilding,
+  settings:   IconSettingsGear,
+  userPlus:   IconUserPlus,
 } as const;
 
 type NavItem = { href: string; label: string; icon: keyof typeof iconMap };
@@ -43,27 +59,31 @@ const OWNER_GROUPS: NavGroup[] = [
   {
     label: "Operacional",
     items: [
-      { href: "/calculadora", label: "Calculadora de Milhas", icon: "document" },
+      { href: "/calculadora", label: "Calculadora de Milhas", icon: "calculator" },
+      { href: "/viagens",     label: "Viagens",                icon: "plane"      },
     ],
   },
   {
     label: "Financeiro",
     items: [
-      { href: "/financeiro",  label: "Financeiro",            icon: "wallet"   },
+      { href: "/vendas",              label: "Vendas",          icon: "cash"   },
+      { href: "/financeiro",          label: "Fluxo de Caixa",  icon: "wallet" },
+      { href: "/financeiro/receita",  label: "Receitas",        icon: "plus"   },
+      { href: "/financeiro/despesa",  label: "Despesas",        icon: "minus"  },
     ],
   },
   {
     label: "Equipe",
     items: [
-      { href: "/vendedores",          label: "Equipe",              icon: "users"  },
-      { href: "/vendedores/convidar", label: "Convidar Agente",     icon: "users"  },
+      { href: "/vendedores",          label: "Equipe",              icon: "users"    },
+      { href: "/vendedores/convidar", label: "Convidar Agente",     icon: "userPlus" },
     ],
   },
   {
     label: "Configurações",
     items: [
-      { href: "/agencia",        label: "Agência",        icon: "layout" },
-      { href: "/configuracoes",  label: "Configurações",  icon: "layout" },
+      { href: "/agencia",        label: "Agência",        icon: "building"  },
+      { href: "/configuracoes",  label: "Configurações",  icon: "settings"  },
     ],
   },
 ];
@@ -80,13 +100,14 @@ const SELLER_GROUPS: NavGroup[] = [
   {
     label: "Operacional",
     items: [
-      { href: "/calculadora", label: "Calculadora de Milhas", icon: "document" },
+      { href: "/calculadora", label: "Calculadora de Milhas", icon: "calculator" },
+      { href: "/viagens",     label: "Viagens",                icon: "plane"      },
     ],
   },
   {
     label: "Financeiro",
     items: [
-      { href: "/minhas-comissoes", label: "Minhas Comissões", icon: "wallet" },
+      { href: "/minhas-comissoes", label: "Minhas Comissões", icon: "cash" },
     ],
   },
 ];
@@ -287,10 +308,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2">
             <GlobalSearch />
             <NotificationBell />
-            <div className="hidden text-right sm:block">
+            <Link
+              href={isOwner ? "/agencia" : "/configuracoes"}
+              className="hidden rounded-[var(--hub-radius-sm)] px-1.5 py-1 text-right transition-colors hover:bg-[var(--hub-bg-subtle)] sm:block"
+              title={isOwner ? "Ir para Minha Agência" : "Ir para Configurações"}
+            >
               <p className="text-xs font-semibold text-[var(--hub-text-primary)] leading-tight">{nome}</p>
               <p className="text-[10px] text-[var(--hub-text-muted)] leading-tight">{roleLabel}</p>
-            </div>
+            </Link>
             <Button
               variant="secondary"
               size="sm"

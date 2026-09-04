@@ -10,7 +10,6 @@ import {
   useState,
 } from "react";
 import { useData } from "@/contexts/data-context";
-import { useAuth } from "@/contexts/auth-context";
 import {
   type NotifPrefs,
   DEFAULT_NOTIF_PREFS,
@@ -84,7 +83,6 @@ function saveDismissed(set: Set<string>) {
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const { cotacoes, clientes, lancamentos, isReady } = useData();
-  const { token } = useAuth();
 
   const [notifications, setNotifications] = useState<Notification[]>(() =>
     loadNotifications(),
@@ -96,8 +94,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const prevClienteIds = useRef<Set<string>>(new Set());
   const prevLancamentoIds = useRef<Set<string>>(new Set());
   const prevApprovedIds = useRef<Set<string>>(new Set());
-  const prevSubmissionIds = useRef<Set<string>>(new Set());
-  const submissionInitializedRef = useRef(false);
   const initializedRef = useRef(false);
 
   // Persist notifications
@@ -284,55 +280,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     const t = setTimeout(() => { initializedRef.current = true; }, 500);
     return () => clearTimeout(t);
   }, [isReady]);
-
-  // ── 5. Nova submissão pelo formulário público ────────────────────────────────
-  useEffect(() => {
-    if (!isReady || !token || !prefs.submissaoNova.enabled) return;
-
-    async function checkSubmissions() {
-      try {
-        const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch("/api/app/solicitacao-submissions", {
-          credentials: "include",
-          headers,
-        });
-        if (!res.ok) return;
-        const data = (await res.json()) as { submissions?: Array<{ id: string; nome: string; slug: string }> };
-        const subs = data.submissions ?? [];
-
-        if (!submissionInitializedRef.current) {
-          prevSubmissionIds.current = new Set(subs.map((s) => s.id));
-          submissionInitializedRef.current = true;
-          return;
-        }
-
-        const novas: Notification[] = [];
-        for (const s of subs) {
-          if (prevSubmissionIds.current.has(s.id)) continue;
-          const key = `submissao-nova-${s.id}`;
-          if (dismissed.has(key)) continue;
-          novas.push({
-            id: key,
-            type: "submissao_nova",
-            title: "Nova solicitação recebida",
-            message: `${s.nome} preencheu o formulário público.`,
-            link: `/cotacoes`,
-            createdAt: new Date().toISOString(),
-            read: false,
-            data: s,
-          });
-        }
-        prevSubmissionIds.current = new Set(subs.map((s) => s.id));
-        pushNotifs(novas);
-      } catch {
-        /* rede indisponível — ignora */
-      }
-    }
-
-    void checkSubmissions();
-    const id = setInterval(() => void checkSubmissions(), 30_000);
-    return () => clearInterval(id);
-  }, [isReady, token, dismissed, prefs.submissaoNova.enabled]);
 
   // ── Actions ─────────────────────────────────────────────────────────────────
 
