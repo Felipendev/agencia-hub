@@ -18,7 +18,7 @@ import {
 } from "@/lib/br-phone";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AirportAutocomplete } from "@/components/ui/airport-autocomplete";
+import { AirportAutocomplete, applySelectionAfterDash, lastSegmentAfterDash } from "@/components/ui/airport-autocomplete";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import type { CotacaoDetalhes } from "@/types";
@@ -223,12 +223,13 @@ export function CotacaoDetalhesForm({
               <div className="space-y-2">
                 {det.destinosTrechos.map((trecho, i) => (
                   <div key={i} className="flex gap-2">
-                    <Input
+                    <AirportAutocomplete
                       id={i === 0 ? "cdf-dest-0" : undefined}
-                      placeholder="Origem — Destino"
                       value={trecho}
-                      onChange={(e) => setTrecho(i, e.target.value)}
+                      onChange={(v) => setTrecho(i, v)}
                       className={errosCampos.destinos && i === 0 ? ERR_INPUT : ""}
+                      extractQuery={lastSegmentAfterDash}
+                      applySelection={applySelectionAfterDash}
                     />
                     <Button
                       type="button"
