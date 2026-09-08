@@ -110,13 +110,18 @@ export default function MinhasComissoesPage() {
         description="Acompanhe suas comissões sobre cotações aprovadas e sobre vendas registradas."
       />
 
-      {/* Summary cards */}
+      {/* Quotation-based commission */}
+      <div>
+        <h2 className="text-base font-semibold text-[var(--hub-text-primary)]">Comissão sobre cotações</h2>
+        <p className="text-sm text-[var(--hub-text-secondary)]">Calculada pela sua taxa sobre cotações aprovadas. É uma estimativa — este valor não tem controle de pagamento próprio; o que a agência já pagou de comissão de verdade aparece em &quot;Comissões de vendas&quot;, mais abaixo.</p>
+      </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
-          <p className="text-sm font-medium text-[var(--hub-text-secondary)]">Comissão acumulada</p>
+          <p className="text-sm font-medium text-[var(--hub-text-secondary)]">Comissão calculada</p>
           <p className="mt-1 text-2xl font-bold text-emerald-600">
             {formatBRL(dashboard.totalCommissionEarned)}
           </p>
+          <p className="mt-1 text-xs text-[var(--hub-text-muted)]">Cotações aprovadas · não confirma pagamento</p>
         </Card>
         <Card>
           <p className="text-sm font-medium text-[var(--hub-text-secondary)]">Comissão pendente</p>
@@ -204,7 +209,7 @@ export default function MinhasComissoesPage() {
       {/* Sale-based commissions */}
       <Card>
         <CardTitle>Comissões de vendas</CardTitle>
-        <p className="mt-1 text-sm text-[var(--hub-text-secondary)]">Comissões atribuídas a mim em vendas registradas no Financeiro. Só viram saída de caixa quando a agência as paga.</p>
+        <p className="mt-1 text-sm text-[var(--hub-text-secondary)]">Comissões atribuídas a mim em vendas registradas no Financeiro, com pagamento de verdade rastreado pela agência — diferente da comissão de cotações acima, que é só uma estimativa.</p>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Card>
