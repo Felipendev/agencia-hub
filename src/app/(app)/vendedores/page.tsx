@@ -7,11 +7,13 @@ import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, Th, Td } from "@/components/ui/table";
 import { PageHeader } from "@/components/layout/page-header";
 import { formatBRL } from "@/lib/format";
+import { centsToDisplay, parseCurrencyInput } from "@/lib/currency-input";
 import { listSalesAgentsRemote, updateUserRemote } from "@/lib/api/users-remote";
 import type { ApiUserResponse } from "@/lib/api/auth-types";
 
@@ -82,7 +84,7 @@ export default function VendedoresPage() {
             editType === "pct" && editPct ? parseFloat(editPct) : null,
           commissionFixed:
             editType === "fixed" && editFixed
-              ? parseFloat(editFixed.replace(",", "."))
+              ? parseCurrencyInput(editFixed)
               : null,
         },
         token,
@@ -103,7 +105,7 @@ export default function VendedoresPage() {
       setEditFixed("");
     } else if (u.commissionFixed != null) {
       setEditType("fixed");
-      setEditFixed(String(u.commissionFixed));
+      setEditFixed(centsToDisplay(u.commissionFixed));
       setEditPct("");
     } else {
       setEditType("none");
@@ -183,11 +185,10 @@ export default function VendedoresPage() {
                             />
                           )}
                           {editType === "fixed" && (
-                            <Input
+                            <CurrencyInput
                               className="w-24 text-xs"
-                              placeholder="200,00"
                               value={editFixed}
-                              onChange={(e) => setEditFixed(e.target.value)}
+                              onValueChange={setEditFixed}
                             />
                           )}
                           <Button

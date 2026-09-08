@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { TimePicker } from "@/components/ui/time-picker";
 import { ClientePicker } from "@/components/cliente/ClientePicker";
 import { useData } from "@/contexts/data-context";
+import { centsToDisplay, parseCurrencyInput } from "@/lib/currency-input";
 import {
   calcular,
   LUCRO_CONFIG_PADRAO,
@@ -94,16 +96,16 @@ function OpcaoVooForm({
   canRemove: boolean;
 }) {
   const [taxasStr, setTaxasStr] = useState(() =>
-    opcao.taxas > 0 ? String(opcao.taxas).replace(".", ",") : ""
+    opcao.taxas > 0 ? centsToDisplay(opcao.taxas) : ""
   );
   const [malaStr, setMalaStr] = useState(() =>
-    opcao.valorMala > 0 ? String(opcao.valorMala).replace(".", ",") : ""
+    opcao.valorMala > 0 ? centsToDisplay(opcao.valorMala) : ""
   );
   const [pctStr, setPctStr] = useState(() =>
     opcao.lucroConfig.pct > 0 ? String(opcao.lucroConfig.pct).replace(".", ",") : ""
   );
   const [fixoStr, setFixoStr] = useState(() =>
-    opcao.lucroConfig.fixo > 0 ? String(opcao.lucroConfig.fixo).replace(".", ",") : ""
+    opcao.lucroConfig.fixo > 0 ? centsToDisplay(opcao.lucroConfig.fixo) : ""
   );
 
   function set(patch: Partial<OpcaoVoo>) { onChange({ ...opcao, ...patch }); }
@@ -189,13 +191,13 @@ function OpcaoVooForm({
         )}
         <div>
           <Label>Taxas (R$)</Label>
-          <Input inputMode="decimal" placeholder="Ex: 31,73" value={taxasStr}
-            onChange={(e) => handleDecimal(e.target.value, setTaxasStr, (v) => set({ taxas: v }))} />
+          <CurrencyInput value={taxasStr}
+            onValueChange={(formatted) => { setTaxasStr(formatted); set({ taxas: parseCurrencyInput(formatted) }); }} />
         </div>
         <div>
           <Label>Mala (R$)</Label>
-          <Input inputMode="decimal" placeholder="Ex: 130" value={malaStr}
-            onChange={(e) => handleDecimal(e.target.value, setMalaStr, (v) => set({ valorMala: v }))} />
+          <CurrencyInput value={malaStr}
+            onValueChange={(formatted) => { setMalaStr(formatted); set({ valorMala: parseCurrencyInput(formatted) }); }} />
         </div>
         <div>
           <Label>Qtd. malas</Label>
@@ -221,8 +223,8 @@ function OpcaoVooForm({
               onChange={(e) => set({ lucroConfig: { ...opcao.lucroConfig, usarFixo: e.target.checked } })}
               className="accent-[var(--hub-blue)]" />
             <span className="text-[var(--hub-text-secondary)]">R$ fixo</span>
-            <Input inputMode="decimal" value={fixoStr}
-              onChange={(e) => handleDecimal(e.target.value, setFixoStr, (v) => set({ lucroConfig: { ...opcao.lucroConfig, fixo: v } }))}
+            <CurrencyInput value={fixoStr}
+              onValueChange={(formatted) => { setFixoStr(formatted); set({ lucroConfig: { ...opcao.lucroConfig, fixo: parseCurrencyInput(formatted) } }); }}
               disabled={!opcao.lucroConfig.usarFixo} className="h-7 w-20 text-xs" />
           </label>
           {milheiroSugerido > 0 && (

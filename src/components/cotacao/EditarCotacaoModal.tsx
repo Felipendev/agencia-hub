@@ -6,13 +6,14 @@ import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { XIcon } from "@/components/icons";
 import { CotacaoDetalhesForm } from "@/components/cotacao/CotacaoDetalhesForm";
 import { COTACAO_STATUS_LABELS } from "@/lib/constants";
-import { formatBRL } from "@/lib/format";
+import { centsToDisplay, parseCurrencyInput } from "@/lib/currency-input";
 import { listSalesAgentsRemote } from "@/lib/api/users-remote";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
 import type { ApiUserResponse } from "@/lib/api/auth-types";
@@ -51,7 +52,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
   const [titulo,      setTitulo]      = useState(cotacao.titulo);
   const [clienteId,   setClienteId]   = useState(cotacao.clienteId);
   const [status,      setStatus]      = useState<CotacaoStatus>(cotacao.status);
-  const [valorTotal,  setValorTotal]  = useState(cotacao.valorTotal > 0 ? String(cotacao.valorTotal).replace(".", ",") : "");
+  const [valorTotal,  setValorTotal]  = useState(cotacao.valorTotal > 0 ? centsToDisplay(cotacao.valorTotal) : "");
   const [validade,    setValidade]    = useState(cotacao.validade);
   const [responsavel, setResponsavel] = useState(cotacao.responsavel);
   const [prioridade,  setPrioridade]  = useState(cotacao.prioridade);
@@ -104,7 +105,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
     setTitulo(cotacao.titulo);
     setClienteId(cotacao.clienteId);
     setStatus(cotacao.status);
-    setValorTotal(cotacao.valorTotal > 0 ? String(cotacao.valorTotal).replace(".", ",") : "");
+    setValorTotal(cotacao.valorTotal > 0 ? centsToDisplay(cotacao.valorTotal) : "");
     setValidade(cotacao.validade);
     setResponsavel(cotacao.responsavel);
     setPrioridade(cotacao.prioridade);
@@ -148,7 +149,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
     if (!titulo.trim()) { toast.error("Título é obrigatório"); return; }
     if (!clienteId)     { toast.error("Selecione um cliente"); return; }
 
-    const v = parseFloat(valorTotal.replace(",", ".")) || 0;
+    const v = parseCurrencyInput(valorTotal);
     const tagList = tags.split(/[,#]/).map((t) => t.trim()).filter(Boolean);
     const destino =
       det.destinosTrechos.filter((x) => x.trim()).join(" · ") ||
@@ -331,18 +332,11 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="eq-valor">Valor total (R$)</Label>
-                  <Input
+                  <CurrencyInput
                     id="eq-valor"
-                    inputMode="decimal"
-                    placeholder="0,00"
                     value={valorTotal}
-                    onChange={(e) => setValorTotal(e.target.value)}
+                    onValueChange={setValorTotal}
                   />
-                  {parseFloat(valorTotal.replace(",", ".")) > 0 && (
-                    <p className="mt-1 text-xs text-[var(--hub-text-muted)]">
-                      {formatBRL(parseFloat(valorTotal.replace(",", ".")))}
-                    </p>
-                  )}
                 </div>
                 <div>
                   <Label htmlFor="eq-validade">Validade</Label>
