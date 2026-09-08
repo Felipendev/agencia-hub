@@ -9,12 +9,14 @@ import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { DownloadIcon, EditIcon, WhatsAppIcon } from "@/components/icons";
 import { formatDateBR, formatDateTimeBR } from "@/lib/format";
+import { centsToDisplay, parseCurrencyInput } from "@/lib/currency-input";
 import { imprimirCotacao, baixarCotacaoHtml } from "@/lib/pdf-generator";
 import { COTACAO_STATUS_LABELS } from "@/lib/constants";
 import {
@@ -119,7 +121,7 @@ export default function CotacaoDetalhePage() {
     if (!cotacao) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Syncing form state from derived data
     setStatusEdit(cotacao.status);
-    setValorEdit(cotacao.valorTotal > 0 ? String(cotacao.valorTotal).replace(".", ",") : "");
+    setValorEdit(cotacao.valorTotal > 0 ? centsToDisplay(cotacao.valorTotal) : "");
     setValidadeEdit(cotacao.validade);
     setObsEdit(cotacao.observacoes);
   }, [cotacao]);
@@ -148,7 +150,7 @@ export default function CotacaoDetalhePage() {
   );
 
   function saveCampos() {
-    const v = parseFloat(valorEdit.replace(",", ".")) || 0;
+    const v = parseCurrencyInput(valorEdit);
     updateCotacao(id, {
       valorTotal: v,
       validade: validadeEdit,
@@ -588,11 +590,10 @@ export default function CotacaoDetalhePage() {
           </div>
           <div>
             <Label htmlFor="valor">Valor total (R$)</Label>
-            <Input
+            <CurrencyInput
               id="valor"
-              inputMode="decimal"
               value={valorEdit}
-              onChange={(e) => setValorEdit(e.target.value)}
+              onValueChange={setValorEdit}
             />
           </div>
           <div>

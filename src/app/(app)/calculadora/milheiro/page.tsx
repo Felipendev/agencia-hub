@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
+import { centsToDisplay, formatCurrencyInput, parseCurrencyInput } from "@/lib/currency-input";
 import {
   carregarTabelas,
   formatarFaixa,
@@ -28,7 +30,7 @@ function CiaCard({
   const [faixas, setFaixas] = useState<FaixaMilheiro[]>(cia.faixas);
   const [milheiroStrs, setMilheiroStrs] = useState<string[]>(() =>
     cia.faixas.map((f) =>
-      f.valorPorMilheiro > 0 ? String(f.valorPorMilheiro).replace(".", ",") : ""
+      f.valorPorMilheiro > 0 ? centsToDisplay(f.valorPorMilheiro) : ""
     )
   );
   const [nome, setNome] = useState(cia.nome);
@@ -42,7 +44,7 @@ function CiaCard({
     setFaixas(cia.faixas);
     setMilheiroStrs(
       cia.faixas.map((f) =>
-        f.valorPorMilheiro > 0 ? String(f.valorPorMilheiro).replace(".", ",") : ""
+        f.valorPorMilheiro > 0 ? centsToDisplay(f.valorPorMilheiro) : ""
       )
     );
     setNome(cia.nome);
@@ -55,7 +57,7 @@ function CiaCard({
 
   function updateMilheiroStr(i: number, str: string) {
     setMilheiroStrs((prev) => prev.map((s, idx) => (idx === i ? str : s)));
-    updateFaixa(i, { valorPorMilheiro: parseFloat(str.replace(",", ".")) || 0 });
+    updateFaixa(i, { valorPorMilheiro: parseCurrencyInput(str) });
   }
 
   function addFaixa() {
@@ -135,11 +137,9 @@ function CiaCard({
                 </div>
                 <div>
                   <p className="mb-0.5 text-[10px] text-[var(--hub-text-muted)]">R$/1000 milhas</p>
-                  <Input
-                    inputMode="decimal"
+                  <CurrencyInput
                     value={milheiroStrs[i] ?? ""}
-                    placeholder="0"
-                    onChange={(e) => updateMilheiroStr(i, e.target.value)}
+                    onValueChange={(formatted) => updateMilheiroStr(i, formatted)}
                     className="h-8 text-xs"
                   />
                 </div>
@@ -212,8 +212,7 @@ function buildBagagemStrs(t: TabelasMilhas): Record<string, string> {
   const map: Record<string, string> = {};
   for (const b of t.bagagens) {
     for (const campo of ["antes", "checkin", "aeroporto", "depois48h"] as const) {
-      const v = b.bagagem[campo];
-      map[`${b.id}:${campo}`] = v > 0 ? String(v).replace(".", ",") : "0";
+      map[`${b.id}:${campo}`] = centsToDisplay(b.bagagem[campo]);
     }
   }
   return map;
@@ -343,15 +342,15 @@ export default function PrecificarMilheiroPage() {
                       <td key={campo} className="px-4 py-3 text-right">
                         <input
                           type="text"
-                          inputMode="decimal"
+                          inputMode="numeric"
                           value={bagagemStrs[`${b.id}:${campo}`] ?? ""}
                           onChange={(e) => {
-                            const str = e.target.value;
+                            const str = formatCurrencyInput(e.target.value);
                             setBagagemStrs((prev) => ({
                               ...prev,
                               [`${b.id}:${campo}`]: str,
                             }));
-                            const val = parseFloat(str.replace(",", ".")) || 0;
+                            const val = parseCurrencyInput(str);
                             const novas: TabelasMilhas = {
                               ...tabelas,
                               bagagens: tabelas.bagagens.map((bg) =>

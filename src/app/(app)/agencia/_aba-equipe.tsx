@@ -5,10 +5,12 @@ import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/toast";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Table, Th, Td } from "@/components/ui/table";
 import { formatBRL } from "@/lib/format";
+import { centsToDisplay, parseCurrencyInput } from "@/lib/currency-input";
 import { listSalesAgentsRemote, updateUserRemote } from "@/lib/api/users-remote";
 import { useAuth } from "@/contexts/auth-context";
 import type { ApiUserResponse } from "@/lib/api/auth-types";
@@ -67,7 +69,7 @@ export function AbaEquipe({ token }: Props) {
     try {
       const updated = await updateUserRemote(u.id, {
         commissionPct: editType === "pct" && editPct ? parseFloat(editPct) : null,
-        commissionFixed: editType === "fixed" && editFixed ? parseFloat(editFixed.replace(",", ".")) : null,
+        commissionFixed: editType === "fixed" && editFixed ? parseCurrencyInput(editFixed) : null,
       }, token);
       setAgents((p) => p.map((x) => x.id === u.id ? updated : x));
       setEditingId(null);
@@ -78,7 +80,7 @@ export function AbaEquipe({ token }: Props) {
   function startEdit(u: ApiUserResponse) {
     setEditingId(u.id);
     if (u.commissionPct != null) { setEditType("pct"); setEditPct(String(u.commissionPct)); setEditFixed(""); }
-    else if (u.commissionFixed != null) { setEditType("fixed"); setEditFixed(String(u.commissionFixed)); setEditPct(""); }
+    else if (u.commissionFixed != null) { setEditType("fixed"); setEditFixed(centsToDisplay(u.commissionFixed)); setEditPct(""); }
     else { setEditType("none"); setEditPct(""); setEditFixed(""); }
   }
 
@@ -125,7 +127,7 @@ export function AbaEquipe({ token }: Props) {
                             <option value="none">Nenhuma</option>
                           </Select>
                           {editType === "pct" && <Input className="w-16 text-xs" placeholder="5" value={editPct} onChange={(e) => setEditPct(e.target.value)} />}
-                          {editType === "fixed" && <Input className="w-20 text-xs" placeholder="200" value={editFixed} onChange={(e) => setEditFixed(e.target.value)} />}
+                          {editType === "fixed" && <CurrencyInput className="w-20 text-xs" value={editFixed} onValueChange={setEditFixed} />}
                           <button type="button" onClick={() => handleSaveComm(u)} className="rounded bg-[var(--hub-blue)] px-2 py-1 text-xs text-white">OK</button>
                           <button type="button" onClick={() => setEditingId(null)} className="text-xs text-[var(--hub-text-muted)]">x</button>
                         </div>

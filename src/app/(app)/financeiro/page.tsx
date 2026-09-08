@@ -14,10 +14,12 @@ import { computeFinanceiroResumo, useData } from "@/contexts/data-context";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { ClientePicker } from "@/components/cliente/ClientePicker";
 import { formatBRL, formatDateBR } from "@/lib/format";
+import { centsToDisplay, parseCurrencyInput } from "@/lib/currency-input";
 import { exportarLancamentosCSV } from "@/lib/csv-export";
 import { LANCAMENTO_CATEGORIA_LABELS, LANCAMENTO_STATUS_LABELS } from "@/lib/constants";
 import type {
@@ -172,7 +174,7 @@ export default function FinanceiroPage() {
     setEditDescricao(l.descricao);
     setEditTipo(l.tipo);
     setEditCategoria(l.categoria);
-    setEditValor(String(l.valor));
+    setEditValor(centsToDisplay(l.valor));
     setEditData(l.data.slice(0, 10));
     setEditStatus(l.status);
     setEditClienteId(l.clienteId ?? "");
@@ -182,7 +184,7 @@ export default function FinanceiroPage() {
   async function handleSalvarEdicao(e: React.FormEvent) {
     e.preventDefault();
     if (!editando) return;
-    const v = Math.abs(parseFloat(editValor.replace(",", ".")) || 0);
+    const v = Math.abs(parseCurrencyInput(editValor));
     if (!editDescricao.trim() || v === 0) return;
     try {
       await updateLancamento(editando.id, {
@@ -258,7 +260,7 @@ export default function FinanceiroPage() {
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     if (!descricao.trim()) return;
-    const v = Math.abs(parseFloat(valor.replace(",", ".")) || 0);
+    const v = Math.abs(parseCurrencyInput(valor));
     if (v === 0) return;
     try {
       await addLancamento({
@@ -315,7 +317,7 @@ export default function FinanceiroPage() {
                 </div>
                 <div>
                   <Label htmlFor="ed-valor">Valor (R$)</Label>
-                  <Input id="ed-valor" required value={editValor} onChange={(e) => setEditValor(e.target.value)} placeholder="0,00" />
+                  <CurrencyInput id="ed-valor" required value={editValor} onValueChange={setEditValor} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -688,7 +690,7 @@ export default function FinanceiroPage() {
               </div>
               <div>
                 <Label htmlFor="valor">Valor (R$)</Label>
-                <Input id="valor" inputMode="decimal" required placeholder="0,00" value={valor} onChange={(e) => setValor(e.target.value)} />
+                <CurrencyInput id="valor" required value={valor} onValueChange={setValor} />
               </div>
               <div>
                 <Label htmlFor="data">Data</Label>

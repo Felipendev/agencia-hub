@@ -18,6 +18,7 @@ import {
 } from "@/lib/br-phone";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AirportAutocomplete } from "@/components/ui/airport-autocomplete";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import type { CotacaoDetalhes } from "@/types";
@@ -196,10 +197,10 @@ export function CotacaoDetalhesForm({
                 Origem (cidade / aeroporto){" "}
                 {contatoCelularObrigatorio && <span className="text-red-500">*</span>}
               </Label>
-              <Input
+              <AirportAutocomplete
                 id="cdf-orig"
                 value={det.origem}
-                onChange={(e) => applyPatch({ origem: e.target.value })}
+                onChange={(v) => applyPatch({ origem: v })}
                 className={errosCampos.origem ? ERR_INPUT : ""}
               />
               {errosCampos.origem && (

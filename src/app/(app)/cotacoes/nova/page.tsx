@@ -9,6 +9,8 @@ import { emptyCotacaoDetalhes } from "@/lib/cotacao-defaults";
 import { Button } from "@/components/ui/button";
 import { CotacaoDetalhesForm } from "@/components/cotacao/CotacaoDetalhesForm";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
+import { parseCurrencyInput } from "@/lib/currency-input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -97,7 +99,7 @@ export default function NovaCotacaoPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!clienteId || !titulo.trim() || !validade) return;
-    const v = parseFloat(valorTotal.replace(",", ".")) || 0;
+    const v = parseCurrencyInput(valorTotal);
     const tagList = tags
       .split(/[#,]/g)
       .map((t) => t.trim())
@@ -179,12 +181,10 @@ export default function NovaCotacaoPage() {
             </div>
             <div>
               <Label htmlFor="nova-val">Valor total (R$)</Label>
-              <Input
+              <CurrencyInput
                 id="nova-val"
-                inputMode="decimal"
-                placeholder="0"
                 value={valorTotal}
-                onChange={(e) => setValorTotal(e.target.value)}
+                onValueChange={setValorTotal}
               />
             </div>
             <div>
