@@ -1,0 +1,66 @@
+{
+  "screens": 58,
+  "nodes": 10515,
+  "texts": 3795,
+  "autoLayoutContainers": 3470,
+  "prototypeLinks": 1040,
+  "componentFamilies": {
+    "Button/quiet": 56,
+    "Button/primary": 72,
+    "Badge/warning": 20,
+    "Badge/info": 47,
+    "Badge/success": 10,
+    "Badge/neutral": 13,
+    "Button/secondary": 115,
+    "Field/select": 25,
+    "Field/default": 55,
+    "Button/danger": 2,
+    "Field/error": 2,
+    "Button/focus-demo": 1,
+    "Badge/danger": 1
+  },
+  "journey": [
+    "home",
+    "new",
+    "created",
+    "send",
+    "sent",
+    "approve",
+    "approved",
+    "new-trip",
+    "new-trip-success",
+    "sale",
+    "sale-success",
+    "finance",
+    "receive",
+    "received"
+  ],
+  "contrast": [
+    {
+      "name": "Texto",
+      "ratio": 12.97
+    },
+    {
+      "name": "Apoio",
+      "ratio": 5.53
+    },
+    {
+      "name": "Botão",
+      "ratio": 9.01
+    },
+    {
+      "name": "Sucesso",
+      "ratio": 6.13
+    },
+    {
+      "name": "Atenção",
+      "ratio": 5.68
+    },
+    {
+      "name": "Erro",
+      "ratio": 5.59
+    }
+  ],
+  "missingDestinations": [],
+  "nativeFigmaImport": "Pendente de execução e revisão visual no Figma; MCP atingiu limite Starter."
+}

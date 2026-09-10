@@ -1,0 +1,87 @@
+{
+  "fileKey": "Z2jTgdEYMGU6VCyvC5sTaV",
+  "createdNodeIds": [
+    "0:1",
+    "3:3",
+    "3:4"
+  ],
+  "pages": {
+    "system": "0:1",
+    "screens": "3:3",
+    "prototype": "3:4"
+  },
+  "variables": {
+    "bg": "VariableID:3:9",
+    "surface": "VariableID:3:11",
+    "subtle": "VariableID:3:13",
+    "ink": "VariableID:3:15",
+    "muted": "VariableID:3:17",
+    "border": "VariableID:3:19",
+    "primary": "VariableID:3:21",
+    "hover": "VariableID:3:23",
+    "tint": "VariableID:3:25",
+    "white": "VariableID:3:27",
+    "success": "VariableID:3:29",
+    "successBg": "VariableID:3:31",
+    "warning": "VariableID:3:33",
+    "warningBg": "VariableID:3:35",
+    "danger": "VariableID:3:37",
+    "dangerBg": "VariableID:3:39",
+    "focus": "VariableID:3:41",
+    "disabled": "VariableID:3:43",
+    "space/0": "VariableID:3:44",
+    "space/4": "VariableID:3:45",
+    "space/8": "VariableID:3:46",
+    "space/12": "VariableID:3:47",
+    "space/16": "VariableID:3:48",
+    "space/20": "VariableID:3:49",
+    "space/24": "VariableID:3:50",
+    "space/32": "VariableID:3:51",
+    "space/40": "VariableID:3:52",
+    "space/48": "VariableID:3:53",
+    "space/64": "VariableID:3:54",
+    "radius/0": "VariableID:3:55",
+    "radius/4": "VariableID:3:56",
+    "radius/8": "VariableID:3:57"
+  },
+  "styles": {
+    "Display": "S:262b0a83a1ba4ada46d16b75418e144b8d214058,",
+    "Title": "S:79b8db92e732204a60207902a2f867e9df0c5f82,",
+    "Section": "S:a4a121a03ca7156ca81d97a61ce0d21f559012fa,",
+    "Body": "S:04ed67580156f81e82a94c3b068a892e82b90051,",
+    "Label": "S:a555bf62fdef374fad9b0f1d12dcf4cf90006db9,",
+    "Small": "S:c14c0b039d5c292d8dd7479790d564897a12df79,",
+    "Metric": "S:9c249ab4bc56e84f2d77ca50da24a30e45113208,"
+  },
+  "effectId": "S:b1da68cb5db7386debcb02612cd01c4cb9f83327,",
+  "inherited": {
+    "name": "Body",
+    "fontSize": 13
+  },
+  "collections": [
+    "VariableCollectionId:3:5",
+    "VariableCollectionId:3:6",
+    "VariableCollectionId:3:7"
+  ],
+  "components": {
+    "Button": {
+      "Primary": "4:44",
+      "Secondary": "4:46",
+      "Danger": "4:48",
+      "Disabled": "4:50",
+      "Loading": "4:52",
+      "Focus": "4:54",
+      "Hover": "4:56"
+    }
+  },
+  "screens": {},
+  "status": "blocked_by_figma_starter_mcp_limit",
+  "nativePrototypeComplete": false,
+  "initialFoundationFrame": "4:2",
+  "foundationNeedsLayoutRepair": true,
+  "localPrototype": "design/prototype/index.html",
+  "importPackage": "design/screens.figma.json",
+  "pluginRegistration": "Needs genuine Figma development plugin ID; configure manifest before importing",
+  "validation": "design/validation.json",
+  "baseCommit": "16c1676"
+}

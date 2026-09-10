@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+  <meta charset="utf-8" /><style>
+    body {
+      font: 13px/1.6 system-ui;
+      margin: 24px;
+      color: #172d39;
+    }
+    h1 {
+      font-size: 20px;
+    }
+    button {
+      background: #154f63;
+      color: white;
+      border: 0;
+      border-radius: 4px;
+      padding: 12px 16px;
+      margin-top: 20px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.5;
+    }
+    input {
+      width: 100%;
+    }
+    pre {
+      white-space: pre-wrap;
+      font-size: 12px;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+    }
+  </style>
+  <h1>AgênciasHub · Proposta de UX</h1>
+  <p>
+    Importe <strong>screens.figma.json</strong>. O plugin cria telas editáveis,
+    componentes reutilizáveis e conexões de protótipo. Não acessa a rede.
+  </p>
+  <input type="file" id="file" accept="application/json,.json" /><label
+    ><input id="repair" type="checkbox" style="width: auto" checked /> Corrigir
+    a prancha de fundações criada nesta tarefa</label
+  ><button id="run" disabled>Criar telas e protótipo</button>
+  <pre id="status" role="status">Selecione o arquivo de importação.</pre>
+  <script>
+    let data;
+    const run = document.getElementById("run"),
+      status = document.getElementById("status");
+    document.getElementById("file").onchange = async (e) => {
+      try {
+        data = JSON.parse(await e.target.files[0].text());
+        if (data.version !== 1 || !Array.isArray(data.screens))
+          throw Error("Formato inválido.");
+        run.disabled = false;
+        status.textContent =
+          data.screens.length + " telas prontas para importar.";
+      } catch (e) {
+        status.textContent = e.message;
+        run.disabled = true;
+      }
+    };
+    run.onclick = () => {
+      run.disabled = true;
+      status.textContent = "Criando componentes e telas…";
+      parent.postMessage(
+        {
+          pluginMessage: {
+            type: "import",
+            data,
+            repair: document.getElementById("repair").checked,
+          },
+        },
+        "*",
+      );
+    };
+    onmessage = (e) => {
+      const msg = e.data.pluginMessage;
+      if (msg) {
+        status.textContent = msg.text;
+        if (msg.type === "error") run.disabled = false;
+      }
+    };
+  </script>
+</html>
