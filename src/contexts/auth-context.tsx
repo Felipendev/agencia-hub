@@ -7,10 +7,12 @@ import {
   useEffect,
   useMemo,
   useState,
+  useRef,
 } from "react";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
 import type { ApiLoginResponse } from "@/lib/api/auth-types";
 import type { UsuarioSessao } from "@/types";
+import { sessionTiming, shouldRenew } from "@/lib/session-activity";
 
 const AUTH_COOKIE   = "ah_auth";
 const STORAGE_USER  = "agencia-hub-user";
@@ -41,7 +43,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 function setCookie(name: string, value: string, days: number) {
   const maxAge = days * 24 * 60 * 60;
-  document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`;
 }
 
 function deleteCookie(name: string) {
@@ -115,6 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser]   = useState<UsuarioSessao | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const lastActivity = useRef(0);
 
   // Initialise from localStorage
   useEffect(() => {
@@ -153,6 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const applySession = useCallback((sessao: UsuarioSessao, tok: string) => {
+    lastActivity.current = Date.now();
     clearAppData();
     persistSession(sessao, tok);
     setUser(sessao);
@@ -204,6 +208,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           };
 
           clearAppData();
+          lastActivity.current = Date.now();
           persistSession(sessao, data.token);
           setUser(sessao);
           setToken(data.token);
@@ -240,14 +245,73 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const logout = useCallback(() => {
+    const currentToken = readTokenFromStorage();
+    const base = getAgenciaHubApiBaseUrl();
+    if (base && currentToken) {
+      void fetch(`${base}/auth/logout`, {
+        method: "POST", headers: { Authorization: `Bearer ${currentToken}` }, keepalive: true,
+      }).catch(() => {});
+    }
     clearSession();
     setUser(null);
     setToken(null);
   }, []);
 
+  // Only real foreground interaction counts. Polling and an open tab cannot keep a session alive.
+  useEffect(() => {
+    if (!user || !token || !getAgenciaHubApiBaseUrl()) return;
+    let pending = false;
+    let stopped = false;
+    let retryAfter = 0;
+    const abort = new AbortController();
+    async function tick() {
+      if (stopped || pending || readTokenFromStorage() !== token) return;
+      const now = Date.now();
+      const timing = sessionTiming(token!);
+      if (!timing || now >= timing.expiresAt) { logout(); return; }
+      if (now < retryAfter || !shouldRenew(token!, now, lastActivity.current, document.visibilityState === "visible")) return;
+      pending = true;
+      retryAfter = now + 15_000;
+      try {
+        const response = await fetch(`${getAgenciaHubApiBaseUrl()}/auth/session/renew`, {
+          method: "POST", headers: { Authorization: `Bearer ${token}` },
+          signal: AbortSignal.any([abort.signal, AbortSignal.timeout(10_000)]),
+        });
+        if (stopped || readTokenFromStorage() !== token) return;
+        if (response.status === 401 || response.status === 403) { logout(); return; }
+        if (!response.ok) return;
+        const data = await response.json() as { token?: string };
+        if (!stopped && readTokenFromStorage() === token && data.token && data.token !== token) {
+          // Renewal preserves cached app data and must never resurrect a logged-out session.
+          persistSession(user!, data.token);
+          setToken(data.token);
+        }
+      } catch { /* transient failures retry while the access token is still valid */ }
+      finally { pending = false; }
+    }
+    function activity(event: Event) {
+      if (event.isTrusted && document.visibilityState === "visible") {
+        lastActivity.current = Date.now();
+        void tick();
+      }
+    }
+    const events = ["pointerdown", "keydown", "scroll", "touchstart"];
+    events.forEach((name) => window.addEventListener(name, activity, { passive: true }));
+    const timer = setInterval(() => void tick(), 5_000);
+    return () => {
+      stopped = true;
+      abort.abort();
+      clearInterval(timer);
+      events.forEach((name) => window.removeEventListener(name, activity));
+    };
+  }, [user, token, logout]);
+
   // Listen for 401 responses dispatched by apiFetch and log the user out
   useEffect(() => {
-    function handleUnauthorized() { logout(); }
+    function handleUnauthorized(event: Event) {
+      const rejectedToken = (event as CustomEvent<string | undefined>).detail;
+      if (!rejectedToken || rejectedToken === readTokenFromStorage()) logout();
+    }
     window.addEventListener("auth:unauthorized", handleUnauthorized);
     return () => window.removeEventListener("auth:unauthorized", handleUnauthorized);
   }, [logout]);

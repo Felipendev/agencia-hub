@@ -31,6 +31,7 @@ import type {
 } from "@/types";
 
 type Props = {
+  cliente?: Cliente;
   open: boolean;
   onClose: () => void;
   onCreated: (cliente: Cliente) => void;
@@ -178,6 +179,7 @@ function TipoSwitch({
     <label className="flex cursor-pointer items-center gap-3">
       <button
         type="button"
+        aria-label={label}
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
@@ -196,8 +198,8 @@ function TipoSwitch({
   );
 }
 
-export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave = false, initialType = "cliente" }: Props) {
-  const { addCliente } = useData();
+export function NovoClienteModal({ cliente, open, onClose, onCreated, keepOpenAfterSave = false, initialType = "cliente" }: Props) {
+  const { addCliente, updateCliente } = useData();
   const toast = useToast();
   const [tab, setTab] = useState<TabId>("contato");
 
@@ -243,7 +245,8 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
   const [emergenciaNome, setEmergenciaNome] = useState("");
   const [emergenciaTelefone, setEmergenciaTelefone] = useState("");
 
-  const [destinoInteresse, setDestinoInteresse] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<ClienteStatus>("prospecto");
   const [informacoesExtras, setInformacoesExtras] = useState("");
 
@@ -255,10 +258,51 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
 
   useEffect(() => {
     if (!open) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Resetting the type toggles to match the shortcut when the modal opens
-    setTipoCliente(initialType === "cliente");
-    setTipoFornecedor(initialType === "fornecedor");
-  }, [initialType, open]);
+    if (!cliente) {
+      setTipoCliente(initialType === "cliente");
+      setTipoFornecedor(initialType === "fornecedor");
+      return;
+    }
+    setTab("contato");
+    setNome(cliente.nome ?? "");
+    setAvaliacao(cliente.avaliacao ?? undefined);
+    setDataNascimento(cliente.dataNascimento ?? "");
+    setSexo(cliente.sexo ?? "nao_informado");
+    setTipoPassageiro(cliente.tipoPassageiro ?? false);
+    setTipoCliente(cliente.tipoCliente ?? (!cliente.tipoFornecedor && !cliente.tipoPassageiro && !cliente.tipoRepresentante));
+    setTipoFornecedor(cliente.tipoFornecedor ?? false);
+    setTipoRepresentante(cliente.tipoRepresentante ?? false);
+    setTelefone(cliente.telefone ?? "");
+    setEmail(cliente.email ?? "");
+    setRedeSocial(cliente.redeSocial ?? "");
+    setSite(cliente.site ?? "");
+    setChavePix(cliente.chavePix ?? "");
+    setAceitaComunicacao(cliente.aceitaComunicacao ?? true);
+    setDocumentoCpfCnpj(cliente.documentoCpfCnpj ?? "");
+    setDocumentoRg(cliente.documentoRg ?? "");
+    setDocumentoOrgaoEmissorRg(cliente.documentoOrgaoEmissorRg ?? "");
+    setDocumentoInscricaoMunicipal(cliente.documentoInscricaoMunicipal ?? "");
+    setDocumentoIdEstrangeiro(cliente.documentoIdEstrangeiro ?? "");
+    setDocumentoNacionalidade(cliente.documentoNacionalidade ?? "");
+    setDocumentoEstadoCivil(cliente.documentoEstadoCivil ?? "");
+    setDocumentoPassaporte(cliente.documentoPassaporte ?? "");
+    setDocumentoPassaporteEmissao(cliente.documentoPassaporteEmissao ?? "");
+    setDocumentoPassaporteVencimento(cliente.documentoPassaporteVencimento ?? "");
+    setDocumentoPassaporteNacionalidade(cliente.documentoPassaporteNacionalidade ?? "");
+    setDocumentoVisto(cliente.documentoVisto ?? "");
+    setDocumentoVistoValidade(cliente.documentoVistoValidade ?? "");
+    setDocumentosObs(cliente.documentosObs ?? "");
+    setProfissao(cliente.profissao ?? "");
+    setRenda(cliente.renda ?? "");
+    setCanalVenda(cliente.canalVenda ?? "");
+    setEmergenciaNome(cliente.emergenciaNome ?? "");
+    setEmergenciaTelefone(cliente.emergenciaTelefone ?? "");
+    setWhatsapp(cliente.whatsapp ?? "");
+    setStatus(cliente.status ?? "prospecto");
+    setInformacoesExtras(cliente.informacoesExtras ?? "");
+    setEndereco(cliente.endereco ?? emptyEndereco());
+    setObservacoes(cliente.observacoes ?? "");
+  }, [cliente, initialType, open]);
 
   function patchEndereco(patch: Partial<ClienteEndereco>) {
     setEndereco((e) => ({ ...e, ...patch }));
@@ -299,7 +343,7 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
     setCanalVenda("");
     setEmergenciaNome("");
     setEmergenciaTelefone("");
-    setDestinoInteresse("");
+    setWhatsapp("");
     setStatus("prospecto");
     setInformacoesExtras("");
     setEndereco(emptyEndereco());
@@ -312,7 +356,8 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
   }
 
   async function handleSubmit(): Promise<boolean> {
-    if (!nome.trim()) return false;
+    if (saving) return false;
+    if (!nome.trim()) { toast.error("Nome é obrigatório"); return false; }
 
     const anyTipo =
       tipoPassageiro || tipoCliente || tipoFornecedor || tipoRepresentante;
@@ -344,12 +389,13 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
         }
       : undefined;
 
+    setSaving(true);
     try {
-      const novo = await addCliente({
+      const values: Omit<Cliente, "id" | "createdAt" | "destinoInteresse"> = {
         nome: nome.trim(),
         email: email.trim(),
         telefone: telefoneSalvo,
-        destinoInteresse: destinoInteresse.trim(),
+        whatsapp: whatsapp.trim(),
         status,
         observacoes: observacoes.trim(),
         avaliacao,
@@ -387,7 +433,14 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
         emergenciaTelefone: emergenciaTelSalvo,
         informacoesExtras: informacoesExtras.trim(),
         endereco: end,
-      });
+      };
+      if (cliente) {
+        await updateCliente(cliente.id, values);
+        toast.success("Pessoa atualizada com sucesso!");
+        onClose();
+        return true;
+      }
+      const novo = await addCliente({ ...values, destinoInteresse: "" });
       onCreated(novo);
       toast.success(`Pessoa "${novo.nome}" cadastrada!`);
       reset();
@@ -400,6 +453,8 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
         toast.error("Erro ao salvar cliente. Tente novamente.");
       }
       return false;
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -418,7 +473,7 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
             id="novo-cli-titulo"
             className="text-lg font-bold text-[var(--hub-blue-dark)]"
           >
-            Nova pessoa
+            {cliente ? "Editar pessoa" : "Nova pessoa"}
           </h2>
           <button
             type="button"
@@ -511,6 +566,7 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
                   key={t.id}
                   type="button"
                   onClick={() => setTab(t.id)}
+                  aria-current={tab === t.id ? "page" : undefined}
                   className={`border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
                     tab === t.id
                       ? "border-[var(--hub-blue)] text-[var(--hub-blue-dark)]"
@@ -559,6 +615,10 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
                     placeholder="nome@email.com"
                     className="mt-1"
                   />
+                </div>
+                <div>
+                  <Label htmlFor="nc-wa">WhatsApp</Label>
+                  <Input id="nc-wa" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="mt-1" />
                 </div>
                 <div>
                   <Label htmlFor="nc-ig">Rede social</Label>
@@ -670,7 +730,8 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
                       }
                       className="mt-1"
                     >
-                      {NACIONALIDADES_OPTIONS.map((o) => (
+                      {documentoNacionalidade && !NACIONALIDADES_OPTIONS.some((option) => String(option.value) === documentoNacionalidade) && <option value={documentoNacionalidade}>{documentoNacionalidade}</option>}
+{NACIONALIDADES_OPTIONS.map((o) => (
                         <option key={o.label} value={o.value}>
                           {o.label}
                         </option>
@@ -688,7 +749,8 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
                     }
                     className="mt-1"
                   >
-                    {ESTADO_CIVIL_OPTIONS.map((o) => (
+                    {documentoEstadoCivil && !ESTADO_CIVIL_OPTIONS.some((option) => String(option.value) === documentoEstadoCivil) && <option value={documentoEstadoCivil}>{documentoEstadoCivil}</option>}
+{ESTADO_CIVIL_OPTIONS.map((o) => (
                       <option key={o.label} value={o.value}>
                         {o.label}
                       </option>
@@ -741,7 +803,8 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
                       }
                       className="mt-1"
                     >
-                      {NACIONALIDADES_PASSAPORTE_OPTIONS.map((o) => (
+                      {documentoPassaporteNacionalidade && !NACIONALIDADES_PASSAPORTE_OPTIONS.some((option) => String(option.value) === documentoPassaporteNacionalidade) && <option value={documentoPassaporteNacionalidade}>{documentoPassaporteNacionalidade}</option>}
+{NACIONALIDADES_PASSAPORTE_OPTIONS.map((o) => (
                         <option key={o.label} value={o.value}>
                           {o.label}
                         </option>
@@ -797,7 +860,8 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
                       onChange={(e) => setProfissao(e.target.value)}
                       className="mt-1"
                     >
-                      {PROFISSAO_OPTIONS.map((o) => (
+                      {profissao && !PROFISSAO_OPTIONS.some((option) => String(option.value) === profissao) && <option value={profissao}>{profissao}</option>}
+{PROFISSAO_OPTIONS.map((o) => (
                         <option key={o.label} value={o.value}>
                           {o.label}
                         </option>
@@ -823,7 +887,8 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
                       onChange={(e) => setCanalVenda(e.target.value)}
                       className="mt-1"
                     >
-                      {CANAL_VENDA_OPTIONS.map((o) => (
+                      {canalVenda && !CANAL_VENDA_OPTIONS.some((option) => String(option.value) === canalVenda) && <option value={canalVenda}>{canalVenda}</option>}
+{CANAL_VENDA_OPTIONS.map((o) => (
                         <option key={o.label} value={o.value}>
                           {o.label}
                         </option>
@@ -872,15 +937,6 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
                 </div>
                 <div className="grid gap-3 border-t border-[var(--hub-border)] pt-4 sm:grid-cols-2">
                   <div>
-                    <Label htmlFor="nc-dest">Destino de interesse</Label>
-                    <Input
-                      id="nc-dest"
-                      value={destinoInteresse}
-                      onChange={(e) => setDestinoInteresse(e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
                     <Label htmlFor="nc-st">Status no CRM</Label>
                     <Select
                       id="nc-st"
@@ -923,7 +979,8 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
                       }
                       className="mt-1"
                     >
-                      {PAISES_OPTIONS.map((o) => (
+                      
+{PAISES_OPTIONS.map((o) => (
                         <option key={o.label} value={o.value}>
                           {o.label}
                         </option>
@@ -1050,13 +1107,14 @@ export function NovoClienteModal({ open, onClose, onCreated, keepOpenAfterSave =
               <Button
                 type="button"
                 variant="secondary"
+                disabled={saving}
                 onClick={async () => { const ok = await handleSubmit(); if (ok) onClose(); }}
               >
                 Salvar e fechar
               </Button>
             )}
-            <Button type="button" onClick={handleSubmit}>
-              {keepOpenAfterSave ? "Salvar e adicionar outro" : "Salvar"}
+            <Button type="button" onClick={handleSubmit} disabled={saving}>
+              {saving ? "Salvando…" : cliente ? "Salvar alterações" : keepOpenAfterSave ? "Salvar e adicionar outro" : "Salvar"}
             </Button>
           </div>
         </div>

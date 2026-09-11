@@ -9,6 +9,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/auth-context";
 import { useData } from "@/contexts/data-context";
+import { ClientePicker } from "@/components/cliente/ClientePicker";
 import { NovoClienteModal } from "@/components/cliente/NovoClienteModal";
 import { TRIP_STATUS_LABELS } from "@/lib/constants";
 import type { Cliente } from "@/types";
@@ -119,11 +120,7 @@ export default function NovaViagemPage() {
       <form onSubmit={submit} className="space-y-4 rounded-xl border border-[var(--hub-border)] bg-white p-5">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <Label>Cliente *</Label>
-            <Select className={attempted && !customerId ? "border-red-500" : ""} value={customerId} aria-invalid={attempted && !customerId} onChange={(event) => { setCustomerId(event.target.value); setQuotationId(""); }}>
-              <option value="">Selecione</option>
-              {clientes.map((customer) => <option key={customer.id} value={customer.id}>{customer.nome}</option>)}
-            </Select>
+            <ClientePicker id="customer-picker" required invalid={attempted && !customerId} clientes={clientes} value={customerId} showNovoButton={false} onChange={(id) => { setCustomerId(id); setQuotationId(""); }} />
             <Button type="button" size="sm" variant="ghost" className="mt-1 text-[var(--hub-blue)]" onClick={() => setCustomerModalOpen(true)}>+ Nova pessoa / cliente</Button>
           </div>
           <div>
@@ -196,7 +193,7 @@ export default function NovaViagemPage() {
         <Button type="submit" disabled={saving}>{saving ? "Salvando..." : "Registrar viagem"}</Button>
       </form>
 
-      <NovoClienteModal open={customerModalOpen} initialType="cliente" onClose={() => setCustomerModalOpen(false)} onCreated={(customer: Cliente) => { setCustomerId(customer.id); setCustomerModalOpen(false); }} />
+      <NovoClienteModal open={customerModalOpen} initialType="cliente" onClose={() => setCustomerModalOpen(false)} onCreated={(customer: Cliente) => { setCustomerId(customer.id); setQuotationId(""); setCustomerModalOpen(false); }} />
     </div>
   );
 }

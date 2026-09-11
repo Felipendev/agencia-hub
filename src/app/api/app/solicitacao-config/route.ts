@@ -1,3 +1,4 @@
+import { normalizeSolicitacaoLinks } from "@/lib/solicitacao-links";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
@@ -117,6 +118,12 @@ export async function PUT(request: Request) {
     nomeMarca: (config.nomeMarca ?? "Agência").trim() || "Agência",
     linksSociais: Array.isArray(config.linksSociais) ? config.linksSociais : [],
   };
+
+  try {
+    apiBody.linksSociais = normalizeSolicitacaoLinks(apiBody.linksSociais, apiBody.nomeMarca);
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : "WhatsApp inválido" }, { status: 400 });
+  }
 
   if (!base) {
     if (!isLocalSolicitacaoStoreEnabled()) {

@@ -25,6 +25,7 @@ type Body = {
   sellerPublicCode?: string | null;
   /** Consentimento LGPD — obrigatório no formulário público */
   consentimentoLgpd?: boolean;
+  consentimentoMarketing?: boolean;
 };
 
 export async function POST(request: Request) {
@@ -59,6 +60,13 @@ export async function POST(request: Request) {
     );
   }
 
+  const whatsapp = det.whatsappIgualCelular ? telefoneDigits : brPhoneDigits(det.whatsapp ?? "");
+  if (whatsapp && !isValidBrazilianPhone(whatsapp)) {
+    return NextResponse.json({ error: "Informe um WhatsApp válido com DDD." }, { status: 400 });
+  }
+  det.celular = telefoneDigits;
+  det.whatsapp = whatsapp;
+
   const temTrecho =
     Array.isArray(det.destinosTrechos) &&
     det.destinosTrechos.some((x) => x?.trim());
@@ -81,7 +89,7 @@ export async function POST(request: Request) {
     telefone: telefoneDigits,
     detalhes: det,
     observacoes: body.observacoes ?? "",
-    consentimentoLgpd: body.consentimentoLgpd === true,
+    consentimentoMarketing: body.consentimentoMarketing === true,
     ...(referralSellerId ? { referralSellerId } : {}),
     ...(sellerPublicCode ? { sellerPublicCode } : {}),
   };
@@ -147,7 +155,7 @@ export async function POST(request: Request) {
       observacoes: body.observacoes ?? "",
       referralSellerId,
       sellerPublicCode,
-      consentimentoLgpd: body.consentimentoLgpd === true,
+      consentimentoMarketing: body.consentimentoMarketing === true,
     });
     return NextResponse.json({ ok: true, id: created.id });
   } catch (err) {

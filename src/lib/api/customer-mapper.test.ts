@@ -47,7 +47,7 @@ describe("clientePatchToApi", () => {
 });
 
 describe("mergeCustomerApiResponse", () => {
-  it("falls back to a display placeholder only for missing interestDestination", () => {
+  it("keeps missing destination empty instead of persisting a display sentinel", () => {
     const merged = mergeCustomerApiResponse(
       { ...baseCliente, id: "x", createdAt: "2026-01-01" },
       {
@@ -62,7 +62,7 @@ describe("mergeCustomerApiResponse", () => {
         deletedAt: null,
       },
     );
-    expect(merged.destinoInteresse).toBe("—");
+    expect(merged.destinoInteresse).toBe("");
     expect(merged.email).toBe("");
   });
 });

@@ -9,14 +9,16 @@ import { AbaFormulario } from "./_aba-formulario";
 import { AbaEquipe } from "./_aba-equipe";
 import { AbaSeguranca } from "./_aba-seguranca";
 import { AbaNotificacoes } from "./_aba-notificacoes";
+import { AbaCupons } from "./_aba-cupons";
 import { PageHeader } from "@/components/layout/page-header";
 
-type Aba = "agencia" | "endereco" | "formulario" | "equipe" | "seguranca" | "notificacoes";
+type Aba = "agencia" | "endereco" | "formulario" | "equipe" | "seguranca" | "notificacoes" | "cupons";
 
 const ABAS: { id: Aba; label: string }[] = [
   { id: "agencia",       label: "Agência"               },
   { id: "endereco",      label: "Endereço"              },
   { id: "formulario",    label: "Formulário de Cotação" },
+  { id: "cupons",        label: "Cupons"                },
   { id: "equipe",        label: "Equipe"                },
   { id: "seguranca",     label: "Segurança"             },
   { id: "notificacoes",  label: "Notificações"          },
@@ -76,6 +78,7 @@ export default function AgenciaPage() {
       {aba === "agencia"      && <AbaAgencia />}
       {aba === "endereco"     && <AbaEndereco />}
       {aba === "formulario"   && <AbaFormulario />}
+      {aba === "cupons"       && <AbaCupons />}
       {aba === "equipe"       && <AbaEquipe token={token} />}
       {aba === "seguranca"    && <AbaSeguranca />}
       {aba === "notificacoes" && <AbaNotificacoes />}

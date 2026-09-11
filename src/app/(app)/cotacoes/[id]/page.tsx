@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { DownloadIcon, EditIcon, WhatsAppIcon } from "@/components/icons";
 import { formatDateBR, formatDateTimeBR } from "@/lib/format";
 import { centsToDisplay, parseCurrencyInput } from "@/lib/currency-input";
+import { useAgencyBranding } from "@/hooks/use-agency-branding";
 import { imprimirCotacao, baixarCotacaoHtml } from "@/lib/pdf-generator";
 import { COTACAO_STATUS_LABELS } from "@/lib/constants";
 import {
@@ -56,16 +57,7 @@ export default function CotacaoDetalhePage() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [waModalOpen, setWaModalOpen] = useState(false);
   const [sellers, setSellers] = useState<ApiUserResponse[]>([]);
-  const [nomeAgencia, setNomeAgencia] = useState(() => {
-    try {
-      const raw = localStorage.getItem("agencia-hub-solicitacao-config");
-      if (raw) {
-        const parsed = JSON.parse(raw) as { nomeMarca?: string };
-        if (parsed?.nomeMarca) return parsed.nomeMarca;
-      }
-    } catch { /* ignore */ }
-    return "Agência";
-  });
+  const { name: nomeAgencia, logo: logoAgencia } = useAgencyBranding();
 
   useEffect(() => {
     if (!isOwner || !token || !getAgenciaHubApiBaseUrl()) return;
@@ -102,20 +94,6 @@ export default function CotacaoDetalhePage() {
       a.name.localeCompare(b.name, "pt-BR"),
     );
   }, [sellers, user, isOwner]);
-
-  // Agency name for print/PDF — localStorage read is in useState initializer; fallback to API
-  useEffect(() => {
-    // A configuração do formulário é exclusiva do dono. Vendedores usam o
-    // nome disponível na sessão/cache e nunca disparam um 403 desnecessário.
-    if (!isOwner || !token) return;
-    const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
-    fetch("/api/app/solicitacao-config", { credentials: "include", headers })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data: { config?: { nomeMarca?: string } } | null) => {
-        if (data?.config?.nomeMarca) setNomeAgencia(data.config.nomeMarca);
-      })
-      .catch(() => {});
-  }, [isOwner, token]);
 
   useEffect(() => {
     if (!cotacao) return;
@@ -169,8 +147,8 @@ export default function CotacaoDetalhePage() {
   function handleImprimir() {
     if (!cliente) { toast.error("Cliente nao encontrado"); return; }
     try {
-      imprimirCotacao(cotacao!, cliente, nomeAgencia);
-      toast.success("Abrindo janela de impressao...");
+      imprimirCotacao(cotacao!, cliente, nomeAgencia || "Agência", logoAgencia);
+      toast.success("Prévia aberta em outra guia. Use Imprimir / Salvar PDF ou Voltar à cotação.");
     } catch {
       toast.error("Erro ao abrir impressao. Verifique se popups estao permitidos.");
     }
@@ -179,7 +157,7 @@ export default function CotacaoDetalhePage() {
   function handleBaixarHtml() {
     if (!cliente) { toast.error("Cliente nao encontrado"); return; }
     try {
-      baixarCotacaoHtml(cotacao!, cliente, nomeAgencia);
+      baixarCotacaoHtml(cotacao!, cliente, nomeAgencia || "Agência", logoAgencia);
       toast.success("Download iniciado!");
     } catch {
       toast.error("Erro ao baixar arquivo");

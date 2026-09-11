@@ -1,3 +1,4 @@
+import { whatsappLink, defaultFormWhatsappMessage } from "@/lib/whatsapp";
 import type { LinkSocialItem, LinkSocialTipo } from "@/types/solicitacao-publica";
 
 function IconForTipo({ tipo }: { tipo: LinkSocialTipo }) {
@@ -96,8 +97,8 @@ function labelForTipo(tipo: LinkSocialTipo, custom?: string) {
 }
 
 /** Lista lateral em cartões — layout próprio do AgenciaHub (não centralizado em ícones soltos). */
-export function SolicitacaoSocialPanel({ links }: { links: LinkSocialItem[] }) {
-  const list = links.filter((l) => l.url?.trim());
+export function SolicitacaoSocialPanel({ links, agency = "" }: { links: LinkSocialItem[]; agency?: string }) {
+  const list = links.map((l) => l.tipo === "whatsapp" ? { ...l, url: whatsappLink(l.url, l.mensagemWhatsapp?.trim() || defaultFormWhatsappMessage(agency)) ?? "" } : l).filter((l) => l.url?.trim());
   if (list.length === 0) return null;
 
   return (

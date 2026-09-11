@@ -231,7 +231,7 @@ export function apiDetailsToCotacaoDetalhes(raw: unknown): CotacaoDetalhes {
     bagagemEspecial: b(o.specialBaggage, false),
     categoriaHospedagem: s(o.lodgingCategory),
     comodidadesHospedagem: strArr(o.lodgingAmenities),
-    qtdQuartos: n(o.rooms, 1),
+    qtdQuartos: n(o.rooms, 0),
     celular: s(o.mobilePhone),
     whatsapp: s(o.whatsappPhone),
     whatsappIgualCelular: b(o.whatsappSameAsMobile, false),

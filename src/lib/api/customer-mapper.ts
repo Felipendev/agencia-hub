@@ -1,3 +1,4 @@
+import { CUSTOMER_PROFILE_KEYS, type CustomerProfileData } from "./customer-types";
 import type { Cliente, ClienteStatus } from "@/types";
 import type {
   ApiCreateCustomerRequest,
@@ -29,6 +30,7 @@ export function clienteToCreateRequest(
   c: Omit<Cliente, "id" | "createdAt">,
 ): ApiCreateCustomerRequest {
   return {
+    profileData: profileToApi(c),
     name: c.nome.trim(),
     email: c.email.trim() || null,
     phone: c.telefone.trim() || null,
@@ -52,10 +54,18 @@ export function clientePatchToApi(
   }
   if (patch.status !== undefined) body.status = clienteStatusToApi(patch.status);
   if (patch.observacoes !== undefined) body.notes = patch.observacoes.trim();
+  const profile = profileToApi(patch);
+  if (Object.keys(profile).length) body.profileData = profile;
   return body;
 }
 
-/** Aplica resposta HTTP mantendo campos extras que só existem no SPA. */
+function profileToApi(source: Partial<Cliente>): CustomerProfileData {
+  return Object.fromEntries(CUSTOMER_PROFILE_KEYS
+    .filter((key) => Object.prototype.hasOwnProperty.call(source, key))
+    .map((key) => [key, source[key] ?? null]));
+}
+
+/** A resposta da API é a fonte persistida; null explícito limpa o campo. */
 export function mergeCustomerApiResponse(
   draft: Cliente,
   api: ApiCustomerResponse,
@@ -67,11 +77,14 @@ export function mergeCustomerApiResponse(
 
   return {
     ...draft,
+    ...Object.fromEntries(CUSTOMER_PROFILE_KEYS
+      .filter((key) => api.profileData && Object.prototype.hasOwnProperty.call(api.profileData, key))
+      .map((key) => [key, api.profileData![key] ?? undefined])),
     id: api.id,
     nome: api.name,
     email: api.email ?? "",
     telefone: api.phone ?? "",
-    destinoInteresse: api.interestDestination ?? "—",
+    destinoInteresse: api.interestDestination ?? "",
     status: apiCustomerStatusToFront(api.status),
     observacoes: api.notes ?? draft.observacoes,
     createdAt,

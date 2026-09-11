@@ -1,10 +1,9 @@
 /** Máscara e validação de celular/telefone brasileiro (DDD + número). */
 
-const MAX_DIGITS_BR = 11;
-
-/** Extrai apenas dígitos, limitando ao tamanho de um número BR nacional. */
+/** Normaliza sem truncar: um número longo deve falhar na validação. */
 export function brPhoneDigits(input: string): string {
-  return input.replace(/\D/g, "").slice(0, MAX_DIGITS_BR);
+  const digits = input.replace(/\D/g, "");
+  return /^55\d{10,11}$/.test(digits) ? digits.slice(2) : digits;
 }
 
 /**
@@ -14,6 +13,7 @@ export function brPhoneDigits(input: string): string {
 export function formatBrPhoneDisplay(digits: string): string {
   const d = brPhoneDigits(digits);
   if (d.length === 0) return "";
+  if (d.length > 11) return d;
   const ddd = d.slice(0, 2);
   if (d.length <= 2) return `(${ddd}`;
   const rest = d.slice(2);
@@ -28,8 +28,7 @@ export function formatBrPhoneDisplay(digits: string): string {
 
 /** DDD plausível (11–99; regra simples para UI). */
 function isPlausibleDdd(ddd: string): boolean {
-  const n = Number(ddd);
-  return n >= 11 && n <= 99;
+  return /^(1[1-9]|2[12478]|3[1-578]|4[1-9]|5[13-5]|6[1-9]|7[134579]|8[1-9]|9[1-9])$/.test(ddd);
 }
 
 /**
@@ -42,5 +41,5 @@ export function isValidBrazilianPhone(digits: string): boolean {
   if (d.length === 11) {
     return d[2] === "9";
   }
-  return true;
+  return /^[2-5]/.test(d.slice(2));
 }

@@ -1,66 +1,30 @@
 import { formatBRL, formatDateBR } from "@/lib/format";
 import type { Cotacao, Cliente } from "@/types";
 
-// ── label helpers (inline to keep this file self-contained) ──────────────────
+import { SERVICOS_DESEJADOS_OPTIONS, FLEXIBILIDADE_OPTIONS, HORARIO_SAIDA_OPTIONS,
+  PREFERENCIA_VOO_OPTIONS, HOSPEDAGEM_CATEGORIA_OPTIONS, PAGAMENTO_OPTIONS, COMUNICACAO_OPTIONS,
+} from "@/lib/cotacao-options";
 
-const SERVICOS_LABELS: Record<string, string> = {
-  passagem: "Passagem aérea",
-  hospedagem: "Hospedagem",
-  transfer: "Transfer aeroporto ↔ hospedagem",
-  carro: "Aluguel de carro",
-  passeios: "Passeios / ingressos",
-  seguro: "Seguro viagem",
-  visto: "Visto",
-  passaporte: "Passaporte",
-  cruzeiro: "Cruzeiro",
-  excursao: "Excursão / intercâmbio",
-  onibus: "Ônibus",
-};
+const labels = (options: readonly { id: string; label: string }[]) => Object.fromEntries(options.map((o) => [o.id, o.label]));
+const SERVICOS_LABELS = labels(SERVICOS_DESEJADOS_OPTIONS);
+const FLEX_LABELS = labels(FLEXIBILIDADE_OPTIONS);
+const HORARIO_LABELS = labels(HORARIO_SAIDA_OPTIONS);
+const VOO_LABELS = labels(PREFERENCIA_VOO_OPTIONS);
+const HOSPEDAGEM_LABELS = labels(HOSPEDAGEM_CATEGORIA_OPTIONS);
+const PAGAMENTO_LABELS = labels(PAGAMENTO_OPTIONS);
+const COMUNICACAO_LABELS = labels(COMUNICACAO_OPTIONS);
 
-const FLEX_LABELS: Record<string, string> = {
-  um_dia_antes: "Sim (1 dia antes)",
-  um_dia_depois: "Sim (1 dia depois)",
-  exato: "Não (data exata)",
-  outro: "Outro",
-};
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]!);
+}
 
-const HORARIO_LABELS: Record<string, string> = {
-  manha: "Manhã",
-  tarde: "Tarde",
-  noite: "Noite",
-  madrugada: "Madrugada",
-  mais_barato: "O mais barato",
-};
-
-const VOO_LABELS: Record<string, string> = {
-  direto: "Somente voo direto",
-  escalas: "Pode ter escalas",
-  barato: "A opção mais barata",
-};
-
-const HOSPEDAGEM_LABELS: Record<string, string> = {
-  economico: "Econômico (hostel)",
-  basico: "Local só para dormir",
-  "4estrelas": "Hotel 4 estrelas + café",
-  "5estrelas": "Hotel 5 estrelas",
-  resort: "Resort",
-};
-
-const PAGAMENTO_LABELS: Record<string, string> = {
-  pix: "À vista / Pix",
-  cartao: "Cartão de crédito",
-  debito: "Cartão de débito",
-  boleto: "Boleto bancário",
-  outro: "Outro",
-};
-
-const COMUNICACAO_LABELS: Record<string, string> = {
-  wa_texto: "WhatsApp (texto)",
-  wa_audio: "WhatsApp (áudio)",
-  wa_video: "WhatsApp (vídeo)",
-  wa_voz: "WhatsApp (ligação)",
-  email: "E-mail",
-};
+/** Escapa inclusive os campos livres aninhados, preservando números e booleanos. */
+function escapeFields<T>(value: T): T {
+  if (typeof value === "string") return escapeHtml(value) as T;
+  if (Array.isArray(value)) return value.map(escapeFields) as T;
+  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, escapeFields(item)])) as T;
+  return value;
+}
 
 function lbl(map: Record<string, string>, id: string): string {
   return map[id] ?? id;
@@ -90,6 +54,10 @@ export function gerarHtmlCotacao(
   nomeAgencia: string = "Agência",
   logoUrl?: string,
 ): string {
+  cotacao = escapeFields(cotacao);
+  cliente = escapeFields(cliente);
+  nomeAgencia = escapeHtml(nomeAgencia.trim() || "Agência");
+  logoUrl = logoUrl && /^(https?:\/\/|data:image\/(png|jpeg|webp|gif);base64,)/i.test(logoUrl) ? escapeHtml(logoUrl) : undefined;
   const d = cotacao.detalhes;
 
   // ── Roteiro ──
@@ -121,6 +89,7 @@ export function gerarHtmlCotacao(
     d.horarioSaidaIda ? `Ida: ${lbl(HORARIO_LABELS, d.horarioSaidaIda)}` : "",
     d.horarioSaidaVolta ? `Volta: ${lbl(HORARIO_LABELS, d.horarioSaidaVolta)}` : "",
     d.preferenciaVooIda ? lbl(VOO_LABELS, d.preferenciaVooIda) : "",
+    d.preferenciaVooVolta ? lbl(VOO_LABELS, d.preferenciaVooVolta) : "",
     d.usaMilhas ? "Usa milhas" : "",
   ].filter(Boolean);
 
@@ -371,7 +340,13 @@ export function gerarHtmlCotacao(
       letter-spacing: 1px;
     }
 
+    @page { size: A4; margin: 12mm; }
+    .print-controls { max-width:820px; margin:16px auto; padding:16px; background:white; border:1px solid #cbd5e1; border-radius:8px; }
+    .print-controls button { padding:10px 16px; margin:12px 8px 0 0; cursor:pointer; }
     @media print {
+      .print-controls { display:none; }
+      .section, .client-card, tr { break-inside:avoid; }
+      thead { display:table-header-group; }
       body { background: white; }
       .page { box-shadow: none; }
     }
@@ -422,7 +397,7 @@ export function gerarHtmlCotacao(
     </div>
     ${cliente.email ? `<div class="cl"><div class="cl-label">E-mail</div><div class="cl-val">${cliente.email}</div></div>` : ""}
     ${(d.celular || cliente.telefone) ? `<div class="cl"><div class="cl-label">Celular</div><div class="cl-val">${d.celular || cliente.telefone}</div></div>` : ""}
-    ${(d.whatsappIgualCelular ? d.celular : d.whatsapp) ? `<div class="cl"><div class="cl-label">WhatsApp</div><div class="cl-val">${d.whatsappIgualCelular ? d.celular : d.whatsapp}</div></div>` : ""}
+    ${(d.whatsappIgualCelular ? (d.celular || cliente.telefone) : (d.whatsapp || cliente.whatsapp)) ? `<div class="cl"><div class="cl-label">WhatsApp</div><div class="cl-val">${d.whatsappIgualCelular ? (d.celular || cliente.telefone) : (d.whatsapp || cliente.whatsapp)}</div></div>` : ""}
   </div>
 
   <div class="body">
@@ -490,7 +465,7 @@ export function gerarHtmlCotacao(
         <tbody>
           ${cotacao.opcoesVoo.map((o) => `
           <tr>
-            <td><strong style="color:${o.corCia || "#0369a1"}">${o.cia}</strong><br><span style="font-size:11px;color:#64748b">${o.nome}</span></td>
+            <td><strong style="color:${/^#[0-9a-f]{3,8}$/i.test(o.corCia || "") ? o.corCia : "#0369a1"}">${o.cia}</strong><br><span style="font-size:11px;color:#64748b">${o.nome}</span></td>
             <td>${o.horarioSaida}${o.horarioChegada ? " → " + o.horarioChegada : ""}</td>
             <td>${o.conexoes || "Direto"}</td>
             <td class="right">${formatBRL(o.precoPassagens)}</td>
@@ -536,12 +511,34 @@ export function imprimirCotacao(
   const html = gerarHtmlCotacao(cotacao, cliente, nomeAgencia, logoUrl);
   const printWindow = window.open("", "_blank");
   if (!printWindow) throw new Error("Popup bloqueado. Permita popups para imprimir.");
-  printWindow.document.write(html);
+  // A prévia não abre um diálogo bloqueante ao carregar. O usuário decide quando imprimir.
+  const controls = `<div class="print-controls" aria-label="Prévia de impressão">
+    <strong>Prévia da cotação</strong>
+    <p id="print-status" role="status">Confira os dados. Ao imprimir, escolha sua impressora ou Salvar como PDF. Após confirmar ou cancelar, você pode voltar à cotação.</p>
+    <button id="print-action" type="button">Imprimir / Salvar PDF</button>
+    <button id="print-back" type="button">Voltar à cotação</button>
+  </div>`;
+  printWindow.document.write(html.replace('<div class="page">', controls + '<div class="page">'));
   printWindow.document.close();
-  printWindow.onload = () => {
-    printWindow.focus();
-    setTimeout(() => { printWindow.print(); }, 250);
-  };
+  const status = printWindow.document.getElementById("print-status");
+  const printButton = printWindow.document.getElementById("print-action");
+  printButton?.addEventListener("click", () => {
+    try {
+      printWindow.focus();
+      printWindow.print();
+    } catch {
+      if (status) status.textContent = "Não foi possível abrir a impressão. Tente novamente ou volte à cotação.";
+    }
+  });
+  printWindow.addEventListener("afterprint", () => {
+    if (status) status.textContent = "Diálogo de impressão encerrado. Se cancelou, pode tentar novamente; para continuar trabalhando, volte à cotação.";
+    printButton?.focus();
+  });
+  printWindow.document.getElementById("print-back")?.addEventListener("click", () => {
+    window.focus();
+    printWindow.close();
+  });
+  printWindow.focus();
 }
 
 export function baixarCotacaoHtml(

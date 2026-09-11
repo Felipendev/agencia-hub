@@ -2,8 +2,8 @@
 
 > Itens levantados na auditoria de persistência e fluxos críticos em 2026-09-03.
 
-**Last Updated**: 2026-09-04  
-**Total Items**: 19 (1 TODO, 1 DEBT, 17 resolved)
+**Last Updated**: 2026-09-10  
+**Total Items**: 37 (1 TODO pending — needs live repro, 1 DEBT, 35 resolved)
 
 ---
 
@@ -328,6 +328,155 @@ Esta é a visão curta para acompanhamento. O detalhamento e os critérios de ac
 - **Affected Files**: `src/contexts/data-context.tsx`, `src/lib/api/*`, `src/components/cliente/*`, `src/app/(app)/cotacoes/*`, `src/app/(app)/financeiro/*`, `.github/workflows/ci.yml`
 - **Complexity**: Large
 - **Risk if Ignored**: Novas regressões podem voltar a confirmar operações não persistidas; falhas só serão percebidas depois da recarga ou por dados ausentes em produção.
+
+---
+
+## 🔎 Auditoria 2026-09-09 (usuário) — cupom, PDF, sessão, clientes, financeiro
+
+> Lote de itens levantados pelo usuário em 2026-09-09. Investigação feita por leitura de código (sem servidor local rodando — respeitar restrição de não usar portas 8080/8081 em execuções futuras). Cada item abaixo tem o achado do código-fonte; implementação ainda não iniciada, exceto onde marcado "resolved".
+
+> **Atualização (mesmo dia, após validar as mudanças que o GPT já tinha deixado no working tree, ambos os repos, não commitadas):** o GPT já tinha começado a implementar de fato TODO-024 (sessão), TODO-025 (edição de cliente), TODO-026 (renomear Clientes→Pessoas), TODO-028 (remover Destino de interesse) e TODO-029 (cotação aprovada → financeiro) e TODO-031 (notificação de check-in) — front (`NovoClienteModal.tsx` unificado create/edit, `ClientePicker.tsx`) e back (`SessionController`, `CheckinNotificationController`/`CheckinNotificationScheduler`, `QuotationApprovalService`, `CustomerProfile`, 3 migrações novas). Rodei a validação completa (não só leitura) e achei + corrigi 3 bugs reais nesse código não commitado:
+> 1. **3 migrações Flyway com a mesma versão `V40`** (`V40__agency_checkin_notifications.sql`, `V40__customer_profile_data.sql`, `V40__quotation_approval_sales.sql`) — Flyway falha o boot inteiro com `Found more than one migration with version 40`. Renomeadas para `V40`/`V41`/`V42` (sem conflito de tabela/coluna entre elas). Confirmado com `mvn test` completo: todos os testes passam depois da correção.
+> 2. **`src/components/ui/input.tsx`** não repassava `ref` (componente função simples) — `ClientePicker.tsx` (autocomplete de cliente, usado no novo fluxo) passa `ref` pro `<Input>` e quebrava o build (`npx tsc --noEmit` com erro). Corrigido com `forwardRef`.
+> 3. **`clientes/[id]/page.tsx`** usava `tone="neutral"` no `<Badge>`, mas o componente só aceita `"default" | "success" | "warning" | "muted" | "danger"` — build quebrado. Trocado para `"muted"`.
+>
+> Depois dessas 3 correções: `npx tsc --noEmit -p .`, `npm run lint` (0 erros), `npm test` (36/36) e `npm run build` (front) e `mvn test` (back, `agencia-hub-api`) — todos passando. **Nada disso foi commitado ainda** — segue no working tree de ambos os repositórios, aguardando revisão/commit do usuário. Os itens abaixo tiveram o status atualizado para refletir isso; a auditoria original (achado por leitura de código, antes de eu ver esse trabalho do GPT) fica registrada em cada item para rastreabilidade.
+
+### TODO-019: Criar gestão real de cupom de desconto
+- **Priority**: Medium
+- **Status**: resolved (não commitado — vai numa branch própria, `feature/cupom-desconto`, a pedido do usuário)
+- **Created**: 2026-09-09 · **Resolved**: 2026-09-10
+- **Origin**: "valide se o dono consegue hj add cupons de desconto e se não, onde seria isso"
+- **Resolution**: Backend: entidade `Coupon` + migração `V43__coupons.sql` (tabela `coupons`, único por agência) + `CouponRepository` + `CouponController` (`/agency/coupons`, CRUD, OWNER only) + `PublicCouponController` (`GET /public/coupons/validate?slug=&code=`, sem autenticação, resolve agência pelo slug via `SolicitacaoConfigRepository`, rate-limited a 20/min). Frontend: nova aba "Cupons" em Agência (`_aba-cupons.tsx`) com criar/ativar-desativar/remover; `src/lib/api/coupons-remote.ts` + proxies `/api/app/coupons`; `src/app/api/public/cupom/validate/route.ts` deixou de usar o mapa hardcoded e agora chama o backend real (por slug no formulário público, ou pelos cupons da própria agência quando autenticado sem slug — `CotacaoDetalhesForm` ganhou props `slug`/`token` para isso). `mvn -o compile` e `npx tsc --noEmit` limpos.
+
+### TODO-020: Link de WhatsApp sem validação/mensagem configurável — **JÁ RESOLVIDO**
+- **Priority**: —
+- **Status**: resolved (confirmado nesta auditoria, sem alteração)
+- **Created**: 2026-09-09
+- **Origin**: "deve ter um regex que valida se tem numeros de whatsapp corretos... msg padrão configurável"
+- **Resolution**: Já implementado. `src/lib/whatsapp.ts` valida com `isValidBrazilianPhone` + regex, normaliza dígitos (remove espaço/traço) via `brPhoneDigits`, e `defaultFormWhatsappMessage(agencyName)` gera mensagem padrão configurável por agência. `WhatsappLinkFields.tsx` (usado na aba Agência → Formulário) já expõe o campo "Mensagem ao abrir o WhatsApp" com esse padrão como placeholder e aviso de fallback.
+
+### TODO-021: Revisar geração do PDF de cotação (campos errados, quarto parecendo pré-selecionado)
+- **Priority**: High
+- **Status**: resolved (parcial) — reescrita do gerador já corrigiu o bug real de campo faltando; a alegação do "1 quarto" segue sem repro
+- **Created**: 2026-09-09 · **Resolved**: 2026-09-10
+- **Origin**: "validar como o imprimir PDF está sendo configurado... 1 quarto está vindo como selecionado automaticamente" + "Qtd. quartos parece estar selecionado automatico no formulário de solicitação tbm"
+- **Resolution**: `src/lib/pdf-generator.ts` já foi reescrito (WIP do GPT, validado nesta auditoria): o bug real de "campo errado" era `d.preferenciaVooVolta` **nunca aparecia no PDF** (só a preferência de ida) — corrigido na reescrita. Também ganhou escaping de HTML/CSS (XSS em `corCia` e campos livres) e fallback de WhatsApp/telefone mais robusto. `qtdQuartos` nasce `0` e só aparece no PDF quando `> 0` (`pdf-generator.ts:83,433`) — não achei nenhum caminho de código que force `1` automaticamente, nem no formulário público (que não tem campo de quartos) nem no mapeador. Não reproduzido; precisa de um cupom... digo, uma cotação real com screenshot para achar onde o `1` aparece, se ainda aparecer.
+- **Affected Files**: `src/lib/pdf-generator.ts`.
+
+### TODO-022: Impressão do PDF bloqueia a tela do app sem indicar o motivo — **JÁ RESOLVIDO**
+- **Priority**: —
+- **Status**: resolved (confirmado nesta auditoria)
+- **Created**: 2026-09-09 · **Resolved**: 2026-09-10
+- **Origin**: "Ao clicar em imprimir se eu não fechar a tela de impressão, não consigo mexer na tela do app"
+- **Resolution**: `imprimirCotacao()` em `pdf-generator.ts` já foi reescrita para abrir uma prévia numa nova guia sem chamar `window.print()` automaticamente — o usuário decide clicando em "Imprimir / Salvar PDF"; há botão "Voltar à cotação" e o próprio código comenta "a prévia não abre um diálogo bloqueante ao carregar". Isso evita o travamento reportado.
+
+### TODO-023: Nome da agência ausente/errado na mensagem de WhatsApp ao enviar cotação
+- **Priority**: Medium
+- **Status**: resolved
+- **Created**: 2026-09-09 · **Resolved**: 2026-09-10
+- **Origin**: "AgenciaHub está sendo usado na msg ao enviar cotação por whatsapp"
+- **Resolution**: Causa raiz confirmada e corrigida: `src/hooks/use-agency-branding.ts` só buscava a configuração `if (!enabled || !isOwner || !token) return` — vendedor nunca buscava o nome/logo real da agência e caía no fallback vazio. Removida a checagem `isOwner`. Backend: `SolicitacaoConfigController.get()` exigia `hasRole('AGENCY_OWNER')` na classe inteira; adicionado `@PreAuthorize("hasAnyRole('AGENCY_OWNER','SALES_AGENT')")` só no método `get()` (o `upsert()` continua owner-only).
+- **Affected Files**: `src/hooks/use-agency-branding.ts`, `SolicitacaoConfigController.java`.
+
+### TODO-024: Sessão expira cedo mesmo com uso ativo
+- **Priority**: High
+- **Status**: resolved
+- **Created**: 2026-09-09 · **Resolved**: 2026-09-10
+- **Origin**: "O login está com um tempo curto de sessão. Mesmo o usuario usando o sistema."
+- **Resolution**: Causa raiz real encontrada em `SessionController.renew()` (WIP do GPT): exigia `agency.getStatus() == ACTIVE`, mas `Login.java` permite login normalmente para agência `TRIAL`/`SUSPENDED` (só bloqueia `DELETION_PENDING`/`PENDING_VERIFICATION`/`CANCELED`). Qualquer agência em `TRIAL` (o padrão logo após verificar o e-mail, `VerifyEmail.java`) tinha a renovação de sessão sempre rejeitada com 403 — e o front (`auth-context.tsx`) desloga no primeiro 403 do `/auth/session/renew`. Corrigido para usar o mesmo critério de bloqueio do login.
+- **Affected Files**: `SessionController.java`.
+
+### TODO-025: Edição de cliente não exibe informações já salvas — **JÁ RESOLVIDO**
+- **Priority**: High
+- **Status**: resolved (confirmado nesta auditoria + 1 bug corrigido)
+- **Created**: 2026-09-09 · **Resolved**: 2026-09-10
+- **Origin**: "ao editar um cliente em /clientes varias que já são do cliente, não estão sendo renderisadas"
+- **Resolution**: `NovoClienteModal.tsx`/`EditarClienteModal.tsx` (WIP do GPT) unificaram criação e edição no mesmo formulário completo, populando todos os campos no `useEffect` a partir do `cliente` — backend ganhou `CustomerProfile.java` + migração `profile_data` JSONB para persistir o perfil estendido. Corrigido nesta auditoria: `src/components/ui/input.tsx` não repassava `ref` (função simples) e quebrava `ClientePicker.tsx`, que usa `ref` no autocomplete — agora usa `forwardRef`. `npx tsc`/`npm test`/`mvn compile` limpos.
+
+### TODO-026: Generalizar a aba/nomenclatura de "Clientes" — **JÁ RESOLVIDO**
+- **Priority**: Low
+- **Status**: resolved
+- **Created**: 2026-09-09 · **Resolved**: 2026-09-10
+- **Origin**: "alterar a aba de clientes pra ser gererica"
+- **Resolution**: GPT já tinha trocado o rótulo para "Pessoas" em `dashboard-shell.tsx` (as duas entradas de menu, dono e vendedor) e em `clientes/[id]/page.tsx`/`NovoClienteModal.tsx` ("Nova pessoa"/"Editar pessoa"). Completado nesta auditoria: `_aba-notificacoes.tsx` ("Clientes" → "Pessoas", "Novo cliente cadastrado" → "Nova pessoa cadastrada"), `ClientePicker.tsx` ("Novo cliente" → "Nova pessoa"), `ImportarSubmissaoModal.tsx` e `notification-context.tsx` (mesma troca).
+
+### TODO-027: Separar cor de status de cliente da cor/identificação por tipo — **JÁ RESOLVIDO**
+- **Priority**: Medium
+- **Status**: resolved (confirmado nesta auditoria, sem alteração)
+- **Created**: 2026-09-09 · **Resolved**: 2026-09-10
+- **Origin**: "alterar as cores das pessoas cadastras pra serem divididas por categorias" + "pro status podemos deixar a flag colorida apenas e a logo do usuario de outra cor separada por seu Tipo"
+- **Resolution**: Já implementado (WIP do GPT). `src/lib/pessoa-presentation.ts` dá uma cor de avatar por Tipo (Cliente=azul, Passageiro=teal, Fornecedor=âmbar, Representante=índigo; múltiplos tipos = cinza neutro). `clientes/page.tsx` usa `BADGE_CLASS_BY_STATUS` — paleta totalmente separada (ativo=verde, prospecto=violeta, inativo=cinza) só para o badge de status. As duas camadas de cor já são independentes, exatamente como pedido.
+
+### TODO-028: Remover "Destino de interesse" do modal de edição de cliente — **JÁ RESOLVIDO**
+- **Priority**: Low
+- **Status**: resolved
+- **Created**: 2026-09-09 · **Resolved**: 2026-09-10
+- **Origin**: "No modal de editar cliente tem um Destino de interesse - acho inutil pq o cliente pode ter varios destinos e varias viagens"
+- **Resolution**: `NovoClienteModal.tsx` unificado (WIP do GPT) não tem mais o campo — o submit usa `Omit<Cliente, ... "destinoInteresse">`. A página de detalhe mantém o valor só como leitura histórica, rotulado "Destino informado anteriormente (histórico)" em vez de removê-lo de vez (preserva o dado da captação original sem reintroduzir o campo editável).
+
+### TODO-029: Cotação aprovada devia gerar lançamento em Vendas/Financeiro automaticamente — **JÁ RESOLVIDO**
+- **Priority**: High
+- **Status**: resolved
+- **Created**: 2026-09-09 · **Resolved**: 2026-09-10
+- **Origin**: "hj quando uma cotação é aprovada, ela entra em viagens! Poderiamos melhorar para esse fluxo repercutir no financeiro tbm... para que ele não precise lançar a mão novamente uma receita"
+- **Resolution**: `QuotationApprovalService.java` (WIP do GPT, revisado nesta auditoria) já faz exatamente isso: ao aceitar uma cotação, cria `Sale` (status `DRAFT`, `approvalManaged=true`), `Receivable` (PENDING) e `SaleItem`, além do `Trip`; ao reverter a aprovação, cancela tudo (com trava se já houver algo pago); ao editar o valor da cotação aprovada, propaga pro `Sale`/`Receivable` (com trava se a venda já saiu de DRAFT). Wired em `CreateQuotation.java` e `UpdateQuotation.java`. `DeleteQuotation.java` bloqueia excluir cotação com venda vinculada (força cancelar em vez de apagar o histórico). Confirmado por leitura + `mvn test` completo passando; falta só validação manual do fluxo na tela.
+
+### TODO-030: Solução definitiva para solicitações públicas já importadas reaparecerem
+- **Priority**: High
+- **Status**: resolved
+- **Created**: 2026-09-09 · **Resolved**: 2026-09-10
+- **Origin**: "1 solicitação recebida pelo link público (ajustar) - hj mostra solicitações que já foram importadas"
+- **Resolution**: Causa raiz real: `useSolicitacaoSubmissions.ts` só chamava `DELETE /api/app/solicitacao-submissions` (que já existia e já proxyava corretamente pro backend `DELETE /agency/solicitacao-submissions/{id}`) **quando `!hasRemoteApi`** — ou seja, em produção (com API remota configurada) a submissão NUNCA era marcada como consumida no servidor, só filtrada localmente por `SolicitacaoSubmissionsBanner.tsx` (frágil, dependia do cache local de cotações já carregado). Corrigido: a chamada DELETE agora roda sempre após importar, local ou remoto.
+- **Affected Files**: `src/hooks/useSolicitacaoSubmissions.ts`.
+
+### TODO-031: Notificações configuráveis de check-in (início/fim de viagem)
+- **Priority**: Medium
+- **Status**: resolved
+- **Created**: 2026-09-09 · **Resolved**: 2026-09-10
+- **Origin**: "quero ser capaz de poder ativar notificações personalizadas de checkin (em viagem e cotação - Início da viagem e Fim da viagem). Na aba de notificações pode vir pre selecionado com dos dias de antecedência"
+- **Resolution**: Backend já existia (WIP do GPT): `CheckinNotificationController`/`Service`/`Scheduler` + migração `agency_checkin_prefs`/`agency_checkin_notifications` (dias de antecedência configuráveis 1–30, roda a cada 60s por padrão, idempotente via `ON CONFLICT`). Completado nesta auditoria: proxy `/api/app/checkin-notifications/preferences` e UI nova em `_aba-notificacoes.tsx` ("Check-in de viagem" — toggle + campo de dias de antecedência para início e fim, mesmo padrão visual do restante da aba).
+
+### TODO-032: Adicionar número de WhatsApp no formulário de solicitação de orçamento — **JÁ RESOLVIDO**
+- **Priority**: —
+- **Status**: resolved (confirmado nesta auditoria, sem alteração)
+- **Created**: 2026-09-09 · **Resolved**: 2026-09-10
+- **Origin**: "Colocar número do whats na solicitação de orçamento"
+- **Resolution**: O formulário público (`SolicitacaoPublicView.tsx`) já renderiza `SolicitacaoSocialPanel` com os links sociais configurados pela agência (inclui WhatsApp com ícone, quando a agência cadastra um em Agência → Formulário via `WhatsappLinkFields`, TODO-020). Se o dono configurar o WhatsApp lá, ele já aparece no formulário público. Não criei um campo duplicado.
+
+### TODO-033: Padronizar busca de "Cliente *" com o padrão "digitar para buscar" — **JÁ RESOLVIDO**
+- **Priority**: Medium
+- **Status**: resolved (confirmado nesta auditoria, sem alteração)
+- **Created**: 2026-09-09 · **Resolved**: 2026-09-10
+- **Origin**: "Hj não há um padrão em busca de cliente nos campos Cliente *, alguns usam um drop outros digitam pra buscar, vamos padronizar usando o digitar pra buscar, use as mesmas regras usadas na Origem (cidade / aeroporto)"
+- **Resolution**: Já implementado (WIP do GPT): `src/components/cliente/ClientePicker.tsx` replica o padrão do `airport-autocomplete.tsx` (mín. 2 caracteres, mesmo placeholder, navegação por teclado, filtro em `src/lib/cliente-search.ts`) e já está em uso em todo campo "Cliente *" de entrada de dados (`cotacoes/nova`, `EditarCotacaoModal`, `financeiro`, `vendas`, `viagens/nova`, `calculadora`, `ImportarSubmissaoModal`). Os únicos `<select>` remanescentes são filtros de listagem (`cotacoes/page.tsx`), não campos de cadastro — fora do escopo do pedido.
+
+### TODO-034: Validar necessidade do aviso de LGPD e incluir nome da agência — **JÁ RESOLVIDO**
+- **Priority**: Low
+- **Status**: resolved (confirmado nesta auditoria, sem alteração)
+- **Created**: 2026-09-09 · **Resolved**: 2026-09-10
+- **Origin**: "Valide se esse aviso é mesmo necessario... Se sim o nome da agencia deveria estar ai"
+- **Resolution**: `SolicitacaoPublicView.tsx` (WIP do GPT) já separa as duas coisas corretamente do ponto de vista da LGPD: o uso necessário dos dados (elaborar a cotação) é só explicado em texto — não exige checkbox, por ser tratamento amparado em execução de pedido/legítimo interesse (Art. 7º) — e usa `{config.nomeMarca || "A agência responsável"}` dinamicamente; só o consentimento de **marketing** (opcional, desmarcado por padrão) tem checkbox, também com o nome dinâmico da agência. Recomendação técnica confirmada: manter, já está correto.
+
+### TODO-035: Regras de negócio de cupom (limite de uso, 1x por cliente, sem empilhar, esconder validade do cliente)
+- **Priority**: Medium
+- **Status**: resolved
+- **Created**: 2026-09-10 · **Resolved**: 2026-09-10
+- **Origin**: "o cleinte não deve ver a info de validade do cupon, somente se foi aceito ou não, add tbm a opção de quantidade de usos do cupom... cada cliente só pode usar um cupom uma unica vez, não pode haver tbm somatoria de cupons"
+- **Decisões do usuário**: desconto percentual com teto opcional em R$; identificação do cliente por e-mail.
+- **Resolution**: `V44__coupon_rules.sql` adiciona `discount_percent`, `max_discount_amount`, `max_uses`, `used_count` em `coupons` + tabela `coupon_redemptions` (único por `coupon_id`+`customer_email`, garante 1x por cliente). `Coupon.isValidNow()` agora também checa o limite total. `CouponRedemptionService` grava o resgate + incrementa `used_count` numa única instrução atômica (`INSERT ... ON CONFLICT DO NOTHING` + `UPDATE` condicional), chamada de `SubmitPublicSolicitacao` quando a submissão pública tem `cupomCodigo` preenchido — nunca bloqueia o envio se o cupom falhar por qualquer motivo. `PublicCouponController` agora exige `email` e responde só `{valid: boolean}` — sem validade, sem contagem, sem qualquer detalhe interno. `CotacaoDetalhesForm.tsx` só mostra "Cupom aceito." no formulário público (a validade só aparece na tela interna do dono/vendedor, via prop `token`). "Sem empilhamento" já está garantido pela UI ter só 1 campo de cupom por cotação — nada a fazer aí. Aba Cupons ganhou campos de desconto/teto/limite e colunas "Desconto"/"Usos" + badge "Esgotado". Testado ao vivo: 1º resgate ok, mesmo e-mail de novo → recusado, e-mail diferente → ok, 3º cliente após limite de 2 usos → recusado, formulário público mostra só "Cupom aceito."/"Cupom inválido.". `mvn compile`, `tsc`, `lint`, `npm test` (36/36) limpos.
+- **Affected Files**: `V44__coupon_rules.sql`, `Coupon.java`, `CouponRedemption.java` (novo), `CouponRedemptionRepository.java` (novo), `CouponRedemptionService.java` (novo), `CouponController.java`, `PublicCouponController.java`, `SubmitPublicSolicitacao.java`, `CotacaoDetalhesForm.tsx`, `SolicitacaoPublicView.tsx`, `coupons-remote.ts`, `_aba-cupons.tsx`, `/api/public/cupom/validate/route.ts`.
+- **Complexity**: Medium
+
+### TODO-036: Dois formulários públicos (simples e completo)
+- **Priority**: Medium
+- **Status**: resolved
+- **Created**: 2026-09-10 · **Resolved**: 2026-09-10
+- **Origin**: "QUero ter dois formularios disponiveis pra enviar: UM mais simples... apenas com poucas infos da viagem e com um campo pra selecionar e digitar se precisa de outro serviços e o outro completo que é o atual com mais detalhes de hospedagem e tudo mais"
+- **Decisões do usuário**: mesmo link, distinguido por parâmetro na URL (`?tipo=simples`). Revisão em 2026-09-11: o simples não é "raso em tudo" — foco em **passagem aérea**, então ganhou de volta Flexibilidade ida/volta, Horário saída ida/volta e Preferência de voo ida/volta (pedido explícito), mais bagagem (despachada/quantidade/especial) e "Usar milhas nas passagens" (fazem sentido junto de passagem aérea). Continua sem: Hospedagem, Preferência de comunicação, Forma de pagamento e Cupom (não são sobre voo). Destino continua campo único (não trechos), "Outros serviços ou observações" reaproveita o campo observações existente.
+- **Resolution**: `CotacaoDetalhesForm.tsx` ganhou prop `variante?: "completo" | "simples"` (default `"completo"`, zero impacto nas telas internas que não passam a prop). No modo `"simples"`: mostra tudo sobre a viagem em si (serviços desejados, origem, destino único, datas, flexibilidade/horário/preferência de voo ida e volta, passageiros, bagagem, milhas) e esconde só o que é de outra categoria — Hospedagem (seção inteira), Preferência de comunicação, Forma de pagamento e Cupom de desconto. `SolicitacaoPublicView.tsx` lê `?tipo=simples` do próprio `useSearchParams()` já usado ali, passa a variante pro form e troca o rótulo/placeholder de "Observações" pra "Outros serviços ou observações" nesse modo. Aba Agência → Formulário ganhou uma segunda linha "Link simplificado" com o mesmo link + `?tipo=simples` (ou `&tipo=simples` se já tiver `?seller=`) e botão de copiar. Testado ao vivo nos dois modos. `tsc`/`lint` limpos.
+- **Affected Files**: `src/components/cotacao/CotacaoDetalhesForm.tsx`, `src/components/cotacao/SolicitacaoPublicView.tsx`, `src/app/(app)/agencia/_aba-formulario.tsx`, `src/components/cotacao/LinkSolicitacaoModal.tsx` (o modal "Link para solicitação de cotação" aberto em `/cotacoes` — botão "Links" — é o que o usuário realmente usa; tinha ficado de fora da primeira leva e foi corrigido em 2026-09-11).
+- **Complexity**: Large
 
 ---
 

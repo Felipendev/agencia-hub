@@ -25,7 +25,7 @@ export function emptyCotacaoDetalhes(): CotacaoDetalhes {
     bagagemEspecial: false,
     categoriaHospedagem: "",
     comodidadesHospedagem: [],
-    qtdQuartos: 1,
+    qtdQuartos: 0,
     celular: "",
     whatsapp: "",
     whatsappIgualCelular: false,

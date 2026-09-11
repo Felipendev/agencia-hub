@@ -248,6 +248,7 @@ export default function NovaCotacaoPage() {
           onToggleServico={toggleServico}
           onToggleComodidade={toggleComodidade}
           onPatch={patchDet}
+          token={token ?? undefined}
         />
 
         <div className="py-4">

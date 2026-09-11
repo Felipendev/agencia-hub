@@ -29,7 +29,7 @@ export async function apiFetch<T>(
   if (!res.ok) {
     if (res.status === 401) {
       if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+        window.dispatchEvent(new CustomEvent("auth:unauthorized", { detail: token }));
       }
     }
     const msg =

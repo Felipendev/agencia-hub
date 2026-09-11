@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { pessoaPresentation } from "@/lib/pessoa-presentation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { filterClientes, useData } from "@/contexts/data-context";
 import { useAuth } from "@/contexts/auth-context";
@@ -29,18 +30,6 @@ import {
 } from "lucide-react";
 
 // ── Status helpers ────────────────────────────────────────────────────────────
-
-const AVATAR_BG_BY_STATUS: Record<ClienteStatus, string> = {
-  ativo: "bg-sky-500",
-  prospecto: "bg-violet-500",
-  inativo: "bg-slate-400",
-};
-
-const AVATAR_RING_BY_STATUS: Record<ClienteStatus, string> = {
-  ativo: "ring-sky-200",
-  prospecto: "ring-violet-200",
-  inativo: "ring-slate-200",
-};
 
 const BADGE_CLASS_BY_STATUS: Record<ClienteStatus, string> = {
   ativo: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
@@ -109,11 +98,9 @@ function ClienteRow({
   onDeleteRequest,
 }: ClienteRowProps) {
   return (
-    <button
-      type="button"
-      onClick={() => onSelect(c)}
+    <div
       className={[
-        "group w-full text-left transition-all duration-150",
+        "group relative w-full text-left transition-all duration-150",
         "flex items-center gap-3 px-4 py-3",
         "border-l-2",
         selected
@@ -121,12 +108,13 @@ function ClienteRow({
           : "border-transparent hover:border-[var(--hub-primary)] hover:bg-slate-50",
       ].join(" ")}
     >
+      <button type="button" onClick={() => onSelect(c)} aria-label={`Ver detalhes de ${c.nome}`} aria-pressed={selected}
+        className="absolute inset-0 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-sky-700" />
       {/* Avatar */}
       <div
         className={[
           "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white ring-2",
-          AVATAR_BG_BY_STATUS[c.status],
-          AVATAR_RING_BY_STATUS[c.status],
+          pessoaPresentation(c).avatar,
         ].join(" ")}
       >
         {getInitials(c.nome)}
@@ -134,8 +122,8 @@ function ClienteRow({
 
       {/* Info */}
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <span className="truncate font-semibold text-[var(--hub-text-primary)]">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="break-words font-semibold text-[var(--hub-text-primary)]">
             {c.nome}
           </span>
           <span
@@ -145,23 +133,18 @@ function ClienteRow({
           </span>
             <FunilBadge value={c.avaliacao} />
         </div>
+        <p className="text-xs font-medium text-[var(--hub-text-secondary)]">{pessoaPresentation(c).label}</p>
         <p className="truncate text-xs text-[var(--hub-text-muted)]">
           {c.email}
           {c.telefone ? ` · ${c.telefone}` : ""}
         </p>
-        {c.destinoInteresse && (
-          <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-[var(--hub-bg-subtle)] px-2 py-0.5 text-[10px] font-medium text-[var(--hub-text-secondary)]">
-            <MapPin className="h-2.5 w-2.5" />
-            {c.destinoInteresse}
-          </span>
-        )}
       </div>
 
       {/* Actions */}
-      <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+      <div className="flex shrink-0 items-center relative z-10 gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
         <button
           type="button"
-          title="Excluir cliente"
+          title="Excluir pessoa"
           onClick={(e) => {
             e.stopPropagation();
             onDeleteRequest(c.id);
@@ -172,7 +155,7 @@ function ClienteRow({
         </button>
         <ChevronRight className="h-4 w-4 text-[var(--hub-text-muted)] transition-transform group-hover:translate-x-0.5" />
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -194,7 +177,7 @@ function DetailPanel({
       {/* Panel header */}
       <div className="flex items-center justify-between border-b border-[var(--hub-border)] px-6 py-4">
         <span className="text-sm font-semibold text-[var(--hub-text-secondary)] uppercase tracking-wide">
-          Detalhes do cliente
+          Detalhes da pessoa
         </span>
         <button
           type="button"
@@ -213,8 +196,7 @@ function DetailPanel({
           <div
             className={[
               "flex h-16 w-16 items-center justify-center rounded-full text-xl font-bold text-white ring-4",
-              AVATAR_BG_BY_STATUS[c.status],
-              AVATAR_RING_BY_STATUS[c.status],
+              pessoaPresentation(c).avatar,
             ].join(" ")}
           >
             {getInitials(c.nome)}
@@ -226,6 +208,7 @@ function DetailPanel({
             >
               {c.nome}
             </Link>
+            <p className="mt-1 text-sm text-[var(--hub-text-secondary)]">{pessoaPresentation(c).label}</p>
             <div className="mt-1 flex flex-wrap justify-center gap-1">
               <span
                 className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${BADGE_CLASS_BY_STATUS[c.status]}`}
@@ -244,7 +227,7 @@ function DetailPanel({
             <ContactRow icon={<Phone className="h-4 w-4" />} label="Telefone" value={c.telefone} />
           )}
           {c.destinoInteresse && (
-            <ContactRow icon={<MapPin className="h-4 w-4" />} label="Destino de interesse" value={c.destinoInteresse} />
+            <ContactRow icon={<MapPin className="h-4 w-4" />} label="Destino informado anteriormente (histórico)" value={c.destinoInteresse} />
           )}
           <ContactRow
             icon={<Calendar className="h-4 w-4" />}
@@ -335,10 +318,10 @@ function EmptyDetailState() {
       </div>
       <div>
         <p className="font-semibold text-[var(--hub-text-secondary)]">
-          Selecione um cliente
+          Selecione uma pessoa
         </p>
         <p className="mt-1 text-xs text-[var(--hub-text-muted)]">
-          Clique em um cliente na lista para ver os detalhes.
+          Clique em uma pessoa na lista para ver os detalhes.
         </p>
       </div>
     </div>
@@ -359,7 +342,8 @@ export default function ClientesPage() {
 
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<ClienteStatus | "todos">("todos");
-  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedCliente = clientes.find((c) => c.id === selectedId) ?? null;
   const [novoClienteOpen, setNovoClienteOpen] = useState(false);
   const [editarCliente, setEditarCliente] = useState<Cliente | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
@@ -371,12 +355,12 @@ export default function ClientesPage() {
     if (!deleteTarget) return;
     try {
       await deleteCliente(deleteTarget);
-      toast.success("Cliente excluído com sucesso.");
+      toast.success("Pessoa excluída com sucesso.");
       if (selectedCliente?.id === deleteTarget) {
-        setSelectedCliente(null);
+        setSelectedId(null);
       }
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Erro ao excluir cliente.");
+      toast.error(e instanceof Error ? e.message : "Erro ao excluir pessoa.");
     } finally {
       setDeleteTarget(null);
     }
@@ -402,11 +386,11 @@ export default function ClientesPage() {
 
   function handleExportar() {
     exportarClientesCSV(filtrados);
-    toast.success(`${filtrados.length} cliente(s) exportado(s)!`);
+    toast.success(`${filtrados.length} pessoa(s) exportada(s)!`);
   }
 
   function handleSelectCliente(c: Cliente) {
-    setSelectedCliente((prev) => (prev?.id === c.id ? null : c));
+    setSelectedId((prev) => (prev === c.id ? null : c.id));
   }
 
   if (!isReady) {
@@ -423,7 +407,7 @@ export default function ClientesPage() {
       <div className="animate-fade-in-up stagger-1 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold tracking-tight text-[var(--hub-text-primary)]">
-            Clientes
+            Pessoas
           </h1>
           <span className="rounded-full bg-[var(--hub-bg-subtle)] px-2.5 py-0.5 text-sm font-semibold text-[var(--hub-text-secondary)] ring-1 ring-[var(--hub-border)]">
             {clientes.length}
@@ -442,9 +426,9 @@ export default function ClientesPage() {
             type="button"
             onClick={() => setNovoClienteOpen(true)}
             className="inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-[var(--hub-shadow-sm)] transition-colors hover:opacity-90"
-            style={{ backgroundColor: "var(--hub-yellow)" }}
+            style={{ backgroundColor: "var(--hub-yellow)", color: "var(--hub-blue-dark)" }}
           >
-            + Novo cliente
+            + Nova pessoa
           </button>
         </div>
       </div>
@@ -454,7 +438,7 @@ export default function ClientesPage() {
         <KpiCard
           icon={<Users className="h-5 w-5" />}
           value={clientes.length}
-          label="Total de clientes"
+          label="Total de pessoas"
           stagger="stagger-1"
         />
         <KpiCard
@@ -479,6 +463,7 @@ export default function ClientesPage() {
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--hub-text-muted)]" />
             <input
               type="search"
+              aria-label="Buscar pessoas"
               placeholder="Buscar por nome…"
               value={q}
               onChange={(e) => setQ(e.target.value)}
@@ -486,6 +471,7 @@ export default function ClientesPage() {
             />
           </div>
           <select
+            aria-label="Filtrar por status"
             value={statusFilter}
             onChange={(e) =>
               setStatusFilter(e.target.value as ClienteStatus | "todos")
@@ -520,10 +506,10 @@ export default function ClientesPage() {
               <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">
                 <Search className="h-8 w-8 text-[var(--hub-text-muted)]" />
                 <p className="font-medium text-[var(--hub-text-secondary)]">
-                  Nenhum cliente encontrado
+                  Nenhuma pessoa encontrada
                 </p>
                 <p className="text-xs text-[var(--hub-text-muted)]">
-                  Tente ajustar os filtros ou criar um novo cliente.
+                  Tente ajustar os filtros ou cadastrar uma nova pessoa.
                 </p>
               </div>
             ) : (
@@ -556,7 +542,7 @@ export default function ClientesPage() {
                 <DetailPanel
                   key={selectedCliente.id}
                   cliente={selectedCliente}
-                  onClose={() => setSelectedCliente(null)}
+                  onClose={() => setSelectedId(null)}
                   onDeleteRequest={handleDeleteRequest}
                   onEdit={(c) => setEditarCliente(c)}
                 />
@@ -586,8 +572,8 @@ export default function ClientesPage() {
 
       <ConfirmDialog
         open={deleteTarget !== null}
-        title="Excluir cliente"
-        message="Esta ação remove o cliente de forma permanente, junto com as cotações vinculadas a ele. Não é possível desfazer."
+        title="Excluir pessoa"
+        message="Esta ação remove a pessoa de forma permanente, junto com as cotações vinculadas a ela. Não é possível desfazer."
         confirmLabel="Excluir"
         cancelLabel="Cancelar"
         destructive

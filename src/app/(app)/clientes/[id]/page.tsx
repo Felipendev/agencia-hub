@@ -52,8 +52,8 @@ export default function ClienteDetalhePage() {
   if (!cliente) {
     return (
       <div className="space-y-4 rounded-[var(--hub-radius-lg)] border border-amber-200 bg-amber-50 p-6 text-amber-900">
-        <BackButton href="/clientes" label="Clientes" />
-        <p className="font-medium">Cliente não encontrado.</p>
+        <BackButton href="/clientes" label="Pessoas" />
+        <p className="font-medium">Pessoa não encontrada.</p>
       </div>
     );
   }
@@ -61,9 +61,9 @@ export default function ClienteDetalhePage() {
   return (
     <>
       <div className="space-y-8">
-        <BackButton href="/clientes" label="Clientes" />
+        <BackButton href="/clientes" label="Pessoas" />
         <PageHeader title={cliente.nome} description={`Cadastrado em ${formatDateBR(cliente.createdAt)}`}>
-          <Badge tone="warning">{CLIENTE_STATUS_LABELS[cliente.status]}</Badge>
+          <Badge tone={cliente.status === "ativo" ? "success" : cliente.status === "inativo" ? "muted" : "warning"}>{CLIENTE_STATUS_LABELS[cliente.status]}</Badge>
           <Button
             type="button"
             variant="secondary"
@@ -71,7 +71,7 @@ export default function ClienteDetalhePage() {
             className="flex items-center gap-2"
           >
             <EditIcon className="h-4 w-4" />
-            Editar cliente
+            Editar pessoa
           </Button>
         </PageHeader>
 
@@ -171,7 +171,7 @@ export default function ClienteDetalhePage() {
 
             {/* Destino de interesse */}
             <div>
-              <dt className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">Destino de interesse</dt>
+              <dt className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">Destino informado anteriormente (histórico)</dt>
               <dd className="text-[var(--hub-text-primary)]">{cliente.destinoInteresse || "—"}</dd>
             </div>
 

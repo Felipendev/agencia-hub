@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { XIcon, WhatsAppIcon } from "@/components/icons";
+import { whatsappLink } from "@/lib/whatsapp";
 import { gerarMensagemTexto } from "@/lib/whatsapp-message";
 import type { Cliente, Cotacao } from "@/types";
+import { useAgencyBranding } from "@/hooks/use-agency-branding";
 
 type Props = {
   cotacao: Cotacao;
@@ -13,14 +15,14 @@ type Props = {
 };
 
 function abrirWhatsApp(telefone: string, mensagem: string) {
-  const digits = telefone.replace(/\D/g, "");
-  const numero = digits.startsWith("55") ? digits : `55${digits}`;
-  const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;
+  const url = whatsappLink(telefone, mensagem);
+  if (!url) return;
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
 export function EnviarWhatsAppModal({ cotacao, cliente, open, onClose }: Props) {
   const [mensagem, setMensagem] = useState("");
+  const { name: nomeAgencia } = useAgencyBranding(open);
 
   // Telefone: prioriza whatsapp cadastrado, depois telefone, depois campos do formulário
   const telefone =
@@ -34,14 +36,14 @@ export function EnviarWhatsAppModal({ cotacao, cliente, open, onClose }: Props) 
   useEffect(() => {
     if (open) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- Syncing derived state when modal opens
-      setMensagem(gerarMensagemTexto(cotacao, cliente));
+      setMensagem(gerarMensagemTexto(cotacao, cliente, nomeAgencia));
     }
-  }, [open, cotacao, cliente]);
+  }, [open, cotacao, cliente, nomeAgencia]);
 
   if (!open) return null;
 
   function handleEnviar() {
-    if (!telefone) return;
+    if (!whatsappLink(telefone)) return;
     abrirWhatsApp(telefone, mensagem);
     onClose();
   }
@@ -112,7 +114,7 @@ export function EnviarWhatsAppModal({ cotacao, cliente, open, onClose }: Props) 
           <button
             type="button"
             onClick={handleEnviar}
-            disabled={!telefone || !mensagem.trim()}
+            disabled={!whatsappLink(telefone) || !mensagem.trim()}
             className="inline-flex items-center gap-2 rounded-[var(--hub-radius)] bg-emerald-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <WhatsAppIcon className="h-4 w-4" />
