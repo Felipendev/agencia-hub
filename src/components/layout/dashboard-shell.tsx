@@ -53,7 +53,7 @@ const OWNER_GROUPS: NavGroup[] = [
     items: [
       { href: "/dashboard",   label: "Dashboard",             icon: "layout"   },
       { href: "/cotacoes",    label: "Cotações",              icon: "document" },
-      { href: "/clientes",    label: "Clientes",              icon: "users"    },
+      { href: "/clientes",    label: "Pessoas",              icon: "users"    },
     ],
   },
   {
@@ -94,7 +94,7 @@ const SELLER_GROUPS: NavGroup[] = [
     items: [
       { href: "/meu-painel",  label: "Meu Painel",            icon: "layout"   },
       { href: "/cotacoes",    label: "Cotações",              icon: "document" },
-      { href: "/clientes",    label: "Clientes",              icon: "users"    },
+      { href: "/clientes",    label: "Pessoas",              icon: "users"    },
     ],
   },
   {

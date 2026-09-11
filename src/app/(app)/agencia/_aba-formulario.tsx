@@ -1,5 +1,8 @@
 "use client";
 
+import { WhatsappLinkFields } from "@/components/cotacao/WhatsappLinkFields";
+import { normalizeSolicitacaoLinks } from "@/lib/solicitacao-links";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
@@ -100,6 +103,12 @@ export function AbaFormulario() {
     return base;
   }, [config?.slug, user?.id, user?.accountKind, user?.linkPublicCode]);
 
+  // TODO-036: mesmo link, ?tipo=simples escolhe a variante enxuta do formulário.
+  const publicUrlSimples = useMemo(() => {
+    if (!publicUrl) return "";
+    return publicUrl.includes("?") ? `${publicUrl}&tipo=simples` : `${publicUrl}?tipo=simples`;
+  }, [publicUrl]);
+
   const handleSave = useCallback(async () => {
     if (!config) return;
     if (!isValidSolicitacaoSlug(config.slug)) {
@@ -113,7 +122,7 @@ export function AbaFormulario() {
       const res = await fetch("/api/app/solicitacao-config", {
         method: "PUT", credentials: "include",
         headers,
-        body: JSON.stringify({ config }),
+        body: JSON.stringify({ config: { ...config, linksSociais: normalizeSolicitacaoLinks(config.linksSociais, config.nomeMarca) } }),
       });
       const data = (await res.json().catch(() => ({}))) as {
         error?: string;
@@ -243,6 +252,21 @@ export function AbaFormulario() {
               Copiar link
             </button>
           </div>
+
+          <div>
+            <p className="text-sm font-semibold text-[var(--hub-blue-dark)]">Link simplificado</p>
+            <p className="mt-0.5 text-xs text-[var(--hub-text-secondary)]">
+              Mesmo formulário, só com o essencial (nome, contato, origem/destino, datas, passageiros e um campo
+              livre pra outros serviços) — sem hospedagem, pagamento ou cupom.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 rounded-[var(--hub-radius)] border border-sky-200 bg-sky-50 px-3 py-2">
+            <code className="flex-1 break-all text-xs text-[var(--hub-text-primary)]">{publicUrlSimples}</code>
+            <button type="button" onClick={() => navigator.clipboard.writeText(publicUrlSimples).then(() => toast.success("Link copiado!"))}
+              className="shrink-0 rounded border border-sky-300 bg-white px-3 py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-100 transition-colors">
+              Copiar link
+            </button>
+          </div>
           {user?.id ? (
             <p className="mt-2 text-xs leading-relaxed text-[var(--hub-text-secondary)]">
               O link copiado inclui <code className="rounded bg-white/90 px-1 py-0.5 text-[11px]">?seller=</code>{" "}
@@ -314,7 +338,7 @@ export function AbaFormulario() {
                   <Select value={l.tipo} onChange={(e) => updateLink(l.id, { tipo: e.target.value as LinkSocialTipo })}>
                     {TIPOS_LINK.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
                   </Select>
-                  <Input placeholder="https://..." value={l.url} onChange={(e) => updateLink(l.id, { url: e.target.value })} />
+                  <WhatsappLinkFields link={l} agency={config.nomeMarca} onChange={(patch) => updateLink(l.id, patch)} />
                   <button type="button" onClick={() => removeLink(l.id)}
                     className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700 hover:bg-red-100">
                     Remover

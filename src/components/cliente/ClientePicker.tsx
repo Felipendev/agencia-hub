@@ -20,6 +20,7 @@ export type ClientePickerProps = {
   required?: boolean;
   disabled?: boolean;
   showNovoButton?: boolean;
+  invalid?: boolean;
 };
 
 export function ClientePicker({
@@ -31,9 +32,12 @@ export function ClientePicker({
   required = false,
   disabled = false,
   showNovoButton = true,
+  invalid = false,
 }: ClientePickerProps) {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
+  const [highlighted, setHighlighted] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
 
@@ -57,28 +61,35 @@ export function ClientePicker({
     return () => document.removeEventListener("mousedown", handlePointer);
   }, []);
 
+  useEffect(() => {
+    inputRef.current?.setCustomValidity(required && !selected ? "Selecione um cliente nos resultados da busca." : "");
+  }, [required, selected, search]);
+
   function pick(clienteId: string) {
     onChange(clienteId);
     setSearch("");
     setOpen(false);
+    inputRef.current?.focus();
   }
 
   function clearSelection() {
     onChange("");
     setSearch("");
-    setOpen(false);
+    setOpen(true);
+    setHighlighted(0);
+    inputRef.current?.focus();
   }
 
   const q = search.trim();
   const showHintMinChars = q.length > 0 && q.length < CLIENTE_SEARCH_MIN_CHARS;
   const showResults =
-    open && !disabled && q.length >= CLIENTE_SEARCH_MIN_CHARS;
+    open && !selected && !disabled && q.length >= CLIENTE_SEARCH_MIN_CHARS;
 
   return (
     <>
       <div className="space-y-1">
         <div className="flex flex-wrap items-end justify-between gap-2">
-          <Label htmlFor={selected && !disabled ? undefined : id} className="mb-0">
+          <Label htmlFor={id} className="mb-0">
             {label}
             {required ? " *" : ""}
           </Label>
@@ -89,88 +100,70 @@ export function ClientePicker({
               className="!py-1.5 text-xs"
               onClick={() => setModalOpen(true)}
             >
-              Novo cliente
+              Nova pessoa
             </Button>
           ) : null}
         </div>
 
-        {selected && !disabled ? (
-          <div className="flex flex-wrap items-center gap-2 rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-3 py-2">
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-medium text-[var(--hub-blue-dark)]">
-                {selected.nome}
-              </p>
-              {selected.email ? (
-                <p className="truncate text-xs text-[var(--hub-text-muted)]">
-                  {selected.email}
-                </p>
-              ) : null}
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              className="!py-1 shrink-0 text-xs"
-              onClick={clearSelection}
-            >
-              Trocar
-            </Button>
-          </div>
-        ) : null}
-
-        {selected && disabled ? (
-          <p className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-3 py-2 text-sm">
-            {selected.nome}
-          </p>
-        ) : null}
-
-        {!selected && !disabled ? (
-          <div ref={wrapRef} className="relative">
-            <Input
-              id={id}
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
+        <div ref={wrapRef} className="relative">
+          <Input
+            ref={inputRef}
+            id={id}
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={showResults}
+            aria-controls={`${id}-results`}
+            aria-activedescendant={showResults && filtered[highlighted] ? `${id}-option-${highlighted}` : undefined}
+            aria-describedby={`${id}-hint`}
+            aria-invalid={invalid || undefined}
+            required={required}
+            disabled={disabled}
+            value={selected ? selected.nome : search}
+            className={selected ? "pr-20" : undefined}
+            onChange={(event) => {
+              if (value) onChange("");
+              setSearch(event.target.value);
+              setHighlighted(0);
+              setOpen(true);
+            }}
+            onFocus={() => setOpen(true)}
+            onBlur={() => setOpen(false)}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") { event.preventDefault(); setOpen(false); return; }
+              if (event.key === "Enter" && !selected) {
+                event.preventDefault();
+                if (showResults && filtered[highlighted]) pick(filtered[highlighted].id);
+                return;
+              }
+              if ((event.key === "ArrowDown" || event.key === "ArrowUp") && filtered.length) {
+                event.preventDefault();
                 setOpen(true);
-              }}
-              onFocus={() => setOpen(true)}
-              placeholder="Digite para buscar (mín. 2 caracteres)"
-              autoComplete="off"
-            />
-            {showHintMinChars ? (
-              <p className="mt-1 text-xs text-[var(--hub-text-muted)]">
-                Digite {CLIENTE_SEARCH_MIN_CHARS} ou mais caracteres para buscar.
-              </p>
-            ) : null}
-            {showResults ? (
-              <ul className="absolute z-20 mt-1 max-h-52 w-full overflow-auto rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white py-1 shadow-lg">
-                {filtered.length === 0 ? (
-                  <li className="px-3 py-2 text-sm text-[var(--hub-text-muted)]">
-                    Nenhum cliente encontrado.
-                  </li>
-                ) : (
-                  filtered.map((c) => (
-                    <li key={c.id}>
-                      <button
-                        type="button"
-                        className="w-full px-3 py-2 text-left text-sm hover:bg-[var(--hub-bg-subtle)]"
-                        onClick={() => pick(c.id)}
-                      >
-                        <span className="font-medium text-[var(--hub-blue-dark)]">
-                          {c.nome}
-                        </span>
-                        {c.email ? (
-                          <span className="ml-2 text-xs text-[var(--hub-text-muted)]">
-                            {c.email}
-                          </span>
-                        ) : null}
-                      </button>
-                    </li>
-                  ))
-                )}
-              </ul>
-            ) : null}
-          </div>
-        ) : null}
+                setHighlighted((h) => Math.max(0, Math.min(filtered.length - 1, h + (event.key === "ArrowDown" ? 1 : -1))));
+              }
+            }}
+            placeholder="Digite para buscar (mín. 2 caracteres)"
+            autoComplete="off"
+          />
+          {selected && !disabled && <button type="button" className="absolute right-3 top-2 text-sm" onClick={clearSelection}>Trocar</button>}
+          <p id={`${id}-hint`} className="mt-1 text-xs text-[var(--hub-text-muted)]" role="status">
+            {selected ? selected.email || selected.telefone : showHintMinChars
+              ? `Digite ${CLIENTE_SEARCH_MIN_CHARS} ou mais caracteres para buscar.`
+              : showResults && filtered.length === 0 ? "Nenhum cliente encontrado." : "Busque por nome, e-mail ou telefone e selecione um resultado."}
+          </p>
+          {showResults && filtered.length > 0 && (
+            <ul id={`${id}-results`} role="listbox" aria-label="Clientes encontrados" className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white py-1 shadow-lg">
+              {filtered.map((c, index) => (
+                <li key={c.id} id={`${id}-option-${index}`} role="option" aria-selected={index === highlighted}
+                  className={`cursor-pointer px-3 py-2 text-sm ${index === highlighted ? "bg-[var(--hub-bg-subtle)]" : ""}`}
+                  onMouseEnter={() => setHighlighted(index)}
+                  onMouseDown={(event) => { event.preventDefault(); pick(c.id); }}>
+                  <span className="font-medium text-[var(--hub-blue-dark)]">{c.nome}</span>
+                  <span className="ml-2 text-xs text-[var(--hub-text-muted)]">{c.email || c.telefone}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
       </div>
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { ClientePicker } from "@/components/cliente/ClientePicker";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { XIcon } from "@/components/icons";
@@ -169,7 +170,6 @@ export function ImportarSubmissaoModal({
 
           {/* Cliente */}
           <div>
-            <Label htmlFor="cliente-select">Cliente</Label>
             {clientesMatch.length > 0 && (
               <div className="mb-2 rounded-[var(--hub-radius)] bg-amber-50 p-3 text-sm">
                 <p className="font-medium text-amber-900">
@@ -184,25 +184,17 @@ export function ImportarSubmissaoModal({
                 </ul>
               </div>
             )}
-            <Select
-              id="cliente-select"
-              value={clienteId}
-              onChange={(e) => setClienteId(e.target.value)}
-              required
-            >
-              <option value="">Selecione...</option>
-              <option value="new">➕ Criar novo cliente</option>
-              <optgroup label="Clientes existentes">
-                {clientes
-                  .slice()
-                  .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"))
-                  .map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nome} ({c.email || c.telefone})
-                    </option>
-                  ))}
-              </optgroup>
-            </Select>
+            {clienteId === "new" ? (
+              <div className="space-y-2">
+                <p>Nova pessoa: {submission.nome}</p>
+                <Button type="button" variant="secondary" onClick={() => setClienteId("")}>Buscar cliente existente</Button>
+              </div>
+            ) : (
+              <>
+                <ClientePicker id="cliente-select" required clientes={clientes} value={clienteId} onChange={setClienteId} showNovoButton={false} />
+                <Button type="button" variant="secondary" className="mt-2" onClick={() => setClienteId("new")}>Criar novo cliente com os dados da solicitação</Button>
+              </>
+            )}
           </div>
 
           {/* Status inicial */}

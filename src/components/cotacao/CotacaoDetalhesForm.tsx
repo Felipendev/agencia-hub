@@ -42,6 +42,14 @@ export type CotacaoDetalhesFormProps = {
   contatoCelularObrigatorio?: boolean;
   /** Campos obrigatórios que devem ser destacados em vermelho após tentativa de envio */
   errosCampos?: CamposObrigatoriosErro;
+  /** Slug da agência (formulário público) — necessário para validar cupom sem autenticação. */
+  slug?: string;
+  /** Token de sessão (telas internas autenticadas) — necessário para validar cupom sem slug público. */
+  token?: string;
+  /** E-mail do cliente (formulário público) — cupom é 1x por cliente, identificado pelo e-mail. */
+  email?: string;
+  /** TODO-036: "simples" esconde hospedagem, flexibilidade/horário/voo, pagamento e cupom — só o essencial. */
+  variante?: "completo" | "simples";
 };
 
 const ERR_INPUT = "!border-red-400 !ring-1 !ring-red-300 focus:!border-red-500 focus:!ring-red-300";
@@ -54,10 +62,18 @@ export function CotacaoDetalhesForm({
   secoesAbertas = false,
   contatoCelularObrigatorio = false,
   errosCampos = {},
+  slug,
+  token,
+  email,
+  variante = "completo",
 }: CotacaoDetalhesFormProps) {
+  const simples = variante === "simples";
   const detailsProps = secoesAbertas ? { open: true as const } : {};
   const [cupomBusy, setCupomBusy] = useState(false);
   const [cupomHint, setCupomHint] = useState<string | null>(null);
+  // Reabrir uma cotação com cupom já validado (com validade) reflete o estado salvo;
+  // cupom sem validade precisa ser revalidado, pois o dado salvo não distingue os dois casos.
+  const [cupomValido, setCupomValido] = useState(!!(det.cupomCodigo.trim() && det.cupomValidoAte));
 
   const celularOk = contatoCelularObrigatorio
     ? isValidBrazilianPhone(det.celular)
@@ -123,8 +139,15 @@ export function CotacaoDetalhesForm({
   async function validarCupom() {
     const codigo = det.cupomCodigo.trim();
     setCupomHint(null);
+    setCupomValido(false);
     if (!codigo) {
       setCupomHint("Digite um código.");
+      applyPatch({ cupomValidoAte: undefined });
+      return;
+    }
+    // Formulário público: cupom é 1x por cliente, identificado pelo e-mail informado acima.
+    if (slug && !token && !email?.trim()) {
+      setCupomHint("Preencha seu e-mail acima para validar o cupom.");
       applyPatch({ cupomValidoAte: undefined });
       return;
     }
@@ -132,8 +155,11 @@ export function CotacaoDetalhesForm({
     try {
       const res = await fetch("/api/public/cupom/validate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ codigo }),
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ codigo, slug, email }),
       });
       const data = (await res.json()) as {
         valid?: boolean;
@@ -145,13 +171,8 @@ export function CotacaoDetalhesForm({
         applyPatch({ cupomValidoAte: undefined });
         return;
       }
-      const exp = data.expiresAt ? new Date(data.expiresAt) : null;
-      if (exp && exp < new Date()) {
-        setCupomHint("Este cupom está expirado.");
-        applyPatch({ cupomValidoAte: undefined });
-        return;
-      }
       applyPatch({ cupomValidoAte: data.expiresAt });
+      setCupomValido(true);
       setCupomHint(null);
     } catch {
       setCupomHint("Não foi possível validar agora. Tente de novo.");
@@ -207,51 +228,69 @@ export function CotacaoDetalhesForm({
                 <p className="mt-1 text-xs text-red-500">Informe a cidade ou aeroporto de origem.</p>
               )}
             </div>
-            <div className="sm:col-span-2 xl:col-span-3">
-              <Label>
-                Destinos (trechos){" "}
-                {contatoCelularObrigatorio && <span className="text-red-500">*</span>}
-              </Label>
-              <p className="mb-2 text-xs text-[var(--hub-text-muted)]">
-                Adicione quantos trechos precisar, ex.: São Paulo — Madri,
-                Madri — Lisboa… Esse texto compõe o destino na ficha da
-                cotação (abaixo do título), ao juntar os trechos preenchidos.
-              </p>
-              {errosCampos.destinos && (
-                <p className="mb-2 text-xs text-red-500">Informe ao menos um destino.</p>
-              )}
-              <div className="space-y-2">
-                {det.destinosTrechos.map((trecho, i) => (
-                  <div key={i} className="flex gap-2">
-                    <AirportAutocomplete
-                      id={i === 0 ? "cdf-dest-0" : undefined}
-                      value={trecho}
-                      onChange={(v) => setTrecho(i, v)}
-                      className={errosCampos.destinos && i === 0 ? ERR_INPUT : ""}
-                      extractQuery={lastSegmentAfterDash}
-                      applySelection={applySelectionAfterDash}
-                    />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="shrink-0 px-2 text-xs"
-                      onClick={() => removeTrecho(i)}
-                      aria-label="Remover trecho"
-                    >
-                      −
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="text-xs"
-                  onClick={addTrecho}
-                >
-                  + Adicionar trecho
-                </Button>
+            {simples ? (
+              <div>
+                <Label htmlFor="cdf-dest-0">
+                  Destino (cidade / aeroporto){" "}
+                  {contatoCelularObrigatorio && <span className="text-red-500">*</span>}
+                </Label>
+                {errosCampos.destinos && (
+                  <p className="mb-1 text-xs text-red-500">Informe o destino.</p>
+                )}
+                <AirportAutocomplete
+                  id="cdf-dest-0"
+                  value={det.destinosTrechos[0] ?? ""}
+                  onChange={(v) => setTrecho(0, v)}
+                  className={errosCampos.destinos ? ERR_INPUT : ""}
+                />
               </div>
-            </div>
+            ) : (
+              <div className="sm:col-span-2 xl:col-span-3">
+                <Label>
+                  Destinos (trechos){" "}
+                  {contatoCelularObrigatorio && <span className="text-red-500">*</span>}
+                </Label>
+                <p className="mb-2 text-xs text-[var(--hub-text-muted)]">
+                  Adicione quantos trechos precisar, ex.: São Paulo — Madri,
+                  Madri — Lisboa… Esse texto compõe o destino na ficha da
+                  cotação (abaixo do título), ao juntar os trechos preenchidos.
+                </p>
+                {errosCampos.destinos && (
+                  <p className="mb-2 text-xs text-red-500">Informe ao menos um destino.</p>
+                )}
+                <div className="space-y-2">
+                  {det.destinosTrechos.map((trecho, i) => (
+                    <div key={i} className="flex gap-2">
+                      <AirportAutocomplete
+                        id={i === 0 ? "cdf-dest-0" : undefined}
+                        value={trecho}
+                        onChange={(v) => setTrecho(i, v)}
+                        className={errosCampos.destinos && i === 0 ? ERR_INPUT : ""}
+                        extractQuery={lastSegmentAfterDash}
+                        applySelection={applySelectionAfterDash}
+                      />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="shrink-0 px-2 text-xs"
+                        onClick={() => removeTrecho(i)}
+                        aria-label="Remover trecho"
+                      >
+                        −
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="text-xs"
+                    onClick={addTrecho}
+                  >
+                    + Adicionar trecho
+                  </Button>
+                </div>
+              </div>
+            )}
             <div>
               <Label htmlFor="cdf-di">
                 Data ida{" "}
@@ -486,6 +525,7 @@ export function CotacaoDetalhesForm({
         </div>
       </details>
 
+      {!simples && (
       <details
         {...detailsProps}
         className="border-b border-[var(--hub-border)] py-3"
@@ -530,18 +570,22 @@ export function CotacaoDetalhesForm({
             </div>
           </div>
           <div>
-            <Label>Qtd. quartos</Label>
+            <Label htmlFor="cdf-quartos">Qtd. quartos</Label>
             <Input
+              id="cdf-quartos"
               type="number"
               min={1}
-              value={det.qtdQuartos}
+              step={1}
+              placeholder="Não informado"
+              value={det.qtdQuartos || ""}
               onChange={(e) =>
-                applyPatch({ qtdQuartos: Number(e.target.value) || 1 })
+                applyPatch({ qtdQuartos: Math.max(0, Math.trunc(Number(e.target.value) || 0)) })
               }
             />
           </div>
         </div>
       </details>
+      )}
 
       <details
         {...detailsProps}
@@ -633,6 +677,8 @@ export function CotacaoDetalhesForm({
               </p>
             ) : null}
           </div>
+          {!simples && (
+          <>
           <div className="xl:col-span-1">
             <Label>Preferência de comunicação</Label>
             <Select
@@ -673,6 +719,8 @@ export function CotacaoDetalhesForm({
               />
             ) : null}
           </div>
+          </>
+          )}
           <div className="flex items-center gap-2 sm:col-span-2 xl:col-span-3">
             <input
               type="checkbox"
@@ -687,6 +735,7 @@ export function CotacaoDetalhesForm({
         </div>
       </details>
 
+      {!simples && (
       <details {...detailsProps} className="py-3">
         <summary className="cursor-pointer text-sm font-semibold text-[var(--hub-blue-dark)]">
           Cupom de desconto
@@ -700,6 +749,7 @@ export function CotacaoDetalhesForm({
               value={det.cupomCodigo}
               onChange={(e) => {
                 setCupomHint(null);
+                setCupomValido(false);
                 applyPatch({
                   cupomCodigo: e.target.value,
                   cupomValidoAte: undefined,
@@ -715,10 +765,12 @@ export function CotacaoDetalhesForm({
               {cupomBusy ? "Validando…" : "Validar cupom"}
             </Button>
           </div>
-          {det.cupomValidoAte ? (
+          {cupomValido ? (
             <p className="text-xs text-emerald-700">
-              Cupom aceito — validade registrada até{" "}
-              {new Date(det.cupomValidoAte).toLocaleDateString("pt-BR")}.
+              {/* Cliente vê só aceito/recusado — validade e limites são detalhe interno da agência (TODO-035). */}
+              {token && det.cupomValidoAte
+                ? <>Cupom aceito — válido até {new Date(det.cupomValidoAte).toLocaleDateString("pt-BR")}.</>
+                : "Cupom aceito."}
             </p>
           ) : null}
           {cupomHint ? (
@@ -726,6 +778,7 @@ export function CotacaoDetalhesForm({
           ) : null}
         </div>
       </details>
+      )}
     </>
   );
 }

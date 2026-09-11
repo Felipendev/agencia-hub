@@ -31,6 +31,8 @@ type Props = { slug: string };
 export function SolicitacaoPublicView({ slug }: Props) {
   const searchParams = useSearchParams();
   const vendedorParam = (searchParams.get("seller") ?? searchParams.get("vendedor"))?.trim() || null;
+  // TODO-036: ?tipo=simples troca pra variante enxuta do mesmo formulário (mesmo link, mesma config).
+  const variante = searchParams.get("tipo") === "simples" ? "simples" : "completo";
   // Se ?seller= (ou legado ?vendedor=) contém um UUID, é um referralSellerId (tratado separadamente); não enviar como sellerPublicCode
   const sellerPublicCode = vendedorParam && !isUuid(vendedorParam) ? vendedorParam : null;
   const [config, setConfig] = useState<SolicitacaoPublicaConfig | null>(null);
@@ -38,7 +40,6 @@ export function SolicitacaoPublicView({ slug }: Props) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [consentimento, setConsentimento] = useState(false);
-  const [erroConsentimento, setErroConsentimento] = useState(false);
   const [observacoes, setObservacoes] = useState("");
   const [det, setDet] = useState<CotacaoDetalhes>(() => emptyCotacaoDetalhes());
   const [enviando, setEnviando] = useState(false);
@@ -142,18 +143,13 @@ export function SolicitacaoPublicView({ slug }: Props) {
       setErroEnvio("Preencha os campos obrigatórios marcados com *.");
       return;
     }
-    if (!consentimento) {
-      setErroConsentimento(true);
-      return;
-    }
-    setErroConsentimento(false);
 
     setEnviando(true);
     try {
       const celularFinal = brPhoneDigits(det.celular);
       const whatsFinal = det.whatsappIgualCelular
         ? celularFinal
-        : brPhoneDigits(det.whatsapp) || celularFinal;
+        : brPhoneDigits(det.whatsapp);
       const detalhes: CotacaoDetalhes = { ...det, celular: celularFinal, whatsapp: whatsFinal };
       const body: Record<string, unknown> = {
         slug,
@@ -163,7 +159,7 @@ export function SolicitacaoPublicView({ slug }: Props) {
         detalhes,
         observacoes: observacoes.trim(),
         sellerPublicCode,
-        consentimentoLgpd: true,
+        consentimentoMarketing: consentimento,
       };
       const ref = referralSellerIdFromCurrentUrl();
       if (ref) body.referralSellerId = ref;
@@ -275,7 +271,7 @@ export function SolicitacaoPublicView({ slug }: Props) {
 
             {temLinksSociais ? (
               <div className="lg:justify-self-end lg:self-start">
-                <SolicitacaoSocialPanel links={config.linksSociais} />
+                <SolicitacaoSocialPanel links={config.linksSociais} agency={config.nomeMarca} />
               </div>
             ) : null}
           </div>
@@ -319,49 +315,36 @@ export function SolicitacaoPublicView({ slug }: Props) {
             secoesAbertas
             contatoCelularObrigatorio
             errosCampos={errosCampos}
+            slug={config.slug}
+            email={email}
+            variante={variante}
           />
         </div>
 
         <div className="mt-4">
-          <Label htmlFor="sp-obs">Observações</Label>
+          <Label htmlFor="sp-obs">{variante === "simples" ? "Outros serviços ou observações" : "Observações"}</Label>
           <Textarea
             id="sp-obs"
             className="mt-1"
             rows={4}
             value={observacoes}
             onChange={(e) => setObservacoes(e.target.value)}
-            placeholder="Preferências, restrições, ocasião da viagem…"
+            placeholder={
+              variante === "simples"
+                ? "Ex.: preciso de seguro viagem e aluguel de carro; alguma restrição alimentar…"
+                : "Preferências, restrições, ocasião da viagem…"
+            }
           />
         </div>
 
-        {/* ── Consentimento LGPD ─────────────────────────────── */}
-        <div className={`mt-6 rounded-lg border p-4 ${erroConsentimento ? "border-red-300 bg-red-50" : "border-[var(--hub-border)] bg-[var(--hub-bg-subtle)]"}`}>
-          <label className="flex cursor-pointer items-start gap-3">
-            <input
-              id="sp-lgpd"
-              type="checkbox"
-              checked={consentimento}
-              onChange={(e) => {
-                setConsentimento(e.target.checked);
-                if (e.target.checked) {
-                  setErroConsentimento(false);
-                  setErroEnvio(null);
-                }
-              }}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--hub-border)] accent-[var(--hub-primary)]"
-            />
-            <span className={`text-sm leading-relaxed ${erroConsentimento ? "text-red-700" : "text-[var(--hub-text-secondary)]"}`}>
-              Autorizo o uso dos meus dados pessoais (nome, e-mail, telefone e informações de viagem) por{" "}
-              <strong className="text-[var(--hub-text-primary)]">{config?.nomeMarca || "esta agência"}</strong>{" "}
-              para elaboração da cotação solicitada, envio de comunicações sobre promoções e futuros contatos,
-              em conformidade com a Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018).
-            </span>
+        <div className="mt-6 rounded-lg border border-[var(--hub-border)] p-4 text-sm text-[var(--hub-text-secondary)]">
+          <p><strong>{config.nomeMarca || "A agência responsável"}</strong> usará os dados informados para preparar e responder ao seu pedido de orçamento e entrar em contato sobre esta viagem. Esse tratamento é necessário para atender à sua solicitação.</p>
+          <p className="mt-2">Para informações sobre seus dados ou para exercer seus direitos, entre em contato com a agência pelos canais desta página. <a href="/privacidade" target="_blank" rel="noopener noreferrer" className="underline">Política de privacidade da plataforma</a>.</p>
+          <label className="mt-4 flex cursor-pointer items-start gap-3">
+            <input id="sp-marketing" type="checkbox" checked={consentimento}
+              onChange={(e) => setConsentimento(e.target.checked)} className="mt-1" />
+            <span>Quero receber promoções e novidades de {config.nomeMarca || "esta agência"} por e-mail ou WhatsApp. Opcional: posso cancelar a qualquer momento pelos canais da agência, sem afetar meu orçamento.</span>
           </label>
-          {erroConsentimento && (
-            <p className="mt-2 text-xs font-medium text-red-600">
-              É necessário autorizar o uso dos seus dados para continuar.
-            </p>
-          )}
         </div>
 
         {erroEnvio ? (

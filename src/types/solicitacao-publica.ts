@@ -17,6 +17,7 @@ export type LinkSocialItem = {
   url: string;
   /** Rótulo opcional para tooltip / acessibilidade */
   label?: string;
+  mensagemWhatsapp?: string;
 };
 
 /** Personalização da página pública de solicitação. */
@@ -47,4 +48,5 @@ export type SolicitacaoPublicSubmission = {
   sellerPublicCode?: string | null;
   /** Consentimento LGPD — true quando o cliente marcou a checkbox antes de enviar */
   consentimentoLgpd?: boolean;
+  consentimentoMarketing?: boolean;
 };

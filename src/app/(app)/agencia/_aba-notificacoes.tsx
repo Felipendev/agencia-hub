@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   Clock,
   Info,
+  Plane,
 } from "lucide-react";
 
 // ── Toggle Switch ─────────────────────────────────────────────────────────────
@@ -208,6 +209,42 @@ export function AbaNotificacoes() {
     }
   }
 
+  // ── Check-in de viagem (início/fim) ────────────────────────────────────────
+  const [checkin, setCheckin] = useState({ startEnabled: false, startDays: 2, endEnabled: false, endDays: 2 });
+  const [checkinSaving, setCheckinSaving] = useState(false);
+
+  useEffect(() => {
+    if (!token) return;
+    void fetch("/api/app/checkin-notifications/preferences", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((d: unknown) => {
+        const dto = d as Partial<typeof checkin>;
+        setCheckin((prev) => ({ ...prev, ...dto }));
+      })
+      .catch(() => {/* mantém padrão desativado */});
+  }, [token]);
+
+  async function saveCheckin(patch: Partial<typeof checkin>) {
+    const next = { ...checkin, ...patch };
+    setCheckin(next);
+    if (!token) return;
+    setCheckinSaving(true);
+    try {
+      await fetch("/api/app/checkin-notifications/preferences", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(next),
+      });
+    } finally {
+      setCheckinSaving(false);
+    }
+  }
+
   function patchVencendo(patch: Partial<NotifPrefs["cotacaoVencendo"]>) {
     updatePrefs({
       cotacaoVencendo: { ...prefs.cotacaoVencendo, ...patch },
@@ -354,23 +391,88 @@ export function AbaNotificacoes() {
         </RuleCard>
       </div>
 
-      {/* ── Clientes ───────────────────────────────────────────────────── */}
+      {/* ── Pessoas ───────────────────────────────────────────────────── */}
       <div className="space-y-3">
         <SectionHeader
           icon={<Users className="h-4 w-4" />}
-          title="Clientes"
-          description="Notificações sobre movimentações na sua carteira de clientes"
+          title="Pessoas"
+          description="Notificações sobre movimentações na sua carteira de pessoas"
         />
 
         <RuleCard
           icon={<Users className="h-4 w-4" />}
           iconBg="bg-sky-50"
           iconColor="text-sky-600"
-          title="Novo cliente cadastrado"
-          description="Notifica sempre que um novo cliente é adicionado à base (manualmente ou via equipe)."
+          title="Nova pessoa cadastrada"
+          description="Notifica sempre que uma nova pessoa é adicionada à base (manualmente ou via equipe)."
           enabled={prefs.clienteNovo.enabled}
           onToggle={(v) => updatePrefs({ clienteNovo: { enabled: v } })}
         />
+      </div>
+
+      {/* ── Check-in de viagem ────────────────────────────────────────────── */}
+      <div className="space-y-3">
+        <SectionHeader
+          icon={<Plane className="h-4 w-4" />}
+          title="Check-in de viagem"
+          description="Avisos de início e fim de viagem, em cotações aprovadas e viagens em andamento"
+        />
+
+        <RuleCard
+          icon={<Plane className="h-4 w-4" />}
+          iconBg="bg-indigo-50"
+          iconColor="text-indigo-600"
+          title="Início da viagem"
+          description="Avisa com a antecedência configurada antes da data de ida."
+          enabled={checkin.startEnabled}
+          onToggle={(v) => void saveCheckin({ startEnabled: v })}
+        >
+          {checkin.startEnabled && (
+            <label className="flex items-center gap-2 text-xs text-[var(--hub-text-muted)]">
+              Avisar com
+              <input
+                type="number"
+                min={1}
+                max={30}
+                value={checkin.startDays}
+                disabled={checkinSaving}
+                onChange={(e) =>
+                  void saveCheckin({ startDays: Math.min(30, Math.max(1, Number(e.target.value) || 1)) })
+                }
+                className="w-14 rounded border border-[var(--hub-border)] px-1.5 py-0.5 text-center text-[var(--hub-text-primary)]"
+              />
+              dia(s) de antecedência
+            </label>
+          )}
+        </RuleCard>
+
+        <RuleCard
+          icon={<Plane className="h-4 w-4 -scale-x-100" />}
+          iconBg="bg-indigo-50"
+          iconColor="text-indigo-600"
+          title="Fim da viagem"
+          description="Avisa com a antecedência configurada antes da data de volta."
+          enabled={checkin.endEnabled}
+          onToggle={(v) => void saveCheckin({ endEnabled: v })}
+        >
+          {checkin.endEnabled && (
+            <label className="flex items-center gap-2 text-xs text-[var(--hub-text-muted)]">
+              Avisar com
+              <input
+                type="number"
+                min={1}
+                max={30}
+                value={checkin.endDays}
+                disabled={checkinSaving}
+                onChange={(e) =>
+                  void saveCheckin({ endDays: Math.min(30, Math.max(1, Number(e.target.value) || 1)) })
+                }
+                className="w-14 rounded border border-[var(--hub-border)] px-1.5 py-0.5 text-center text-[var(--hub-text-primary)]"
+              />
+              dia(s) de antecedência
+            </label>
+          )}
+        </RuleCard>
       </div>
 
       {/* ── Financeiro ─────────────────────────────────────────────────── */}

@@ -1,5 +1,8 @@
 "use client";
 
+import { WhatsappLinkFields } from "@/components/cotacao/WhatsappLinkFields";
+import { normalizeSolicitacaoLinks } from "@/lib/solicitacao-links";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +62,13 @@ export function LinkSolicitacaoModal({
     }
     return url;
   }, [config?.slug, sellerPublicCode]);
+
+  // TODO-036: mesmo link, ?tipo=simples ativa a variante enxuta focada em passagem aérea.
+  const publicUrlSimples = useMemo(() => {
+    if (!publicUrl) return "";
+    return publicUrl.includes("?") ? `${publicUrl}&tipo=simples` : `${publicUrl}?tipo=simples`;
+  }, [publicUrl]);
+  const [copiedSimples, setCopiedSimples] = useState(false);
 
   const isSalesAgent = user?.accountKind === "SALES_AGENT";
 
@@ -136,7 +146,7 @@ export function LinkSolicitacaoModal({
         method: "PUT",
         credentials: "include",
         headers,
-        body: JSON.stringify({ config }),
+        body: JSON.stringify({ config: { ...config, linksSociais: normalizeSolicitacaoLinks(config.linksSociais, config.nomeMarca) } }),
       });
       const data = (await res.json().catch(() => ({}))) as {
         error?: string;
@@ -164,6 +174,16 @@ export function LinkSolicitacaoModal({
       await navigator.clipboard.writeText(publicUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setSaveError("Não foi possível copiar. Copie manualmente.");
+    }
+  }
+
+  async function copyLinkSimples() {
+    try {
+      await navigator.clipboard.writeText(publicUrlSimples);
+      setCopiedSimples(true);
+      setTimeout(() => setCopiedSimples(false), 2000);
     } catch {
       setSaveError("Não foi possível copiar. Copie manualmente.");
     }
@@ -270,8 +290,38 @@ export function LinkSolicitacaoModal({
               </div>
             </div>
 
+            <div className="rounded-[var(--hub-radius-lg)] border border-sky-200 bg-sky-50 px-4 py-3">
+              <p className="text-sm font-semibold text-[var(--hub-blue-dark)]">
+                Link simplificado (foco em passagem aérea)
+              </p>
+              <p className="mt-2 break-all font-mono text-xs text-[var(--hub-text-primary)]">
+                {publicUrlSimples || "Carregando identificador…"}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="text-sm"
+                  onClick={() => void copyLinkSimples()}
+                  disabled={!publicUrlSimples}
+                >
+                  {copiedSimples ? "Copiado!" : "Copiar link"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="text-sm"
+                  onClick={() => publicUrlSimples && window.open(publicUrlSimples, "_blank", "noopener")}
+                  disabled={!publicUrlSimples}
+                >
+                  Abrir em nova aba
+                </Button>
+              </div>
+            </div>
+
             <p className="text-xs leading-relaxed text-[var(--hub-text-secondary)]">
               Compartilhe este link com seus clientes para receber solicitações de cotação diretamente no painel.
+              O simplificado só pede o essencial e detalhes de voo (sem hospedagem, pagamento ou cupom).
             </p>
 
             {!isSalesAgent && (
@@ -404,13 +454,7 @@ export function LinkSolicitacaoModal({
                             </option>
                           ))}
                         </Select>
-                        <Input
-                          placeholder="https://…"
-                          value={l.url}
-                          onChange={(e) =>
-                            updateLink(l.id, { url: e.target.value })
-                          }
-                        />
+                        <WhatsappLinkFields link={l} agency={config.nomeMarca} onChange={(patch) => updateLink(l.id, patch)} />
                         <Button
                           type="button"
                           variant="secondary"

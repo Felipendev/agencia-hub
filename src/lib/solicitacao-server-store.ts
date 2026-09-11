@@ -114,6 +114,7 @@ export async function addSubmission(input: {
   referralSellerId?: string;
   sellerPublicCode?: string | null;
   consentimentoLgpd?: boolean;
+  consentimentoMarketing?: boolean;
 }): Promise<SolicitacaoPublicSubmission> {
   const data = await readRaw();
   const row: SolicitacaoPublicSubmission = {
@@ -127,7 +128,7 @@ export async function addSubmission(input: {
     observacoes: input.observacoes.trim(),
     referralSellerId: input.referralSellerId ?? null,
     sellerPublicCode: input.sellerPublicCode?.trim() || null,
-    consentimentoLgpd: input.consentimentoLgpd === true,
+    consentimentoMarketing: input.consentimentoMarketing === true,
   };
   data.submissions.unshift(row);
   await writeRaw(data);

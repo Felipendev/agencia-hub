@@ -1,5 +1,6 @@
 import { formatBRL, formatDateBR } from "@/lib/format";
 import type { Cotacao, Cliente } from "@/types";
+import { SERVICOS_DESEJADOS_OPTIONS } from "@/lib/cotacao-options";
 
 /**
  * Gera mensagem de texto simples (sem emojis) para copiar e colar
@@ -8,14 +9,14 @@ import type { Cotacao, Cliente } from "@/types";
 export function gerarMensagemTexto(
   cotacao: Cotacao,
   cliente: Cliente,
-  nomeAgencia = "AgenciaHub",
+  nomeAgencia = "",
 ): string {
   const L: string[] = [];
 
   L.push(`Ola, ${cliente.nome}!`);
   L.push("");
   L.push(
-    "Segue o resumo da sua cotacao de viagem. O arquivo PDF com todos os detalhes foi enviado em anexo.",
+    "Segue o resumo da sua cotacao de viagem.",
   );
   L.push("");
 
@@ -47,15 +48,7 @@ export function gerarMensagemTexto(
   // Servicos
   const servicos = cotacao.detalhes.servicosDesejados ?? [];
   if (servicos.length > 0) {
-    const labels: Record<string, string> = {
-      passagem: "Passagens aereas",
-      hospedagem: "Hospedagem",
-      seguro: "Seguro viagem",
-      transfer: "Transfer aeroporto",
-      passeios: "Passeios e ingressos",
-      aluguel_carro: "Aluguel de carro",
-      chip: "Chip internacional",
-    };
+    const labels: Record<string, string> = Object.fromEntries(SERVICOS_DESEJADOS_OPTIONS.map((s) => [s.id, s.label]));
     L.push(`Servicos: ${servicos.map((s) => labels[s] ?? s).join(", ")}`);
   }
 
@@ -74,8 +67,10 @@ export function gerarMensagemTexto(
   L.push(
     "Para confirmar a reserva ou tirar duvidas, e so responder esta mensagem.",
   );
-  L.push("");
-  L.push(nomeAgencia);
+  if (nomeAgencia.trim()) {
+    L.push("");
+    L.push(nomeAgencia.trim());
+  }
 
   return L.join("\n");
 }

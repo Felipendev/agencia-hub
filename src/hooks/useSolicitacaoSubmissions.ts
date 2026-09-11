@@ -108,6 +108,7 @@ export function useSolicitacaoSubmissions() {
               nome: selectedSubmission.nome,
               email: selectedSubmission.email || "",
               telefone: selectedSubmission.telefone,
+              whatsapp: selectedSubmission.detalhes.whatsapp,
               destinoInteresse:
                 selectedSubmission.detalhes.destinosTrechos
                   ?.filter((x) => x.trim())
@@ -178,17 +179,14 @@ export function useSolicitacaoSubmissions() {
               : undefined,
         });
 
-        const delRes = await fetch(
-          `/api/app/solicitacao-submissions?id=${encodeURIComponent(selectedSubmission.id)}`,
-          {
-            method: "DELETE",
-            credentials: "include",
-            headers: authHeaders(),
-          },
-        );
-        if (!delRes.ok) {
-          console.warn("[submissions] Falha ao remover submissão:", delRes.status);
-        }
+        // Marca a submissão como consumida no servidor (local store ou API remota) para que
+        // ela nunca mais volte a aparecer como pendente — a checagem client-side é só um filtro
+        // de exibição, não a fonte de verdade. Ver TODO-030.
+        const delRes = await fetch(`/api/app/solicitacao-submissions?id=${encodeURIComponent(selectedSubmission.id)}`, {
+          method: "DELETE", credentials: "include", headers: authHeaders(),
+        });
+        if (!delRes.ok) throw new Error("Cotação criada, mas não foi possível concluir a solicitação no servidor.");
+        setList((current) => current.filter((item) => item.id !== selectedSubmission.id));
 
         toast.success("Cotação importada com sucesso!");
         setSelectedSubmission(null);

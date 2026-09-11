@@ -226,7 +226,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       novas.push({
         id: key,
         type: "cliente_novo",
-        title: "Novo cliente cadastrado",
+        title: "Nova pessoa cadastrada",
         message: `${c.nome} foi adicionado à sua base de clientes.`,
         link: `/clientes`,
         createdAt: new Date().toISOString(),

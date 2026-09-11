@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Label } from "@/components/ui/label";
+import { ClientePicker } from "@/components/cliente/ClientePicker";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { XIcon } from "@/components/icons";
@@ -115,11 +116,6 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
     setDet(cotacao.detalhes);
     setObservacoes(cotacao.observacoes);
   }, [open, cotacao]);
-
-  const clienteSelecionado = useMemo(
-    () => clientes.find((c) => c.id === clienteId),
-    [clientes, clienteId],
-  );
 
   if (!open) return null;
 
@@ -284,50 +280,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
                 />
               </div>
 
-              {/* Cliente */}
-              <div>
-                <Label htmlFor="eq-cliente">Cliente *</Label>
-                {clienteSelecionado && (
-                  <div className="mb-2 flex items-center gap-2 rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-3 py-2 text-sm">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--hub-blue)] text-xs font-bold text-white">
-                      {clienteSelecionado.nome.charAt(0).toUpperCase()}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium text-[var(--hub-blue-dark)]">
-                        {clienteSelecionado.nome}
-                      </p>
-                      <p className="truncate text-xs text-[var(--hub-text-muted)]">
-                        {clienteSelecionado.email || clienteSelecionado.telefone}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setClienteId("")}
-                      className="shrink-0 text-xs text-[var(--hub-text-muted)] hover:text-red-500"
-                    >
-                      Trocar
-                    </button>
-                  </div>
-                )}
-                {!clienteSelecionado && (
-                  <Select
-                    id="eq-cliente"
-                    value={clienteId}
-                    onChange={(e) => setClienteId(e.target.value)}
-                  >
-                    <option value="">Selecione um cliente…</option>
-                    {clientes
-                      .slice()
-                      .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"))
-                      .map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.nome}
-                          {c.email ? ` — ${c.email}` : ""}
-                        </option>
-                      ))}
-                  </Select>
-                )}
-              </div>
+              <ClientePicker id="eq-cliente" required clientes={clientes} value={clienteId} onChange={setClienteId} />
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
@@ -423,6 +376,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
               onToggleComodidade={toggleComodidade}
               onPatch={patchDet}
               secoesAbertas
+              token={token ?? undefined}
             />
           )}
 
