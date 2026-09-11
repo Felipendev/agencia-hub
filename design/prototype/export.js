@@ -42,6 +42,19 @@ function exportDesign() {
       r.height <= 0
     )
       return null;
+    if (el.tagName.toLowerCase() === "svg") {
+      const clone = el.cloneNode(true);
+      clone.setAttribute("color", c.color);
+      clone.setAttribute("font-family", "Plus Jakarta Sans");
+      clone.setAttribute("width", r.width);
+      clone.setAttribute("height", r.height);
+      return {
+        type: "SVG",
+        name: el.getAttribute("aria-label") || "Ícone",
+        ...rect(r, parent),
+        svg: new XMLSerializer().serializeToString(clone),
+      };
+    }
     const data = {
       type: "FRAME",
       name: el.dataset.component || el.className || el.tagName,

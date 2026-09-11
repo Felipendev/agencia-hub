@@ -58,3 +58,5 @@ Campos editáveis e busca simples funcionam no navegador. Os cliques do cenário
 5. Reimporte em um arquivo de revisão ou desfaça a importação anterior.
 
 O servidor aceita apenas arquivos conhecidos e o endpoint de exportação na interface local. A tipografia é carregada do Google Fonts; sem internet, o HTML utiliza a fonte de sistema. O Figma carrega Plus Jakarta Sans pela biblioteca de fontes disponível.
+
+Revisão de 11/09/2026: financeiro com gráficos de receitas/despesas e composição por categoria, indicadores com ícones SVG autorais em dois tons e cartões arredondados. Veja `finance-preview.png` e o protótipo em `http://localhost:4176/#finance`. Prévia compacta disponível em `http://localhost:4176/?mobile=1#finance`. O exportador agora preserva os SVGs como vetores; a importação nativa segue pendente de validação no Figma.

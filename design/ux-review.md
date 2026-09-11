@@ -108,3 +108,8 @@ Verificados os pares principais de contraste por cálculo (resultado em `validat
 8. Validar datas, fuso, disponibilidade de tarifa, check-in e tratamento de múltiplos trechos. Voos e horários do protótipo são ilustrativos.
 9. Revisar consentimento, mensagens públicas e documentos jurídicos com o responsável; reutilizar os textos vigentes.
 10. Revisar o plugin no Figma, refinar components/variants, Auto Layout e constraints, e realizar teste de usabilidade antes de implementar nas telas de produção.
+
+### Revisão visual — 11 de setembro de 2026
+A direção passa a combinar a fonte Plus Jakarta Sans e a hierarquia concisa com mais identidade visual. O financeiro recupera receitas versus despesas e composição por categoria da aplicação atual, com azul, laranja e verde usados de forma contida. Quatro indicadores distinguem recebido, pago, saldo e previsões. O recebimento simulado atualiza os indicadores e as duas visualizações. Os valores mensais também ficam disponíveis em texto expansível.
+
+A navegação usa uma pequena família SVG autoral em dois tons, substituindo os números. Não foi instalada uma biblioteca de ícones externa. Cartões usam cantos de 12 px, controles de 8 px e elevação discreta. Esta revisão substitui a direção anterior de eliminar gráficos do financeiro. O exportador preserva SVGs como vetores; execução e revisão nativa do importador Figma continuam pendentes.

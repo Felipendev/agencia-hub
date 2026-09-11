@@ -39,6 +39,190 @@ const field = (label, value = "", helper = "", opts = {}) => {
 };
 field.counter = 0;
 const formrow = (...items) => `<div class="formrow">${items.join("")}</div>`;
+
+const icon = (name) => {
+  const paths = {
+    home: '<path d="M3 11 12 3l9 8v10h-6v-7H9v7H3Z"/>',
+    quotes: '<path d="M5 3h14v18H5Z"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+    clients:
+      '<circle cx="10" cy="8" r="4"/><path d="M3 21v-3a7 7 0 0 1 14 0v3M18 5a4 4 0 0 1 0 8m2 8v-3"/>',
+    trips: '<path d="m3 10 8 2 7-8 3 1-5 9 5 4-1 2-8-3-5 4-2-1 3-6-6-2Z"/>',
+    finance:
+      '<rect x="3" y="5" width="18" height="15" rx="3"/><path d="M15 10h6v5h-6Z M4 5l13-3v3"/>',
+    calculator:
+      '<rect x="5" y="2" width="14" height="20" rx="3"/><path d="M8 6h8M8 11h2m4 0h2m-8 4h2m4 0h2m-8 4h2m4 0h2"/>',
+    income: '<path d="M4 17 10 11l4 3 6-9M14 5h6v6"/>',
+    expense: '<path d="m4 7 6 6 4-3 6 9M14 19h6v-6"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>',
+  };
+  return (
+    '<svg class="hub-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5" fill="currentColor" fill-opacity=".12" stroke="none"/>' +
+    paths[name || "home"] +
+    "</svg>"
+  );
+};
+function financeVisuals(received) {
+  const total = received ? 51040 : 42580,
+    expense = 29940;
+  const brl = (n) => "R$ " + n.toLocaleString("pt-BR");
+  const series = [
+    ["Abr", 28000, 21000],
+    ["Mai", 34000, 24000],
+    ["Jun", 31000, 23000],
+    ["Jul", 39000, 28000],
+    ["Ago", 37000, 26000],
+    ["Set", total, expense],
+  ];
+  const points = (k) =>
+    series
+      .map((r, i) => 48 + i * 96 + "," + (192 - (r[k] / 60000) * 160))
+      .join(" ");
+  const chart =
+    '<svg class="cash-chart" role="img" aria-label="Receitas e despesas de abril a setembro, valores em reais" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 230">' +
+    [0, 20000, 40000, 60000]
+      .map(
+        (v) =>
+          '<line x1="48" x2="535" y1="' +
+          (192 - (v / 60000) * 160) +
+          '" y2="' +
+          (192 - (v / 60000) * 160) +
+          '" stroke="#e1e7ea"/><text x="0" y="' +
+          (196 - (v / 60000) * 160) +
+          '" font-size="11" fill="#586b73">' +
+          v / 1000 +
+          " mil</text>",
+      )
+      .join("") +
+    '<polygon points="48,192 ' +
+    points(1) +
+    ' 528,192" fill="#1684bc" fill-opacity=".09"/><polyline points="' +
+    points(1) +
+    '" fill="none" stroke="#1684bc" stroke-width="3"/><polyline points="' +
+    points(2) +
+    '" fill="none" stroke="#bd6526" stroke-width="3" stroke-dasharray="6 4"/>' +
+    series
+      .map(
+        (r, i) =>
+          '<circle cx="' +
+          (48 + i * 96) +
+          '" cy="' +
+          (192 - (r[1] / 60000) * 160) +
+          '" r="4" fill="#1684bc"/><text x="' +
+          (48 + i * 96) +
+          '" y="220" text-anchor="middle" font-size="12" fill="#586b73">' +
+          r[0] +
+          "</text>",
+      )
+      .join("") +
+    "</svg>";
+  const categories = [
+    ["Passagens", received ? 38460 : 30000, "#1684bc"],
+    ["Hospedagem", 8500, "#17685e"],
+    ["Serviços", 4080, "#bd6526"],
+  ];
+  let offset = 0;
+  const donut =
+    '<svg class="donut" role="img" aria-label="Distribuição das receitas recebidas em setembro" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">' +
+    categories
+      .map(([label, value, color]) => {
+        const pct = (value / total) * 100;
+        const out =
+          '<circle cx="90" cy="90" r="65" fill="none" stroke="' +
+          color +
+          '" stroke-width="20" pathLength="100" stroke-dasharray="' +
+          pct +
+          " " +
+          (100 - pct) +
+          '" stroke-dashoffset="' +
+          -offset +
+          '" transform="rotate(-90 90 90)"/>';
+        offset += pct;
+        return out;
+      })
+      .join("") +
+    '<text x="90" y="86" text-anchor="middle" font-size="12" fill="#586b73">Recebido</text><text x="90" y="109" text-anchor="middle" font-size="19" font-weight="700" fill="#172d39">' +
+    brl(total) +
+    "</text></svg>";
+  return (
+    '<div class="finance-kpis">' +
+    [
+      ["income", "Recebido", total, "Entradas confirmadas", "blue"],
+      ["expense", "Pago", expense, "Saídas confirmadas", "orange"],
+      [
+        "finance",
+        "Saldo do período",
+        total - expense,
+        "Recebido menos pago",
+        "green",
+      ],
+      [
+        "clock",
+        "A receber",
+        received ? 9960 : 18420,
+        "Próximos 7 dias",
+        "amber",
+      ],
+    ]
+      .map(
+        ([ic, label, value, desc, tone]) =>
+          '<div class="finance-kpi ' +
+          tone +
+          '"><div class="row gap8"><span class="icon-tile">' +
+          icon(ic) +
+          "</span><span>" +
+          label +
+          "</span></div><strong>" +
+          brl(value) +
+          "</strong><small>" +
+          desc +
+          "</small></div>",
+      )
+      .join("") +
+    '</div><div class="finance-charts">' +
+    panel(
+      "Receitas × despesas",
+      '<div class="chart-legend"><span class="blue-dot">Receitas</span><span class="orange-dot">Despesas · linha tracejada</span></div>' +
+        chart +
+        '<details class="chart-data"><summary>Ver valores por mês</summary>' +
+        series
+          .map(
+            (r) =>
+              "<p>" +
+              r[0] +
+              ": receitas " +
+              brl(r[1]) +
+              " · despesas " +
+              brl(r[2]) +
+              "</p>",
+          )
+          .join("") +
+        "</details>",
+      '<span class="small muted">Abr–set 2026</span>',
+    ) +
+    panel(
+      "Receita por categoria",
+      '<div class="category-chart">' +
+        donut +
+        '<div class="category-key">' +
+        categories
+          .map(
+            ([label, value, color]) =>
+              '<div class="category-row"><span style="background:' +
+              color +
+              '" class="category-dot"></span><span>' +
+              label +
+              "</span><strong>" +
+              brl(value) +
+              "</strong></div>",
+          )
+          .join("") +
+        "</div></div>",
+      '<span class="small muted">Setembro</span>',
+    ) +
+    "</div>"
+  );
+}
+
 const nav = [
   ["Hoje", "home", "01"],
   ["Cotações", "quotes", "02"],
@@ -48,7 +232,7 @@ const nav = [
   ["Calculadora de milhas", "calculator", "06"],
 ];
 function shell(body, active = "home", overlay = "", name = "") {
-  return `<div class="screen" data-screen="${name || active}"><aside class="sidebar"><div class="stack gap8"><div class="brand">agências<span style="color:#aac4cd">hub</span></div><div class="brand-sub">Horizonte Viagens</div></div><nav class="navgroup" aria-label="Navegação principal"><div class="navlabel">MESA DE OPERAÇÃO</div>${nav.map(([label, to, n]) => `<a class="navitem ${active === to ? "active" : ""}" ${active === to ? 'aria-current="page"' : ""} href="#${to}" data-target="${to}"><span class="navnum">${n}</span><span>${label}</span></a>`).join("")}</nav><nav class="navgroup" aria-label="Gestão"><div class="navlabel">GESTÃO</div><a class="navitem" href="#team" data-target="team">Equipe e acessos</a><a class="navitem" href="#agency" data-target="agency">Agência</a></nav><div class="navfooter"><a class="navitem" href="#states" data-target="states">Guia do protótipo</a><div class="row gap8"><div class="avatar">MC</div><div><h3>Marina Costa</h3><p class="brand-sub">Gestora · Horizonte</p></div></div></div></aside><div class="workspace"><header class="topbar"><div class="row gap8">${link("Menu", "menu", "quiet")}<span>Horizonte Viagens</span><span class="badge">Gestora</span></div><div class="topbar-search"><a href="#quotes" data-target="quotes">Buscar cliente, cotação ou localizador</a><span class="key">/</span>${textLink("Pendências · 5", "home")}</div></header><main class="content">${body}</main></div>${overlay}</div>`;
+  return `<div class="screen" data-screen="${name || active}"><aside class="sidebar"><div class="stack gap8"><div class="brand">agências<span style="color:#aac4cd">hub</span></div><div class="brand-sub">Horizonte Viagens</div></div><nav class="navgroup" aria-label="Navegação principal"><div class="navlabel">MESA DE OPERAÇÃO</div>${nav.map(([label, to, n]) => `<a class="navitem ${active === to ? "active" : ""}" ${active === to ? 'aria-current="page"' : ""} href="#${to}" data-target="${to}">${icon(to)}<span>${label}</span></a>`).join("")}</nav><nav class="navgroup" aria-label="Gestão"><div class="navlabel">GESTÃO</div><a class="navitem" href="#team" data-target="team">Equipe e acessos</a><a class="navitem" href="#agency" data-target="agency">Agência</a></nav><div class="navfooter"><a class="navitem" href="#states" data-target="states">Guia do protótipo</a><div class="row gap8"><div class="avatar">MC</div><div><h3>Marina Costa</h3><p class="brand-sub">Gestora · Horizonte</p></div></div></div></aside><div class="workspace"><header class="topbar"><div class="row gap8">${link("Menu", "menu", "quiet")}<span>Horizonte Viagens</span><span class="badge">Gestora</span></div><div class="topbar-search"><a href="#quotes" data-target="quotes">Buscar cliente, cotação ou localizador</a><span class="key">/</span>${textLink("Pendências · 5", "home")}</div></header><main class="content">${body}</main></div>${overlay}</div>`;
 }
 const quoteRows = [
   [
@@ -231,7 +415,7 @@ function newTripSuccess() {
 }
 function finance(state = "finance") {
   return shell(
-    `${head("Vendas e caixa", "Diferencie o que foi vendido do que já entrou no caixa.", link("Registrar venda", "sale", "primary"))}${state === "received" ? notice("Recebimento de R$ 8.460 registrado no cenário demonstrativo.", "success") : ""}<div class="tabs"><a class="tab active" href="#finance" data-target="finance">A receber</a><a class="tab" href="#payables" data-target="payables">A pagar</a><a class="tab" href="#sales" data-target="sales">Vendas</a></div><div class="summary"><div class="metric"><span>Previsto · próximos 7 dias</span><strong>R$ 18.420</strong></div><div class="metric"><span>Vence hoje</span><strong>R$ ${"2.380"}</strong></div><div class="metric"><span>Já recebido · setembro</span><strong>R$ ${state === "received" ? "51.040" : "42.580"}</strong></div></div><div class="panel"><div class="panelhead"><h2>Parcelas a receber</h2><span class="small muted">Ordenadas por vencimento</span></div><div class="table"><div class="tr th"><div class="td customer">Cliente / venda</div><div class="td">Vencimento</div><div class="td">Parcela</div><div class="td amount">Valor</div><div class="td">Ação</div></div>${[
+    `${head("Vendas e caixa", "Setembro 2026 · Seu caixa, de forma simples.", link("Registrar venda", "sale", "primary"))}${state === "received" ? notice("Recebimento de R$ 8.460 registrado no cenário demonstrativo.", "success") : ""}<div class="tabs"><a class="tab active" href="#finance" data-target="finance">A receber</a><a class="tab" href="#payables" data-target="payables">A pagar</a><a class="tab" href="#sales" data-target="sales">Vendas</a></div>${financeVisuals(state === "received")}<div class="panel"><div class="panelhead"><h2>Parcelas a receber</h2><span class="small muted">Ordenadas por vencimento</span></div><div class="table"><div class="tr th"><div class="td customer">Cliente / venda</div><div class="td">Vencimento</div><div class="td">Parcela</div><div class="td amount">Valor</div><div class="td">Ação</div></div>${[
       ["Bruno Almeida", "V-0182", "10 set 2026", "1 de 2", "2.380"],
       ["Ana Martins", "V-0183", "12 set 2026", "Única", "8.460"],
       ["Carla Nascimento", "V-0184", "14 set 2026", "1 de 2", "7.580"],
@@ -242,7 +426,7 @@ function finance(state = "finance") {
       )
       .join(
         "",
-      )}</div></div>${notice("Confirme o recebimento somente depois que o dinheiro entrar na conta.", "info")}<p class="productnote">Valores fictícios para demonstrar a diferença entre venda, parcela prevista e movimento confirmado.</p>`,
+      )}</div></div><p class="productnote">Valores fictícios para demonstrar a diferença entre venda, parcela prevista e movimento confirmado.</p>`,
     "finance",
     "",
     state,
@@ -670,7 +854,7 @@ function render() {
       `<div class="screen-name">Operação mobile</div>${home().replace('class="screen"', 'class="screen mobile-frame"').replace('data-screen="home"', 'data-screen="home-mobile"')}<div class="screen-name">Viagem mobile</div>${trip().replace('class="screen"', 'class="screen mobile-frame"').replace('data-screen="trip"', 'data-screen="trip-mobile"')}`;
     return;
   }
-  document.body.className = "";
+  document.body.className = new URLSearchParams(location.search).has("mobile") ? "catalog mobile-preview" : "";
   const requested = location.hash.slice(1) || "home";
   $("#app").innerHTML =
     `<div class="demo"><span>PROTÓTIPO · Dados fictícios · Ações simuladas</span><a href="#states">Explorar telas e estados</a></div>${renderScreen(requested)}`;

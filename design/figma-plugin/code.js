@@ -120,6 +120,15 @@ figma.ui.onmessage = async (msg) => {
         if (children[i]) registerLinks(children[i], d.children[i]);
     }
     function createRaw(d) {
+      if (d.type === "SVG") {
+        const n = figma.createNodeFromSvg(d.svg);
+        created.push(n.id);
+        n.name = d.name;
+        n.resize(d.width, d.height);
+        n.x = d.x;
+        n.y = d.y;
+        return n;
+      }
       if (d.type === "TEXT") {
         const n = figma.createText();
         created.push(n.id);
