@@ -19,7 +19,7 @@ type TripDetails = {
   trip: { id: string; customerId: string; customerName: string; serviceType: string; bookingLocator: string | null; airline: string | null; status: string; travelStartDate: string | null; travelEndDate: string | null };
   supplierId: string | null; supplierName: string | null; quotationId: string | null; saleId: string | null; saleDate: string | null; notes: string; segments: Segment[];
 };
-type Attachment = { id: string; filename: string; contentType: string; size: number };
+type Attachment = { id: string; filename: string; contentType: string; size: number; description: string };
 
 export default function ViagemDetalhePage() {
   const params = useParams();
@@ -34,6 +34,8 @@ export default function ViagemDetalhePage() {
   const [editing, setEditing] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [attachmentDescription, setAttachmentDescription] = useState("");
+  const [savingAttachmentId, setSavingAttachmentId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!base || !token || !id) return;
@@ -58,7 +60,7 @@ export default function ViagemDetalhePage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          customerId: next.trip.customerId, supplierId: next.supplierId, quotationId: next.quotationId, saleId: next.saleId,
+          customerId: next.trip.customerId, supplierId: next.supplierId, supplierCustomerId: null, quotationId: next.quotationId, saleId: next.saleId,
           serviceType: next.trip.serviceType, bookingLocator: next.trip.bookingLocator, airline: next.trip.airline, status: next.trip.status,
           saleDate: next.saleDate, travelStartDate: next.trip.travelStartDate, travelEndDate: next.trip.travelEndDate, notes: next.notes,
           segments: next.segments.map((segment) => ({ origin: segment.origin, destination: segment.destination, departureAt: segment.departureAt || null, arrivalAt: segment.arrivalAt || null, airline: segment.airline, flightNumber: segment.flightNumber, ticketNumber: segment.ticketNumber })),
@@ -74,16 +76,40 @@ export default function ViagemDetalhePage() {
     }
   }
 
-  async function uploadAttachment(file: File | null) {
-    if (!base || !token || !file) return;
-    if (file.size > 5 * 1024 * 1024) { setError("O anexo deve ter até 5 MB."); return; }
+  async function uploadAttachments(files: FileList | null) {
+    if (!base || !token || !files?.length) return;
+    const selected = Array.from(files);
+    if (selected.some((file) => file.size > 5 * 1024 * 1024)) { setError("Cada anexo deve ter até 5 MB."); return; }
     setUploading(true); setError("");
     try {
-      const data = new FormData(); data.append("file", file);
-      const response = await fetch(`${base}/attachments/trips/${id}`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: data });
-      if (!response.ok) { setError("Não foi possível enviar o anexo."); return; }
+      for (const file of selected) {
+        const data = new FormData(); data.append("file", file); data.append("description", attachmentDescription);
+        const response = await fetch(`${base}/attachments/trips/${id}`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: data });
+        if (!response.ok) throw new Error("Não foi possível enviar um dos anexos.");
+      }
+      setAttachmentDescription("");
       await load();
-    } catch { setError("Não foi possível comunicar com o servidor."); } finally { setUploading(false); }
+    } catch (uploadError) { setError(uploadError instanceof Error ? uploadError.message : "Não foi possível comunicar com o servidor."); } finally { setUploading(false); }
+  }
+
+  async function saveAttachmentDescription(attachment: Attachment, description: string) {
+    if (!base || !token) return;
+    setSavingAttachmentId(attachment.id); setError("");
+    try {
+      const response = await fetch(`${base}/attachments/${attachment.id}`, { method: "PATCH", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ description }) });
+      if (!response.ok) throw new Error("Não foi possível salvar a descrição.");
+      await load();
+    } catch (updateError) { setError(updateError instanceof Error ? updateError.message : "Não foi possível comunicar com o servidor."); } finally { setSavingAttachmentId(null); }
+  }
+
+  async function deleteAttachment(attachment: Attachment) {
+    if (!base || !token || !window.confirm(`Remover o arquivo "${attachment.filename}"?`)) return;
+    setSavingAttachmentId(attachment.id); setError("");
+    try {
+      const response = await fetch(`${base}/attachments/${attachment.id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+      if (!response.ok) throw new Error("Não foi possível remover o arquivo.");
+      await load();
+    } catch (deleteError) { setError(deleteError instanceof Error ? deleteError.message : "Não foi possível comunicar com o servidor."); } finally { setSavingAttachmentId(null); }
   }
 
   async function downloadAttachment(attachment: Attachment) {
@@ -184,8 +210,9 @@ export default function ViagemDetalhePage() {
       <Card>
         <CardTitle>Documentos da viagem</CardTitle>
         <p className="mt-1 text-sm text-[var(--hub-text-secondary)]">Centralize contratos, vouchers, bilhetes e demais arquivos desta viagem.</p>
-        <div className="mt-4 flex flex-wrap items-center gap-3"><Input className="max-w-md" type="file" disabled={uploading} accept="image/jpeg,image/png,image/webp,application/pdf,text/plain,text/csv" onChange={(e) => void uploadAttachment(e.target.files?.[0] ?? null)} /><span className="text-xs text-[var(--hub-text-muted)]">PDF, imagem ou texto · até 5 MB</span></div>
-        {attachments.length === 0 ? <p className="mt-4 text-sm text-[var(--hub-text-muted)]">Nenhum documento anexado.</p> : <ul className="mt-4 divide-y divide-[var(--hub-border)]">{attachments.map((attachment) => <li key={attachment.id} className="flex items-center justify-between gap-3 py-3 text-sm"><span className="truncate">{attachment.filename}</span><button type="button" className="shrink-0 font-medium text-[var(--hub-blue)] hover:underline" onClick={() => void downloadAttachment(attachment)}>Baixar</button></li>)}</ul>}
+        <div className="mt-4 grid gap-3 md:grid-cols-[1fr_auto]"><div><Label htmlFor="attachment-description">Descrição para os arquivos selecionados</Label><Input id="attachment-description" value={attachmentDescription} maxLength={1000} onChange={(e) => setAttachmentDescription(e.target.value)} placeholder="Ex.: vouchers e bilhetes de ida" /></div><div className="self-end"><Input className="max-w-md" type="file" multiple disabled={uploading} accept="image/jpeg,image/png,image/webp,application/pdf,text/plain,text/csv" onChange={(e) => { void uploadAttachments(e.target.files); e.currentTarget.value = ""; }} /></div></div>
+        <p className="mt-2 text-xs text-[var(--hub-text-muted)]">Selecione vários PDFs, imagens ou textos de uma vez · até 5 MB por arquivo</p>
+        {attachments.length === 0 ? <p className="mt-4 text-sm text-[var(--hub-text-muted)]">Nenhum documento anexado.</p> : <ul className="mt-4 divide-y divide-[var(--hub-border)]">{attachments.map((attachment) => <li key={attachment.id} className="grid gap-2 py-3 text-sm md:grid-cols-[1fr_auto]"><div><p className="truncate font-medium">{attachment.filename}</p><Input aria-label={`Descrição de ${attachment.filename}`} className="mt-2" defaultValue={attachment.description} maxLength={1000} onBlur={(e) => { if (e.target.value !== attachment.description) void saveAttachmentDescription(attachment, e.target.value); }} placeholder="Adicionar descrição" /></div><div className="flex items-start gap-3"><button type="button" className="font-medium text-[var(--hub-blue)] hover:underline" onClick={() => void downloadAttachment(attachment)}>Baixar</button><button type="button" disabled={savingAttachmentId === attachment.id} className="font-medium text-red-600 hover:underline disabled:opacity-50" onClick={() => void deleteAttachment(attachment)}>Remover</button></div></li>)}</ul>}
       </Card>
     </div>
   );

@@ -14,7 +14,7 @@ import { NovoClienteModal } from "@/components/cliente/NovoClienteModal";
 import { TRIP_STATUS_LABELS } from "@/lib/constants";
 import type { Cliente } from "@/types";
 
-type Supplier = { id: string; name: string };
+type Supplier = { id: string; name: string; source: "supplier" | "person"; typeLabel: string };
 type Segment = { origin: string; destination: string; departureAt: string; arrivalAt: string; airline: string; flightNumber: string; ticketNumber: string };
 
 const emptySegment = (): Segment => ({ origin: "", destination: "", departureAt: "", arrivalAt: "", airline: "", flightNumber: "", ticketNumber: "" });
@@ -29,7 +29,7 @@ export default function NovaViagemPage() {
 
   const [customerId, setCustomerId] = useState(params.get("clienteId") ?? "");
   const [quotationId, setQuotationId] = useState(params.get("cotacaoId") ?? "");
-  const [supplierId, setSupplierId] = useState("");
+  const [supplierSelection, setSupplierSelection] = useState("");
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [serviceType, setServiceType] = useState("FLIGHT");
   const [bookingLocator, setBookingLocator] = useState("");
@@ -55,7 +55,7 @@ export default function NovaViagemPage() {
 
   useEffect(() => {
     if (!base || !token) return;
-    void fetch(`${base}/suppliers`, { headers: { Authorization: `Bearer ${token}` } })
+    void fetch(`${base}/trips/supplier-options`, { headers: { Authorization: `Bearer ${token}` } })
       .then((response) => response.ok ? response.json() : [])
       .then(setSuppliers)
       .catch(() => setSuppliers([]));
@@ -77,7 +77,8 @@ export default function NovaViagemPage() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           customerId,
-          supplierId: supplierId || null,
+          supplierId: supplierSelection.startsWith("supplier:") ? supplierSelection.slice("supplier:".length) : null,
+          supplierCustomerId: supplierSelection.startsWith("person:") ? supplierSelection.slice("person:".length) : null,
           quotationId: quotationId || null,
           serviceType,
           bookingLocator: bookingLocator || null,
@@ -132,9 +133,9 @@ export default function NovaViagemPage() {
           </div>
           <div>
             <Label>Fornecedor (opcional)</Label>
-            <Select value={supplierId} onChange={(event) => setSupplierId(event.target.value)}>
+            <Select value={supplierSelection} onChange={(event) => setSupplierSelection(event.target.value)}>
               <option value="">Sem fornecedor</option>
-              {suppliers.map((supplier) => <option key={supplier.id} value={supplier.id}>{supplier.name}</option>)}
+              {suppliers.map((supplier) => <option key={`${supplier.source}-${supplier.id}`} value={`${supplier.source}:${supplier.id}`}>{supplier.name} — {supplier.typeLabel}</option>)}
             </Select>
           </div>
           <div>
