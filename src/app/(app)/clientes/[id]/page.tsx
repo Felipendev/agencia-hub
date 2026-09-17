@@ -28,6 +28,7 @@ export default function ClienteDetalhePage() {
   const [editOpen, setEditOpen] = useState(false);
   const [vendas, setVendas] = useState<Array<{ id: string; totalAmount: number; saleDate: string }>>([]);
   const [viagens, setViagens] = useState<Array<{ id: string; serviceType: string; bookingLocator: string | null; status: string; travelStartDate: string | null }>>([]);
+  const [documentosViagem, setDocumentosViagem] = useState<Array<{ id: string; filename: string; tripId: string; bookingLocator: string | null; travelStartDate: string | null }>>([]);
 
   const cliente = clientes.find((c) => c.id === id);
   const cotacoesDoCliente = cotacoes.filter((q) => q.clienteId === id);
@@ -40,9 +41,17 @@ export default function ClienteDetalhePage() {
       .then((rows) => setVendas(rows))
       .catch(() => setVendas([]));
     void fetch(`${base}/trips?customerId=${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((response) => response.ok ? response.json() : [])
-      .then((rows) => setViagens(rows))
-      .catch(() => setViagens([]));
+      .then(async (response) => {
+        const rows = response.ok ? await response.json() as Array<{ id: string; serviceType: string; bookingLocator: string | null; status: string; travelStartDate: string | null }> : [];
+        setViagens(rows);
+        const attachments = await Promise.all(rows.map(async (trip) => {
+          const attachmentResponse = await fetch(`${base}/attachments/trips/${trip.id}`, { headers: { Authorization: `Bearer ${token}` } });
+          const files = attachmentResponse.ok ? await attachmentResponse.json() as Array<{ id: string; filename: string }> : [];
+          return files.map((file) => ({ ...file, tripId: trip.id, bookingLocator: trip.bookingLocator, travelStartDate: trip.travelStartDate }));
+        }));
+        setDocumentosViagem(attachments.flat());
+      })
+      .catch(() => { setViagens([]); setDocumentosViagem([]); });
   }, [id, token]);
 
   if (!isReady) {
@@ -219,6 +228,33 @@ export default function ClienteDetalhePage() {
         </Card>
 
         <Card>
+          <CardTitle>Documentos de viagens</CardTitle>
+          <p className="mt-1 text-sm text-[var(--hub-text-secondary)]">Todos os vouchers, bilhetes e contratos vinculados às viagens deste cliente.</p>
+          {documentosViagem.length === 0 ? <p className="mt-4 text-sm text-[var(--hub-text-muted)]">Nenhum documento de viagem anexado.</p> : <ul className="mt-4 divide-y divide-[var(--hub-border)]">{documentosViagem.map((documento) => <li key={documento.id} className="flex items-center justify-between gap-3 py-3 text-sm"><span className="truncate">{documento.filename}</span><Link href={`/viagens/${documento.tripId}`} className="shrink-0 text-[var(--hub-blue)] hover:underline">{documento.travelStartDate ? formatDateBR(documento.travelStartDate) : "Viagem"} · {documento.bookingLocator || "sem localizador"}</Link></li>)}</ul>}
+        </Card>
+
+        <Card>
+          <CardTitle>Documentos</CardTitle>
+          <p className="mt-1 text-sm text-[var(--hub-text-secondary)]">Informações para emissão e atendimento, disponíveis sem abrir a edição.</p>
+          <dl className="mt-4 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+            <DocumentField label="CPF / CNPJ" value={cliente.documentoCpfCnpj} />
+            <DocumentField label="RG" value={cliente.documentoRg} />
+            <DocumentField label="Órgão emissor" value={cliente.documentoOrgaoEmissorRg} />
+            <DocumentField label="Inscrição municipal" value={cliente.documentoInscricaoMunicipal} />
+            <DocumentField label="Documento estrangeiro" value={cliente.documentoIdEstrangeiro} />
+            <DocumentField label="Nacionalidade" value={cliente.documentoNacionalidade} />
+            <DocumentField label="Estado civil" value={cliente.documentoEstadoCivil} />
+            <DocumentField label="Passaporte" value={cliente.documentoPassaporte} />
+            <DocumentField label="Emissão do passaporte" value={cliente.documentoPassaporteEmissao ? formatDateBR(cliente.documentoPassaporteEmissao) : undefined} />
+            <DocumentField label="Vencimento do passaporte" value={cliente.documentoPassaporteVencimento ? formatDateBR(cliente.documentoPassaporteVencimento) : undefined} />
+            <DocumentField label="Nacionalidade do passaporte" value={cliente.documentoPassaporteNacionalidade} />
+            <DocumentField label="Visto" value={cliente.documentoVisto} />
+            <DocumentField label="Validade do visto" value={cliente.documentoVistoValidade ? formatDateBR(cliente.documentoVistoValidade) : undefined} />
+            <div className="sm:col-span-2"><DocumentField label="Anotações sobre documentos" value={cliente.documentosObs} /></div>
+          </dl>
+        </Card>
+
+        <Card>
           <div className="mb-4 flex items-center justify-between">
             <CardTitle>Cotações deste cliente</CardTitle>
             <Link
@@ -294,4 +330,8 @@ export default function ClienteDetalhePage() {
     />
   </>
   );
+}
+
+function DocumentField({ label, value }: { label: string; value?: string }) {
+  return <div><dt className="text-xs font-medium uppercase text-[var(--hub-text-muted)]">{label}</dt><dd className="mt-0.5 whitespace-pre-wrap text-[var(--hub-text-primary)]">{value || "—"}</dd></div>;
 }
