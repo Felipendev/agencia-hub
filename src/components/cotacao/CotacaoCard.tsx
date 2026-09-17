@@ -8,6 +8,7 @@ import { EditarCotacaoModal } from "@/components/cotacao/EditarCotacaoModal";
 import { EnviarWhatsAppModal } from "@/components/cotacao/EnviarWhatsAppModal";
 import { EditIcon, EyeIcon, UserIcon, TagIcon, WhatsAppIcon, TrashIcon } from "@/components/icons";
 import { FunilBadge } from "@/components/cliente/FunilBadge";
+import { CircleX } from "lucide-react";
 
 type Props = {
   cotacao: Cotacao;
@@ -15,6 +16,7 @@ type Props = {
   onDragStart: (e: React.DragEvent, id: string) => void;
   onDragEnd?: () => void;
   onDelete?: (id: string) => void;
+  onReject?: (id: string) => void;
 };
 
 function ActionButton({
@@ -41,7 +43,7 @@ function ActionButton({
   );
 }
 
-export function CotacaoCard({ cotacao, cliente, onDragStart, onDragEnd, onDelete }: Props) {
+export function CotacaoCard({ cotacao, cliente, onDragStart, onDragEnd, onDelete, onReject }: Props) {
   const [editOpen, setEditOpen] = useState(false);
   const [waOpen, setWaOpen] = useState(false);
   const created = cotacao.createdAt.slice(0, 10);
@@ -179,6 +181,18 @@ export function CotacaoCard({ cotacao, cliente, onDragStart, onDragEnd, onDelete
               }}
             >
               <WhatsAppIcon className="h-4 w-4 text-emerald-500" />
+            </ActionButton>
+          )}
+
+          {onReject && cotacao.status !== "reprovado" && (
+            <ActionButton
+              title="Reprovar cotação"
+              onClick={(e) => {
+                e.stopPropagation();
+                onReject(cotacao.id);
+              }}
+            >
+              <CircleX className="h-4 w-4 text-red-500" />
             </ActionButton>
           )}
 

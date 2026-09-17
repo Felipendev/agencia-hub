@@ -14,9 +14,10 @@ type Props = {
   clientes: Cliente[];
   onMove: (cotacaoId: string, newStatus: CotacaoStatus) => void;
   onDelete?: (cotacaoId: string) => void;
+  onReject?: (cotacaoId: string) => void;
 };
 
-export function KanbanBoard({ cotacoes, clientes, onMove, onDelete }: Props) {
+export function KanbanBoard({ cotacoes, clientes, onMove, onDelete, onReject }: Props) {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [overColumn, setOverColumn] = useState<CotacaoStatus | null>(null);
 
@@ -124,6 +125,7 @@ export function KanbanBoard({ cotacoes, clientes, onMove, onDelete }: Props) {
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
                 onDelete={onDelete}
+                onReject={onReject}
               />
             </div>
           ))}

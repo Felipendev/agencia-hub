@@ -179,13 +179,9 @@ export function useSolicitacaoSubmissions() {
               : undefined,
         });
 
-        // Marca a submissão como consumida no servidor (local store ou API remota) para que
-        // ela nunca mais volte a aparecer como pendente — a checagem client-side é só um filtro
-        // de exibição, não a fonte de verdade. Ver TODO-030.
-        const delRes = await fetch(`/api/app/solicitacao-submissions?id=${encodeURIComponent(selectedSubmission.id)}`, {
-          method: "DELETE", credentials: "include", headers: authHeaders(),
-        });
-        if (!delRes.ok) throw new Error("Cotação criada, mas não foi possível concluir a solicitação no servidor.");
+        // A cotação guarda o vínculo com a submissão. Apagá-la aqui viola a chave estrangeira
+        // e deixa uma solicitação pendente depois que a cotação é excluída. A API lista apenas
+        // submissões sem cotação vinculada.
         setList((current) => current.filter((item) => item.id !== selectedSubmission.id));
 
         toast.success("Cotação importada com sucesso!");
@@ -200,7 +196,7 @@ export function useSolicitacaoSubmissions() {
         }
       }
     },
-    [selectedSubmission, addCliente, addCotacao, toast, token, authHeaders],
+    [selectedSubmission, addCliente, addCotacao, toast, token],
   );
 
   return {

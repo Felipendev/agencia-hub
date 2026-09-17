@@ -156,7 +156,7 @@ export type DataContextValue = {
   addCotacao: (
     c: Omit<Cotacao, "id" | "createdAt" | "updatedAt">,
   ) => Promise<Cotacao>;
-  updateCotacao: (id: string, patch: Partial<Cotacao>) => void;
+  updateCotacao: (id: string, patch: Partial<Cotacao>) => Promise<void>;
   resetDemoData: () => void;
   isReady: boolean;
   /** Base URL da API configurada em build (`NEXT_PUBLIC_AGENCIA_HUB_API_URL`). */
@@ -354,42 +354,42 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     [token],
   );
 
-  const updateCotacao = useCallback((id: string, patch: Partial<Cotacao>) => {
+  const updateCotacao = useCallback(async (id: string, patch: Partial<Cotacao>) => {
+    const current = data.cotacoes.find((cotacao) => cotacao.id === id);
+    if (!current) throw new Error("Cotação não encontrada.");
     const now = new Date().toISOString();
-    let mergedForRemote: Cotacao | null = null;
+    const mergedForRemote: Cotacao = { ...current, ...patch, updatedAt: now };
+    if (patch.detalhes) {
+      mergedForRemote.detalhes = mergeCotacaoDetalhes({
+        ...current.detalhes,
+        ...patch.detalhes,
+      });
+    }
     setData((d) => ({
       ...d,
       cotacoes: d.cotacoes.map((x) => {
         if (x.id !== id) return x;
-        const merged: Cotacao = { ...x, ...patch, updatedAt: now };
-        if (patch.detalhes) {
-          merged.detalhes = mergeCotacaoDetalhes({
-            ...x.detalhes,
-            ...patch.detalhes,
-          });
-        }
-        mergedForRemote = merged;
-        return merged;
+        return mergedForRemote;
       }),
     }));
 
-    if (mergedForRemote) {
-      void updateQuotationRemote(mergedForRemote, patch, token)
-        .then((apiMerged) => {
-          if (!apiMerged) return;
-          setData((d) => ({
-            ...d,
-            cotacoes: d.cotacoes.map((x) => (x.id === id ? apiMerged : x)),
-          }));
-        })
-        .catch((e) => {
-          console.warn(
-            "[agencia-hub] Falha ao atualizar cotação na API; mudança salva localmente.",
-            e,
-          );
-        });
+    try {
+      const apiMerged = await updateQuotationRemote(mergedForRemote, patch, token);
+      if (!apiMerged) return;
+      setData((d) => ({
+        ...d,
+        cotacoes: d.cotacoes.map((x) => (x.id === id ? apiMerged : x)),
+      }));
+    } catch (error) {
+      setData((d) => ({
+        ...d,
+        cotacoes: d.cotacoes.map((x) =>
+          x.id === id && x.updatedAt === now ? current : x,
+        ),
+      }));
+      throw error;
     }
-  }, [token]);
+  }, [data.cotacoes, token]);
 
   const resetDemoData = useCallback(() => {
     const hasApi = getHasRemoteApi();

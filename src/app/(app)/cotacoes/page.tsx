@@ -10,7 +10,6 @@ import { Select } from "@/components/ui/select";
 import { KanbanBoard } from "@/components/cotacao/KanbanBoard";
 import { LinkSolicitacaoModal } from "@/components/cotacao/LinkSolicitacaoModal";
 import { SolicitacaoSubmissionsBanner } from "@/components/cotacao/SolicitacaoSubmissionsBanner";
-import { SolicitacoesRecebidasList } from "@/components/cotacao/SolicitacoesRecebidasList";
 import { useToast } from "@/components/ui/toast";
 import { softDeleteQuotation } from "@/lib/api/soft-delete-remote";
 import { isUuid } from "@/lib/api/quotation-mapper";
@@ -103,6 +102,7 @@ export default function CotacoesPage() {
   const [filtroApiBusca] = useState("");
 
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<string | null>(null);
   const toast = useToast();
 
   const handleDeleteRequest = useCallback((id: string) => {
@@ -193,7 +193,20 @@ export default function CotacoesPage() {
   }, [cotacoes]);
 
   function handleMove(id: string, status: CotacaoStatus) {
-    updateCotacao(id, { status });
+    void updateCotacao(id, { status }).catch((error) => {
+      toast.error(error instanceof Error ? error.message : "Não foi possível alterar o status da cotação.");
+    });
+  }
+
+  function handleRejectConfirm() {
+    if (!rejectTarget) return;
+    const id = rejectTarget;
+    setRejectTarget(null);
+    void updateCotacao(id, { status: "reprovado" }).then(() => {
+      toast.success("Cotação reprovada.");
+    }).catch((error) => {
+      toast.error(error instanceof Error ? error.message : "Não foi possível reprovar a cotação.");
+    });
   }
 
   function aplicarBuscaCliente() {
@@ -542,11 +555,9 @@ export default function CotacoesPage() {
           clientes={clientes}
           onMove={handleMove}
           onDelete={handleDeleteRequest}
+          onReject={setRejectTarget}
         />
       </div>
-
-      {/* ── Solicitações recebidas (lista compacta) ────────────────────── */}
-      <SolicitacoesRecebidasList />
 
       {/* ── Dialogs ─────────────────────────────────────────────────────── */}
       <ConfirmDialog
@@ -558,6 +569,17 @@ export default function CotacoesPage() {
         destructive
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
+      />
+
+      <ConfirmDialog
+        open={rejectTarget !== null}
+        title="Reprovar cotação"
+        message="Deseja marcar esta cotação como reprovada? Ela continuará disponível no histórico."
+        confirmLabel="Reprovar"
+        cancelLabel="Cancelar"
+        destructive
+        onConfirm={handleRejectConfirm}
+        onCancel={() => setRejectTarget(null)}
       />
 
       <LinkSolicitacaoModal
