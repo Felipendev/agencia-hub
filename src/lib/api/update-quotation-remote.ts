@@ -35,6 +35,7 @@ export async function updateQuotationRemote(
 
   // Monta apenas os campos que foram alterados
   const body: Record<string, unknown> = {};
+  if (patch.flightPlan !== undefined) body.flightPlan = patch.flightPlan;
 
   if (patch.titulo !== undefined) body.title = patch.titulo.trim();
   if (patch.destino !== undefined) body.destination = patch.destino.trim();

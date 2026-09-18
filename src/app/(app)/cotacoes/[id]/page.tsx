@@ -1,5 +1,6 @@
 "use client";
 
+import { FlightPlanDetails } from "@/components/cotacao/FlightPlanDetails";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -227,6 +228,8 @@ export default function CotacaoDetalhePage() {
           <span className="text-xs text-[var(--hub-text-muted)]">· Registro: {cotacao.criadoPorNome}</span>
         )}
       </div>
+
+      <FlightPlanDetails quotationId={id} plan={cotacao.flightPlan} />
 
       {/* Cards principais */}
       <div className="grid gap-6 lg:grid-cols-2">
@@ -570,6 +573,8 @@ export default function CotacaoDetalhePage() {
             <Label htmlFor="valor">Valor total (R$)</Label>
             <CurrencyInput
               id="valor"
+              disabled={!!cotacao.flightPlan}
+              title={cotacao.flightPlan ? "Altere taxas e lucro pela calculadora de milhas." : undefined}
               value={valorEdit}
               onValueChange={setValorEdit}
             />

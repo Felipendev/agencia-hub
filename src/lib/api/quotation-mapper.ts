@@ -1,4 +1,5 @@
 import { emptyCotacaoDetalhes } from "@/lib/cotacao-defaults";
+import { commercialFlights } from "@/lib/flight-plan";
 import type {
   ApiCreateQuotationRequest,
   ApiQuotationCreationSource,
@@ -100,6 +101,7 @@ export function cotacaoToCreateRequest(
   c: Omit<Cotacao, "id" | "createdAt" | "updatedAt">,
 ): ApiCreateQuotationRequest {
   const req: ApiCreateQuotationRequest = {
+    flightPlan: c.flightPlan,
     customerId: c.clienteId.trim(),
     title: c.titulo.trim(),
     destination: c.destino.trim(),
@@ -142,6 +144,8 @@ export function mergeQuotationApiResponse(
 
   return {
     ...draft,
+    flightPlan: api.flightPlan ?? draft.flightPlan,
+    opcoesVoo: api.flightPlan ? commercialFlights(api.flightPlan) : draft.opcoesVoo,
     id: api.id,
     clienteId: api.customerId,
     vendedorId: api.sellerId ?? undefined,
@@ -254,6 +258,8 @@ export function apiQuotationResponseToCotacao(api: ApiQuotationResponse): Cotaca
     : emptyCotacaoDetalhes();
 
   return {
+    flightPlan: api.flightPlan ?? undefined,
+    opcoesVoo: api.flightPlan ? commercialFlights(api.flightPlan) : undefined,
     id: api.id,
     clienteId: api.customerId,
     vendedorId: api.sellerId ?? undefined,

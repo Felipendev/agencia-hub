@@ -155,49 +155,29 @@ export function calcularLucro(precoBase: number, config: LucroConfig): number {
 
 export function calcularCia(input: CiaInput, qtdPessoas: number): ResultadoCia {
   const { trecho, lucroConfig, valorMala, qtdMalas } = input;
-
-  let precoSemTaxaIda = 0;
-  let precoSemTaxaVolta = 0;
-  let precoComTaxaIda = 0;
-  let precoComTaxaVolta = 0;
-
-  if (trecho.tipo === "preco_unico") {
-    const precoSemTaxa = calcularPrecoSemTaxa(trecho.milhasIda, trecho.custoPorMilheiro);
-    precoSemTaxaIda = precoSemTaxa;
-    precoComTaxaIda = precoSemTaxa + trecho.taxas;
-    precoSemTaxaVolta = 0;
-    precoComTaxaVolta = 0;
-  } else if (trecho.tipo === "so_ida") {
-    precoSemTaxaIda = calcularPrecoSemTaxa(trecho.milhasIda, trecho.custoPorMilheiro);
-    precoComTaxaIda = precoSemTaxaIda + trecho.taxas;
-    precoSemTaxaVolta = 0;
-    precoComTaxaVolta = 0;
-  } else {
-    precoSemTaxaIda = calcularPrecoSemTaxa(trecho.milhasIda, trecho.custoPorMilheiro);
-    precoSemTaxaVolta = calcularPrecoSemTaxa(trecho.milhasVolta, trecho.custoPorMilheiro);
-    precoComTaxaIda = precoSemTaxaIda + trecho.taxas;
-    precoComTaxaVolta = precoSemTaxaVolta;
-  }
-
-  // Preco base = milhas + taxas (sem lucro)
-  const precoBasePorPessoa = precoComTaxaIda + precoComTaxaVolta;
-
-  // Lucro calculado sobre o preco base
-  const lucroPorPessoa = calcularLucro(precoBasePorPessoa, lucroConfig);
-
-  // Preco por pessoa sem mala = base + lucro
-  const precoPorPessoaSemMala = precoBasePorPessoa + lucroPorPessoa;
-
-  // Total de malas (separado — cliente ve esse valor separado)
-  const totalMalas = valorMala * qtdMalas;
-
-  // Preco por pessoa com mala
-  const precoPorPessoaComMala =
-    precoPorPessoaSemMala + (qtdPessoas > 0 ? totalMalas / qtdPessoas : 0);
-
-  const precoTotalSemMala = precoPorPessoaSemMala * qtdPessoas;
-  const precoTotalComMala = precoTotalSemMala + totalMalas;
-  const lucroTotal = lucroPorPessoa * qtdPessoas;
+  // Centavos inteiros, com arredondamento HALF_UP como no backend BigDecimal.
+  // Divide antes de multiplicar para manter produtos dentro dos inteiros seguros.
+  const integer = (n: number) => Number.isSafeInteger(Math.round(n)) && n >= 0 ? Math.round(n) : 0;
+  const cents = (n: number) => integer(n * 100);
+  const multiplyDivide = (a: number, b: number, divisor: number) =>
+    Math.floor(a / divisor) * b + Math.round((a % divisor) * b / divisor);
+  const passengers = integer(qtdPessoas);
+  const milhas = integer(trecho.milhasIda) + (trecho.tipo === "ida_volta" ? integer(trecho.milhasVolta) : 0);
+  const costCents = multiplyDivide(milhas, cents(trecho.custoPorMilheiro), 1000);
+  const baseCents = costCents + cents(trecho.taxas);
+  const profitCents = (lucroConfig.usarPct ? multiplyDivide(baseCents, cents(lucroConfig.pct), 10000) : 0)
+    + (lucroConfig.usarFixo ? cents(lucroConfig.fixo) : 0);
+  const bagCents = cents(valorMala) * integer(qtdMalas);
+  const ticketCents = (baseCents + profitCents) * passengers;
+  const precoSemTaxa = costCents / 100;
+  const precoBasePorPessoa = baseCents / 100;
+  const lucroPorPessoa = profitCents / 100;
+  const precoPorPessoaSemMala = (baseCents + profitCents) / 100;
+  const totalMalas = bagCents / 100;
+  const precoPorPessoaComMala = passengers > 0 ? Math.round((ticketCents + bagCents) / passengers) / 100 : precoPorPessoaSemMala;
+  const precoTotalSemMala = ticketCents / 100;
+  const precoTotalComMala = (ticketCents + bagCents) / 100;
+  const lucroTotal = profitCents * passengers / 100;
 
   const label =
     input.cia === "OUTRA"
@@ -216,7 +196,7 @@ export function calcularCia(input: CiaInput, qtdPessoas: number): ResultadoCia {
     lucroTotal,
     totalMalas,
     detalhes: {
-      precoSemTaxaPorPessoa: precoSemTaxaIda + precoSemTaxaVolta,
+      precoSemTaxaPorPessoa: precoSemTaxa,
       taxasPorPessoa: trecho.taxas,
       precoComTaxaPorPessoa: precoBasePorPessoa,
     },

@@ -1,475 +1,136 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { CurrencyInput } from "@/components/ui/currency-input";
-import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import { TimePicker } from "@/components/ui/time-picker";
 import { ClientePicker } from "@/components/cliente/ClientePicker";
 import { useData } from "@/contexts/data-context";
-import { centsToDisplay, parseCurrencyInput } from "@/lib/currency-input";
-import {
-  calcular,
-  LUCRO_CONFIG_PADRAO,
-  type CiaInput,
-  type LucroConfig,
-  type ResultadoCalculadora,
-} from "@/lib/calculadora-milhas";
-import {
-  carregarTabelas,
-  getValorMilheiro,
-  type TabelasMilhas,
-} from "@/lib/tabelas-milhas";
-import { ResultadoCiaCard } from "./_resultado-cia";
+import { carregarTabelas, getValorMilheiro } from "@/lib/tabelas-milhas";
 import { PageHeader } from "@/components/layout/page-header";
+import { ImportarVoos } from "@/components/cotacao/ImportarVoos";
+import { FlightOptionForm } from "@/components/cotacao/FlightOptionForm";
+import { emptyCotacaoDetalhes } from "@/lib/cotacao-defaults";
+import { buildFlightPlan, commercialFlights, importedDraft, newFlightDraft, type FlightDraft, type FlightImportResult } from "@/lib/flight-plan";
+import type { Cotacao } from "@/types";
 
-type TipoTrecho = "ida_volta" | "so_ida" | "preco_unico";
-
-type OpcaoVoo = {
-  id: string;
-  nome: string;
-  ciaId: string;
-  horarioSaida: string;
-  horarioChegada: string;
-  conexoes: string;
-  milhasIda: number;
-  milhasVolta: number;
-  tipoTrecho: TipoTrecho;
-  taxas: number;
-  valorMala: number;
-  qtdMalas: number;
-  lucroConfig: LucroConfig;
-  selecionada: boolean;
-};
-
-function novaOpcao(ciaId: string, nome: string, idx: number): OpcaoVoo {
-  return {
-    id: `op-${Date.now()}-${idx}`,
-    nome: nome || `Opcao ${idx + 1}`,
-    ciaId,
-    horarioSaida: "",
-    horarioChegada: "",
-    conexoes: "",
-    milhasIda: 0,
-    milhasVolta: 0,
-    tipoTrecho: "ida_volta",
-    taxas: 0,
-    valorMala: 0,
-    qtdMalas: 0,
-    lucroConfig: { ...LUCRO_CONFIG_PADRAO },
-    selecionada: true,
-  };
-}
-
-function opcaoToCiaInput(op: OpcaoVoo, tabelas: TabelasMilhas): CiaInput {
-  const cia = tabelas.cias.find((c) => c.id === op.ciaId);
-  const milhasTotal = op.tipoTrecho === "ida_volta" ? op.milhasIda + op.milhasVolta : op.milhasIda;
-  const custoPorMilheiro = cia ? getValorMilheiro(cia, milhasTotal) : 0;
-  return {
-    cia: "OUTRA",
-    nomeCustom: op.nome,
-    trecho: {
-      tipo: op.tipoTrecho,
-      milhasIda: op.milhasIda,
-      milhasVolta: op.milhasVolta,
-      custoPorMilheiro,
-      taxas: op.taxas,
-    },
-    lucroConfig: op.lucroConfig,
-    valorMala: op.valorMala,
-    qtdMalas: op.qtdMalas,
-  };
-}
-
-function OpcaoVooForm({
-  opcao, tabelas, onChange, onRemove, canRemove,
-}: {
-  opcao: OpcaoVoo;
-  tabelas: TabelasMilhas;
-  onChange: (v: OpcaoVoo) => void;
-  onRemove: () => void;
-  canRemove: boolean;
-}) {
-  const [taxasStr, setTaxasStr] = useState(() =>
-    opcao.taxas > 0 ? centsToDisplay(opcao.taxas) : ""
-  );
-  const [malaStr, setMalaStr] = useState(() =>
-    opcao.valorMala > 0 ? centsToDisplay(opcao.valorMala) : ""
-  );
-  const [pctStr, setPctStr] = useState(() =>
-    opcao.lucroConfig.pct > 0 ? String(opcao.lucroConfig.pct).replace(".", ",") : ""
-  );
-  const [fixoStr, setFixoStr] = useState(() =>
-    opcao.lucroConfig.fixo > 0 ? centsToDisplay(opcao.lucroConfig.fixo) : ""
-  );
-
-  function set(patch: Partial<OpcaoVoo>) { onChange({ ...opcao, ...patch }); }
-
-  function handleDecimal(
-    str: string,
-    setStr: (s: string) => void,
-    updater: (v: number) => void,
-  ) {
-    setStr(str);
-    updater(parseFloat(str.replace(",", ".")) || 0);
-  }
-
-  const cia = tabelas.cias.find((c) => c.id === opcao.ciaId);
-  const milhasTotal = opcao.tipoTrecho === "ida_volta" ? opcao.milhasIda + opcao.milhasVolta : opcao.milhasIda;
-  const milheiroSugerido = cia ? getValorMilheiro(cia, milhasTotal) : 0;
-
-  return (
-    <div
-      className={`rounded-[var(--hub-radius-lg)] border-2 bg-white p-4 transition-all ${opcao.selecionada ? "border-[var(--hub-blue)]" : "border-[var(--hub-border)] opacity-60"}`}
-      style={cia?.cor ? { borderLeftColor: cia.cor, borderLeftWidth: "4px" } : {}}
-    >
-      <div className="flex items-center gap-3">
-        <input type="checkbox" checked={opcao.selecionada}
-          onChange={(e) => set({ selecionada: e.target.checked })}
-          className="h-4 w-4 rounded border-[var(--hub-border)] accent-[var(--hub-blue)]"
-          title="Incluir na cotacao" />
-        {/* Nome colorido da CIA como prefixo */}
-        {cia?.cor && (
-          <span
-            className="shrink-0 text-xs font-bold uppercase tracking-wide"
-            style={{ color: cia.cor }}
-          >
-            {cia.nome}
-          </span>
-        )}
-        <Input value={opcao.nome} onChange={(e) => set({ nome: e.target.value })}
-          placeholder="Ex: Direto manha" className="h-8 flex-1 text-sm font-semibold" />
-        {canRemove && (
-          <button type="button" onClick={onRemove} className="text-xs text-red-400 hover:text-red-600">
-            Remover
-          </button>
-        )}
-      </div>
-
-      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <div>
-          <Label>Companhia</Label>
-          <Select value={opcao.ciaId} onChange={(e) => set({ ciaId: e.target.value })}>
-            {tabelas.cias.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
-          </Select>
-        </div>
-        <div>
-          <Label>Trecho</Label>
-          <Select value={opcao.tipoTrecho} onChange={(e) => set({ tipoTrecho: e.target.value as TipoTrecho })}>
-            <option value="ida_volta">Ida e volta</option>
-            <option value="preco_unico">I+V preco unico</option>
-            <option value="so_ida">So ida</option>
-          </Select>
-        </div>
-        <div>
-          <Label>Saida / Chegada</Label>
-          <div className="flex gap-1">
-            <TimePicker value={opcao.horarioSaida} onChange={(v) => set({ horarioSaida: v })} placeholder="06:00" />
-            <TimePicker value={opcao.horarioChegada} onChange={(v) => set({ horarioChegada: v })} placeholder="14:30" />
-          </div>
-        </div>
-        <div>
-          <Label>Conexoes</Label>
-          <Input placeholder="Direto / 1 escala GRU" value={opcao.conexoes} onChange={(e) => set({ conexoes: e.target.value })} className="text-sm" />
-        </div>
-        <div>
-          <Label>{opcao.tipoTrecho === "preco_unico" ? "Milhas (I+V)" : "Milhas ida"}</Label>
-          <Input inputMode="numeric" placeholder="Ex: 12000" value={opcao.milhasIda || ""}
-            onChange={(e) => set({ milhasIda: parseInt(e.target.value.replace(/\D/g, "")) || 0 })} />
-        </div>
-        {opcao.tipoTrecho === "ida_volta" && (
-          <div>
-            <Label>Milhas volta</Label>
-            <Input inputMode="numeric" placeholder="Ex: 12000" value={opcao.milhasVolta || ""}
-              onChange={(e) => set({ milhasVolta: parseInt(e.target.value.replace(/\D/g, "")) || 0 })} />
-          </div>
-        )}
-        <div>
-          <Label>Taxas (R$)</Label>
-          <CurrencyInput value={taxasStr}
-            onValueChange={(formatted) => { setTaxasStr(formatted); set({ taxas: parseCurrencyInput(formatted) }); }} />
-        </div>
-        <div>
-          <Label>Mala (R$)</Label>
-          <CurrencyInput value={malaStr}
-            onValueChange={(formatted) => { setMalaStr(formatted); set({ valorMala: parseCurrencyInput(formatted) }); }} />
-        </div>
-        <div>
-          <Label>Qtd. malas</Label>
-          <Input inputMode="numeric" placeholder="0" value={opcao.qtdMalas || ""}
-            onChange={(e) => set({ qtdMalas: parseInt(e.target.value.replace(/\D/g, "")) || 0 })} />
-        </div>
-      </div>
-
-      <div className="mt-3 border-t border-[var(--hub-border)] pt-3">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--hub-text-muted)]">Lucro</p>
-        <div className="flex flex-wrap items-center gap-3">
-          <label className="flex items-center gap-1.5 text-xs">
-            <input type="checkbox" checked={opcao.lucroConfig.usarPct}
-              onChange={(e) => set({ lucroConfig: { ...opcao.lucroConfig, usarPct: e.target.checked } })}
-              className="accent-[var(--hub-blue)]" />
-            <span className="text-[var(--hub-text-secondary)]">%</span>
-            <Input inputMode="decimal" value={pctStr}
-              onChange={(e) => handleDecimal(e.target.value, setPctStr, (v) => set({ lucroConfig: { ...opcao.lucroConfig, pct: v } }))}
-              disabled={!opcao.lucroConfig.usarPct} className="h-7 w-16 text-xs" />
-          </label>
-          <label className="flex items-center gap-1.5 text-xs">
-            <input type="checkbox" checked={opcao.lucroConfig.usarFixo}
-              onChange={(e) => set({ lucroConfig: { ...opcao.lucroConfig, usarFixo: e.target.checked } })}
-              className="accent-[var(--hub-blue)]" />
-            <span className="text-[var(--hub-text-secondary)]">R$ fixo</span>
-            <CurrencyInput value={fixoStr}
-              onValueChange={(formatted) => { setFixoStr(formatted); set({ lucroConfig: { ...opcao.lucroConfig, fixo: parseCurrencyInput(formatted) } }); }}
-              disabled={!opcao.lucroConfig.usarFixo} className="h-7 w-20 text-xs" />
-          </label>
-          {milheiroSugerido > 0 && (
-            <span className="text-[10px] text-[var(--hub-text-muted)]">Milheiro: R${milheiroSugerido}/1000</span>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function CalculadoraMilhasPage() {
+function Calculator({ initial }: { initial?: Cotacao }) {
   const router = useRouter();
-  const { clientes, addCotacao } = useData();
-  const [tabelas] = useState<TabelasMilhas | null>(() => carregarTabelas());
-  const [clienteId, setClienteId] = useState("");
-  const [qtdPessoas, setQtdPessoas] = useState(1);
-  const [origem, setOrigem] = useState("");
-  const [destino, setDestino] = useState("");
-  const [dataIda, setDataIda] = useState("");
-  const [dataVolta, setDataVolta] = useState("");
-  const [opcoes, setOpcoes] = useState<OpcaoVoo[]>(() => {
-    const t = carregarTabelas();
-    if (t.cias.length > 0) {
-      return [
-        novaOpcao(t.cias[0].id, `${t.cias[0].nome} — Opcao 1`, 0),
-        novaOpcao(t.cias[1]?.id ?? t.cias[0].id, `${t.cias[1]?.nome ?? t.cias[0].nome} — Opcao 2`, 1),
-      ];
-    }
-    return [];
-  });
-  const [resultado, setResultado] = useState<ResultadoCalculadora | null>(null);
+  const { clientes, cotacoes, addCotacao, saveCotacaoFlightPlan } = useData();
+  const [tables] = useState(carregarTabelas);
+  const [targetId, setTargetId] = useState(initial?.id ?? "");
+  const [loadedTargetId, setLoadedTargetId] = useState(initial?.id ?? "");
+  const [clienteId, setClienteId] = useState(initial?.clienteId ?? "");
+  const [title, setTitle] = useState(initial?.titulo ?? "");
+  const [options, setOptions] = useState<FlightDraft[]>(() => initial?.flightPlan
+    ? initial.flightPlan.options.map((o) => ({ ...o, incluir: true, avisos: [] })) : [newFlightDraft()]);
+  const [principal, setPrincipal] = useState(initial?.flightPlan?.selectedOptionId ?? "");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const saving = useRef(false);
+  const target = cotacoes.find((c) => c.id === targetId);
 
-  function updateOpcao(idx: number, v: OpcaoVoo) {
-    setOpcoes((prev) => prev.map((o, i) => (i === idx ? v : o)));
-  }
-  function addOpcao() {
-    if (!tabelas) return;
-    const cia = tabelas.cias[0];
-    setOpcoes((prev) => [...prev, novaOpcao(cia.id, `${cia.nome} — Opcao ${prev.length + 1}`, prev.length)]);
-  }
-  function removeOpcao(idx: number) {
-    setOpcoes((prev) => prev.filter((_, i) => i !== idx));
-  }
-  function calcularAgora() {
-    if (!tabelas) return;
-    const sel = opcoes.filter((o) => o.selecionada);
-    if (sel.length === 0) return;
-    const r = calcular({ qtdPessoas, cias: sel.map((o) => opcaoToCiaInput(o, tabelas)) });
-    setResultado(r);
-  }
-
-  async function salvarNaCotacao() {
-    if (!resultado || resultado.resultados.length === 0) return;
-    if (!clienteId) { alert("Selecione um cliente antes de salvar."); return; }
-
-    const opcoesVoo = resultado.resultados.map((r, i) => {
-      const op = opcoes.filter((o) => o.selecionada)[i];
-      const cia = tabelas?.cias.find((c) => c.id === op?.ciaId);
-      return {
-        nome: r.label,
-        cia: cia?.nome ?? "",
-        corCia: cia?.cor,
-        horarioSaida: op?.horarioSaida ?? "",
-        horarioChegada: op?.horarioChegada ?? "",
-        conexoes: op?.conexoes ?? "",
-        precoPassagens: r.precoTotalSemMala,
-        precoBagagens: r.totalMalas,
-        precoTotal: r.precoTotalComMala,
-        qtdPessoas,
-      };
+  function imported(result: FlightImportResult) {
+    const additions = result.extraction.offers.map((offer) => {
+      const draft = importedDraft(offer, result.id);
+      const cia = tables.cias.find((c) => c.nome.toUpperCase().includes((offer.airline ?? "__").toUpperCase()));
+      if (cia) { draft.cia = cia.nome; draft.corCia = cia.cor; draft.calculo.custoPorMilheiro = getValorMilheiro(cia, draft.calculo.milhasIda); }
+      draft.avisos = [...result.extraction.warnings, ...draft.avisos];
+      return draft;
     });
-
-    const rota = origem && destino ? `${origem} - ${destino}` : destino || origem || "Milhas";
-    const valorTotal = Math.max(...opcoesVoo.map((o) => o.precoTotal));
-    const validade = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-
-    const nova = await addCotacao({
-      clienteId,
-      titulo: `Cotacao ${rota}`,
-      destino: rota,
-      valorTotal,
-      moeda: "BRL",
-      status: "em_cotacao",
-      validade,
-      dataInicioViagem: dataIda || undefined,
-      dataFimViagem: dataVolta || undefined,
-      observacoes: "",
-      detalhes: {
-        servicosDesejados: ["passagem"],
-        origem,
-        destinoForm: destino,
-        destinosTrechos: [destino],
-        dataIda,
-        dataVolta,
-        flexibilidadeIda: "",
-        flexibilidadeVolta: "",
-        flexibilidadeIdaOutro: "",
-        flexibilidadeVoltaOutro: "",
-        horarioSaidaIda: "",
-        horarioSaidaVolta: "",
-        preferenciaVooIda: "",
-        preferenciaVooVolta: "",
-        adultos: qtdPessoas,
-        criancas: 0,
-        idadesCriancas: "",
-        bebes: 0,
-        malasDespachadas: opcoesVoo.some((o) => o.precoBagagens > 0),
-        qtdMalas: "",
-        bagagemEspecial: false,
-        categoriaHospedagem: "",
-        comodidadesHospedagem: [],
-        qtdQuartos: 0,
-        celular: "",
-        whatsapp: "",
-        whatsappIgualCelular: false,
-        preferenciaComunicacao: "",
-        usaMilhas: true,
-        formaPagamento: "",
-        formaPagamentoOutro: "",
-        cupomCodigo: "",
-      },
-      tags: ["milhas"],
-      prioridade: false,
-      responsavel: "",
-      opcoesVoo,
-    });
-
-    router.push(`/cotacoes/${nova.id}`);
+    // A repeated upload never overwrites manually reviewed values.
+    if (options.some((o) => o.calculo.importacaoId === result.id)) { setError("Este arquivo já foi adicionado. Mantivemos suas correções nas opções existentes."); return; }
+    if (options.length + additions.length > 20) { setError("Limite de 20 opções. Remova opções antes de importar outras."); return; }
+    setOptions((current) => [...current.filter((o) => !(o.nome === "Opção de voo" && !o.cia && !o.calculo.importacaoId
+      && o.calculo.milhasIda === 0 && o.calculo.taxas === 0 && o.calculo.taxasAdicionais === 0
+      && o.calculo.custoPorMilheiro === 0 && o.calculo.valorMala === 0 && o.calculo.qtdMalas === 0
+      && !o.calculo.revisado && o.qtdPessoas === 1 && o.segmentos.length === 1
+      && Object.values(o.segmentos[0]).every((v) => v == null))), ...additions]); setError("");
   }
-
-  const temMala = opcoes.some((o) => o.qtdMalas > 0 && o.valorMala > 0);
-  const selecionadas = opcoes.filter((o) => o.selecionada);
-
-  if (!tabelas) return <p className="text-sm text-[var(--hub-text-muted)]">Carregando...</p>;
-
-  return (
-    <div className="space-y-5">
-      <PageHeader
-        title="Calculadora de Milhas"
-        description="Compare opções de voo e gere o comparativo para o cliente."
-      >
-        <Link
-          href="/calculadora/milheiro"
-          className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] px-3 py-2 text-xs font-medium text-[var(--hub-text-secondary)] hover:border-[var(--hub-blue)] hover:text-[var(--hub-blue)]"
-        >
-          Precificar milheiro
-        </Link>
-      </PageHeader>
-
-      {/* Barra de filtros */}
+  function loadSaved() {
+    if (!target?.flightPlan) return;
+    setOptions(target.flightPlan.options.map((o) => ({ ...o, incluir: true, avisos: [] })));
+    setLoadedTargetId(target.id);
+    setPrincipal(target.flightPlan.selectedOptionId); setClienteId(target.clienteId); setTitle(target.titulo); setError("");
+  }
+  async function save() {
+    if (saving.current) return;
+    setError("");
+    try {
+      const existing = target?.flightPlan && loadedTargetId !== target.id
+        ? target.flightPlan.options.map((o) => ({ ...o, incluir: true, avisos: [] })) : [];
+      const plan = buildFlightPlan([...existing, ...options], principal);
+      if (!targetId && !clienteId) throw new Error("Selecione um cliente.");
+      if (targetId && !target) throw new Error("Cotação não encontrada.");
+      saving.current = true; setBusy(true);
+      if (targetId) {
+        await saveCotacaoFlightPlan(targetId, plan);
+        router.push(`/cotacoes/${targetId}`);
+        return;
+      }
+      const selected = plan.options.find((o) => o.id === principal)!;
+      const first = selected.segmentos[0], last = selected.segmentos[selected.segmentos.length - 1];
+      const route = selected.segmentos.map((s) => `${s.origin || "A confirmar"} → ${s.destination || "A confirmar"}`).join(" / ");
+      const nova = await addCotacao({
+        clienteId, titulo: title.trim() || `Cotação ${route}`, destino: route, valorTotal: selected.precoTotal,
+        moeda: "BRL", status: "em_cotacao", validade: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10),
+        dataInicioViagem: first.departureDate || undefined, dataFimViagem: last.arrivalDate || undefined, observacoes: "",
+        detalhes: { ...emptyCotacaoDetalhes(), servicosDesejados: ["passagem"], origem: first.origin || "", destinoForm: first.destination || "",
+          destinosTrechos: selected.segmentos.map((s) => `${s.origin || "A confirmar"} → ${s.destination || "A confirmar"}`), dataIda: first.departureDate || "",
+          dataVolta: selected.calculo.tipo === "ida_volta" ? last.departureDate || "" : "", adultos: selected.qtdPessoas,
+          usaMilhas: true, malasDespachadas: selected.calculo.qtdMalas > 0, qtdMalas: String(selected.calculo.qtdMalas) },
+        tags: ["milhas"], prioridade: false, responsavel: "", flightPlan: plan, opcoesVoo: commercialFlights(plan),
+      });
+      router.push(`/cotacoes/${nova.id}`);
+    } catch (e) { setError(e instanceof Error ? e.message : "Não foi possível salvar a cotação."); }
+    finally { saving.current = false; setBusy(false); }
+  }
+  return <div className="space-y-5">
+    <PageHeader title="Calculadora de Milhas" description="Importe ou preencha os voos, confira os custos e prepare a cotação.">
+      <Link href="/calculadora/milheiro" className="text-sm text-[var(--hub-blue)] hover:underline">Precificar milheiro</Link>
+    </PageHeader>
+    <fieldset disabled={busy} className="space-y-5">
       <Card>
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="w-full sm:w-auto sm:flex-1">
-            <ClientePicker id="calc-cliente" label="Cliente" clientes={clientes} value={clienteId} onChange={setClienteId} />
-          </div>
-          <div className="w-20">
-            <Label htmlFor="calc-pax">Pax</Label>
-            <Input id="calc-pax" type="number" min={1} max={20} value={qtdPessoas}
-              onChange={(e) => setQtdPessoas(Math.max(1, parseInt(e.target.value) || 1))} />
-          </div>
-          <div className="w-24">
-            <Label htmlFor="calc-orig">Origem</Label>
-            <Input id="calc-orig" placeholder="SSA" value={origem} onChange={(e) => setOrigem(e.target.value.toUpperCase())} />
-          </div>
-          <div className="w-24">
-            <Label htmlFor="calc-dest">Destino</Label>
-            <Input id="calc-dest" placeholder="GRU" value={destino} onChange={(e) => setDestino(e.target.value.toUpperCase())} />
-          </div>
-          <div>
-            <Label htmlFor="calc-ida">Ida</Label>
-            <Input id="calc-ida" type="date" value={dataIda} onChange={(e) => setDataIda(e.target.value)} className="w-36" />
-          </div>
-          <div>
-            <Label htmlFor="calc-volta">Volta</Label>
-            <Input id="calc-volta" type="date" value={dataVolta} onChange={(e) => setDataVolta(e.target.value)} className="w-36" />
-          </div>
-          <Button type="button" onClick={calcularAgora} disabled={selecionadas.length === 0}>
-            Calcular
-          </Button>
-          {resultado && resultado.resultados.length > 0 && clienteId && (
-            <Button type="button" variant="secondary" onClick={() => void salvarNaCotacao()}>
-              Salvar na cotacao
-            </Button>
-          )}
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="text-sm">Salvar em<Select value={targetId} onChange={(e) => { setTargetId(e.target.value); setError(""); }}>
+            <option value="">Nova cotação</option>{cotacoes.map((c) => <option key={c.id} value={c.id}>{c.titulo} — {clientes.find((p) => p.id === c.clienteId)?.nome ?? "Cliente"}</option>)}
+          </Select></label>
+          {!targetId && <ClientePicker id="calc-cliente" label="Cliente" clientes={clientes} value={clienteId} onChange={setClienteId} />}
+          {!targetId && <label className="text-sm">Título (opcional)<Input value={title} maxLength={150} onChange={(e) => setTitle(e.target.value)} placeholder="Cotação de passagens" /></label>}
+          {target?.flightPlan && <div><Button type="button" variant="secondary" onClick={loadSaved}>Carregar opções salvas</Button><p className="mt-1 text-xs">Substitui o rascunho da calculadora pelas opções desta cotação.</p></div>}
         </div>
       </Card>
-
-      <div className="grid gap-5 xl:grid-cols-[1fr_400px]">
-        {/* Opcoes */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-[var(--hub-text-primary)]">
-              Opcoes de voo
-              <span className="ml-2 text-xs font-normal text-[var(--hub-text-muted)]">(marque as que deseja incluir na cotacao)</span>
-            </p>
-            <button type="button" onClick={addOpcao}
-              className="text-xs font-medium text-[var(--hub-blue)] hover:underline">
-              + Adicionar opcao
-            </button>
-          </div>
-          {opcoes.map((op, i) => (
-            <OpcaoVooForm key={op.id} opcao={op} tabelas={tabelas}
-              onChange={(v) => updateOpcao(i, v)} onRemove={() => removeOpcao(i)} canRemove={opcoes.length > 1} />
-          ))}
-        </div>
-
-        {/* Resultados */}
-        <div className="space-y-3">
-          {resultado && resultado.resultados.length > 0 ? (
-            <>
-              <Card>
-                <div className="space-y-1 text-sm">
-                  <p className="font-semibold text-[var(--hub-blue-dark)]">
-                    {origem && destino ? `${origem} -> ${destino}` : "Comparativo"}
-                  </p>
-                  {clienteId && <p className="text-[var(--hub-text-muted)]">{clientes.find((c) => c.id === clienteId)?.nome}</p>}
-                  <p className="text-[var(--hub-text-muted)]">
-                    {qtdPessoas} passageiro{qtdPessoas > 1 ? "s" : ""}
-                    {dataIda && ` · ${new Date(dataIda + "T12:00:00").toLocaleDateString("pt-BR")}`}
-                    {dataVolta && ` -> ${new Date(dataVolta + "T12:00:00").toLocaleDateString("pt-BR")}`}
-                  </p>
-                </div>
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                </div>
-              </Card>
-              {resultado.resultados.map((r, i) => (
-                <ResultadoCiaCard key={i} resultado={r} qtdPessoas={qtdPessoas} temMala={temMala}
-                  isMaisBarata={r.cia === resultado.maisBarataSemMala}
-                  isMaiorLucro={r.cia === resultado.maiorLucro}
-                  corCia={tabelas.cias.find((c) => opcoes.find((o) => o.selecionada && o.nome === r.label)?.ciaId === c.id)?.cor}
-                />
-              ))}
-            </>
-          ) : (
-            <Card>
-              <div className="flex flex-col items-center justify-center py-10 text-center">
-                <p className="text-3xl">✈️</p>
-                <p className="mt-3 text-sm font-medium text-[var(--hub-text-secondary)]">Preencha as opcoes e clique em Calcular</p>
-                <p className="mt-1 text-xs text-[var(--hub-text-muted)]">Apenas as opcoes marcadas serao calculadas</p>
-              </div>
-            </Card>
-          )}
-        </div>
+      <ImportarVoos onImport={imported} />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-semibold">Opções de voo</h2>
+        <Button type="button" variant="secondary" disabled={options.length >= 20} onClick={() => setOptions((current) => [...current, newFlightDraft()])}>Adicionar opção manual</Button>
       </div>
-    </div>
-  );
+      {options.map((option) => <FlightOptionForm key={option.id} option={option} tables={tables} principal={principal === option.id}
+        onPrincipal={() => setPrincipal(option.id)}
+        onChange={(changed) => setOptions((current) => current.map((o) => o.id === changed.id ? changed : o))}
+        onRemove={() => { setOptions((current) => current.filter((o) => o.id !== option.id)); if (principal === option.id) setPrincipal(""); }} />)}
+      <Card>
+        <p className="text-sm">Os preços são recalculados a cada alteração. A opção marcada define o total; as alternativas não são somadas.</p>
+        {targetId && <p className="mt-2 text-sm font-medium">Ao salvar, o total atual da cotação será substituído pelo preço desta opção. Valores de outros serviços não serão somados. Confira também as datas e o destino no cadastro da cotação.</p>}
+        <p className="mt-1 text-sm text-[var(--hub-text-secondary)]">O PDF mostra os voos e preços finais. A memória de cálculo fica no detalhe interno.</p>
+        {error && <p className="mt-3 text-sm text-red-600" role="alert">{error}</p>}
+        <Button type="button" className="mt-4" onClick={() => void save()} disabled={busy || !options.some((o) => o.incluir)}>{busy ? "Salvando…" : targetId ? "Atualizar voos da cotação" : "Criar cotação com voos"}</Button>
+      </Card>
+    </fieldset>
+  </div>;
+}
+function CalculatorLoader() {
+  const params = useSearchParams();
+  const { cotacoes, isReady } = useData();
+  const id = params.get("cotacao");
+  if (!isReady) return <p>Carregando calculadora…</p>;
+  const current = id ? cotacoes.find((c) => c.id === id) : undefined;
+  if (id && !current) return <p>Cotação não encontrada. <Link href="/calculadora">Abrir calculadora</Link></p>;
+  return <Calculator key={id ?? "nova"} initial={current} />;
+}
+export default function CalculadoraMilhasPage() {
+  return <Suspense fallback={<p>Carregando calculadora…</p>}><CalculatorLoader /></Suspense>;
 }

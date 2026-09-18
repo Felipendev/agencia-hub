@@ -2,14 +2,16 @@
 
 > Itens levantados na auditoria de persistência e fluxos críticos em 2026-09-03.
 
-**Last Updated**: 2026-09-10  
-**Total Items**: 37 (1 TODO pending — needs live repro, 1 DEBT, 35 resolved)
+**Last Updated**: 2026-09-17  
+**Total Items**: 38 (1 TODO pending — needs live repro, 1 TODO in-progress, 1 DEBT, 35 resolved)
 
 ---
 
 ## 🤝 Handoff para Claude / próximo agente
 
-**Regra do usuário:** não execute `npm test`, `npm run lint`, `npx tsc`, `mvn test`, build ou qualquer validação automatizada. O usuário fará toda a validação manual/automatizada ao final. Não alegar que testes passaram.
+**Atualização em 2026-09-17:** o usuário autorizou expressamente validações, testes e publicação em produção para a calculadora. Essa autorização substitui a restrição abaixo nesta entrega.
+
+**Regra anterior do usuário:** não execute `npm test`, `npm run lint`, `npx tsc`, `mvn test`, build ou qualquer validação automatizada. O usuário fará toda a validação manual/automatizada ao final. Não alegar que testes passaram.
 
 **Workspace:** frontend em `C:\workspace-pessoal\agencia-hub`; API Spring em `C:\workspace-pessoal\agencia-hub-api`. O worktree já tinha mudanças do usuário antes deste trabalho — preservar alterações não relacionadas e não usar reset/checkout destrutivo.
 
@@ -477,6 +479,76 @@ Esta é a visão curta para acompanhamento. O detalhamento e os critérios de ac
 - **Resolution**: `CotacaoDetalhesForm.tsx` ganhou prop `variante?: "completo" | "simples"` (default `"completo"`, zero impacto nas telas internas que não passam a prop). No modo `"simples"`: mostra tudo sobre a viagem em si (serviços desejados, origem, destino único, datas, flexibilidade/horário/preferência de voo ida e volta, passageiros, bagagem, milhas) e esconde só o que é de outra categoria — Hospedagem (seção inteira), Preferência de comunicação, Forma de pagamento e Cupom de desconto. `SolicitacaoPublicView.tsx` lê `?tipo=simples` do próprio `useSearchParams()` já usado ali, passa a variante pro form e troca o rótulo/placeholder de "Observações" pra "Outros serviços ou observações" nesse modo. Aba Agência → Formulário ganhou uma segunda linha "Link simplificado" com o mesmo link + `?tipo=simples` (ou `&tipo=simples` se já tiver `?seller=`) e botão de copiar. Testado ao vivo nos dois modos. `tsc`/`lint` limpos.
 - **Affected Files**: `src/components/cotacao/CotacaoDetalhesForm.tsx`, `src/components/cotacao/SolicitacaoPublicView.tsx`, `src/app/(app)/agencia/_aba-formulario.tsx`, `src/components/cotacao/LinkSolicitacaoModal.tsx` (o modal "Link para solicitação de cotação" aberto em `/cotacoes` — botão "Links" — é o que o usuário realmente usa; tinha ficado de fora da primeira leva e foi corrigido em 2026-09-11).
 - **Complexity**: Large
+
+---
+
+## 🆕 Feature solicitada em 2026-09-13
+
+### TODO-037: Importar voos de PDF, imagem ou link de companhia para calcular milhas e compor cotação
+- **Priority**: High (sugerida pelo impacto no fluxo de cotação)
+- **Status**: in-progress — implementação iniciada em 2026-09-13; código de frontend/backend e testes preparados, aguardando configuração do provedor e validação pelo usuário
+- **Created**: 2026-09-13
+- **Origin**: Pedido do usuário nesta conversa, após procurar uma task de leitura de PDF. O usuário confirmou que deseja registrar e detalhar a feature no backlog.
+- **Complexity**: Large
+- **Context**: Reduzir a digitação das ofertas de voos, calcular o preço de venda a partir de milhas, taxas e lucro e anexar as opções à cotação. O detalhe interno deve preservar a memória de cálculo; o cliente recebe somente os dados do voo e os preços de venda, sem quantidade/custo de milhas, custo do milheiro, lucro ou composição interna de taxas.
+
+#### Estrutura aprovada pelo usuário em 2026-09-13
+
+**Implementação iniciada a pedido do usuário:** importação autenticada em Spring com PDFBox/Gemini, cache e reserva de consumo por agência, rascunhos revisáveis na calculadora, recálculo no servidor, persistência de `flightPlan`, histórico de versões e projeção comercial no PDF/WhatsApp. PNG/JPEG/PDF são os formatos da primeira entrega. Busca de companhias por link não implementada. Testes de cálculo, persistência, concorrência e isolamento preparados, mas não executados conforme instrução deste backlog. Configuração e roteiro de validação: [docs/flight-imports.md](../docs/flight-imports.md). Não marcar resolvido antes da validação real.
+
+- **Primeira entrega:** importação de PDF e imagem com conferência pelo agente. Busca direta de passagens por API/link fica como evolução independente, condicionada à disponibilidade de uma fonte confiável de ofertas em milhas; não é requisito para concluir a primeira entrega.
+- **PDF com texto selecionável:** extrair o texto diretamente e tentar mapear os campos. Usar IA para interpretar somente quando necessário. Em PDFs mistos, avaliar cada página para não perder ofertas presentes em páginas digitalizadas.
+- **Imagem ou PDF digitalizado:** usar um modelo econômico com visão para retornar dados estruturados. Validar o resultado contra um esquema, deixando campos ausentes vazios e indicando ambiguidades para revisão humana. Não precisa de agente autônomo ou navegação com IA.
+- **Cálculos e material comercial:** validação de valores, taxas, lucro, totais e geração do PDF executados por código. Alterar taxas/lucro, recalcular, salvar ou gerar novamente o PDF não deve disparar outra leitura por IA.
+- **Controle de consumo:** limitar tamanho/páginas de arquivo, chamadas e orçamento por agência no backend, com controle atômico para chamadas concorrentes; limitar tokens de saída, tempo e novas tentativas. Registrar uso efetivo e custo estimado por extração. Ao atingir o limite, permitir preenchimento manual sem repetir chamadas automaticamente.
+- **Reaproveitamento:** salvar a extração e reutilizá-la para o mesmo arquivo dentro da agência, identificando arquivo e versão do extrator. Separar a extração original dos ajustes manuais; reutilizar o resultado não pode sobrescrever correções do agente. Nunca compartilhar arquivos ou resultados entre agências.
+- **Provedor:** avaliar inicialmente um modelo econômico com visão, como Gemini 3.1 Flash-Lite, com amostras reais antes de fixar o modelo. Credenciais somente no backend; provedor/modelo configuráveis. A estrutura está aprovada, mas nenhum serviço foi contratado, credencial configurada ou chamada paga executada nesta task.
+- **Orçamento de referência:** a comparação discutida usou US$ 0,25 por milhão de tokens de entrada e US$ 1,50 por milhão de tokens de saída para Gemini 3.1 Flash-Lite. Com 2.000 tokens de entrada e 500 de saída faturada, o exemplo resulta em US$ 1,25 por 1.000 leituras. É simulação, não medição da imagem fornecida; confirmar preços e medir consumo, erros e repetições na prova técnica. Referência: https://ai.google.dev/gemini-api/docs/pricing.
+
+#### Fluxo e requisitos funcionais
+
+1. **Importar oferta:** permitir obter dados de PDF e imagem da oferta pela estrutura aprovada acima, com formatos e limites documentados após prova de extração com exemplos reais. Leitura direta de links fica para evolução futura; importar somente parâmetros de busca de uma URL não satisfaz a leitura de horários, duração e valores.
+2. **Extrair dados por opção e trecho:** companhia, origem e destino (aeroportos/códigos quando disponíveis), data de saída e chegada, horários, duração, conexões/escalas e quantidade de milhas/pontos. Capturar taxas monetárias quando explicitadas na fonte, distinguindo-as de milhas e do preço em dinheiro. Preservar ida e volta, conexões e chegada no dia seguinte sem misturar ofertas.
+3. **Revisar antes de aplicar:** mostrar uma prévia editável das opções extraídas. O agente escolhe quais entram na calculadora/cotação e corrige campos ausentes ou ambíguos. Não inventar horário, duração, milhas ou taxas e não interpretar ausência de taxa como taxa zero confirmada. Identificar se valores são por passageiro, por trecho ou pelo grupo; exigir revisão quando a fonte não permitir determinar isso.
+4. **Calcular preço:** reutilizar a calculadora de milhas, permitindo definir/ajustar custo por milheiro, taxas e lucro percentual e/ou fixo. Tornar explícita a base por pessoa/trecho/grupo para evitar multiplicação duplicada. Recalcular após ajustes e manter coerentes valor individual e total, com arredondamento monetário definido.
+5. **Vincular à cotação:** permitir adicionar as opções revisadas a uma cotação existente ou gerar uma nova pelo fluxo da calculadora. Preservar os dados importados/revisados e a memória de cálculo no backend, recuperáveis após recarregar ou abrir em outra sessão autorizada. Se houver alternativas, não somar seus preços como se fossem serviços cumulativos; definir qual opção compõe o total da cotação.
+6. **Rastro interno no detalhe:** exibir uma seção identificada como interna contendo milhas por trecho, custo por milheiro utilizado, custo convertido em reais, taxas, base de cálculo, configuração e valor de lucro e preço final. Guardar origem da importação, data/hora, responsável e valores usados no cálculo salvo. Alterações futuras na tabela do milheiro não devem modificar silenciosamente a cotação já salva; um recálculo explícito deve preservar o rastro anterior.
+7. **PDF para o cliente:** apresentar companhia, origem/destino, datas, horários, duração, conexões e preço final das opções, com passageiros e bagagens quando aplicáveis. Excluir milhas/pontos, custo do milheiro, custos de aquisição, lucro e detalhamento interno de taxas. Aplicar a mesma separação ao HTML para impressão/download, mensagens de WhatsApp e qualquer visualização ou resposta pública da cotação.
+
+#### Constatações do projeto e direção técnica proposta
+
+- `src/lib/calculadora-milhas.ts` já calcula custo das milhas, taxas e lucro percentual/fixo. `src/app/(app)/calculadora/page.tsx` já monta opções de voo e cria cotação. Reutilizar esses cálculos, revisando suas premissas de valores por pessoa.
+- `OpcaoVooCotacao`, em `src/types/index.ts`, contém horários e preços comerciais, mas não datas, duração nem memória de cálculo. Modelar dados comerciais e internos separadamente, com identificadores estáveis por opção/trecho.
+- `src/lib/api/quotation-mapper.ts` não inclui `opcoesVoo` no payload de criação nem na reconstrução da cotação a partir da API. Incluir criação, atualização, leitura e persistência das opções e do cálculo no escopo; manter compatibilidade com cotações antigas.
+- `src/lib/pdf-generator.ts` já apresenta opções de voo. Usar uma projeção explícita dos campos comerciais permitidos, sem serializar ou concatenar o objeto de cálculo interno em observações/HTML. O nome `internalNotes` da API, isoladamente, não garante que um texto não apareça no material do cliente.
+- Implementação da extração: seguir a estrutura aprovada (texto direto de PDF e modelo econômico com visão para imagens/digitalizações), escolhendo biblioteca e modelo após validar amostras, qualidade, custo e ambiente de execução. OCR tradicional fica como alternativa futura se medições justificarem sua manutenção.
+- Leitura de links: comprovar acesso aos resultados antes de prometer suporte por companhia; prever resultado indisponível, sessão expirada ou página sem oferta e orientar importação de arquivo/revisão manual. Se houver busca pelo backend, restringir destinos permitidos, validar redirecionamentos e impedir acesso a endereços internos (SSRF), com limites de tempo e tamanho.
+- Manter cálculos e arquivos de origem restritos à agência e aos usuários autorizados. O arquivo original pode revelar milhas/custos e não deve ser anexado automaticamente ao material enviado ao cliente. Definir limites de upload, retenção e autorização de download.
+- **Affected Files**: `src/app/(app)/calculadora/page.tsx`, `src/lib/calculadora-milhas.ts`, `src/types/index.ts`, `src/lib/api/quotation-types.ts`, `src/lib/api/quotation-mapper.ts`, `src/lib/api/update-quotation-remote.ts`, `src/app/(app)/cotacoes/[id]/page.tsx`, `src/lib/pdf-generator.ts`, `src/components/cotacao/EnviarWhatsAppModal.tsx`; novos componentes/serviços de importação; contratos, persistência e autorização de cotações no projeto `agencia-hub-api`.
+
+#### Referência fornecida e pontos para a implementação
+
+- [Busca LATAM enviada pelo usuário](https://www.latamairlines.com/br/pt/oferta-voos?origin=BPS&outbound=2026-09-10T00%3A00%3A00.000Z&destination=REC&adt=1&chd=0&inf=0&trip=OW&cabin=Economy&redemption=true&sort=RECOMMENDED&exp_id=fb1fb170-d143-44bb-98c4-a8710a54865a).
+- A URL informa BPS → REC, 10/09/2026, 1 adulto, só ida, econômica e busca com resgate. Não contém os horários, duração ou preços dos resultados. A tentativa de abrir a página pela ferramenta de pesquisa não retornou conteúdo; a viabilidade de extrair ofertas do site permanece não validada. A data da busca já passou na data deste registro; usar uma busca válida na prova técnica.
+- O usuário enviou posteriormente uma imagem real da LATAM: BPS → REC, saída 17:25, chegada 23:20, duração 5h55, 1 parada, 87.141 milhas + BRL 38,84 por pessoa, com os textos "a partir de" e "inclui taxas e impostos". A data e o aeroporto de conexão não aparecem; devem permanecer ausentes até confirmação do agente. A parcela monetária precisa ser revisada para evitar duplicar taxas já incluídas. A imagem foi interpretada na conversa, mas ainda não foi testada por um extrator integrado ao sistema. Preservar uma amostra de teste durável na implementação; não depender do arquivo temporário do clipboard.
+- O cURL enviado posteriormente aponta para `/bff/air-offers/v2/offers/search`, com `redemption=false`, cookies, token de CAPTCHA e token de busca temporário. Não comprova acesso contínuo nem busca em milhas; nenhuma resposta JSON foi fornecida. Não copiar cookies ou tokens para o repositório. A investigação dessa integração pertence à evolução de busca direta.
+- Decisões a fechar na implementação: biblioteca de PDF, modelo/provedor definitivo, formatos/companhias validados, limites de arquivo e orçamento por agência, tratamento de preços diferentes por adulto/criança/bebê e regra de seleção da opção que define o total. O mecanismo geral de extração já foi aprovado acima.
+
+#### Critérios de aceite e validação futura
+
+- [ ] Uma amostra real de cada formato declarado como suportado produz opções editáveis com origem, destino, datas, horários, duração e milhas; campos não reconhecidos são sinalizados.
+- [ ] Ida/volta, conexão, virada de dia e diferentes bases de preço/passageiros não misturam trechos nem duplicam milhas ou taxas.
+- [ ] O agente pode adicionar/editar taxas, custo por milheiro e lucro, conferir o cálculo e anexar a uma cotação nova ou existente.
+- [ ] Exemplo sintético para validação, não extraído do link: 20.000 milhas × R$ 25/1.000 = R$ 500; taxas de R$ 50/pessoa resultam em base de R$ 550; lucro de 10% sobre a base + R$ 20/pessoa = R$ 75; preço final de R$ 625/pessoa e R$ 1.250 para 2 pessoas, sem bagagem.
+- [ ] Salvar, editar, recarregar e abrir em outra sessão autorizada preserva opções e memória de cálculo; alterações na tabela de milheiro não reescrevem valores históricos.
+- [ ] O detalhe da cotação mostra os cálculos internos com identificação clara; outras agências e acessos públicos não conseguem recuperá-los nem baixar a fonte original.
+- [ ] PDF/HTML e compartilhamentos mostram itinerário e preço de venda, sem quantidade/custo das milhas, lucro, composição interna das taxas ou conteúdo do arquivo original. Cobrir a ausência desses campos com teste de regressão específico.
+- [ ] PDFs com texto são processados diretamente; imagens e páginas digitalizadas usam visão; PDFs mistos não perdem páginas. Campos ausentes ou inválidos exigem revisão, sem preenchimento inventado.
+- [ ] A amostra LATAM retorna 87.141 milhas e R$ 38,84 por pessoa, BPS → REC, horários 17:25/23:20, 5h55 e 1 parada; data e aeroporto da conexão permanecem não informados.
+- [ ] Recalcular taxas/lucro e gerar o PDF não chama IA. Reenviar o mesmo arquivo na mesma agência reutiliza a extração salva sem apagar correções; outra agência não acessa o resultado.
+- [ ] Limites de consumo são aplicados também em chamadas concorrentes; novas tentativas são limitadas e uso/custo são registrados. Limite atingido ou falha do provedor permite continuar manualmente.
+- [ ] Evolução futura de links: parâmetros de busca isolados são apresentados como importação parcial, nunca como extração completa. Este critério não bloqueia a entrega de PDF/imagem.
+- [ ] Cotações antigas e o fluxo manual continuam funcionando. Validar cálculo, persistência, autorização e material final; nenhuma validação automatizada foi executada nesta implementação.
 
 ---
 

@@ -287,7 +287,9 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
                   <Label htmlFor="eq-valor">Valor total (R$)</Label>
                   <CurrencyInput
                     id="eq-valor"
-                    value={valorTotal}
+                    disabled={!!cotacao.flightPlan}
+              title={cotacao.flightPlan ? "Altere taxas e lucro pela calculadora de milhas." : undefined}
+              value={valorTotal}
                     onValueChange={setValorTotal}
                   />
                 </div>

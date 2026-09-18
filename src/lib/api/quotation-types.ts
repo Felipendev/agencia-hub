@@ -12,6 +12,7 @@ export type ApiQuotationStatus =
 export type ApiQuotationCreationSource = "INTERNAL" | "PUBLIC_FORM";
 
 export type ApiCreateQuotationRequest = {
+  flightPlan?: import("@/lib/flight-plan").FlightPlan;
   customerId: string;
   sellerId?: string;
   title: string;
@@ -33,6 +34,7 @@ export type ApiCreateQuotationRequest = {
 };
 
 export type ApiQuotationResponse = {
+  flightPlan?: import("@/lib/flight-plan").FlightPlan | null;
   id: string;
   customerId: string;
   customerName: string;

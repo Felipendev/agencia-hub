@@ -190,10 +190,13 @@ export interface Cotacao {
   updatedAt: string;
   /** Opcoes de voo calculadas na calculadora de milhas (visivel no PDF) */
   opcoesVoo?: OpcaoVooCotacao[];
+  /** Somente agência autenticada: memória de cálculo, nunca enviar ao cliente. */
+  flightPlan?: import("@/lib/flight-plan").FlightPlan;
 }
 
 /** Opcao de voo salva na cotacao — dados que o cliente ve */
 export interface OpcaoVooCotacao {
+  segmentos?: import("@/lib/flight-plan").FlightSegment[];
   nome: string;
   cia: string;
   corCia?: string;

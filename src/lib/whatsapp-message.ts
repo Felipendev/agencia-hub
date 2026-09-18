@@ -1,3 +1,4 @@
+import { commercialFlights } from "@/lib/flight-plan";
 import { formatBRL, formatDateBR } from "@/lib/format";
 import type { Cotacao, Cliente } from "@/types";
 import { SERVICOS_DESEJADOS_OPTIONS } from "@/lib/cotacao-options";
@@ -55,6 +56,18 @@ export function gerarMensagemTexto(
   L.push("");
   if (cotacao.valorTotal > 0) {
     L.push(`Valor total: ${formatBRL(cotacao.valorTotal)}`);
+  }
+  if (cotacao.flightPlan) {
+    for (const option of commercialFlights(cotacao.flightPlan)) {
+      L.push("");
+      L.push(`${option.cia} — ${option.nome}`);
+      for (const s of option.segmentos ?? []) {
+        L.push(`${s.origin || "—"} → ${s.destination || "—"}: ${s.departureDate ? formatDateBR(s.departureDate) : "Data não informada"} ${s.departureTime || "—"} → ${s.arrivalDate ? formatDateBR(s.arrivalDate) : "Data não informada"} ${s.arrivalTime || "—"}`);
+        L.push(`Duração: ${s.durationMinutes ?? "não informada"} min · ${s.stops == null ? "Paradas não informadas" : `${s.stops} parada(s)`}`);
+      }
+      L.push(`Preço para ${option.qtdPessoas} passageiro(s): ${formatBRL(option.precoTotal)}`);
+    }
+    L.push("Alternativas de voo; os valores não são somados.");
   }
   L.push(`Validade: ${formatDateBR(cotacao.validade)}`);
 

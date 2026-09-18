@@ -1,5 +1,6 @@
 "use client";
 
+import { commercialFlights, type FlightPlan } from "@/lib/flight-plan";
 import {
   createContext,
   useCallback,
@@ -157,6 +158,7 @@ export type DataContextValue = {
     c: Omit<Cotacao, "id" | "createdAt" | "updatedAt">,
   ) => Promise<Cotacao>;
   updateCotacao: (id: string, patch: Partial<Cotacao>) => Promise<void>;
+  saveCotacaoFlightPlan: (id: string, plan: FlightPlan) => Promise<Cotacao>;
   resetDemoData: () => void;
   isReady: boolean;
   /** Base URL da API configurada em build (`NEXT_PUBLIC_AGENCIA_HUB_API_URL`). */
@@ -354,6 +356,23 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     [token],
   );
 
+  const saveCotacaoFlightPlan = useCallback(async (id: string, plan: FlightPlan): Promise<Cotacao> => {
+    const current = data.cotacoes.find((c) => c.id === id);
+    if (!current) throw new Error("Cotação não encontrada.");
+    const selected = plan.options.find((o) => o.id === plan.selectedOptionId);
+    if (!selected) throw new Error("Selecione a opção principal.");
+    const patch: Partial<Cotacao> = { flightPlan: plan, opcoesVoo: commercialFlights(plan), valorTotal: selected.precoTotal };
+    let saved: Cotacao = { ...current, ...patch, updatedAt: new Date().toISOString() };
+    if (getHasRemoteApi()) {
+      if (!token) throw new Error("Sua sessão expirou.");
+      const remote = await updateQuotationRemote(current, patch, token);
+      if (!remote) throw new Error("A API de cotações não está configurada.");
+      saved = remote;
+    }
+    setData((d) => ({ ...d, cotacoes: d.cotacoes.map((c) => c.id === id ? saved : c) }));
+    return saved;
+  }, [data.cotacoes, token]);
+
   const updateCotacao = useCallback(async (id: string, patch: Partial<Cotacao>) => {
     const current = data.cotacoes.find((cotacao) => cotacao.id === id);
     if (!current) throw new Error("Cotação não encontrada.");
@@ -465,6 +484,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       deleteLancamento,
       addCotacao,
       updateCotacao,
+      saveCotacaoFlightPlan,
       resetDemoData,
       isReady,
       hasRemoteApi,
@@ -483,6 +503,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       deleteLancamento,
       addCotacao,
       updateCotacao,
+      saveCotacaoFlightPlan,
       resetDemoData,
       isReady,
       hasRemoteApi,
