@@ -2,7 +2,7 @@
 
 > Itens levantados na auditoria de persistência e fluxos críticos em 2026-09-03.
 
-**Last Updated**: 2026-09-17  
+**Last Updated**: 2026-09-17
 **Total Items**: 38 (1 TODO pending — needs live repro, 1 TODO in-progress, 1 DEBT, 35 resolved)
 
 ---
@@ -486,7 +486,7 @@ Esta é a visão curta para acompanhamento. O detalhamento e os critérios de ac
 
 ### TODO-037: Importar voos de PDF, imagem ou link de companhia para calcular milhas e compor cotação
 - **Priority**: High (sugerida pelo impacto no fluxo de cotação)
-- **Status**: in-progress — implementação iniciada em 2026-09-13; código de frontend/backend e testes preparados, aguardando configuração do provedor e validação pelo usuário
+- **Status**: in-progress — implementação iniciada em 2026-09-13; código de frontend/backend e testes preparados, 47 testes frontend e 27 backend passaram; build/lint aprovados; publicação em andamento
 - **Created**: 2026-09-13
 - **Origin**: Pedido do usuário nesta conversa, após procurar uma task de leitura de PDF. O usuário confirmou que deseja registrar e detalhar a feature no backlog.
 - **Complexity**: Large

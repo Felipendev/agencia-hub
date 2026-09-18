@@ -78,3 +78,7 @@ Validação manual necessária: enviar a imagem real LATAM (87.141 milhas + R$ 3
 Leitura com indicador de atividade, tempo decorrido e cancelamento que aborta a espera HTTP e descarta respostas tardias. O processamento já enviado ao provedor pode terminar e ser cobrado. Ações de remoção em vermelho. Milhas e dados de itinerário opcionais; milheiro exigido somente quando existem milhas. Nome, passageiros (padrão 1), seleção principal, cliente e revisão continuam necessários. Sem milhas, o preço usa a parcela em dinheiro, taxas, lucro e malas. Valores preenchidos inválidos apresentam o campo responsável.
 
 Migração V48 sucede a V47 já em produção. Criações idempotentes também acomodam bancos locais que receberam a antiga V45 experimental. O login livre local não faz parte da publicação.
+
+## Evidência de validação da entrega
+
+47 testes frontend e 27 testes focados backend passaram. TypeScript, ESLint e builds frontend aprovados (Turbopack no workspace, webpack na integração sobre main). Teste no navegador: R$ 500 sem milhas com lucro 10% resulta em R$ 550; remoção vermelha; cancelamento descarta a resposta. Exemplo LATAM importado pelo fluxo local usando extração já em cache. Não foi necessário reenviar o documento ao modelo nesse teste.
