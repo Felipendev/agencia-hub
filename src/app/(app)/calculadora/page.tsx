@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { ClientePicker } from "@/components/cliente/ClientePicker";
 import { useData } from "@/contexts/data-context";
@@ -138,14 +139,34 @@ function Calculator({ initial }: { initial?: Cotacao }) {
       <Link href="/calculadora/milheiro" className="text-sm text-[var(--hub-blue)] hover:underline">Precificar milheiro</Link>
     </PageHeader>
     <fieldset disabled={busy} className="space-y-5">
-      <Card>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="text-sm">Salvar em<Select value={targetId} onChange={(e) => { setTargetId(e.target.value); setError(""); }}>
-            <option value="">Nova cotação</option>{cotacoes.map((c) => <option key={c.id} value={c.id}>{c.titulo} — {clientes.find((p) => p.id === c.clienteId)?.nome ?? "Cliente"}</option>)}
-          </Select></label>
-          {!targetId && <ClientePicker id="calc-cliente" label="Cliente" required invalid={attemptedSave && !clienteSelecionado} clientes={clientes} value={clienteId} onChange={setClienteId} loading={clientesLoading} loadError={clientesLoadError} onRetryLoad={() => void loadClientes()} />}
-          {!targetId && <label className="text-sm">Título (opcional)<Input value={title} maxLength={150} onChange={(e) => setTitle(e.target.value)} placeholder="Cotação de passagens" /></label>}
-          {target?.flightPlan && <div><Button type="button" variant="secondary" onClick={loadSaved}>Carregar opções salvas</Button><p className="mt-1 text-xs">Substitui o rascunho da calculadora pelas opções desta cotação.</p></div>}
+      <Card padding="p-0" className="overflow-hidden">
+        <div className="border-b border-[var(--hub-border)] bg-[var(--hub-bg-subtle)]/70 px-5 py-4 sm:px-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--hub-text-muted)]">Destino do cálculo</p>
+          <h2 className="mt-1 text-base font-semibold text-[var(--hub-text-primary)]">Prepare a cotação antes de incluir os voos</h2>
+          <p className="mt-1 text-sm text-[var(--hub-text-secondary)]">Escolha se este cálculo cria uma cotação nova ou atualiza uma já existente.</p>
+        </div>
+        <div className="grid gap-x-6 gap-y-5 px-5 py-5 sm:px-6 lg:grid-cols-12">
+          <div className="lg:col-span-5">
+            <Label htmlFor="calc-target">Salvar em</Label>
+            <Select id="calc-target" value={targetId} onChange={(e) => { setTargetId(e.target.value); setError(""); }}>
+              <option value="">Nova cotação</option>
+              {cotacoes.map((c) => <option key={c.id} value={c.id}>{c.titulo} — {clientes.find((p) => p.id === c.clienteId)?.nome ?? "Cliente"}</option>)}
+            </Select>
+            <p className="mt-1.5 text-xs text-[var(--hub-text-muted)]">A nova cotação começa a partir dos dados deste formulário.</p>
+          </div>
+          {!targetId ? <>
+            <div className="lg:col-span-7">
+              <ClientePicker id="calc-cliente" label="Cliente" required invalid={attemptedSave && !clienteSelecionado} clientes={clientes} value={clienteId} onChange={setClienteId} loading={clientesLoading} loadError={clientesLoadError} onRetryLoad={() => void loadClientes()} />
+            </div>
+            <div className="lg:col-span-5">
+              <Label htmlFor="calc-title">Título <span className="font-normal text-[var(--hub-text-muted)]">(opcional)</span></Label>
+              <Input id="calc-title" value={title} maxLength={150} onChange={(e) => setTitle(e.target.value)} placeholder="Ex.: Passagens Fortaleza → Lisboa" />
+              <p className="mt-1.5 text-xs text-[var(--hub-text-muted)]">Se ficar vazio, o sistema cria um título a partir dos trechos.</p>
+            </div>
+          </> : <div className="flex items-start justify-between gap-4 rounded-lg border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] p-4 lg:col-span-7">
+            <div><p className="text-sm font-medium text-[var(--hub-text-primary)]">Atualizar voos da cotação selecionada</p><p className="mt-1 text-xs text-[var(--hub-text-secondary)]">O plano salvo substitui as opções de voo atuais; os demais dados da cotação são mantidos.</p></div>
+            {target?.flightPlan ? <Button type="button" variant="secondary" className="shrink-0" onClick={loadSaved}>Carregar opções</Button> : null}
+          </div>}
         </div>
       </Card>
       <ImportarVoos onImport={imported} />
