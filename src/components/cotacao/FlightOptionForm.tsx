@@ -28,6 +28,8 @@ export function FlightOptionForm({ option: o, tables, principal, showValidationE
   };
   const hasInvalidDuration = (segment: FlightSegment) => segment.durationMinutes != null
     && (!Number.isInteger(segment.durationMinutes) || segment.durationMinutes < 1 || segment.durationMinutes > 10_080);
+  const selectedCia = tables.cias.find((cia) => cia.nome === o.cia);
+  const savedMilheiro = selectedCia ? getValorMilheiro(selectedCia, o.calculo.milhasIda + o.calculo.milhasVolta) : null;
   const result = calculateFlight(o);
   return <section className="space-y-4 rounded-xl border border-[var(--hub-border)] bg-white p-5">
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -43,10 +45,10 @@ export function FlightOptionForm({ option: o, tables, principal, showValidationE
       {o.baseFonte === "PER_PERSON" ? " Valores por pessoa; confira se já incluem taxas." : " Base por grupo ou não identificada: preencha abaixo os valores por pessoa, sem dividir categorias de passageiros diferentes automaticamente."}</p>}
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       <label className="text-sm">Nome da opção <span className="text-red-500">*</span><Input id={`nome-opcao-${o.id}`} aria-invalid={showValidationErrors && !o.nome.trim()} className={showValidationErrors && !o.nome.trim() ? "border-red-500" : undefined} value={o.nome} maxLength={150} onChange={(e) => set({ nome: e.target.value })} />{showValidationErrors && !o.nome.trim() && <p className="mt-1 text-xs text-red-600">Nome da opção é obrigatório.</p>}</label>
-      <label className="text-sm">Companhia<Select value={o.cia} onChange={(e) => {
+      <div className="text-sm"><label htmlFor={`cia-${o.id}`}>Companhia</label><Select id={`cia-${o.id}`} value={o.cia} onChange={(e) => {
         const cia = tables.cias.find((c) => c.nome === e.target.value);
         set({ cia: e.target.value, corCia: cia?.cor, calculo: { ...o.calculo, custoPorMilheiro: cia ? getValorMilheiro(cia, o.calculo.milhasIda + o.calculo.milhasVolta) : 0 } });
-      }}><option value="">Selecione a companhia</option>{o.cia && !tables.cias.some((c) => c.nome === o.cia) && <option value={o.cia}>{o.cia}</option>}{tables.cias.map((c) => <option key={c.id} value={c.nome}>{c.nome}</option>)}</Select></label>
+      }}><option value="">Selecione a companhia</option>{o.cia && !tables.cias.some((c) => c.nome === o.cia) && <option value={o.cia}>{o.cia}</option>}{tables.cias.map((c) => <option key={c.id} value={c.nome}>{c.nome}</option>)}</Select>{selectedCia ? <button type="button" className="mt-1 text-xs font-medium text-[var(--hub-blue)] underline" onClick={() => calc({ custoPorMilheiro: savedMilheiro! })}>Usar valor salvo: {fmtBRL(savedMilheiro!)} / 1.000 milhas</button> : null}</div>
       <label className="text-sm">Passageiros com o mesmo preço <span className="text-red-500">*</span><Input aria-invalid={showValidationErrors && (!Number.isInteger(o.qtdPessoas) || o.qtdPessoas < 1 || o.qtdPessoas > 20)} className={showValidationErrors && (!Number.isInteger(o.qtdPessoas) || o.qtdPessoas < 1 || o.qtdPessoas > 20) ? "border-red-500" : undefined} type="number" min={1} max={20} value={o.qtdPessoas} onChange={(e) => set({ qtdPessoas: Number(e.target.value) })} />{showValidationErrors && (!Number.isInteger(o.qtdPessoas) || o.qtdPessoas < 1 || o.qtdPessoas > 20) && <p className="mt-1 text-xs text-red-600">Informe de 1 a 20 passageiros.</p>}</label>
     </div>
     <p className="text-sm text-[var(--hub-text-secondary)]">Milhas e dados do voo são opcionais. Para uma passagem sem milhas, preencha o valor em dinheiro. O custo do milheiro só é necessário quando há milhas.</p>

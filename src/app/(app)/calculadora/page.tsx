@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { ClientePicker } from "@/components/cliente/ClientePicker";
 import { useData } from "@/contexts/data-context";
-import { carregarTabelas, getValorMilheiro } from "@/lib/tabelas-milhas";
+import { carregarTabelas, getValorMilheiro, MILEAGE_TABLES_UPDATED_EVENT } from "@/lib/tabelas-milhas";
 import { PageHeader } from "@/components/layout/page-header";
 import { ImportarVoos } from "@/components/cotacao/ImportarVoos";
 import { FlightOptionForm } from "@/components/cotacao/FlightOptionForm";
@@ -20,7 +20,7 @@ import type { Cotacao } from "@/types";
 function Calculator({ initial }: { initial?: Cotacao }) {
   const router = useRouter();
   const { clientes, cotacoes, addCotacao, saveCotacaoFlightPlan, hasRemoteApi, isReady, syncClientesFromApi } = useData();
-  const [tables] = useState(carregarTabelas);
+  const [tables, setTables] = useState(carregarTabelas);
   const [targetId, setTargetId] = useState(initial?.id ?? "");
   const [loadedTargetId, setLoadedTargetId] = useState(initial?.id ?? "");
   const [clienteId, setClienteId] = useState(initial?.clienteId ?? "");
@@ -35,6 +35,7 @@ function Calculator({ initial }: { initial?: Cotacao }) {
   const [clientesLoadError, setClientesLoadError] = useState("");
   const saving = useRef(false);
   const target = cotacoes.find((c) => c.id === targetId);
+  const clienteSelecionado = clientes.some((cliente) => cliente.id === clienteId);
 
   const loadClientes = useCallback(async () => {
     if (!hasRemoteApi) return;
@@ -53,6 +54,16 @@ function Calculator({ initial }: { initial?: Cotacao }) {
     if (!isReady) return;
     void loadClientes();
   }, [isReady, loadClientes]);
+
+  useEffect(() => {
+    const reloadTables = () => setTables(carregarTabelas());
+    window.addEventListener(MILEAGE_TABLES_UPDATED_EVENT, reloadTables);
+    window.addEventListener("storage", reloadTables);
+    return () => {
+      window.removeEventListener(MILEAGE_TABLES_UPDATED_EVENT, reloadTables);
+      window.removeEventListener("storage", reloadTables);
+    };
+  }, []);
 
   useEffect(() => {
     const included = options.filter((option) => option.incluir);
@@ -97,7 +108,7 @@ function Calculator({ initial }: { initial?: Cotacao }) {
       const existing = target?.flightPlan && loadedTargetId !== target.id
         ? target.flightPlan.options.map((o) => ({ ...o, incluir: true, avisos: [] })) : [];
       const plan = buildFlightPlan([...existing, ...options], principal);
-      if (!targetId && !clienteId) throw new Error("Selecione um cliente.");
+      if (!targetId && !clienteSelecionado) throw new Error("Selecione um cliente.");
       if (targetId && !target) throw new Error("Cotação não encontrada.");
       saving.current = true; setBusy(true);
       if (targetId) {
@@ -132,7 +143,7 @@ function Calculator({ initial }: { initial?: Cotacao }) {
           <label className="text-sm">Salvar em<Select value={targetId} onChange={(e) => { setTargetId(e.target.value); setError(""); }}>
             <option value="">Nova cotação</option>{cotacoes.map((c) => <option key={c.id} value={c.id}>{c.titulo} — {clientes.find((p) => p.id === c.clienteId)?.nome ?? "Cliente"}</option>)}
           </Select></label>
-          {!targetId && <ClientePicker id="calc-cliente" label="Cliente" required invalid={attemptedSave && !clienteId} clientes={clientes} value={clienteId} onChange={setClienteId} loading={clientesLoading} loadError={clientesLoadError} onRetryLoad={() => void loadClientes()} />}
+          {!targetId && <ClientePicker id="calc-cliente" label="Cliente" required invalid={attemptedSave && !clienteSelecionado} clientes={clientes} value={clienteId} onChange={setClienteId} loading={clientesLoading} loadError={clientesLoadError} onRetryLoad={() => void loadClientes()} />}
           {!targetId && <label className="text-sm">Título (opcional)<Input value={title} maxLength={150} onChange={(e) => setTitle(e.target.value)} placeholder="Cotação de passagens" /></label>}
           {target?.flightPlan && <div><Button type="button" variant="secondary" onClick={loadSaved}>Carregar opções salvas</Button><p className="mt-1 text-xs">Substitui o rascunho da calculadora pelas opções desta cotação.</p></div>}
         </div>
@@ -142,7 +153,7 @@ function Calculator({ initial }: { initial?: Cotacao }) {
         <h2 className="font-semibold">Opções de voo</h2>
         <Button type="button" variant="secondary" disabled={options.length >= 20} onClick={() => setOptions((current) => [...current, newFlightDraft()])}>Adicionar opção manual</Button>
       </div>
-      {attemptedSave && !targetId && !clienteId && <p className="text-sm text-red-600" role="alert">Selecione um cliente.</p>}
+      {attemptedSave && !targetId && !clienteSelecionado && <p className="text-sm text-red-600" role="alert">Selecione um cliente.</p>}
       {attemptedSave && !options.some((option) => option.incluir && option.id === principal) && <p className="text-sm text-red-600" role="alert">Escolha uma opção principal da cotação.</p>}
       {options.map((option) => <FlightOptionForm key={option.id} option={option} tables={tables} principal={principal === option.id} showValidationErrors={attemptedSave}
         onPrincipal={() => setPrincipal(option.id)}

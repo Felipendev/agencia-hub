@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import type { FlightImportResult } from "@/lib/flight-plan";
 
-export function ImportarVoos({ onImport }: { onImport: (result: FlightImportResult) => void }) {
+export function ImportarVoos({ onImport }: { onImport: (result: FlightImportResult) => boolean | void }) {
   const { token } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -36,8 +37,10 @@ export function ImportarVoos({ onImport }: { onImport: (result: FlightImportResu
       if (!response.ok) throw new Error(result.error || "Não foi possível ler o arquivo.");
       const parsed = result as FlightImportResult;
       if (!parsed.extraction || !Array.isArray(parsed.extraction.offers)) throw new Error("Resposta de leitura inválida.");
-      onImport(parsed);
-      setMessage(parsed.extraction.offers.length
+      const imported = onImport(parsed);
+      setMessage(imported === false
+        ? "O arquivo foi lido, mas as opções não foram adicionadas. Veja o aviso abaixo."
+        : parsed.extraction.offers.length
         ? `${parsed.cached ? "Leitura anterior reutilizada. " : ""}${parsed.extraction.offers.length} opção(ões) adicionada(s). Confira os dados abaixo.`
         : "Nenhuma oferta reconhecida. Preencha manualmente ou envie outra imagem.");
     } catch (error) {
@@ -49,12 +52,14 @@ export function ImportarVoos({ onImport }: { onImport: (result: FlightImportResu
   return <Card>
     <h2 className="font-semibold">Importar oferta de voo</h2>
     <p className="mt-1 text-sm text-[var(--hub-text-secondary)]">Envie PDF, PNG ou JPEG de até 4 MB; PDF com até 5 páginas. A leitura cria opções editáveis; nada é salvo na cotação até você conferir e salvar.</p>
-    <div className="mt-3 flex flex-wrap items-center gap-3">
-      <label className="text-sm">Arquivo da oferta
-        <input className="ml-2 max-w-full text-sm" type="file" accept="application/pdf,image/png,image/jpeg" disabled={busy}
-          onChange={(e) => { setFile(e.target.files?.[0] ?? null); setMessage(""); }} />
-      </label>
+    <div className="mt-4 rounded-lg border border-dashed border-[var(--hub-blue-muted)] bg-[var(--hub-bg-subtle)] p-4">
+      <label htmlFor="flight-import-file" className="block text-sm font-medium text-[var(--hub-text-primary)]">Arquivo da oferta</label>
+      <p className="mt-1 text-xs text-[var(--hub-text-secondary)]">PDF, PNG ou JPEG, até 4 MB.</p>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+      <Input id="flight-import-file" className="max-w-xl cursor-pointer bg-white text-sm file:mr-3 file:rounded-md file:border-0 file:bg-[var(--hub-blue-dark)] file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:bg-[var(--hub-blue)]" type="file" accept="application/pdf,image/png,image/jpeg" disabled={busy}
+        onChange={(e) => { setFile(e.target.files?.[0] ?? null); setMessage(""); }} />
       <Button type="button" onClick={() => void upload()} disabled={!file || !token || busy}>{busy ? "Lendo oferta…" : "Ler arquivo"}</Button>
+      </div>
     </div>
     {busy && <div role="status" aria-live="polite" className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
       <div className="flex items-center gap-3"><span aria-hidden="true" className="h-5 w-5 animate-spin motion-reduce:animate-none rounded-full border-2 border-blue-200 border-t-blue-700" /><p className="font-medium">Lendo {file?.name} · {seconds}s</p></div>

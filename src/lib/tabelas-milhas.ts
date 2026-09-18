@@ -4,6 +4,7 @@
  */
 
 const STORAGE_KEY = "agencia-hub-tabelas-milhas";
+export const MILEAGE_TABLES_UPDATED_EVENT = "agencia-hub-tabelas-milhas-updated";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -168,6 +169,7 @@ export function carregarTabelas(): TabelasMilhas {
 export function salvarTabelas(tabelas: TabelasMilhas): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tabelas));
+  window.dispatchEvent(new CustomEvent(MILEAGE_TABLES_UPDATED_EVENT));
 }
 
 export function resetarTabelas(): TabelasMilhas {

@@ -87,6 +87,7 @@ export function ClientePicker({
   }
 
   const q = search.trim();
+  const effectiveInvalid = invalid || (required && value !== "" && !selected);
   const showHintMinChars = q.length > 0 && q.length < CLIENTE_SEARCH_MIN_CHARS;
   const showResults = open && !selected && !disabled && (q.length === 0 || q.length >= CLIENTE_SEARCH_MIN_CHARS);
 
@@ -119,12 +120,12 @@ export function ClientePicker({
             aria-expanded={showResults}
             aria-controls={`${id}-results`}
             aria-activedescendant={showResults && filtered[highlighted] ? `${id}-option-${highlighted}` : undefined}
-            aria-describedby={`${id}-hint`}
-            aria-invalid={invalid || undefined}
+            aria-describedby={`${id}-hint${effectiveInvalid ? ` ${id}-error` : ""}`}
+            aria-invalid={effectiveInvalid || undefined}
             required={required}
             disabled={disabled}
             value={selected ? selected.nome : search}
-            className={`${selected ? "pr-20" : ""} ${invalid ? "border-red-500 focus-visible:ring-red-500" : ""}`.trim()}
+            className={`${selected ? "pr-20" : ""} ${effectiveInvalid ? "!border-red-500 !ring-1 !ring-red-200 focus:border-red-600 focus:ring-red-200" : ""}`.trim()}
             onChange={(event) => {
               if (value) onChange("");
               setSearch(event.target.value);
@@ -155,7 +156,7 @@ export function ClientePicker({
               ? `Digite ${CLIENTE_SEARCH_MIN_CHARS} ou mais caracteres para buscar.`
               : showResults && filtered.length === 0 ? "Nenhuma pessoa cadastrada encontrada." : "Selecione uma pessoa cadastrada ou busque por nome, e-mail ou telefone."}
           </p>
-          {invalid ? <p className="mt-1 text-xs font-medium text-red-600" role="alert">{label} é obrigatório.</p> : null}
+          {effectiveInvalid ? <p id={`${id}-error`} className="mt-1 text-xs font-medium text-red-600" role="alert">{label} é obrigatório.</p> : null}
           {loadError ? <div className="mt-1 flex items-center gap-2 text-xs text-red-600" role="alert"><span>{loadError}</span>{onRetryLoad ? <button type="button" className="font-semibold underline" onClick={onRetryLoad}>Tentar novamente</button> : null}</div> : null}
           {showResults && filtered.length > 0 && (
             <ul id={`${id}-results`} role="listbox" aria-label="Clientes encontrados" className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white py-1 shadow-lg">
