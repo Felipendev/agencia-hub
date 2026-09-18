@@ -27,11 +27,32 @@ export default function NovaCotacaoPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, token } = useAuth();
-  const { clientes, addCotacao, isReady } = useData();
+  const { clientes, addCotacao, isReady, hasRemoteApi, syncClientesFromApi } = useData();
   const toast = useToast();
 
   const isOwner = user?.accountKind === "AGENCY_OWNER";
   const [sellers, setSellers] = useState<ApiUserResponse[]>([]);
+  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
+  const [clientesLoading, setClientesLoading] = useState(false);
+  const [clientesLoadError, setClientesLoadError] = useState("");
+
+  const loadClientes = useMemo(() => async () => {
+    if (!hasRemoteApi || !token) return;
+    setClientesLoading(true);
+    setClientesLoadError("");
+    try {
+      await syncClientesFromApi();
+    } catch {
+      setClientesLoadError("Não foi possível carregar as pessoas da agência.");
+    } finally {
+      setClientesLoading(false);
+    }
+  }, [hasRemoteApi, token, syncClientesFromApi]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    void loadClientes();
+  }, [isReady, loadClientes]);
 
   useEffect(() => {
     if (!isOwner || !token || !getAgenciaHubApiBaseUrl()) return;
@@ -98,7 +119,8 @@ export default function NovaCotacaoPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!clienteId || !titulo.trim() || !validade) return;
+    setAttemptedSubmit(true);
+    if (!clienteId || !titulo.trim() || !valorTotal.trim() || !validade) return;
     const v = parseCurrencyInput(valorTotal);
     const tagList = tags
       .split(/[#,]/g)
@@ -151,6 +173,7 @@ export default function NovaCotacaoPage() {
 
       <form
         onSubmit={handleSubmit}
+        noValidate
         className="rounded-[1.35rem] border border-[var(--hub-border)] bg-white p-6 shadow-[0_16px_48px_-20px_rgba(15,40,64,0.1)] sm:p-8 lg:p-10"
       >
         <details open className="group border-b border-[var(--hub-border)] py-3">
@@ -168,34 +191,47 @@ export default function NovaCotacaoPage() {
                   setClienteIdDraft(id);
                 }}
                 required
+                invalid={attemptedSubmit && !clienteId}
+                loading={clientesLoading}
+                loadError={clientesLoadError}
+                onRetryLoad={() => void loadClientes()}
               />
             </div>
             <div className="sm:col-span-2 xl:col-span-3">
-              <Label htmlFor="nova-tit">Título *</Label>
+              <Label htmlFor="nova-tit">Título <span aria-hidden="true" className="text-red-600">*</span></Label>
               <Input
                 id="nova-tit"
                 required
+                aria-invalid={attemptedSubmit && !titulo.trim()}
+                className={attemptedSubmit && !titulo.trim() ? "border-red-500" : ""}
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
               />
+              {attemptedSubmit && !titulo.trim() ? <p className="mt-1 text-xs font-medium text-red-600" role="alert">Título é obrigatório.</p> : null}
             </div>
             <div>
-              <Label htmlFor="nova-val">Valor total (R$)</Label>
+              <Label htmlFor="nova-val">Valor total (R$) <span aria-hidden="true" className="text-red-600">*</span></Label>
               <CurrencyInput
                 id="nova-val"
+                aria-invalid={attemptedSubmit && !valorTotal.trim()}
+                className={attemptedSubmit && !valorTotal.trim() ? "border-red-500" : ""}
                 value={valorTotal}
                 onValueChange={setValorTotal}
               />
+              {attemptedSubmit && !valorTotal.trim() ? <p className="mt-1 text-xs font-medium text-red-600" role="alert">Valor total é obrigatório.</p> : null}
             </div>
             <div>
-              <Label htmlFor="nova-venc">Validade da proposta *</Label>
+              <Label htmlFor="nova-venc">Validade da proposta <span aria-hidden="true" className="text-red-600">*</span></Label>
               <Input
                 id="nova-venc"
                 type="date"
                 required
+                aria-invalid={attemptedSubmit && !validade}
+                className={attemptedSubmit && !validade ? "border-red-500" : ""}
                 value={validade}
                 onChange={(e) => setValidade(e.target.value)}
               />
+              {attemptedSubmit && !validade ? <p className="mt-1 text-xs font-medium text-red-600" role="alert">Validade da proposta é obrigatória.</p> : null}
             </div>
             <div>
               <Label htmlFor="nova-resp">Responsável</Label>

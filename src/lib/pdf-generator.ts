@@ -1,4 +1,4 @@
-import { commercialFlights } from "@/lib/flight-plan";
+import { commercialFlights, formatDurationMinutes } from "@/lib/flight-plan";
 import { formatBRL, formatDateBR } from "@/lib/format";
 import type { Cotacao, Cliente } from "@/types";
 
@@ -468,7 +468,7 @@ export function gerarHtmlCotacao(
           ${cotacao.opcoesVoo.map((o) => `
           <tr>
             <td><strong style="color:${/^#[0-9a-f]{3,8}$/i.test(o.corCia || "") ? o.corCia : "#0369a1"}">${o.cia}</strong><br><span style="font-size:11px;color:#64748b">${o.nome}</span></td>
-            <td>${o.segmentos?.length ? o.segmentos.map((s) => `<div style="margin-bottom:6px">${s.origin || "—"} → ${s.destination || "—"}<br>${s.departureDate ? formatDateBR(s.departureDate) : "Data não informada"} ${s.departureTime || "—"} → ${s.arrivalDate ? formatDateBR(s.arrivalDate) : "Data não informada"} ${s.arrivalTime || "—"}<br>${s.durationMinutes != null ? `${Math.floor(s.durationMinutes / 60)}h${String(s.durationMinutes % 60).padStart(2, "0")}` : "Duração não informada"}</div>`).join("") : `${o.horarioSaida}${o.horarioChegada ? " → " + o.horarioChegada : ""}`}</td>
+            <td>${o.segmentos?.length ? o.segmentos.map((s) => `<div style="margin-bottom:6px">${s.origin || "—"} → ${s.destination || "—"}<br>${s.departureDate ? formatDateBR(s.departureDate) : "Data não informada"} ${s.departureTime || "—"} → ${s.arrivalDate ? formatDateBR(s.arrivalDate) : "Data não informada"} ${s.arrivalTime || "—"}<br>${formatDurationMinutes(s.durationMinutes)}</div>`).join("") : `${o.horarioSaida}${o.horarioChegada ? " → " + o.horarioChegada : ""}`}</td>
             <td>${o.segmentos?.length ? o.segmentos.map((s) => s.stops == null ? "Não informado" : s.stops === 0 ? "Direto" : `${s.stops} parada(s)`).join("<br>") : o.conexoes || "Não informado"}</td>
             <td class="right">${formatBRL(o.precoPassagens)}</td>
             ${cotacao.opcoesVoo!.some((x) => x.precoBagagens > 0) ? `<td class="right">${o.precoBagagens > 0 ? formatBRL(o.precoBagagens) : "—"}</td>` : ""}

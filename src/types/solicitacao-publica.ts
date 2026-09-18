@@ -49,4 +49,8 @@ export type SolicitacaoPublicSubmission = {
   /** Consentimento LGPD — true quando o cliente marcou a checkbox antes de enviar */
   consentimentoLgpd?: boolean;
   consentimentoMarketing?: boolean;
+  /** Estado persistido da caixa de entrada. */
+  status?: "PENDING" | "CONVERTED" | "ARCHIVED" | "DELETED";
+  statusUpdatedAt?: string;
+  convertedAt?: string | null;
 };

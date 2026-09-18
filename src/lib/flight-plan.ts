@@ -15,6 +15,13 @@ export type ExtractedOffer = {
 export type FlightImportResult = {
   id: string; cached: boolean; extraction: { offers: ExtractedOffer[]; warnings: string[] };
 };
+
+/** Apresentação humana; o contrato continua persistindo duração total em minutos. */
+export function formatDurationMinutes(minutes: number | null | undefined): string {
+  if (minutes == null || !Number.isFinite(minutes) || minutes < 1) return "Duração não informada";
+  const total = Math.trunc(minutes);
+  return `${Math.floor(total / 60)} h ${String(total % 60).padStart(2, "0")} min`;
+}
 export type FlightCalculation = {
   tipo: CiaInput["trecho"]["tipo"]; milhasIda: number; milhasVolta: number;
   custoPorMilheiro: number; taxas: number; taxasAdicionais: number;

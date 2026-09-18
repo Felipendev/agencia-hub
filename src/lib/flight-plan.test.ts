@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildFlightPlan, commercialFlights, importedDraft, type FlightDraft, type ExtractedOffer } from "./flight-plan";
+import { buildFlightPlan, commercialFlights, formatDurationMinutes, importedDraft, type FlightDraft, type ExtractedOffer } from "./flight-plan";
 import { emptyCotacaoDetalhes } from "./cotacao-defaults";
 import { gerarHtmlCotacao } from "./pdf-generator";
 import { gerarMensagemTexto } from "./whatsapp-message";
@@ -21,6 +21,12 @@ function reviewed(): FlightDraft {
   return d;
 }
 describe("importação e cálculo dos voos", () => {
+  it("formata duração em horas e minutos sem mudar a unidade persistida", () => {
+    expect(formatDurationMinutes(1000)).toBe("16 h 40 min");
+    expect(formatDurationMinutes(355)).toBe("5 h 55 min");
+    expect(formatDurationMinutes(60)).toBe("1 h 00 min");
+    expect(formatDurationMinutes(null)).toBe("Duração não informada");
+  });
   it("preserva data ausente e impede salvar sem revisão/completar campos", () => {
     const d = importedDraft(offer, "source");
     expect(d.segmentos[0].departureDate).toBeNull();

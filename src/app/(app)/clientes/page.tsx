@@ -337,8 +337,10 @@ export default function ClientesPage() {
 
   useEffect(() => {
     if (!isReady || !hasRemoteApi || !token) return;
-    void syncClientesFromApi();
-  }, [isReady, hasRemoteApi, token, syncClientesFromApi]);
+    void syncClientesFromApi().catch(() => {
+      toast.error("Não foi possível atualizar a lista de pessoas.");
+    });
+  }, [isReady, hasRemoteApi, token, syncClientesFromApi, toast]);
 
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<ClienteStatus | "todos">("todos");

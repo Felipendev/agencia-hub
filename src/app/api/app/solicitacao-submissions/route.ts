@@ -7,6 +7,7 @@ import {
   isLocalSolicitacaoStoreEnabled,
   listSubmissions,
   removeSubmission,
+  updateSubmissionStatus,
 } from "@/lib/solicitacao-server-store";
 
 export const runtime = "nodejs";
@@ -54,6 +55,11 @@ function normalizeSubmissions(rows: unknown): SolicitacaoPublicSubmission[] {
         : undefined,
       detalhes: (o.detalhes ?? {}) as CotacaoDetalhes,
       observacoes: String(o.observacoes ?? ""),
+      status: ["PENDING", "CONVERTED", "ARCHIVED", "DELETED"].includes(String(o.status))
+        ? String(o.status) as SolicitacaoPublicSubmission["status"]
+        : "PENDING",
+      statusUpdatedAt: typeof o.statusUpdatedAt === "string" ? o.statusUpdatedAt : undefined,
+      convertedAt: typeof o.convertedAt === "string" ? o.convertedAt : null,
     };
   });
 }
@@ -163,4 +169,36 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Não encontrado" }, { status: 404 });
   }
   return NextResponse.json({ ok: true });
+}
+
+export async function PATCH(request: Request) {
+  const token = getTokenFromRequest(request);
+  const hasCookie = await cookieAuth();
+  if (!token && !hasCookie) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+  if (!id) return NextResponse.json({ error: "id obrigatório" }, { status: 400 });
+  const payload = await request.json().catch(() => null);
+  if (!payload || typeof payload !== "object") return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
+  const base = getAgenciaHubApiBaseUrl();
+  if (!base || !token) {
+    if (!hasCookie || !isLocalSolicitacaoStoreEnabled()) return NextResponse.json({ error: "A caixa de entrada exige a API configurada." }, { status: 503 });
+    const status = (payload as { status?: unknown }).status;
+    if (status !== "PENDING" && status !== "ARCHIVED" && status !== "DELETED" && status !== "CONVERTED") return NextResponse.json({ error: "Estado inválido" }, { status: 400 });
+    const ok = await updateSubmissionStatus(id, status);
+    return ok ? NextResponse.json({ ok: true }) : NextResponse.json({ error: "Não encontrado" }, { status: 404 });
+  }
+  try {
+    const res = await fetch(`${base}/agency/solicitacao-submissions/${encodeURIComponent(id)}/status`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok || res.status === 204) return NextResponse.json({ ok: true });
+    const body = await res.json().catch(() => ({})) as { message?: string };
+    return NextResponse.json({ error: body.message ?? "Não foi possível atualizar a solicitação" }, { status: res.status });
+  } catch (error) {
+    console.error("[solicitacao-submissions] PATCH:", error);
+    return NextResponse.json({ error: "Erro de conexão com o servidor" }, { status: 502 });
+  }
 }

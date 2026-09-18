@@ -21,6 +21,9 @@ export type ClientePickerProps = {
   disabled?: boolean;
   showNovoButton?: boolean;
   invalid?: boolean;
+  loading?: boolean;
+  loadError?: string;
+  onRetryLoad?: () => void;
 };
 
 export function ClientePicker({
@@ -33,6 +36,9 @@ export function ClientePicker({
   disabled = false,
   showNovoButton = true,
   invalid = false,
+  loading = false,
+  loadError,
+  onRetryLoad,
 }: ClientePickerProps) {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
@@ -82,8 +88,7 @@ export function ClientePicker({
 
   const q = search.trim();
   const showHintMinChars = q.length > 0 && q.length < CLIENTE_SEARCH_MIN_CHARS;
-  const showResults =
-    open && !selected && !disabled && q.length >= CLIENTE_SEARCH_MIN_CHARS;
+  const showResults = open && !selected && !disabled && (q.length === 0 || q.length >= CLIENTE_SEARCH_MIN_CHARS);
 
   return (
     <>
@@ -91,7 +96,7 @@ export function ClientePicker({
         <div className="flex flex-wrap items-end justify-between gap-2">
           <Label htmlFor={id} className="mb-0">
             {label}
-            {required ? " *" : ""}
+            {required ? <span aria-hidden="true" className="text-red-600"> *</span> : null}
           </Label>
           {showNovoButton && !disabled ? (
             <Button
@@ -119,7 +124,7 @@ export function ClientePicker({
             required={required}
             disabled={disabled}
             value={selected ? selected.nome : search}
-            className={selected ? "pr-20" : undefined}
+            className={`${selected ? "pr-20" : ""} ${invalid ? "border-red-500 focus-visible:ring-red-500" : ""}`.trim()}
             onChange={(event) => {
               if (value) onChange("");
               setSearch(event.target.value);
@@ -141,15 +146,17 @@ export function ClientePicker({
                 setHighlighted((h) => Math.max(0, Math.min(filtered.length - 1, h + (event.key === "ArrowDown" ? 1 : -1))));
               }
             }}
-            placeholder="Digite para buscar (mín. 2 caracteres)"
+            placeholder="Busque por nome, e-mail ou telefone"
             autoComplete="off"
           />
           {selected && !disabled && <button type="button" className="absolute right-3 top-2 text-sm" onClick={clearSelection}>Trocar</button>}
           <p id={`${id}-hint`} className="mt-1 text-xs text-[var(--hub-text-muted)]" role="status">
-            {selected ? selected.email || selected.telefone : showHintMinChars
+            {loading ? "Carregando pessoas cadastradas…" : selected ? selected.email || selected.telefone : showHintMinChars
               ? `Digite ${CLIENTE_SEARCH_MIN_CHARS} ou mais caracteres para buscar.`
-              : showResults && filtered.length === 0 ? "Nenhum cliente encontrado." : "Busque por nome, e-mail ou telefone e selecione um resultado."}
+              : showResults && filtered.length === 0 ? "Nenhuma pessoa cadastrada encontrada." : "Selecione uma pessoa cadastrada ou busque por nome, e-mail ou telefone."}
           </p>
+          {invalid ? <p className="mt-1 text-xs font-medium text-red-600" role="alert">{label} é obrigatório.</p> : null}
+          {loadError ? <div className="mt-1 flex items-center gap-2 text-xs text-red-600" role="alert"><span>{loadError}</span>{onRetryLoad ? <button type="button" className="font-semibold underline" onClick={onRetryLoad}>Tentar novamente</button> : null}</div> : null}
           {showResults && filtered.length > 0 && (
             <ul id={`${id}-results`} role="listbox" aria-label="Clientes encontrados" className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white py-1 shadow-lg">
               {filtered.map((c, index) => (

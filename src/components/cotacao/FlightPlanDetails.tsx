@@ -6,12 +6,12 @@ import { Card } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth-context";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
 import { fmtBRL } from "@/lib/calculadora-milhas";
-import type { FlightPlan } from "@/lib/flight-plan";
+import { formatDurationMinutes, type FlightPlan } from "@/lib/flight-plan";
 
 function Snapshot({ plan }: { plan: FlightPlan }) {
   return <div className="mt-3 space-y-4">{plan.options.map((o) => <div key={o.id} className="rounded-lg border border-[var(--hub-border)] p-3">
     <p className="font-semibold">{o.cia} — {o.nome}{o.id === plan.selectedOptionId ? " · Opção usada no total" : ""}</p>
-    {o.segmentos.map((s, i) => <p key={i} className="mt-1 text-sm">{s.origin} → {s.destination} · {s.departureDate} {s.departureTime} → {s.arrivalDate} {s.arrivalTime} · {s.durationMinutes} min · {s.stops} parada(s)</p>)}
+    {o.segmentos.map((s, i) => <p key={i} className="mt-1 text-sm">{s.origin} → {s.destination} · {s.departureDate} {s.departureTime} → {s.arrivalDate} {s.arrivalTime} · {formatDurationMinutes(s.durationMinutes)} · {s.stops} parada(s)</p>)}
     <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
       <div><dt>Milhas de ida / volta por pessoa</dt><dd>{o.calculo.milhasIda.toLocaleString("pt-BR")} / {o.calculo.milhasVolta.toLocaleString("pt-BR")}</dd></div>
       <div><dt>Custo do milheiro</dt><dd>{fmtBRL(o.calculo.custoPorMilheiro)}</dd></div>

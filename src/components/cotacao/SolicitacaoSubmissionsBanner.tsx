@@ -1,30 +1,10 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { ImportarSubmissaoModal } from "@/components/cotacao/ImportarSubmissaoModal";
 import { useSolicitacaoSubmissions } from "@/hooks/useSolicitacaoSubmissions";
-import { useData } from "@/contexts/data-context";
-import { RefreshCw, X } from "lucide-react";
-
-const STORAGE_KEY = "submissions-dismissed-ids";
-
-function loadDismissedIds(): Set<string> {
-  try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
-    return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
-  } catch {
-    return new Set();
-  }
-}
-
-function saveDismissedIds(ids: Set<string>) {
-  try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify([...ids]));
-  } catch {
-    /* ignore */
-  }
-}
+import { RefreshCw } from "lucide-react";
 
 export function SolicitacaoSubmissionsBanner() {
   const {
@@ -32,29 +12,7 @@ export function SolicitacaoSubmissionsBanner() {
     isRefreshing, refreshError,
   } =
     useSolicitacaoSubmissions();
-  const { cotacoes } = useData();
-
-  const [dismissedIds, setDismissedIds] = useState<Set<string>>(loadDismissedIds);
-
-  const importedPublicIds = useMemo(
-    () =>
-      new Set(
-        cotacoes
-          .filter((c) => c.origemCriacao === "formulario_publico" && c.publicSubmissionId)
-          .map((c) => c.publicSubmissionId!),
-      ),
-    [cotacoes],
-  );
-
-  const pendingList = list.filter(
-    (s) => !dismissedIds.has(s.id) && !importedPublicIds.has(s.id),
-  );
-
-  const handleDismiss = useCallback(() => {
-    const updated = new Set([...dismissedIds, ...list.map((s) => s.id)]);
-    setDismissedIds(updated);
-    saveDismissedIds(updated);
-  }, [dismissedIds, list]);
+  const pendingList = useMemo(() => list.filter((s) => (s.status ?? "PENDING") === "PENDING"), [list]);
 
   return (
     <>
@@ -79,16 +37,6 @@ export function SolicitacaoSubmissionsBanner() {
               <RefreshCw className={`mr-1 h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
               Atualizar
             </Button>
-            {pendingList.length > 0 && (
-              <button
-                type="button"
-                onClick={handleDismiss}
-                className="rounded p-0.5 text-amber-700 hover:bg-amber-100 hover:text-amber-900"
-                aria-label="Fechar aviso"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
           </div>
         </div>
         {refreshError && <p className="mt-2 text-xs font-medium text-red-700">{refreshError}</p>}

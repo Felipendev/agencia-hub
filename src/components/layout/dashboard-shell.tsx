@@ -247,7 +247,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               onClick={() => setViewAsSeller(!viewAsSeller)}
               className="w-full rounded-[var(--hub-radius-sm)] border border-white/10 px-3 py-1.5 text-[10px] font-medium text-white/50 transition-colors hover:border-white/20 hover:bg-white/8 hover:text-white/80"
             >
-              {viewAsSeller ? "← Perfil Gestor" : "Ver como Vendedor"}
+              {viewAsSeller ? "← Sair da prévia" : "Prévia do menu do vendedor"}
             </button>
           )}
           <button
@@ -330,6 +330,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           trialEndsAt={user?.trialEndsAt ?? null}
           status={user?.agencyStatus ?? ""}
         />
+
+        {viewAsSeller && (
+          <div className="mx-4 mt-4 rounded-[var(--hub-radius)] border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 lg:mx-6">
+            Prévia do menu do vendedor: sua sessão, permissões e dados continuam os de gestor.
+          </div>
+        )}
 
         <main className="flex-1 px-4 py-6 lg:px-6 lg:py-8 animate-fade-in-up">
           {children}

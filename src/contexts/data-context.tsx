@@ -462,6 +462,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setData((d) => ({ ...d, clientes: list }));
     } catch (e) {
       console.warn("[agencia-hub] Falha ao listar clientes da API.", e);
+      throw e;
     }
   }, [token]);
 

@@ -13,6 +13,9 @@ export function filterClientesForPicker(
   limit = DEFAULT_LIMIT,
 ): Cliente[] {
   const q = normalize(query.trim());
+  // Ao abrir o campo, oferecemos uma lista inicial para que o usuário consiga
+  // vincular uma pessoa já cadastrada sem precisar adivinhar dois caracteres.
+  if (!q) return clientes.slice(0, limit);
   if (q.length < CLIENTE_SEARCH_MIN_CHARS) return [];
   const digits = q.replace(/\D/g, "");
   return clientes

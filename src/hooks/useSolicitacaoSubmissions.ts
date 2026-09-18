@@ -179,10 +179,19 @@ export function useSolicitacaoSubmissions() {
               : undefined,
         });
 
-        // A cotação guarda o vínculo com a submissão. Apagá-la aqui viola a chave estrangeira
-        // e deixa uma solicitação pendente depois que a cotação é excluída. A API lista apenas
-        // submissões sem cotação vinculada.
-        setList((current) => current.filter((item) => item.id !== selectedSubmission.id));
+        // A própria criação remota marca a solicitação como CONVERTED na mesma transação.
+        // Não a apagamos: a cotação mantém a referência histórica e apagar a cotação não
+        // pode tornar esse pedido pendente novamente.
+        setList((current) => current.map((item) => item.id === selectedSubmission.id
+          ? { ...item, status: "CONVERTED", convertedAt: new Date().toISOString() }
+          : item));
+        if (!hasRemoteApi) {
+          const markRes = await fetch(`/api/app/solicitacao-submissions?id=${encodeURIComponent(selectedSubmission.id)}`, {
+            method: "PATCH", credentials: "include", headers: { ...authHeaders(), "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "CONVERTED" }),
+          });
+          if (!markRes.ok) throw new Error("Cotação criada, mas não foi possível concluir a solicitação local.");
+        }
 
         toast.success("Cotação importada com sucesso!");
         setSelectedSubmission(null);
@@ -196,8 +205,23 @@ export function useSolicitacaoSubmissions() {
         }
       }
     },
-    [selectedSubmission, addCliente, addCotacao, toast, token],
+    [selectedSubmission, addCliente, addCotacao, toast, token, authHeaders, hasRemoteApi],
   );
+
+  const updateStatus = useCallback(async (
+    submission: SolicitacaoPublicSubmission,
+    status: "PENDING" | "ARCHIVED" | "DELETED",
+  ) => {
+    const res = await fetch(`/api/app/solicitacao-submissions?id=${encodeURIComponent(submission.id)}`, {
+      method: "PATCH", credentials: "include", headers: { ...authHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    if (!res.ok) throw new Error("Não foi possível atualizar a solicitação.");
+    setList((current) => current.map((item) => item.id === submission.id
+      ? { ...item, status, statusUpdatedAt: new Date().toISOString() }
+      : item));
+    window.dispatchEvent(new CustomEvent(SUBMISSIONS_UPDATED_EVENT));
+  }, [authHeaders]);
 
   return {
     list,
@@ -208,5 +232,6 @@ export function useSolicitacaoSubmissions() {
     mergedClientes,
     isRefreshing,
     refreshError,
+    updateStatus,
   };
 }

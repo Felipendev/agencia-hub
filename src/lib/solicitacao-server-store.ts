@@ -148,3 +148,17 @@ export async function removeSubmission(id: string): Promise<boolean> {
   await writeRaw(data);
   return true;
 }
+
+export async function updateSubmissionStatus(
+  id: string,
+  status: NonNullable<SolicitacaoPublicSubmission["status"]>,
+): Promise<boolean> {
+  const data = await readRaw();
+  const row = data.submissions.find((submission) => submission.id === id);
+  if (!row) return false;
+  row.status = status;
+  row.statusUpdatedAt = new Date().toISOString();
+  if (status === "CONVERTED") row.convertedAt = row.statusUpdatedAt;
+  await writeRaw(data);
+  return true;
+}
