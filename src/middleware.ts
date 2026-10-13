@@ -11,6 +11,9 @@ const PROTECTED_PREFIXES = [
   "/meu-painel",
   "/agencia",
   "/calculadora",
+  "/biblioteca",
+  "/viagens",
+  "/vendas",
   "/configuracoes",
 ];
 
@@ -53,6 +56,9 @@ export const config = {
     "/meu-painel", "/meu-painel/:path*",
     "/agencia", "/agencia/:path*",
     "/calculadora", "/calculadora/:path*",
+    "/biblioteca", "/biblioteca/:path*",
+    "/viagens", "/viagens/:path*",
+    "/vendas", "/vendas/:path*",
     "/configuracoes", "/configuracoes/:path*",
     "/admin", "/admin/:path*",
   ],
