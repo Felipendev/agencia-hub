@@ -2,8 +2,8 @@
 
 import { FlightPlanDetails } from "@/components/cotacao/FlightPlanDetails";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useData } from "@/contexts/data-context";
 import { useToast } from "@/components/ui/toast";
@@ -43,6 +43,7 @@ import type { CotacaoStatus } from "@/types";
 
 export default function CotacaoDetalhePage() {
   const params = useParams();
+  const router = useRouter();
   const id = typeof params.id === "string" ? params.id : "";
   const { isOwner, token, user } = useAuth();
   const { clientes, cotacoes, updateCotacao, isReady } = useData();
@@ -58,6 +59,8 @@ export default function CotacaoDetalhePage() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [waModalOpen, setWaModalOpen] = useState(false);
   const [sellers, setSellers] = useState<ApiUserResponse[]>([]);
+  const [saving, setSaving] = useState(false);
+  const pending = useRef(false);
   const { name: nomeAgencia, logo: logoAgencia } = useAgencyBranding();
 
   useEffect(() => {
@@ -128,21 +131,47 @@ export default function CotacaoDetalhePage() {
     d.celular
   );
 
-  function saveCampos() {
+  async function saveCampos() {
+    if (pending.current) return;
+    pending.current = true; setSaving(true);
     const v = parseCurrencyInput(valorEdit);
-    updateCotacao(id, {
+    try { await updateCotacao(id, {
       valorTotal: v,
       validade: validadeEdit,
       observacoes: obsEdit.trim(),
       status: statusEdit,
     });
     toast.success("Cotacao atualizada com sucesso!");
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível salvar a cotação."); }
+    finally { pending.current = false; setSaving(false); }
   }
 
-  function aplicarStatus(novo: CotacaoStatus) {
-    updateCotacao(id, { status: novo });
+  async function aplicarStatus(novo: CotacaoStatus) {
+    if (pending.current) return;
+    pending.current = true; setSaving(true);
+    try { await updateCotacao(id, { status: novo });
     setStatusEdit(novo);
     toast.success(`Status alterado para "${COTACAO_STATUS_LABELS[novo]}"`);
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível alterar o status."); }
+    finally { pending.current = false; setSaving(false); }
+  }
+
+  async function abrirViagem() {
+    if (pending.current) return;
+    pending.current = true; setSaving(true);
+    try {
+      const base = getAgenciaHubApiBaseUrl();
+      if (!base || !token) throw new Error("Conecte-se para consultar a viagem.");
+      const response = await fetch(`${base}/trips?quotationId=${encodeURIComponent(id)}`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!response.ok) throw new Error("Não foi possível consultar a viagem. Tente novamente.");
+      const rows: { id: string }[] = await response.json();
+      if (rows.length === 1) router.push(`/viagens/${rows[0].id}`);
+      else if (rows.length > 1) {
+        toast.error("Há mais de uma viagem vinculada. Revise os registros existentes antes de cadastrar outra.");
+        router.push(`/viagens?cotacaoId=${encodeURIComponent(id)}`);
+      } else router.push(`/viagens/nova?cotacaoId=${id}&clienteId=${cotacao!.clienteId}`);
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível abrir a viagem."); }
+    finally { pending.current = false; setSaving(false); }
   }
 
   function handleImprimir() {
@@ -318,7 +347,7 @@ export default function CotacaoDetalhePage() {
                 type="button"
                 variant={cotacao.status === s ? "primary" : "secondary"}
                 className="!py-2 text-xs"
-                disabled={cotacao.status === s}
+                disabled={saving || cotacao.status === s}
                 onClick={() => aplicarStatus(s)}
               >
                 {COTACAO_STATUS_LABELS[s]}
@@ -326,12 +355,7 @@ export default function CotacaoDetalhePage() {
             ))}
           </div>
           {cotacao.status === "aprovado" && (
-            <Link
-              href={`/viagens/nova?cotacaoId=${cotacao.id}&clienteId=${cotacao.clienteId}`}
-              className="mt-4 inline-flex rounded-[var(--hub-radius)] bg-[var(--hub-blue-dark)] px-4 py-2 text-sm font-medium text-white"
-            >
-              Converter em viagem
-            </Link>
+            <Button type="button" disabled={saving} onClick={abrirViagem} className="mt-4">Abrir viagem vinculada</Button>
           )}
         </Card>
       </div>

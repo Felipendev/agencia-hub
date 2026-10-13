@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,17 +32,23 @@ export default function ViagensPage() {
   const { clientes, isReady, hasRemoteApi, syncClientesFromApi } = useData();
   const base = process.env.NEXT_PUBLIC_AGENCIA_HUB_API_URL;
   const preferencesKey = `agencia-hub:trip-view:${user?.id ?? "anonymous"}`;
+  const requestSequence = useRef(0);
+  const [quotationFilter, setQuotationFilter] = useState("");
   const [trips, setTrips] = useState<Trip[]>([]); const [customerId, setCustomerId] = useState(""); const [locator, setLocator] = useState(""); const [status, setStatus] = useState(""); const [from, setFrom] = useState(""); const [to, setTo] = useState(""); const [view, setView] = useState<TripView>("ALL"); const [sort, setSort] = useState<TripSort>("TRAVEL_START_ASC"); const [error, setError] = useState(""); const [loading, setLoading] = useState(false);
 
-  useEffect(() => { try { const saved = localStorage.getItem(preferencesKey); if (!saved) return; const parsed = JSON.parse(saved) as { view?: TripView; sort?: TripSort }; if (parsed.view && viewLabels[parsed.view]) setView(parsed.view); if (parsed.sort && sortLabels[parsed.sort]) setSort(parsed.sort); } catch { /* preferência local pode ser descartada */ } }, [preferencesKey]);
-  useEffect(() => { localStorage.setItem(preferencesKey, JSON.stringify({ view, sort })); }, [preferencesKey, view, sort]);
+  useEffect(() => { try { if (new URL(window.location.href).searchParams.has("cotacaoId")) { setView("ALL"); return; } const saved = localStorage.getItem(preferencesKey); if (!saved) return; const parsed = JSON.parse(saved) as { view?: TripView; sort?: TripSort }; if (parsed.view && viewLabels[parsed.view]) setView(parsed.view); if (parsed.sort && sortLabels[parsed.sort]) setSort(parsed.sort); } catch { /* preferência local pode ser descartada */ } }, [preferencesKey]);
+  useEffect(() => { if (new URL(window.location.href).searchParams.has("cotacaoId")) return; localStorage.setItem(preferencesKey, JSON.stringify({ view, sort })); }, [preferencesKey, view, sort]);
   useEffect(() => { if (!isReady || !hasRemoteApi || !token) return; void syncClientesFromApi().catch(() => undefined); }, [isReady, hasRemoteApi, token, syncClientesFromApi]);
 
   const load = useCallback(async () => {
     if (!base || !token) return;
+    const sequence = ++requestSequence.current;
     setLoading(true); setError(""); const params = new URLSearchParams();
+    const quotationId = new URL(window.location.href).searchParams.get("cotacaoId");
+    setQuotationFilter(quotationId ?? "");
+    if (quotationId) params.set("quotationId", quotationId);
     if (customerId) params.set("customerId", customerId); if (locator) params.set("locator", locator); if (status) params.set("status", status); if (from) params.set("from", from); if (to) params.set("to", to); params.set("sort", sort);
-    try { const response = await fetch(`${base}/trips?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } }); if (!response.ok) { setError("Não foi possível carregar as viagens."); return; } setTrips(await response.json()); } catch { setError("Não foi possível comunicar com o servidor."); } finally { setLoading(false); }
+    try { const response = await fetch(`${base}/trips?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } }); if (sequence !== requestSequence.current) return; if (!response.ok) { setError("Não foi possível carregar as viagens."); return; } const rows = await response.json(); if (sequence === requestSequence.current) setTrips(rows); } catch { if (sequence === requestSequence.current) setError("Não foi possível comunicar com o servidor."); } finally { if (sequence === requestSequence.current) setLoading(false); }
   }, [base, token, customerId, locator, status, from, to, sort]);
   useEffect(() => { void load(); }, [load]);
 
@@ -54,6 +60,7 @@ export default function ViagensPage() {
   const setMonth = (offset: number) => { const bounds = monthBounds(offset); setFrom(bounds.from); setTo(bounds.to); };
 
   return <div className="space-y-6">
+    {quotationFilter && <p className="rounded-lg border bg-white p-3 text-sm">Mostrando viagens vinculadas à cotação selecionada. <button type="button" className="underline" onClick={() => { const url = new URL(window.location.href); url.searchParams.delete("cotacaoId"); window.history.replaceState(null, "", url); void load(); }}>Ver viagens de todas as cotações</button></p>}
     <div className="flex items-center justify-between"><div><h1 className="text-2xl font-bold text-[var(--hub-text-primary)]">Viagens</h1><p className="text-sm text-[var(--hub-text-secondary)]">Acompanhe emissões por período, proximidade e status.</p></div><Link href="/viagens/nova" className="inline-flex rounded-[var(--hub-radius)] bg-[var(--hub-blue-dark)] px-4 py-2 text-sm font-medium text-white">+ Nova viagem</Link></div>
     <section className="space-y-3 rounded-xl border border-[var(--hub-border)] bg-white p-4"><div className="flex flex-wrap gap-2" aria-label="Visualização de viagens">{(Object.keys(viewLabels) as TripView[]).map((value) => <button key={value} type="button" onClick={() => setView(value)} className={`rounded-full px-3 py-1.5 text-sm font-medium ${view === value ? "bg-[var(--hub-blue-dark)] text-white" : "bg-[var(--hub-bg-subtle)] text-[var(--hub-text-secondary)]"}`}>{viewLabels[value]}</button>)}<button type="button" onClick={() => setMonth(0)} className="rounded-full border border-[var(--hub-border)] px-3 py-1.5 text-sm">Este mês</button><button type="button" onClick={() => setMonth(1)} className="rounded-full border border-[var(--hub-border)] px-3 py-1.5 text-sm">Próximo mês</button><button type="button" onClick={() => { setView("ALL"); setCustomerId(""); setLocator(""); setStatus(""); setFrom(""); setTo(""); }} className="rounded-full border border-[var(--hub-border)] px-3 py-1.5 text-sm">Limpar filtros</button></div><div className="grid gap-3 md:grid-cols-6"><div><Label>Cliente</Label><Select value={customerId} onChange={(event) => setCustomerId(event.target.value)}><option value="">Todos</option>{clientes.map((customer) => <option key={customer.id} value={customer.id}>{customer.nome}</option>)}</Select></div><div><Label>Localizador</Label><Input value={locator} onChange={(event) => setLocator(event.target.value)} placeholder="Ex.: ABC123" /></div><div><Label>Status</Label><Select value={status} onChange={(event) => setStatus(event.target.value)}><option value="">Todos</option>{Object.entries(TRIP_STATUS_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</Select></div><div><Label>Partida de</Label><Input type="date" value={from} onChange={(event) => setFrom(event.target.value)} /></div><div><Label>Partida até</Label><Input type="date" value={to} onChange={(event) => setTo(event.target.value)} /></div><div><Label>Ordenar por</Label><Select value={sort} onChange={(event) => setSort(event.target.value as TripSort)}>{(Object.keys(sortLabels) as TripSort[]).map((value) => <option key={value} value={value}>{sortLabels[value]}</option>)}</Select></div></div></section>
     {error && <p role="alert" className="text-sm text-red-600">{error}</p>}

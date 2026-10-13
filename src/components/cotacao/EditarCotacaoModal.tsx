@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useData } from "@/contexts/data-context";
 import { useAuth } from "@/contexts/auth-context";
 import { useToast } from "@/components/ui/toast";
@@ -48,6 +48,8 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
   const { token, user } = useAuth();
   const toast = useToast();
   const [tab, setTab] = useState<Tab>("geral");
+  const [saving, setSaving] = useState(false);
+  const pending = useRef(false);
 
   // --- Aba Geral ---
   const [titulo,      setTitulo]      = useState(cotacao.titulo);
@@ -141,7 +143,8 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
     setDet((d) => ({ ...d, ...patch }));
   }
 
-  function handleSave() {
+  async function handleSave() {
+    if (pending.current) return;
     if (!titulo.trim()) { toast.error("Título é obrigatório"); return; }
     if (!clienteId)     { toast.error("Selecione um cliente"); return; }
 
@@ -152,7 +155,8 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
       det.destinoForm.trim() ||
       cotacao.destino;
 
-    updateCotacao(cotacao.id, {
+    pending.current = true; setSaving(true);
+    try { await updateCotacao(cotacao.id, {
       titulo:           titulo.trim(),
       clienteId,
       destino,
@@ -172,6 +176,8 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
     });
     toast.success("Cotação atualizada com sucesso!");
     onClose();
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Não foi possível salvar a cotação."); }
+    finally { pending.current = false; setSaving(false); }
   }
 
   return (
@@ -408,7 +414,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
             <Button type="button" variant="secondary" onClick={onClose}>
               Cancelar
             </Button>
-            <Button type="button" onClick={handleSave}>
+            <Button type="button" disabled={saving} onClick={handleSave}>
               Salvar alterações
             </Button>
           </div>

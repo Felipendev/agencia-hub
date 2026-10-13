@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +44,8 @@ export default function NovaViagemPage() {
   const [error, setError] = useState("");
   const [attempted, setAttempted] = useState(false);
   const [saving, setSaving] = useState(false);
+  const submitting = useRef(false);
+  const requestId = useRef<string | null>(null);
 
   const cotacao = useMemo(() => cotacoes.find((q) => q.id === quotationId), [cotacoes, quotationId]);
 
@@ -68,13 +70,28 @@ export default function NovaViagemPage() {
   function removeSegment(index: number) { setSegments((current) => current.filter((_, position) => position !== index)); }
 
   async function submit(event: React.FormEvent) {
-    event.preventDefault(); setError(""); setAttempted(true);
+    event.preventDefault();
+    if (submitting.current) return;
+    setError(""); setAttempted(true);
     if (!base || !token || !customerId) { setError("Selecione o cliente."); return; }
-    setSaving(true);
+    submitting.current = true; setSaving(true);
     try {
+      if (quotationId) {
+        const existing = await fetch(`${base}/trips?quotationId=${encodeURIComponent(quotationId)}`, { headers: { Authorization: `Bearer ${token}` } });
+        if (!existing.ok) throw new Error("Não foi possível conferir as viagens vinculadas. Tente novamente.");
+        const rows: { id: string; serviceType: string; approvalPlaceholder?: boolean }[] = await existing.json();
+        const matching = rows.filter(r => r.serviceType.toUpperCase() === serviceType || r.approvalPlaceholder);
+        if (matching.length) {
+          if (matching.length === 1) router.push(`/viagens/${matching[0].id}`);
+          else router.push(`/viagens?cotacaoId=${encodeURIComponent(quotationId)}`);
+          setError("Já existe uma viagem vinculada. Complete os dados no registro existente.");
+          return;
+        }
+      }
+      requestId.current ??= crypto.randomUUID();
       const response = await fetch(`${base}/trips`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`, "Idempotency-Key": requestId.current },
         body: JSON.stringify({
           customerId,
           supplierId: supplierSelection.startsWith("supplier:") ? supplierSelection.slice("supplier:".length) : null,
@@ -101,12 +118,13 @@ export default function NovaViagemPage() {
             })),
         }),
       });
-      if (!response.ok) { setError("Não foi possível registrar a viagem. Revise os dados e tente novamente."); return; }
+      if (!response.ok) { const data = await response.json().catch(() => null); setError(data?.message || "Não foi possível registrar a viagem. Revise os dados e tente novamente."); return; }
       const created = await response.json() as { trip: { id: string } };
       router.push(`/viagens/${created.trip.id}`);
-    } catch {
-      setError("Não foi possível comunicar com o servidor.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Não foi possível comunicar com o servidor.");
     } finally {
+      submitting.current = false;
       setSaving(false);
     }
   }
