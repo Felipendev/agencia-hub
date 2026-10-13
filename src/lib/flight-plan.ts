@@ -23,6 +23,8 @@ export function formatDurationMinutes(minutes: number | null | undefined): strin
   return `${Math.floor(total / 60)} h ${String(total % 60).padStart(2, "0")} min`;
 }
 export type FlightCalculation = {
+  fonteTipo?: "MILHAS" | "CIA" | "CONSOLIDADORA" | "PESQUISA";
+  empresaVendedora?: string; observacoesComparativo?: string;
   tipo: CiaInput["trecho"]["tipo"]; milhasIda: number; milhasVolta: number;
   custoPorMilheiro: number; taxas: number; taxasAdicionais: number;
   valorMala: number; qtdMalas: number; lucroConfig: LucroConfig;

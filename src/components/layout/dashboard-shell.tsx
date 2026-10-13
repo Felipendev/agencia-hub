@@ -59,8 +59,9 @@ const OWNER_GROUPS: NavGroup[] = [
   {
     label: "Operacional",
     items: [
-      { href: "/calculadora", label: "Calculadora de Milhas", icon: "calculator" },
+      { href: "/calculadora", label: "Calculadora de voos", icon: "calculator" },
       { href: "/viagens",     label: "Viagens",                icon: "plane"      },
+      { href: "/biblioteca",  label: "Biblioteca",             icon: "document"   },
     ],
   },
   {
@@ -100,8 +101,9 @@ const SELLER_GROUPS: NavGroup[] = [
   {
     label: "Operacional",
     items: [
-      { href: "/calculadora", label: "Calculadora de Milhas", icon: "calculator" },
+      { href: "/calculadora", label: "Calculadora de voos", icon: "calculator" },
       { href: "/viagens",     label: "Viagens",                icon: "plane"      },
+      { href: "/biblioteca",  label: "Biblioteca",             icon: "document"   },
     ],
   },
   {

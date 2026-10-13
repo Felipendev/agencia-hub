@@ -10,12 +10,12 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { ClientePicker } from "@/components/cliente/ClientePicker";
 import { useData } from "@/contexts/data-context";
-import { carregarTabelas, getValorMilheiro, MILEAGE_TABLES_UPDATED_EVENT } from "@/lib/tabelas-milhas";
+import { carregarTabelas, getValorMilheiro, encontrarCompanhia, MILEAGE_TABLES_UPDATED_EVENT } from "@/lib/tabelas-milhas";
 import { PageHeader } from "@/components/layout/page-header";
 import { ImportarVoos } from "@/components/cotacao/ImportarVoos";
 import { FlightOptionForm } from "@/components/cotacao/FlightOptionForm";
 import { emptyCotacaoDetalhes } from "@/lib/cotacao-defaults";
-import { buildFlightPlan, commercialFlights, importedDraft, newFlightDraft, type FlightDraft, type FlightImportResult } from "@/lib/flight-plan";
+import { calculateFlight, buildFlightPlan, commercialFlights, importedDraft, newFlightDraft, type FlightDraft, type FlightImportResult } from "@/lib/flight-plan";
 import type { Cotacao } from "@/types";
 
 function Calculator({ initial }: { initial?: Cotacao }) {
@@ -78,7 +78,7 @@ function Calculator({ initial }: { initial?: Cotacao }) {
   function imported(result: FlightImportResult): boolean {
     const additions = result.extraction.offers.map((offer) => {
       const draft = importedDraft(offer, result.id);
-      const cia = tables.cias.find((c) => c.nome.toUpperCase().includes((offer.airline ?? "__").toUpperCase()));
+      const cia = encontrarCompanhia(tables.cias, offer.airline);
       if (cia) { draft.cia = cia.nome; draft.corCia = cia.cor; draft.calculo.custoPorMilheiro = getValorMilheiro(cia, draft.calculo.milhasIda); }
       draft.avisos = [...result.extraction.warnings, ...draft.avisos];
       return draft;
@@ -127,26 +127,26 @@ function Calculator({ initial }: { initial?: Cotacao }) {
         detalhes: { ...emptyCotacaoDetalhes(), servicosDesejados: ["passagem"], origem: first.origin || "", destinoForm: first.destination || "",
           destinosTrechos: selected.segmentos.map((s) => `${s.origin || "A confirmar"} → ${s.destination || "A confirmar"}`), dataIda: first.departureDate || "",
           dataVolta: selected.calculo.tipo === "ida_volta" ? last.departureDate || "" : "", adultos: selected.qtdPessoas,
-          usaMilhas: true, malasDespachadas: selected.calculo.qtdMalas > 0, qtdMalas: String(selected.calculo.qtdMalas) },
-        tags: ["milhas"], prioridade: false, responsavel: "", flightPlan: plan, opcoesVoo: commercialFlights(plan),
+          usaMilhas: selected.calculo.milhasIda + selected.calculo.milhasVolta > 0, malasDespachadas: selected.calculo.qtdMalas > 0, qtdMalas: String(selected.calculo.qtdMalas) },
+        tags: [selected.calculo.fonteTipo === "CONSOLIDADORA" ? "consolidadora" : selected.calculo.milhasIda > 0 ? "milhas" : "voos"], prioridade: false, responsavel: "", flightPlan: plan, opcoesVoo: commercialFlights(plan),
       });
       router.push(`/cotacoes/${nova.id}`);
     } catch (e) { setError(e instanceof Error ? e.message : "Não foi possível salvar a cotação."); }
     finally { saving.current = false; setBusy(false); }
   }
-  return <div className="space-y-5">
-    <PageHeader title="Calculadora de Milhas" description="Importe ou preencha os voos, confira os custos e prepare a cotação.">
+  return <div className="mx-auto w-full max-w-[1440px] space-y-6">
+    <PageHeader title="Calculadora de voos" description="Importe ou preencha os voos, confira os custos e prepare a cotação.">
       <Link href="/calculadora/milheiro" className="text-sm text-[var(--hub-blue)] hover:underline">Precificar milheiro</Link>
     </PageHeader>
     <fieldset disabled={busy} className="space-y-5">
-      <Card padding="p-0" className="overflow-hidden">
-        <div className="border-b border-[var(--hub-border)] bg-[var(--hub-bg-subtle)]/70 px-5 py-4 sm:px-6">
+      <Card padding="p-0" className="min-w-0">
+        <div className="rounded-t-xl border-b border-[var(--hub-border)] bg-[var(--hub-bg-subtle)]/70 px-5 py-4 sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--hub-text-muted)]">Destino do cálculo</p>
           <h2 className="mt-1 text-base font-semibold text-[var(--hub-text-primary)]">Prepare a cotação antes de incluir os voos</h2>
           <p className="mt-1 text-sm text-[var(--hub-text-secondary)]">Escolha se este cálculo cria uma cotação nova ou atualiza uma já existente.</p>
         </div>
-        <div className="grid gap-x-6 gap-y-5 px-5 py-5 sm:px-6 lg:grid-cols-12">
-          <div className="lg:col-span-5">
+        <div className="grid gap-x-6 gap-y-5 px-5 py-5 sm:px-6 xl:grid-cols-3 md:grid-cols-2">
+          <div className="min-w-0">
             <Label htmlFor="calc-target">Salvar em</Label>
             <Select id="calc-target" value={targetId} onChange={(e) => { setTargetId(e.target.value); setError(""); }}>
               <option value="">Nova cotação</option>
@@ -155,15 +155,15 @@ function Calculator({ initial }: { initial?: Cotacao }) {
             <p className="mt-1.5 text-xs text-[var(--hub-text-muted)]">A nova cotação começa a partir dos dados deste formulário.</p>
           </div>
           {!targetId ? <>
-            <div className="lg:col-span-7">
+            <div className="min-w-0">
               <ClientePicker id="calc-cliente" label="Cliente" required invalid={attemptedSave && !clienteSelecionado} clientes={clientes} value={clienteId} onChange={setClienteId} loading={clientesLoading} loadError={clientesLoadError} onRetryLoad={() => void loadClientes()} />
             </div>
-            <div className="lg:col-span-5">
+            <div className="min-w-0">
               <Label htmlFor="calc-title">Título <span className="font-normal text-[var(--hub-text-muted)]">(opcional)</span></Label>
               <Input id="calc-title" value={title} maxLength={150} onChange={(e) => setTitle(e.target.value)} placeholder="Ex.: Passagens Fortaleza → Lisboa" />
               <p className="mt-1.5 text-xs text-[var(--hub-text-muted)]">Se ficar vazio, o sistema cria um título a partir dos trechos.</p>
             </div>
-          </> : <div className="flex items-start justify-between gap-4 rounded-lg border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] p-4 lg:col-span-7">
+          </> : <div className="flex flex-wrap items-start justify-between gap-4 rounded-lg border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] p-4 min-w-0">
             <div><p className="text-sm font-medium text-[var(--hub-text-primary)]">Atualizar voos da cotação selecionada</p><p className="mt-1 text-xs text-[var(--hub-text-secondary)]">O plano salvo substitui as opções de voo atuais; os demais dados da cotação são mantidos.</p></div>
             {target?.flightPlan ? <Button type="button" variant="secondary" className="shrink-0" onClick={loadSaved}>Carregar opções</Button> : null}
           </div>}
@@ -176,6 +176,9 @@ function Calculator({ initial }: { initial?: Cotacao }) {
       </div>
       {attemptedSave && !targetId && !clienteSelecionado && <p className="text-sm text-red-600" role="alert">Selecione um cliente.</p>}
       {attemptedSave && !options.some((option) => option.incluir && option.id === principal) && <p className="text-sm text-red-600" role="alert">Escolha uma opção principal da cotação.</p>}
+      <Card><h2 className="font-semibold">Comparativo de preços</h2><p className="mt-1 text-sm text-[var(--hub-text-secondary)]">Compare milhas, companhias e consolidadoras. Lucro (DU / RAV) é a margem do grupo; fica visível só para a agência.</p>
+        <div className="mt-4 overflow-x-auto"><table className="w-full text-left text-sm"><thead><tr className="border-b"><th className="p-2">Fonte</th><th className="p-2">Companhia(s)</th><th className="p-2">Empresa vendedora</th><th className="p-2 text-right">Preço final</th><th className="p-2 text-right">Lucro (DU / RAV)</th><th className="p-2">Condições</th><th className="p-2">Principal</th></tr></thead><tbody>{options.filter(o => o.incluir).map(o => { const result = calculateFlight(o); return <tr key={o.id} className="border-b"><td className="p-2">{{ MILHAS: "Milhas", CIA: "Companhia", CONSOLIDADORA: "Consolidadora", PESQUISA: "Pesquisa" }[o.calculo.fonteTipo ?? "MILHAS"]}</td><td className="p-2">{o.cia || "—"}</td><td className="p-2">{o.calculo.empresaVendedora || "—"}</td><td className="p-2 text-right">{result.precoTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</td><td className="p-2 text-right">{((result.calculo.lucroPorPessoa ?? 0) * o.qtdPessoas).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</td><td className="p-2">{o.calculo.observacoesComparativo || "—"}</td><td className="p-2"><input aria-label={`Usar ${o.nome} como principal`} type="radio" checked={principal === o.id} onChange={() => setPrincipal(o.id)} /></td></tr>; })}</tbody></table></div>
+      </Card>
       {options.map((option) => <FlightOptionForm key={option.id} option={option} tables={tables} principal={principal === option.id} showValidationErrors={attemptedSave}
         onPrincipal={() => setPrincipal(option.id)}
         onChange={(changed) => setOptions((current) => current.map((o) => o.id === changed.id ? changed : o))}
@@ -185,7 +188,7 @@ function Calculator({ initial }: { initial?: Cotacao }) {
         {targetId && <p className="mt-2 text-sm font-medium">Ao salvar, o total atual da cotação será substituído pelo preço desta opção. Valores de outros serviços não serão somados. Confira também as datas e o destino no cadastro da cotação.</p>}
         <p className="mt-1 text-sm text-[var(--hub-text-secondary)]">O PDF mostra os voos e preços finais. A memória de cálculo fica no detalhe interno.</p>
         {error && <p className="mt-3 text-sm text-red-600" role="alert">{error}</p>}
-        {principal && (() => { const chosen = options.find((option) => option.id === principal); return chosen ? <p className="mt-3 text-sm font-medium">Preço da cotação: {chosen.precoTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} — definido pela opção “{chosen.nome || "sem nome"}”.</p> : null; })()}
+        {principal && (() => { const chosen = options.find((option) => option.id === principal); return chosen ? <p className="mt-3 text-sm font-medium">Preço da cotação: {calculateFlight(chosen).precoTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })} — definido pela opção “{chosen.nome || "sem nome"}”.</p> : null; })()}
         <Button type="button" className="mt-4" onClick={() => void save()} disabled={busy || !options.some((o) => o.incluir)}>{busy ? "Salvando…" : targetId ? "Atualizar voos da cotação" : "Criar cotação com voos"}</Button>
       </Card>
     </fieldset>
