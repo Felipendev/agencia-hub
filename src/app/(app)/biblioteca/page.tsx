@@ -8,12 +8,6 @@ import { Input } from "@/components/ui/input";
 
 type Material = { id: string; title: string; category: string; kind: string; url?: string; body?: string; filename?: string };
 const categories: Record<string, string> = { BAGAGEM: "Bagagem", IMIGRACAO: "Imigração", FORMULARIO: "Formulários", CONTRATO: "Contratos", AGENCIA: "Documentos da agência", NOTA_FISCAL: "Nota fiscal", OUTROS: "Outros" };
-const shortcuts = [
-  ["LATAM — bagagem", "https://www.latamairlines.com/br/pt/central-ajuda/perguntas/bagagem"],
-  ["GOL — bagagem", "https://www.voegol.com.br/pt-br/informacoes/bagagem"],
-  ["Azul — bagagem", "https://www.voeazul.com.br/pt/pt/sua-viagem/planeje/bagagens"],
-  ["Portal consular — vistos e documentos", "https://www.gov.br/mre/pt-br/assuntos/portal-consular"],
-];
 const invoice = "MODELO DE NOTA FISCAL — DOCUMENTO DE APOIO\n\nAgência: [nome]\nCNPJ: [CNPJ]\nEndereço: [endereço]\nCliente: [nome / razão social]\nCPF/CNPJ: [documento]\nData: [data]\nDescrição do serviço: [descrição]\nValor: R$ [valor]\nObservações: [observações]\n\nPreencha este modelo para organizar os dados. A emissão e a validade fiscal dependem do serviço de emissão utilizado pela agência.";
 const empty = { title: "", category: "OUTROS", kind: "LINK", url: "", body: "" };
 
@@ -27,6 +21,7 @@ export default function BibliotecaPage() {
   const [category, setCategory] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [loaded, setLoaded] = useState(false);
   const base = getAgenciaHubApiBaseUrl();
 
@@ -49,15 +44,18 @@ export default function BibliotecaPage() {
     return () => controller.abort();
   }, [base, token]);
   async function save(event: React.FormEvent) {
-    event.preventDefault(); setBusy(true); setError("");
+    event.preventDefault(); setBusy(true); setError(""); setNotice("");
     try {
       let init: RequestInit;
-      if (form.kind === "FILE" && !editing) {
+      let path = editing ? `/${editing}` : "";
+      if (form.kind === "FILE" && (!editing || file)) {
         if (!file || file.size > 5 * 1024 * 1024) throw new Error("Escolha um arquivo de até 5 MB.");
         const data = new FormData(); data.set("title", form.title); data.set("category", form.category); data.set("file", file);
-        init = { method: "POST", body: data };
+        init = { method: editing ? "PUT" : "POST", body: data };
+        path = editing ? `/${editing}/file` : "/files";
       } else init = { method: editing ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) };
-      const saved: Material = await (await request(editing ? `/${editing}` : form.kind === "FILE" ? "/files" : "", init)).json();
+      const saved: Material = await (await request(path, init)).json();
+      setNotice(editing ? "Material atualizado." : "Material adicionado.");
       setMaterials((rows) => [...rows.filter((r) => r.id !== saved.id), saved]); setLoaded(true); setEditing(null); setForm(empty); setFile(null);
     } catch (e) { setError(e instanceof Error ? e.message : "Erro ao salvar."); } finally { setBusy(false); }
   }
@@ -70,15 +68,16 @@ export default function BibliotecaPage() {
   }
   async function remove(row: Material) {
     if (!window.confirm(`Excluir “${row.title}” da biblioteca da agência?`)) return;
-    setBusy(true); setError("");
-    try { await request(`/${row.id}`, { method: "DELETE" }); setMaterials((rows) => rows.filter((r) => r.id !== row.id)); }
+    setBusy(true); setError(""); setNotice("");
+    try { await request(`/${row.id}`, { method: "DELETE" }); setMaterials((rows) => rows.filter((r) => r.id !== row.id)); if (editing === row.id) { setEditing(null); setForm(empty); setFile(null); } setNotice("Material excluído."); }
     catch (e) { setError(e instanceof Error ? e.message : "Erro ao excluir."); } finally { setBusy(false); }
   }
   const visible = materials.filter((r) => (!category || r.category === category) && `${r.title} ${r.filename ?? ""}`.toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR")));
   return <div className="space-y-6">
     <div><h1 className="text-2xl font-semibold">Biblioteca da agência</h1><p className="text-sm text-muted-foreground">Links, formulários, arquivos e modelos compartilhados com sua equipe.</p></div>
     {(error || !base) && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error || "A biblioteca precisa de conexão com o serviço da agência para salvar e carregar materiais."}</p>}
-    <section className="rounded-xl border bg-white p-5"><h2 className="mb-3 font-semibold">Atalhos oficiais</h2><div className="flex flex-wrap gap-3">{shortcuts.map(([title, url]) => <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="text-sm underline underline-offset-4">{title}</a>)}</div><p className="mt-3 text-xs text-muted-foreground">Consulte as regras atuais e os requisitos específicos do destino nos sites oficiais.</p></section>
+    {notice && <p role="status" className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">{notice}</p>}
+    <p className="text-sm text-muted-foreground">Os links oficiais também podem ser editados ou excluídos na lista de materiais. Consulte sempre as regras atuais nos sites de origem.</p>
     <form onSubmit={save} className="space-y-4 rounded-xl border bg-white p-5">
       <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-semibold">{editing ? "Editar material" : "Adicionar material"}</h2><Button type="button" variant="secondary" disabled={busy} onClick={() => { setEditing(null); setFile(null); setForm({ ...empty, title: "Modelo de nota fiscal", kind: "TEMPLATE", category: "NOTA_FISCAL", body: invoice }); }}>Usar modelo de NF</Button></div>
       <div className="grid gap-4 md:grid-cols-3">
@@ -87,13 +86,13 @@ export default function BibliotecaPage() {
         <label className="space-y-1 text-sm">Tipo<select disabled={!!editing} className="h-10 w-full rounded-md border bg-white px-3" value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value })}><option value="LINK">Link</option><option value="FILE">Arquivo</option><option value="TEMPLATE">Modelo editável</option></select></label>
       </div>
       {form.kind === "LINK" && <label className="block space-y-1 text-sm">Endereço do site<Input required type="url" maxLength={2048} placeholder="https://" value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} /></label>}
-      {form.kind === "FILE" && !editing && <label className="block space-y-1 text-sm">Arquivo (até 5 MB)<Input type="file" required accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx,.xls,.xlsx,.txt,.csv" onChange={(e) => setFile(e.target.files?.[0] ?? null)} /></label>}
+      {form.kind === "FILE" && <label className="block space-y-1 text-sm">{editing ? "Substituir arquivo (opcional, até 5 MB)" : "Arquivo (até 5 MB)"}<Input key={editing ?? "new-file"} type="file" required={!editing} accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx,.xls,.xlsx,.txt,.csv" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />{editing && <span className="text-xs text-muted-foreground">Sem um novo arquivo, o documento atual será mantido.</span>}</label>}
       {form.kind === "TEMPLATE" && <label className="block space-y-1 text-sm">Conteúdo do modelo<textarea required maxLength={20000} rows={12} className="w-full rounded-md border p-3" value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} /></label>}
-      <div className="flex gap-2"><Button disabled={busy || !token || !base} type="submit">{busy ? "Salvando…" : "Salvar material"}</Button>{editing && <Button type="button" variant="secondary" onClick={() => { setEditing(null); setForm(empty); }}>Cancelar edição</Button>}</div>
+      <div className="flex gap-2"><Button disabled={busy || !token || !base} type="submit">{busy ? "Salvando…" : editing ? "Salvar alterações" : "Salvar material"}</Button>{editing && <Button type="button" variant="secondary" disabled={busy} onClick={() => { setEditing(null); setForm(empty); setFile(null); }}>Cancelar edição</Button>}</div>
     </form>
     <section className="space-y-4"><div className="flex flex-wrap gap-3"><Input aria-label="Buscar materiais" placeholder="Buscar materiais" value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm" /><select aria-label="Filtrar categoria" className="rounded-md border bg-white px-3" value={category} onChange={(e) => setCategory(e.target.value)}><option value="">Todas as categorias</option>{Object.entries(categories).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></div>
       {visible.length === 0 && <p className="text-sm text-muted-foreground">{loaded ? "Nenhum material encontrado. Adicione os documentos e links da agência acima." : error || !base ? "Os materiais estarão disponíveis quando a conexão for restabelecida." : "Carregando biblioteca…"}</p>}
-      <div className="grid gap-4 md:grid-cols-2">{visible.map((row) => <article key={row.id} className="space-y-3 rounded-xl border bg-white p-5"><div><p className="text-xs text-muted-foreground">{categories[row.category]} · {row.kind === "LINK" ? "Link" : row.kind === "FILE" ? "Arquivo" : "Modelo editável"}</p><h3 className="font-semibold">{row.title}</h3>{row.filename && <p className="text-sm text-muted-foreground">{row.filename}</p>}</div><div className="flex flex-wrap gap-2">{row.kind === "LINK" && row.url && /^https?:\/\//i.test(row.url) ? <a href={row.url} target="_blank" rel="noopener noreferrer" className="rounded-md border px-3 py-2 text-sm">Abrir site</a> : <Button variant="secondary" onClick={() => download(row)}>Baixar {row.kind === "TEMPLATE" ? "modelo" : "arquivo"}</Button>}<Button variant="secondary" disabled={busy} onClick={() => { setEditing(row.id); setForm({ title: row.title, category: row.category, kind: row.kind, url: row.url ?? "", body: row.body ?? "" }); window.scrollTo({ top: 0, behavior: "smooth" }); }}>Editar</Button><Button variant="secondary" disabled={busy} onClick={() => remove(row)}>Excluir</Button></div></article>)}</div>
+      <div className="grid gap-4 md:grid-cols-2">{visible.map((row) => <article key={row.id} className="space-y-3 rounded-xl border bg-white p-5"><div><p className="text-xs text-muted-foreground">{categories[row.category]} · {row.kind === "LINK" ? "Link" : row.kind === "FILE" ? "Arquivo" : "Modelo editável"}</p><h3 className="font-semibold">{row.title}</h3>{row.filename && <p className="text-sm text-muted-foreground">{row.filename}</p>}</div><div className="flex flex-wrap gap-2">{row.kind === "LINK" && row.url && /^https?:\/\//i.test(row.url) ? <a href={row.url} target="_blank" rel="noopener noreferrer" className="rounded-md border px-3 py-2 text-sm">Abrir site</a> : <Button variant="secondary" onClick={() => download(row)}>Baixar {row.kind === "TEMPLATE" ? "modelo" : "arquivo"}</Button>}<Button variant="secondary" disabled={busy} onClick={() => { setEditing(row.id); setFile(null); setNotice(""); setForm({ title: row.title, category: row.category, kind: row.kind, url: row.url ?? "", body: row.body ?? "" }); window.scrollTo({ top: 0, behavior: "smooth" }); }}>Editar</Button><Button variant="secondary" disabled={busy} onClick={() => remove(row)}>Excluir</Button></div></article>)}</div>
     </section>
   </div>;
 }
