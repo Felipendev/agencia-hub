@@ -271,7 +271,7 @@ export function EditarCotacaoModal({ cotacao, open, onClose }: Props) {
           {tab === "geral" && (
             <div className="space-y-4">
               <div>
-                <Label htmlFor="eq-titulo">Título *</Label>
+                <Label htmlFor="eq-titulo" required>Título</Label>
                 <Input
                   id="eq-titulo"
                   value={titulo}

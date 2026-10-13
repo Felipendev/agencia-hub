@@ -1,5 +1,7 @@
 "use client";
 
+import { PhoneInput } from "@/components/ui/phone-input";
+
 import { useState } from "react";
 import {
   COMODIDADES_HOTEL_OPTIONS,
@@ -15,7 +17,7 @@ import {
   brPhoneDigits,
   formatBrPhoneDisplay,
   isValidBrazilianPhone,
-} from "@/lib/br-phone";
+} from "@/lib/international-phone";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AirportAutocomplete, applySelectionAfterDash, lastSegmentAfterDash } from "@/components/ui/airport-autocomplete";
@@ -597,17 +599,17 @@ export function CotacaoDetalhesForm({
         <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3 xl:gap-6">
           <div className="sm:col-span-2 xl:col-span-3">
             <Label htmlFor="cdf-cel">
-              Celular (Brasil)
+              Celular
               {contatoCelularObrigatorio ? <span className="text-red-500"> *</span> : null}
             </Label>
-            <Input
+            <PhoneInput
               id="cdf-cel"
               inputMode="numeric"
               autoComplete="tel"
               placeholder="(11) 98765-4321"
               required={contatoCelularObrigatorio}
               value={formatBrPhoneDisplay(det.celular)}
-              onChange={(e) => setCelularRaw(e.target.value)}
+              onChange={setCelularRaw}
               aria-invalid={!celularOk}
               className={
                 errosCampos.celular === true
@@ -622,8 +624,8 @@ export function CotacaoDetalhesForm({
             {(errosCampos.celular === true || (det.celular.length > 0 && !celularOk)) ? (
               <p className="mt-1 text-xs text-red-600">
                 {errosCampos.celular === true && det.celular.length === 0
-                  ? "Informe o celular com DDD."
-                  : "Informe DDD + número com 10 ou 11 dígitos (celular com 9)."}
+                  ? "Informe o celular com código do país."
+                  : "Informe o código do país e um número válido."}
               </p>
             ) : null}
           </div>
@@ -650,7 +652,7 @@ export function CotacaoDetalhesForm({
           </div>
           <div className="sm:col-span-2 xl:col-span-3">
             <Label htmlFor="cdf-wa">WhatsApp</Label>
-            <Input
+            <PhoneInput
               id="cdf-wa"
               inputMode="numeric"
               autoComplete="tel"
@@ -658,7 +660,7 @@ export function CotacaoDetalhesForm({
               value={formatBrPhoneDisplay(
                 det.whatsappIgualCelular ? det.celular : det.whatsapp,
               )}
-              onChange={(e) => setWhatsappRaw(e.target.value)}
+              onChange={setWhatsappRaw}
               disabled={det.whatsappIgualCelular}
               aria-invalid={!whatsappOk}
               className={
@@ -673,7 +675,7 @@ export function CotacaoDetalhesForm({
             />
             {!det.whatsappIgualCelular && whatsappDigits.length > 0 && !whatsappOk ? (
               <p className="mt-1 text-xs text-red-600">
-                Número inválido. Use DDD + celular ou telefone com 10/11 dígitos.
+                Informe o código do país e um número válido.
               </p>
             ) : null}
           </div>

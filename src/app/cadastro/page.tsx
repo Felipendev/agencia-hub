@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { isValidPhone } from "@/lib/international-phone";
 import { PasswordStrengthIndicator } from "@/components/ui/password-strength";
 import { TermsCheckbox } from "@/components/ui/terms-checkbox";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
@@ -32,11 +33,11 @@ export default function CadastroPage() {
     if (!email.trim()) return "Informe o e-mail.";
     if (password.length < 8) return "A senha deve ter no mínimo 8 caracteres.";
     if (password !== passwordConfirmation) return "As senhas não coincidem.";
-    if (!ownerPhone || (ownerPhone.length !== 10 && ownerPhone.length !== 11)) {
-      return "Informe um telefone válido (DDD + número).";
+    if (!isValidPhone(ownerPhone)) {
+      return "Informe um telefone válido com código do país.";
     }
-    if (agencyPhone && agencyPhone.length !== 10 && agencyPhone.length !== 11) {
-      return "Telefone comercial inválido (DDD + número).";
+    if (agencyPhone && !isValidPhone(agencyPhone)) {
+      return "Telefone comercial inválido. Confira o código do país.";
     }
     if (!termsAccepted) return "É necessário aceitar os Termos de Uso.";
     return null;

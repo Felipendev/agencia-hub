@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { CotacaoDetalhes } from "@/types";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
 import { isUuid } from "@/lib/api/quotation-mapper";
-import { brPhoneDigits, isValidBrazilianPhone } from "@/lib/br-phone";
+import { brPhoneDigits, isValidBrazilianPhone } from "@/lib/international-phone";
 import {
   addSubmission,
   getPublicConfig,
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
   }
   if (!isValidBrazilianPhone(telefoneDigits)) {
     return NextResponse.json(
-      { error: "Informe um celular válido com DDD (10 ou 11 dígitos)." },
+      { error: "Informe um celular válido com código do país." },
       { status: 400 },
     );
   }

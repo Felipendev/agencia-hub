@@ -1,5 +1,5 @@
 import { emptyCotacaoDetalhes } from "@/lib/cotacao-defaults";
-import { brPhoneDigits } from "@/lib/br-phone";
+import { brPhoneDigits } from "@/lib/international-phone";
 import type { Cotacao, CotacaoDetalhes, CotacaoStatus } from "@/types";
 
 const LEGACY_STATUS_MAP: Record<string, CotacaoStatus> = {

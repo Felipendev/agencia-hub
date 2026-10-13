@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { isValidPhone } from "@/lib/international-phone";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { PasswordStrengthIndicator } from "@/components/ui/password-strength";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
@@ -86,7 +87,7 @@ export default function ConvitePage() {
     if (!name.trim()) return "Informe seu nome.";
     if (password.length < 8) return "A senha deve ter no mínimo 8 caracteres.";
     if (password !== passwordConfirmation) return "As senhas não coincidem.";
-    if (phone && phone.length !== 10 && phone.length !== 11) {
+    if (phone && !isValidPhone(phone)) {
       return "Telefone inválido (DDD + número).";
     }
     return null;

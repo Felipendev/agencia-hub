@@ -13,7 +13,7 @@ export function WhatsappLinkFields({ link, agency, onChange }: {
       value={link.url} onChange={(e) => onChange({ url: e.target.value })}
       aria-invalid={link.tipo === "whatsapp" && invalid} />
     {link.tipo === "whatsapp" && <>
-      {invalid && <p className="text-xs text-red-600">Informe um número brasileiro válido com DDD.</p>}
+      {invalid && <p className="text-xs text-red-600">Informe um número válido com o código do país (ex.: +351).</p>}
       <label className="block text-xs font-medium" htmlFor={`wa-message-${link.id}`}>Mensagem ao abrir o WhatsApp</label>
       <Textarea id={`wa-message-${link.id}`} rows={3} maxLength={2000}
         value={link.mensagemWhatsapp ?? ""} placeholder={defaultFormWhatsappMessage(agency)}

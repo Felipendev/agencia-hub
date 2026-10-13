@@ -500,7 +500,7 @@ export default function FinanceiroPage() {
                       <th className="hidden px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-[var(--hub-text-muted)] md:table-cell">Categoria</th>
                       <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-[var(--hub-text-muted)]">Status</th>
                       <th className="hidden px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-[var(--hub-text-muted)] lg:table-cell">Cliente</th>
-                      <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--hub-text-muted)]">Valor</th>
+                      <th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--hub-text-muted)]">Valor</th><th className="px-4 py-3 text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--hub-text-muted)]">Lucro da venda</th>
                       <th className="px-4 py-3" />
                     </tr>
                   </thead>
@@ -550,7 +550,7 @@ export default function FinanceiroPage() {
                           <span className={`font-mono text-sm font-semibold ${l.tipo === "entrada" ? "text-emerald-600" : "text-red-600"}`}>
                             {l.tipo === "entrada" ? "+" : "−"}{formatBRL(l.valor)}
                           </span>
-                        </td>
+                        </td><td className="px-4 py-3 text-right font-mono text-sm">{l.tipo === "entrada" && l.valorVenda != null && l.custoFornecedor != null ? formatBRL(l.valorVenda - l.custoFornecedor - (l.valorComissao ?? 0)) : "—"}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                             <button type="button" onClick={() => abrirEditar(l)}

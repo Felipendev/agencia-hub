@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/toast";
 import { apiFetch } from "@/lib/api/authenticated-fetch";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -234,10 +235,10 @@ export function AbaAgencia() {
           </div>
           <div>
             <Label htmlFor="ag-tel">Telefone comercial</Label>
-            <Input
+            <PhoneInput
               id="ag-tel"
               value={data.phone}
-              onChange={(e) => setData((prev) => ({ ...prev, phone: e.target.value }))}
+              onChange={(phone) => setData((prev) => ({ ...prev, phone }))}
               placeholder="(11) 99999-9999"
             />
           </div>

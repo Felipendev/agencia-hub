@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   brPhoneDigits,
   isValidBrazilianPhone,
-} from "@/lib/br-phone";
+} from "@/lib/international-phone";
 import { isUuid } from "@/lib/api/quotation-mapper";
 import { emptyCotacaoDetalhes } from "@/lib/cotacao-defaults";
 import type { CotacaoDetalhes } from "@/types";

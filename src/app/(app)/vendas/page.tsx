@@ -20,7 +20,7 @@ import { NovoClienteModal } from "@/components/cliente/NovoClienteModal";
 import { EditIcon, TrashIcon } from "@/components/icons";
 import type { Cliente } from "@/types";
 
-type Sale = { id: string; customerId: string; customerName: string; totalAmount: number; saleDate: string; status: string };
+type Sale = { id: string; customerId: string; customerName: string; totalAmount: number; saleDate: string; status: string; grossProfit?: number; netProfit?: number };
 type Supplier = { id: string; name: string };
 type TeamUser = { id: string; name: string; accountKind: string };
 type Line = { description: string; saleAmount: string; supplierId: string; supplierCost: string; direct: boolean };
@@ -191,9 +191,9 @@ export default function VendasPage() {
     setDetails(await response.json());
   }
 
-  async function settle(kind: "receivables" | "payables", id: string) {
+  async function settle(kind: "receivables" | "payables", id: string, undo = false) {
     if (!base || !token) return;
-    const response = await fetch(`${base}/sales/${kind}/${id}/settle`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ date: today() }) });
+    const response = await fetch(`${base}/sales/${kind}/${id}/${undo ? "unsettle" : "settle"}`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ date: today() }) });
     if (!response.ok) { setError("Não foi possível registrar a quitação."); return; }
     if (details) await openDetails(details.sale.id);
     await load();
@@ -285,11 +285,11 @@ export default function VendasPage() {
     <div><h1 className="text-2xl font-bold text-[var(--hub-text-primary)]">{isRevenueRegistration ? "Receitas" : "Vendas"}</h1><p className="text-sm text-[var(--hub-text-secondary)]">{isRevenueRegistration ? "Cadastre a venda e acompanhe cada parcela a receber." : "Histórico comercial das vendas registradas."}</p>{!isRevenueRegistration && <Link href="/financeiro/receita" className="mt-3 inline-flex rounded-[var(--hub-radius)] bg-[var(--hub-blue-dark)] px-4 py-2 text-sm font-medium text-white">Cadastrar receita</Link>}</div>
 
     {isRevenueRegistration && <form onSubmit={submit} className="space-y-4 rounded-xl border border-[var(--hub-border)] bg-white p-5">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><div><ClientePicker id="customer-picker" required invalid={attempted && !customerId} clientes={clientes} value={customerId} showNovoButton={false} onChange={(id) => { setCustomerId(id); setQuotationId(""); }} /><Button type="button" size="sm" variant="ghost" className="mt-1 text-[var(--hub-blue)]" onClick={() => setCustomerModalOpen(true)}>+ Nova pessoa / cliente</Button></div><div><Label>Cotação (opcional)</Label><Select value={quotationId} disabled={!customerId} onChange={(event) => setQuotationId(event.target.value)}><option value="">Sem cotação</option>{cotacoes.filter((quotation) => quotation.clienteId === customerId).map((quotation) => <option key={quotation.id} value={quotation.id}>{quotation.titulo}</option>)}</Select></div><div><Label>Valor total vendido *</Label><CurrencyInput className={attempted && number(total) <= 0 ? "border-red-500" : ""} value={total} onValueChange={setTotal} /></div><div><Label>Data do lançamento *</Label><Input className={attempted && !registeredAt ? "border-red-500" : ""} type="date" value={registeredAt} onChange={(event) => setRegisteredAt(event.target.value)} /></div></div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><div><ClientePicker id="customer-picker" required invalid={attempted && !customerId} clientes={clientes} value={customerId} showNovoButton={false} onChange={(id) => { setCustomerId(id); setQuotationId(""); }} /><Button type="button" size="sm" variant="ghost" className="mt-1 text-[var(--hub-blue)]" onClick={() => setCustomerModalOpen(true)}>+ Nova pessoa / cliente</Button></div><div><Label>Cotação (opcional)</Label><Select value={quotationId} disabled={!customerId} onChange={(event) => setQuotationId(event.target.value)}><option value="">Sem cotação</option>{cotacoes.filter((quotation) => quotation.clienteId === customerId).map((quotation) => <option key={quotation.id} value={quotation.id}>{quotation.titulo}</option>)}</Select></div><div><Label required>Valor total vendido</Label><CurrencyInput className={attempted && number(total) <= 0 ? "border-red-500" : ""} value={total} onValueChange={setTotal} /></div><div><Label required>Data do lançamento</Label><Input className={attempted && !registeredAt ? "border-red-500" : ""} type="date" value={registeredAt} onChange={(event) => setRegisteredAt(event.target.value)} /></div></div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><div><Label>Forma de pagamento</Label><Select value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value)}><option value="PIX">PIX</option><option value="CREDIT_CARD">Cartão de crédito</option><option value="DEBIT_CARD">Cartão de débito</option><option value="TRANSFER">Transferência</option><option value="CASH">Dinheiro</option><option value="OTHER">Outro</option></Select></div><div><Label>Conta que receberá</Label><Input value={receivingAccount} onChange={(event) => setReceivingAccount(event.target.value)} placeholder="Ex.: Conta PJ" /></div><div><Label>Recorrência</Label><Select value={recurrence} onChange={(event) => setRecurrence(event.target.value)}><option value="ONE_TIME">Venda única</option><option value="MONTHLY">Mensal</option><option value="WEEKLY">Semanal</option><option value="YEARLY">Anual</option></Select></div>{paymentMethod === "CREDIT_CARD" && <div><Label>Parcelas no cartão</Label><Select value={cardInstallmentsCount} onChange={(event) => setCardInstallmentsCount(event.target.value)}>{Array.from({ length: 12 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n}x</option>)}</Select></div>}</div>
       {paymentMethod === "CREDIT_CARD" && cardInstallmentPreview && <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[var(--hub-bg-subtle)] px-3 py-2 text-sm"><span>{cardInstallmentPreview.n}x de {formatBRL(cardInstallmentPreview.perInstallment)} — aplica no plano de recebimento abaixo</span><Button type="button" size="sm" variant="secondary" onClick={applyCardInstallments}>Aplicar</Button></div>}
       <div className="space-y-2 rounded-lg bg-[var(--hub-bg-subtle)] p-3">
-        <div className="flex items-center justify-between"><Label>Quando a agência vai receber *</Label><Button type="button" size="sm" variant="secondary" onClick={() => setInstallments((current) => [...current, { amount: "", dueDate: "" }])}>Adicionar parcela</Button></div>
+        <div className="flex items-center justify-between"><Label required>Quando a agência vai receber</Label><Button type="button" size="sm" variant="secondary" onClick={() => setInstallments((current) => [...current, { amount: "", dueDate: "" }])}>Adicionar parcela</Button></div>
         <p className="text-xs text-[var(--hub-text-secondary)]">Divida o valor que a agência vai receber em uma ou mais parcelas, com a data prevista de cada uma. A soma precisa fechar com o valor total da venda (descontando o que o cliente pagar direto ao fornecedor, se houver).</p>
         {installments.map((installment, index) => <div key={index} className="grid gap-2 sm:grid-cols-3"><CurrencyInput className={attempted && number(installment.amount) <= 0 ? "border-red-500" : ""} value={installment.amount} onValueChange={(formatted) => setInstallments((current) => current.map((item, position) => position === index ? { ...item, amount: formatted } : item))} placeholder={`Valor da parcela ${index + 1}`} /><Input className={attempted && !installment.dueDate ? "border-red-500" : ""} type="date" value={installment.dueDate} onChange={(event) => setInstallments((current) => current.map((item, position) => position === index ? { ...item, dueDate: event.target.value } : item))} aria-label={`Data prevista da parcela ${index + 1}`} />{installments.length > 1 && <Button type="button" size="sm" variant="ghost" className="text-red-600" onClick={() => setInstallments((current) => current.filter((_, position) => position !== index))}>Remover</Button>}</div>)}
       </div>
@@ -338,7 +338,7 @@ export default function VendasPage() {
                 <th className="px-4 py-3">Pessoa</th>
                 <th className="px-4 py-3">Descrição</th>
                 <th className="px-4 py-3">Data da venda</th>
-                <th className="px-4 py-3 text-right">Valor</th>
+                <th className="px-4 py-3 text-right">Total vendido</th><th className="px-4 py-3 text-right">Lucro</th>
                 <th className="px-4 py-3">Parcelas</th>
                 <th className="px-4 py-3" />
               </tr>
@@ -356,7 +356,7 @@ export default function VendasPage() {
                     </td>
                     <td className="px-4 py-3 text-[var(--hub-text-secondary)]">Venda #{sale.id.slice(0, 8)}</td>
                     <td className="px-4 py-3 text-[var(--hub-text-secondary)]">{formatDateBR(sale.saleDate)}</td>
-                    <td className="px-4 py-3 text-right font-mono font-semibold text-[var(--hub-text-primary)]">{formatBRL(Number(sale.totalAmount))}</td>
+                    <td className="px-4 py-3 text-right font-mono font-semibold text-[var(--hub-text-primary)]">{formatBRL(Number(sale.totalAmount))}</td><td className="px-4 py-3 text-right font-mono">{sale.netProfit == null ? "Não informado" : formatBRL(Number(sale.netProfit))}</td>
                     <td className="px-4 py-3">
                       {progress ? (
                         <Badge tone={progress.paid === progress.total ? "success" : "warning"}>{progress.paid}/{progress.total} recebidas</Badge>
@@ -410,7 +410,7 @@ export default function VendasPage() {
                   <th className="px-4 py-3">Forma de pagamento</th>
                   <th className="px-4 py-3">Vencimento</th>
                   <th className="px-4 py-3">Pagamento</th>
-                  <th className="px-4 py-3 text-right">Valor</th>
+                  <th className="px-4 py-3 text-right">Valor da parcela</th>
                   <th className="px-4 py-3 text-center">Recebido</th>
                   <th className="px-4 py-3" />
                 </tr>
@@ -467,7 +467,7 @@ export default function VendasPage() {
       </div>
     </section>}
 
-    {details && <section className="space-y-4 rounded-xl border border-[var(--hub-border)] bg-white p-5"><div className="flex items-start justify-between"><div><h2 className="font-semibold">Contas da venda</h2><p className="text-sm text-[var(--hub-text-secondary)]">Receba ou pague somente quando o dinheiro realmente movimentar.</p></div><Button type="button" variant="ghost" onClick={() => setDetails(null)}>Fechar</Button></div><div className="grid gap-3 sm:grid-cols-2"><div className="rounded-lg bg-[var(--hub-bg-subtle)] p-3 text-sm"><span className="text-[var(--hub-text-secondary)]">Lucro bruto</span><strong className="block">{formatBRL(Number(details.grossProfit))}</strong></div><div className="rounded-lg bg-[var(--hub-bg-subtle)] p-3 text-sm"><span className="text-[var(--hub-text-secondary)]">Lucro após comissões</span><strong className="block">{formatBRL(Number(details.netProfit))}</strong></div></div><div><h3 className="mb-2 text-sm font-semibold">A receber</h3>{details.receivables.map((entry) => <div key={entry.id} className="flex items-center justify-between gap-3 border-t py-2 text-sm"><span>Parcela {entry.installmentNumber} · {entry.dueDate}</span><span>{formatBRL(Number(entry.amount))}</span>{entry.status === "PENDING" ? <Button type="button" size="sm" onClick={() => void settle("receivables", entry.id)}>Recebi</Button> : <BadgePaid />}</div>)}</div><div><h3 className="mb-2 text-sm font-semibold">A pagar</h3>{details.payables.map((entry) => <div key={entry.id} className="flex items-center justify-between gap-3 border-t py-2 text-sm"><span>{entry.payableType === "COMMISSION" ? `Comissão · ${entry.recipientName}` : `Fornecedor · ${entry.supplierName ?? "não informado"}`}</span><span>{formatBRL(Number(entry.amount))}</span>{entry.status === "PENDING" ? <Button type="button" size="sm" onClick={() => void settle("payables", entry.id)}>Paguei</Button> : <BadgePaid />}</div>)}</div></section>}
+    {details && <section className="space-y-4 rounded-xl border border-[var(--hub-border)] bg-white p-5"><div className="flex items-start justify-between"><div><h2 className="font-semibold">Contas da venda</h2><p className="text-sm text-[var(--hub-text-secondary)]">Receba ou pague somente quando o dinheiro realmente movimentar.</p></div><Button type="button" variant="ghost" onClick={() => setDetails(null)}>Fechar</Button></div><div className="grid gap-3 sm:grid-cols-2"><div className="rounded-lg bg-[var(--hub-bg-subtle)] p-3 text-sm"><span className="text-[var(--hub-text-secondary)]">Lucro bruto</span><strong className="block">{formatBRL(Number(details.grossProfit))}</strong></div><div className="rounded-lg bg-[var(--hub-bg-subtle)] p-3 text-sm"><span className="text-[var(--hub-text-secondary)]">Lucro após comissões</span><strong className="block">{formatBRL(Number(details.netProfit))}</strong></div></div><div><h3 className="mb-2 text-sm font-semibold">A receber</h3>{details.receivables.map((entry) => <div key={entry.id} className="flex items-center justify-between gap-3 border-t py-2 text-sm"><span>Parcela {entry.installmentNumber} · {entry.dueDate}</span><span>{formatBRL(Number(entry.amount))}</span>{entry.status === "PENDING" ? <Button type="button" size="sm" onClick={() => void settle("receivables", entry.id)}>Recebi</Button> : entry.status === "PAID" ? <Button type="button" size="sm" variant="secondary" onClick={() => void settle("receivables", entry.id, true)}>Estornar recebimento</Button> : <span>Cancelado</span>}</div>)}</div><div><h3 className="mb-2 text-sm font-semibold">A pagar</h3>{details.payables.map((entry) => <div key={entry.id} className="flex items-center justify-between gap-3 border-t py-2 text-sm"><span>{entry.payableType === "COMMISSION" ? `Comissão · ${entry.recipientName}` : `Fornecedor · ${entry.supplierName ?? "não informado"}`}</span><span>{formatBRL(Number(entry.amount))}</span>{entry.status === "PENDING" ? <Button type="button" size="sm" onClick={() => void settle("payables", entry.id)}>Paguei</Button> : entry.status === "PAID" ? <Button type="button" size="sm" variant="secondary" onClick={() => void settle("payables", entry.id, true)}>Estornar pagamento</Button> : <span>Cancelado</span>}</div>)}</div></section>}
 
     {editingReceivable && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-sm rounded-xl border border-[var(--hub-border)] bg-white p-5 shadow-xl">
@@ -490,5 +490,3 @@ export default function VendasPage() {
     <NovoClienteModal open={supplierModalOpen} initialType="fornecedor" onClose={() => setSupplierModalOpen(false)} onCreated={(person: Cliente) => { setSupplierModalOpen(false); void createSupplier(person.nome); }} />
   </div>;
 }
-
-function BadgePaid() { return <span className="rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">Quitado</span>; }

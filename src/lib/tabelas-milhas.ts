@@ -180,6 +180,25 @@ export function resetarTabelas(): TabelasMilhas {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+/** Resolve nomes extraídos sem confundir Azul com Azul Viagens. */
+export function encontrarCompanhia(cias: CiaMilheiro[], nome?: string | null): CiaMilheiro | undefined {
+  const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const query = normalize(nome ?? "");
+  if (!query) return undefined;
+  const exact = cias.find((c) => normalize(c.nome) === query || normalize(c.id) === query);
+  if (exact) return exact;
+  const aliases: Record<string, string[]> = {
+    latam: ["latam", "la", "tam"], azul: ["azul", "ad", "tudoazul"],
+    "azul-viagens": ["azul viagens"], gol: ["gol", "smiles", "g3"],
+    tap: ["tap", "tp"], american: ["american airlines", "aa"],
+    iberia: ["iberia", "ib"], copa: ["copa", "cm"],
+  };
+  return cias.flatMap((cia) => [normalize(cia.nome), ...(aliases[cia.id] ?? [])]
+    .filter((alias) => alias.length > 2 ? ` ${query} `.includes(` ${alias} `) : query === alias)
+    .map((alias) => ({ cia, length: alias.length })))
+    .sort((a, b) => b.length - a.length)[0]?.cia;
+}
+
 /**
  * Retorna o valor do milheiro para uma CIA e quantidade de milhas.
  * Usa a faixa correta baseada na quantidade.

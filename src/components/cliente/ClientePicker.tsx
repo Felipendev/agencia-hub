@@ -93,22 +93,13 @@ export function ClientePicker({
 
   return (
     <>
-      <div className="space-y-1">
+      <div className="min-w-0">
         <div className="flex flex-wrap items-end justify-between gap-2">
-          <Label htmlFor={id} className="mb-0">
+          <Label htmlFor={id} >
             {label}
             {required ? <span aria-hidden="true" className="text-red-600"> *</span> : null}
           </Label>
-          {showNovoButton && !disabled ? (
-            <Button
-              type="button"
-              variant="secondary"
-              className="!py-1.5 text-xs"
-              onClick={() => setModalOpen(true)}
-            >
-              Nova pessoa
-            </Button>
-          ) : null}
+
         </div>
 
         <div ref={wrapRef} className="relative">
@@ -173,6 +164,17 @@ export function ClientePicker({
           )}
         </div>
 
+        <div className="mt-2">          {showNovoButton && !disabled ? (
+            <Button
+              type="button"
+              variant="secondary"
+              className="!py-1.5 text-xs"
+              onClick={() => setModalOpen(true)}
+            >
+              Nova pessoa
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       <NovoClienteModal

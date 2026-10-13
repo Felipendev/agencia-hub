@@ -1,5 +1,7 @@
 "use client";
 
+import { PhoneInput } from "@/components/ui/phone-input";
+
 import { useEffect, useState } from "react";
 import { useData } from "@/contexts/data-context";
 import { useToast } from "@/components/ui/toast";
@@ -7,7 +9,7 @@ import { DuplicateCustomerError } from "@/lib/api/create-customer-remote";
 import {
   brPhoneDigits,
   formatBrPhoneDisplay,
-} from "@/lib/br-phone";
+} from "@/lib/international-phone";
 import {
   CANAL_VENDA_OPTIONS,
   CIDADES_BR_OPTIONS,
@@ -489,7 +491,7 @@ export function NovoClienteModal({ cliente, open, onClose, onCreated, keepOpenAf
           <div className="space-y-4 border-b border-[var(--hub-border)] pb-4">
             <div className="flex flex-wrap items-start gap-3">
               <div className="min-w-0 flex-1">
-                <Label htmlFor="nc-nome">Nome *</Label>
+                <Label htmlFor="nc-nome" required>Nome</Label>
                 <Input
                   id="nc-nome"
                   required
@@ -532,7 +534,7 @@ export function NovoClienteModal({ cliente, open, onClose, onCreated, keepOpenAf
 
             <div>
               <span className="text-sm font-medium text-[var(--hub-blue-dark)]">
-                Tipo *
+                Tipo <span aria-hidden="true" className="text-red-600">*</span>
               </span>
               <div className="mt-3 flex flex-wrap gap-x-8 gap-y-3">
                 <TipoSwitch
@@ -584,25 +586,7 @@ export function NovoClienteModal({ cliente, open, onClose, onCreated, keepOpenAf
               <>
                 <div>
                   <Label htmlFor="nc-cel">Celular</Label>
-                  <div className="mt-1 flex gap-2">
-                    <span
-                      className="flex shrink-0 items-center rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-2 text-xs text-[var(--hub-text-secondary)]"
-                      title="Brasil"
-                    >
-                      🇧🇷 +55
-                    </span>
-                    <Input
-                      id="nc-cel"
-                      inputMode="numeric"
-                      autoComplete="tel"
-                      placeholder="(11) 98765-4321"
-                      value={formatBrPhoneDisplay(telefone)}
-                      onChange={(e) =>
-                        setTelefone(brPhoneDigits(e.target.value))
-                      }
-                      className="min-w-0 flex-1"
-                    />
-                  </div>
+                  <PhoneInput id="nc-cel" value={telefone} onChange={setTelefone} className="mt-1" />
                 </div>
                 <div>
                   <Label htmlFor="nc-email">E-mail</Label>
@@ -618,7 +602,7 @@ export function NovoClienteModal({ cliente, open, onClose, onCreated, keepOpenAf
                 </div>
                 <div>
                   <Label htmlFor="nc-wa">WhatsApp</Label>
-                  <Input id="nc-wa" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="mt-1" />
+                  <PhoneInput id="nc-wa" value={whatsapp} onChange={setWhatsapp} className="mt-1" />
                 </div>
                 <div>
                   <Label htmlFor="nc-ig">Rede social</Label>
@@ -916,23 +900,7 @@ export function NovoClienteModal({ cliente, open, onClose, onCreated, keepOpenAf
                     <Label htmlFor="nc-em-tel">
                       Telefone contato de emergência
                     </Label>
-                    <div className="mt-1 flex gap-2">
-                      <span className="flex shrink-0 items-center rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-[var(--hub-bg-subtle)] px-2 text-xs text-[var(--hub-text-secondary)]">
-                        🇧🇷 +55
-                      </span>
-                      <Input
-                        id="nc-em-tel"
-                        inputMode="numeric"
-                        value={formatBrPhoneDisplay(emergenciaTelefone)}
-                        onChange={(e) =>
-                          setEmergenciaTelefone(
-                            brPhoneDigits(e.target.value),
-                          )
-                        }
-                        placeholder="(11) 98765-4321"
-                        className="min-w-0 flex-1"
-                      />
-                    </div>
+                    <PhoneInput id="nc-em-tel" value={emergenciaTelefone} onChange={setEmergenciaTelefone} className="mt-1" />
                   </div>
                 </div>
                 <div className="grid gap-3 border-t border-[var(--hub-border)] pt-4 sm:grid-cols-2">
