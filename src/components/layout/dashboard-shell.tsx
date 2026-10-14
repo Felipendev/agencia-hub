@@ -289,6 +289,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       {/* ── Mobile drawer ───────────────────────────────────────── */}
       <aside
+        id="hub-mobile-navigation"
+        aria-label="Menu principal"
+        aria-hidden={!mobileOpen}
+        inert={!mobileOpen}
         className={`fixed inset-y-0 left-0 z-50 flex w-[min(240px,85%)] flex-col bg-[var(--hub-blue-dark)] text-white shadow-[var(--hub-shadow-lg)] transition-transform duration-200 lg:hidden ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
@@ -316,6 +320,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               className="rounded-[var(--hub-radius-sm)] p-1.5 text-[var(--hub-text-secondary)] hover:bg-[var(--hub-bg-subtle)] lg:hidden"
               onClick={() => setMobileOpen(true)}
               aria-label="Abrir menu"
+              aria-controls="hub-mobile-navigation"
+              aria-expanded={mobileOpen}
             >
               <IconMenu className="h-5 w-5" />
             </button>
