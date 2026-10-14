@@ -19,7 +19,6 @@ import { TimelineView } from "@/components/timeline/TimelineView";
 import { BackButton } from "@/components/ui/back-button";
 import { PageHeader } from "@/components/layout/page-header";
 import { EditarClienteModal } from "@/components/cliente/EditarClienteModal";
-import { MilesWallet } from "@/components/cliente/MilesWallet";
 
 export default function ClienteDetalhePage() {
   const params = useParams();
@@ -85,7 +84,10 @@ export default function ClienteDetalhePage() {
           </Button>
         </PageHeader>
 
-      <MilesWallet key={id} customerId={id} />
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--hub-radius)] border border-[var(--hub-border)] p-4 text-sm">
+        <p>Esta é a visão de viagens da pessoa. O acompanhamento de milhas tem uma área própria.</p>
+        <Link href={`/milhas/clientes/${id}`} className="font-medium text-[var(--hub-blue)] hover:underline">Abrir perfil de milhas →</Link>
+      </div>
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardTitle>Dados de contato</CardTitle>

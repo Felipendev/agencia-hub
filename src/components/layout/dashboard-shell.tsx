@@ -52,19 +52,25 @@ const OWNER_GROUPS: NavGroup[] = [
     label: "Principal",
     items: [
       { href: "/dashboard",   label: "Dashboard",             icon: "layout"   },
-      { href: "/cotacoes",    label: "Cotações",              icon: "document" },
       { href: "/clientes",    label: "Pessoas",              icon: "users"    },
     ],
   },
   {
-    label: "Operacional",
+    label: "Viagens",
     items: [
+      { href: "/cotacoes", label: "Cotações", icon: "document" },
       { href: "/calculadora", label: "Calculadora de voos", icon: "calculator" },
       { href: "/viagens",     label: "Viagens",                icon: "plane"      },
-      { href: "/simulador-acumulo", label: "Simulador de acúmulo", icon: "calculator" },
-      { href: "/biblioteca",  label: "Biblioteca",             icon: "document"   },
     ],
   },
+  {
+    label: "Milhas",
+    items: [
+      { href: "/milhas", label: "Perfis e carteiras", icon: "wallet" },
+      { href: "/milhas/simulador", label: "Simulador de acúmulo", icon: "calculator" },
+    ],
+  },
+  { label: "Materiais", items: [{ href: "/biblioteca", label: "Biblioteca", icon: "document" }] },
   {
     label: "Financeiro",
     items: [
@@ -95,19 +101,25 @@ const SELLER_GROUPS: NavGroup[] = [
     label: "Principal",
     items: [
       { href: "/meu-painel",  label: "Meu Painel",            icon: "layout"   },
-      { href: "/cotacoes",    label: "Cotações",              icon: "document" },
       { href: "/clientes",    label: "Pessoas",              icon: "users"    },
     ],
   },
   {
-    label: "Operacional",
+    label: "Viagens",
     items: [
+      { href: "/cotacoes", label: "Cotações", icon: "document" },
       { href: "/calculadora", label: "Calculadora de voos", icon: "calculator" },
       { href: "/viagens",     label: "Viagens",                icon: "plane"      },
-      { href: "/simulador-acumulo", label: "Simulador de acúmulo", icon: "calculator" },
-      { href: "/biblioteca",  label: "Biblioteca",             icon: "document"   },
     ],
   },
+  {
+    label: "Milhas",
+    items: [
+      { href: "/milhas", label: "Perfis e carteiras", icon: "wallet" },
+      { href: "/milhas/simulador", label: "Simulador de acúmulo", icon: "calculator" },
+    ],
+  },
+  { label: "Materiais", items: [{ href: "/biblioteca", label: "Biblioteca", icon: "document" }] },
   {
     label: "Financeiro",
     items: [
@@ -137,7 +149,9 @@ function NavGroupSection({
             pathname === item.href ||
             (item.href !== "/dashboard" &&
               item.href !== "/meu-painel" &&
-              pathname.startsWith(item.href));
+              (item.href === "/milhas"
+                ? pathname.startsWith("/milhas/clientes/")
+                : pathname.startsWith(`${item.href}/`)));
           return (
             <Link
               key={item.href}
