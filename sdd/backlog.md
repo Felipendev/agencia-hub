@@ -1,9 +1,176 @@
 # Technical Backlog
 
+## Atualização vigente — 14/10/2026
+
+Divisão atual: **cinco frentes pendentes para Codex e cinco para Claude**, com branches/worktrees próprios e PRs isolados por feature e repositório. Codex começa TODO-041/F01; Claude começa TODO-046/F02. Codex integra arquivos compartilhados, numeração final de migrações e publicação; Claude entrega seus módulos por PR, sem push direto em main ou publicação concorrente.
+
+Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). Esses documentos separam entregas já realizadas e limites das pendências; não significam que Claude já iniciou a implementação.
+
+A exigência do usuário passa a ser **CRUD completo para todas as features em que essas operações façam sentido**, incluindo interface, API e persistência. Salvar alterações como um novo registro não equivale a editar. Histórico financeiro usa cancelamento/estorno/versionamento quando necessário, sem exclusão destrutiva para contornar regras do domínio.
+
+As autorizações atuais do usuário abrangem implementação, testes, validação e publicação em produção. Restrições antigas de testes reproduzidas nas seções históricas abaixo não descrevem a autorização vigente. Não reabrir ou encerrar automaticamente tarefas antigas apenas pelo resumo de setembro.
+
+### TODO-038: Completar a edição das simulações de acúmulo (F06)
+- **Owner**: Codex — entregue.
+- **Priority**: High
+- **Status**: resolved — CRUD completo publicado e validado em produção em 14/10/2026.
+- **Created**: 2026-10-13
+- **Origin**: exigência explícita de CRUD completo pelo usuário.
+- **Context**: F06 está em produção com criar, consultar, excluir e exportar. O botão Consultar cenário carrega valores, mas salvar gera outra simulação. Falta editar o cenário existente; por isso o CRUD ainda não está completo.
+- **Affected Files**: `src/app/(app)/simulador-acumulo/page.tsx`, `src/lib/accumulation-simulation.ts`; API `AccumulationSimulationController.java`, migrações e testes de integração.
+- **Complexity**: Medium
+- **Aceite**:
+  - Editar nome, destino, premissas e programas do cenário existente, mantendo seu identificador.
+  - Recalcular no servidor e persistir resultados coerentes após recarregar e consultar por outro membro autorizado.
+  - Preservar a versão anterior das premissas em histórico persistido, com autor e data, para rastreabilidade.
+  - Oferecer Duplicar cenário separadamente de Salvar alterações.
+  - Edição e exclusão de outra agência são recusadas; erro da API não exibe sucesso.
+- **Entrega**: edição pelo mesmo ID com controle de versão, histórico persistido com autor/data, duplicação separada e exclusão com confirmação. 70 testes frontend e 48 testes selecionados da API aprovados; CRUD conferido no domínio oficial com simulações de teste removidas ao final. Evidências: `docs/crud-simulador-acumulo-2026-10-14.md`.
+
+### TODO-039: Evitar duplicação entre aprovação e conversão manual em viagem
+- **Owner**: Codex — prevenção entregue; revisão dos legados permanece com Codex.
+- **Priority**: High
+- **Status**: resolved quanto à prevenção — implementada, validada e publicada em 14/10/2026. Consolidação de duplicados legados continua pendente de revisão de vínculos/anexos, sem exclusão automática.
+- **Created**: 2026-10-13
+- **Origin**: usuário apontou viagens duplicadas ao revisar o painel.
+- **Context**: a aprovação cria/reutiliza uma viagem vinculada. A tela de detalhe continua oferecendo Converter em viagem, que abre um cadastro novo. O POST /trips insere sem verificar a viagem da conversão; repetir a chamada também insere outra. O PATCH /trips permite alterar o vínculo de cotação e deve compartilhar a mesma regra de integridade. O banco não possui chave única específica de conversão. O dashboard não cria viagens.
+- **Evidência**: teste HTTP com PostgreSQL `TripDuplicationDiagnosticTest`: 1 viagem após aprovação, 2 após conversão manual, 3 após repetição do mesmo POST; somente 1 venda. Reaprovar mantém 3, não cria a quarta. Teste diagnóstico, não critério para perpetuar duplicação.
+- **Caso real já conferido**: Sara, localizador HFQXMI, duas viagens da mesma cotação; uma vinculada à venda e outra sem venda. Esse estado é compatível com o fluxo reproduzido, mas não comprova sozinho a sequência exata dos cliques históricos.
+- **Affected Files**: `src/app/(app)/cotacoes/[id]/page.tsx`, `src/app/(app)/viagens/nova/page.tsx`; API `TripController.java`, `QuotationApprovalService.java`, `TripRepository.java` e migrações de trips.
+- **Complexity**: Large
+- **Aceite**:
+  - Converter uma cotação com viagem existente abre a viagem para completar/editar dados, preservando ID, venda, anexos e trechos. Se houver várias viagens legadas, mostrar conflito/seleção, sem escolher silenciosamente.
+  - API aplica a regra de conversão também em POST/PATCH, com bloqueio transacional da cotação e identificação persistida da conversão. Uma repetição ou chamadas concorrentes não geram novos registros para a mesma operação.
+  - Frontend impede reenvio enquanto aguarda resposta e só confirma aprovação/gravação após a API.
+  - Definir a chave de unicidade da conversão sem impor unicidade global de localizador: uma reserva pode atender vários passageiros ou serviços legítimos. Não proibir genericamente várias viagens de uma cotação sem esclarecer o modelo de serviços.
+  - Registros legados são revisados antes de consolidar: preservar vínculos financeiros, fornecedor, notas, trechos e anexos; não apagar automaticamente por igualdade de cliente/localizador nem alterar datas por suposição.
+  - Cobrir aprovação→conversão, conversão→aprovação, repetição, concorrência, mudança de vínculo via PATCH e isolamento entre agências. Converter não cria segunda venda/receita.
+
+### TODO-040: Perfil e carteira manual de milhas da pessoa (F04)
+- **Owner**: Codex — carteira manual entregue; evolução em TODO-043.
+- **Priority**: High
+- **Status**: resolved — carteira manual com CRUD aplicável, validada e publicada em 14/10/2026.
+- **Origin**: próxima tarefa autorizada pelo usuário após TODO-038.
+- **Escopo**: perfil de objetivos/frequência/destinos/plano, contas por programa e titular, cartões, clubes, vencimentos, movimentações e histórico compartilhado por agência. CRUD por identificador para metadados; arquivamento/reativação para perfil e contas; estorno para movimentos confirmados. Nenhum saldo futuro, vencimento ou plano gera débito/crédito automático.
+- **Aceite**: persistir após recarregar; editar o mesmo registro; manter auditoria; impedir duplicação por confirmação repetida e saldo negativo concorrente; validar inteiros/datas; impedir consulta/alteração entre agências/pessoas; não exibir sucesso quando a API recusa a operação.
+- **Dependências futuras, não concluídas nesta tarefa**: geração de tarefas F01 a partir do plano; formulário público específico de diagnóstico sem sobrescrita insegura da carteira.
+- **Referência**: `docs/perfil-carteira-milhas-2026-10-14.md`.
+
+### TODO-041: Checklists, tarefas e rotinas por pessoa (F01)
+- **Owner**: Codex
+- **Priority**: High
+- **Status**: pending — próximo trabalho do Codex.
+- **Created**: 2026-10-14
+- **Origin**: divisão paralela autorizada pelo usuário.
+- **Scope**: modelos, tarefa avulsa e execução periódica com responsável, prazo, situação, vínculos opcionais e histórico. Mudanças em modelo não reescrevem execuções anteriores; repetir geração não duplica efeito. CRUD aplicável e cancelamento/conclusão auditados.
+- **Branch**: `codex/f01-checklists`, em frontend e API; PRs próprios.
+- **Coordination**: Codex define/publica o contrato de criação de tarefas para integrações posteriores de carteira/agenda.
+
+### TODO-042: Próxima ação e follow-up comercial (F08)
+- **Owner**: Codex
+- **Priority**: High
+- **Status**: pending
+- **Created**: 2026-10-14
+- **Origin**: divisão paralela autorizada pelo usuário.
+- **Scope**: ação, data e responsável por pessoa/prospecto; filtros de atrasados/hoje/próximos e resumo; concluir/reprogramar mantém histórico, sem reconstruir o funil existente.
+- **Branch**: `codex/f08-follow-up`, em frontend e API; PRs próprios.
+
+### TODO-043: Diagnóstico e integrações da carteira e do simulador (evolução F04/F06)
+- **Owner**: Codex
+- **Priority**: High
+- **Status**: pending — conexão de tarefas depende do contrato F01.
+- **Created**: 2026-10-14
+- **Origin**: lacunas explícitas após a entrega manual TODO-040.
+- **Scope**: diagnóstico público de milhas com revisão autenticada antes de incorporar; plano → tarefas sem repetição; reaproveitamento opcional de cartões no simulador. Visitante não sobrescreve carteira por igualdade de telefone/e-mail.
+- **Branch**: `codex/f04-diagnostico-integracoes`, em frontend e API; separar subentregas quando necessário.
+
+### TODO-044: Histórico e exportação consolidada (F11)
+- **Owner**: Codex — consolidação; cada agente mantém a auditoria de seus próprios módulos.
+- **Priority**: Medium
+- **Status**: pending
+- **Created**: 2026-10-14
+- **Origin**: divisão paralela autorizada pelo usuário.
+- **Scope**: exportação seletiva por pessoa/período, permissões, omissão de campos sensíveis e reaproveitamento das exportações existentes. Integrar módulos novos após seus contratos, sem controlar suas escritas.
+- **Branch**: `codex/f11-historico-exportacao`, em frontend e API; PRs próprios.
+
+### TODO-045: Estoque por lotes e reservas (F05)
+- **Owner**: Codex
+- **Priority**: Conditional
+- **Status**: pending — regras de custódia/titularidade/custo/reserva/cancelamento ainda precisam de definição.
+- **Created**: 2026-10-14
+- **Origin**: proposta condicionada no comparativo e divisão autorizada pelo usuário.
+- **Scope**: lotes com custo/validade, reserva e consumo rastreáveis; confirmação idempotente e concorrência sem exceder saldo. Não implementar débitos/reservas reais por suposição.
+- **Branch**: `codex/f05-lotes-reservas`, em frontend e API; PRs próprios quando a regra permitir implementar.
+
+### TODO-046: Contratos versionados da agência (F02)
+- **Owner**: Claude
+- **Priority**: High
+- **Status**: pending — primeiro trabalho atribuído ao Claude; ainda não acionado.
+- **Created**: 2026-10-14
+- **Origin**: divisão paralela autorizada pelo usuário.
+- **Scope**: modelos com CRUD, rascunhos preenchidos a partir da pessoa, revisão/geração, versão dos dados/modelo e estados rascunho/enviado/assinado/cancelado. Assinado exige evidência. Preservar emitidos por versionamento/cancelamento; recebível existente somente por vínculo explícito, sem segunda venda/receita.
+- **Branch**: `claude/f02-contratos`, em frontend e API; PRs isolados `[F02][API]` e `[F02][UI]` vinculados.
+- **Reference**: prompt de entrada e acordo de coordenação acima.
+
+### TODO-047: Economia realizada e relatório do cliente (F03)
+- **Owner**: Claude
+- **Priority**: High
+- **Status**: pending
+- **Created**: 2026-10-14
+- **Origin**: divisão paralela autorizada pelo usuário.
+- **Scope**: comparação equivalente com preço/fonte/data/condições, custo efetivo documentado, edição/versionamento aplicável e relatório por pessoa/período. Sem base, indicar indisponível; separar estimativa, resultado realizado e lucro. Cancelamentos/reembolsos ajustam os resultados.
+- **Branch**: `claude/f03-economia-cliente`, em frontend e API; PRs próprios.
+
+### TODO-048: Agenda e atas de atendimento (F07)
+- **Owner**: Claude
+- **Priority**: Medium
+- **Status**: pending — agenda/atas independem de F01; criação de tarefas será integração posterior.
+- **Created**: 2026-10-14
+- **Origin**: divisão paralela autorizada pelo usuário.
+- **Scope**: compromissos e atas vinculados à pessoa, responsável, datas/duração/objetivo/link e decisões. CRUD aplicável, cancelamento preservando histórico e fuso consistente. Não prometer sincronização de agenda externa.
+- **Branch**: `claude/f07-agenda-atas`, em frontend e API; PRs próprios.
+
+### TODO-049: Indicações e créditos de relacionamento (F09)
+- **Owner**: Claude
+- **Priority**: Medium
+- **Status**: pending — cadastro pode avançar; gatilho/resgate/estorno de créditos precisam de regra definida.
+- **Created**: 2026-10-14
+- **Origin**: divisão paralela autorizada pelo usuário.
+- **Scope**: indicador/indicado, origem e situação com CRUD/histórico. Não confundir crédito com cupom, comissão ou desconto; não automatizar nascimento de crédito ou financeiro por suposição.
+- **Branch**: `claude/f09-indicacoes`, em frontend e API; PRs próprios.
+
+### TODO-050: Etapas e materiais vinculados à viagem (extensão F10)
+- **Owner**: Claude — etapas; Biblioteca existente continua sob manutenção do Codex.
+- **Priority**: Low
+- **Status**: pending
+- **Created**: 2026-10-14
+- **Origin**: parte não entregue da proposta F10 e divisão autorizada pelo usuário.
+- **Scope**: hotel, transfer e atividades com data/anexos/observações, CRUD aplicável e vínculos corretos; reaproveitar Biblioteca/itinerário/anexos sem duplicá-los ou gerar despesa automática.
+- **Branch**: `claude/f10-etapas-viagem`, em frontend e API; PRs próprios, sem editar silenciosamente a página central de viagem.
+
+### Sequência das propostas da engenharia reversa
+
+Fonte funcional: [comparativo e critérios de aceite](../docs/comparativo-sou-gestor-2026-10-13.md). Última entrega: [Biblioteca e simulador](../docs/entrega-biblioteca-e-simulador-2026-10-13.md).
+
+| Ordem | Proposta | Estado e preparação |
+|---|---|---|
+| 0 | F06 — Simulador | CRUD completo publicado em 14/10/2026; TODO-038 concluído, incluindo histórico e edição do mesmo registro. |
+| 1 | F04 — Perfil e carteira de milhas | Carteira manual publicada no TODO-040, com CRUD e histórico. Integração com tarefas F01 e diagnóstico público específico continuam etapas posteriores. |
+| 2 | F01 — Checklist e rotinas | Modelos e execuções com CRUD aplicável, responsável, prazo, histórico e prevenção de duplicação. |
+| 3 | F08 — Próxima ação comercial | Ação, data e responsável no CRM existente; concluir/reprogramar mantém histórico. |
+| 4 | F02 e F03 — Contratos e economia | Modelos da agência, contratos versionados e comparação documentada; detalhar regras por feature. |
+| 5 | F07 e F09 — Agenda e indicações | Agenda/atas; definir quando nasce o crédito de indicação antes de automatizar o financeiro. |
+| Condicional | F05 — Estoque por lotes/reservas | Depende de confirmar compra/custódia/consumo de milhas e política de reserva/custo. Não bloqueia os demais módulos. |
+| Complementar | F10 e F11 — Materiais, etapas e histórico/exportação | Biblioteca com edição/exclusão entregue; etapas ampliadas de viagem e exportação consolidada permanecem propostas. Histórico persistido acompanha os novos módulos. |
+
+Os critérios funcionais já permitem iniciar o planejamento técnico. A configuração `sdd/PROJECT.md` referencia `../milhas-hub`, diretório que não existe neste workspace; usar os repositórios atuais de frontend/API e o comparativo acima como referências disponíveis, sem depender desse direcionador antigo.
+
+## Resumo histórico de setembro
+
 > Itens levantados na auditoria de persistência e fluxos críticos em 2026-09-03.
 
-**Last Updated**: 2026-09-17
-**Total Items**: 38 (1 TODO pending — needs live repro, 1 TODO in-progress, 1 DEBT, 35 resolved)
+**Last Updated**: 2026-10-13
+**Resumo registrado em 17/09/2026**: 38 itens (1 TODO pending — needs live repro, 1 TODO in-progress, 1 DEBT, 35 resolved). Esta contagem histórica não inclui TODO-038 nem representa uma nova auditoria dos estados antigos.
 
 ---
 
