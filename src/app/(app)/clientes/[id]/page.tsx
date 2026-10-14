@@ -19,6 +19,7 @@ import { TimelineView } from "@/components/timeline/TimelineView";
 import { BackButton } from "@/components/ui/back-button";
 import { PageHeader } from "@/components/layout/page-header";
 import { EditarClienteModal } from "@/components/cliente/EditarClienteModal";
+import { MilesWallet } from "@/components/cliente/MilesWallet";
 
 export default function ClienteDetalhePage() {
   const params = useParams();
@@ -84,6 +85,7 @@ export default function ClienteDetalhePage() {
           </Button>
         </PageHeader>
 
+      <MilesWallet key={id} customerId={id} />
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardTitle>Dados de contato</CardTitle>
