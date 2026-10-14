@@ -117,7 +117,8 @@ export function formFromDetail(detail: ContractDetail): DraftForm {
 export function parsePrice(raw: string): number | null {
   const text = raw.trim().replace(/^R\$\s*/i, "");
   if (!text) return null;
-  const normalized = text.includes(",") ? text.replace(/\./g, "").replace(",", ".") : text;
+  // "1.234,56", "3.000" (milhar brasileiro) ou "1234.56".
+  const normalized = text.includes(",") || /^\d{1,3}(\.\d{3})+$/.test(text) ? text.replace(/\./g, "").replace(",", ".") : text;
   if (!/^\d+(\.\d{1,2})?$/.test(normalized)) throw new Error("Informe o valor com até 2 casas decimais, por exemplo 1.200,00.");
   return Number(normalized);
 }

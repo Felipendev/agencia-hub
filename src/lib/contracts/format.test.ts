@@ -6,6 +6,8 @@ describe("formatação e validação de contratos", () => {
     expect(parsePrice("1.200,50")).toBe(1200.5);
     expect(parsePrice("R$ 99,9")).toBe(99.9);
     expect(parsePrice("1500.00")).toBe(1500);
+    expect(parsePrice("3.000")).toBe(3000);
+    expect(parsePrice("1.200.000")).toBe(1200000);
     expect(parsePrice("  ")).toBeNull();
     expect(() => parsePrice("12,345")).toThrow(/2 casas/);
     expect(() => parsePrice("-10")).toThrow();
