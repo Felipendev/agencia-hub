@@ -50,4 +50,8 @@ Aceite: não duplicar pessoas ou carteiras; preservar CRUD/IDs/histórico; não 
 
 ## Validação
 
-Em andamento na branch de separação, com PRs distintos de API e interface. A documentação de coordenação do PR #52 será atualizada com esta fronteira antes do início das próximas features.
+Publicado em produção em 14/10/2026, por PRs isolados: [API #60](https://github.com/Felipendev/agencia-hub-api/pull/60) e [interface #53](https://github.com/Felipendev/agencia-hub/pull/53). API: commit de merge `6ca4dce21530625b9aed9d89042191901960772f`, Railway `5fa1b1b0-3070-45b9-be5b-afbf44b0923b` com SUCCESS. Interface: commit de merge `27ad5aaccd7a55291c78353b64b5a6d55adf95c5`, Vercel `dpl_Ghtoq33KoCzfUyarE77JJEh5bkAu` com READY e alias `www.agenciashub.com.br`.
+
+Validação: 84 testes de interface e 11 testes de integração da API aprovados; tipos, lint e build aprovados. Revisão visual com dados fictícios em desktop e celular, incluindo menu fechado/aberto e ausência de rolagem horizontal. Consulta autenticada `/miles-wallets` retornou 200 em produção; páginas `/milhas` e `/milhas/simulador` acessíveis com sessão, e endereço antigo do simulador redireciona para o novo. Sem migração de banco nesta entrega (V55 preservada).
+
+Evidências visuais com dados fictícios: [desktop](evidencias-dominios/milhas-desktop.png), [celular](evidencias-dominios/milhas-mobile.png) e [menu](evidencias-dominios/milhas-menu-mobile.png). As próximas cinco frentes de cada agente continuam pendentes; TODO-051 não conclui toda a evolução F04.

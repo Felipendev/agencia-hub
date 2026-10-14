@@ -2,13 +2,13 @@
 
 Atualizado em 14/10/2026, por solicitação do usuário. Este acordo organiza o trabalho futuro em dois fluxos independentes, com branches e PRs por feature. Não significa que Claude já foi acionado ou que as tarefas pendentes foram implementadas.
 
-**Orientação posterior do usuário — dois produtos:** Viagens e Milhas terão áreas e fluxos próprios, compartilhando a identidade da pessoa. Carteira/perfil e simulador ficam em Milhas. Uma passagem emitida com milhas continua em Viagens. Antes de desenvolver F02, F01, F07, F08, F09 ou F11, ler `dominios-viagens-milhas-2026-10-14.md`: contratos/tarefas/atendimentos que servem aos dois mundos devem identificar explicitamente `TRAVEL` ou `MILES`, com ciclos de vida e indicadores próprios. A separação estrutural é do Codex (TODO-051), antes das integrações seguintes; não muda as cinco frentes do Claude.
+**Orientação posterior do usuário — dois produtos:** Viagens e Milhas terão áreas e fluxos próprios, compartilhando a identidade da pessoa. Carteira/perfil e simulador ficam em Milhas. Uma passagem emitida com milhas continua em Viagens. Antes de desenvolver F02, F01, F07, F08, F09 ou F11, ler `dominios-viagens-milhas-2026-10-14.md`: contratos/tarefas/atendimentos que servem aos dois mundos devem identificar explicitamente `TRAVEL` ou `MILES`, com ciclos de vida e indicadores próprios. A separação estrutural foi publicada pelo Codex (TODO-051, PRs API #60/interface #53), antes das integrações seguintes; não muda as cinco frentes do Claude.
 
 ## Base disponível e entregas concluídas
 
 Frontend: `C:/workspace-pessoal/agencia-hub`, repositório `Felipendev/agencia-hub`, Next.js 16.2.6 / React 19 / Tailwind 4. API: `C:/workspace-pessoal/agencia-hub-api`, repositório `Felipendev/agencia-hub-api`, Spring Boot / Java 21 / PostgreSQL / Flyway.
 
-Na data deste acordo, produção contém frontend `fe86a8cdfe73f255d28e6408e6958f820e8a3c9e` e API `91614f0cfc00c4d468402283235e4083d7fb7b34`, com migrações até V55. São referências históricas; novas branches partem do `origin/main` atualizado.
+Na data deste acordo, produção contém frontend `27ad5aaccd7a55291c78353b64b5a6d55adf95c5` e API `6ca4dce21530625b9aed9d89042191901960772f`, com migrações até V55. São referências históricas; novas branches partem do `origin/main` atualizado.
 
 | Entrega realizada pelo Codex | Estado e limites |
 |---|---|

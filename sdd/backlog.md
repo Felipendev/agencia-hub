@@ -2,11 +2,11 @@
 
 ## Atualização vigente — 14/10/2026
 
-Divisão atual: **cinco frentes pendentes para Codex e cinco para Claude**, com branches/worktrees próprios e PRs isolados por feature e repositório. Codex começa TODO-041/F01; Claude começa TODO-046/F02. Codex integra arquivos compartilhados, numeração final de migrações e publicação; Claude entrega seus módulos por PR, sem push direto em main ou publicação concorrente.
+Divisão atual: **cinco frentes pendentes para Codex e cinco para Claude**, com branches/worktrees próprios e PRs isolados por feature e repositório. Após TODO-051 publicado, Codex começa TODO-041/F01; Claude começa TODO-046/F02. Codex integra arquivos compartilhados, numeração final de migrações e publicação; Claude entrega seus módulos por PR, sem push direto em main ou publicação concorrente.
 
 Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). Esses documentos separam entregas já realizadas e limites das pendências; não significam que Claude já iniciou a implementação.
 
-**Diretriz de domínio posterior do usuário:** Viagens e Milhas são produtos separados, com as mesmas pessoas. Separação estrutural em TODO-051 sob Codex, antes das próximas integrações. Contratos, tarefas e atendimentos novos identificam o produto; indicadores e cancelamentos não se misturam. Referência: [dois produtos e uma identidade](../docs/dominios-viagens-milhas-2026-10-14.md). O prompt do Claude passa a exigir produto explícito desde F02.
+**Diretriz de domínio posterior do usuário:** Viagens e Milhas são produtos separados, com as mesmas pessoas. Separação estrutural TODO-051 publicada pelo Codex em 14/10, antes das próximas integrações. Contratos, tarefas e atendimentos novos identificam o produto; indicadores e cancelamentos não se misturam. Referência: [dois produtos e uma identidade](../docs/dominios-viagens-milhas-2026-10-14.md). O prompt do Claude passa a exigir produto explícito desde F02.
 
 A exigência do usuário passa a ser **CRUD completo para todas as features em que essas operações façam sentido**, incluindo interface, API e persistência. Salvar alterações como um novo registro não equivale a editar. Histórico financeiro usa cancelamento/estorno/versionamento quando necessário, sem exclusão destrutiva para contornar regras do domínio.
 
@@ -153,7 +153,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-051: Separar os produtos Viagens e Milhas, mantendo identidade compartilhada
 - **Owner**: Codex — subentrega estrutural da evolução F04, antes de F01/F08.
 - **Priority**: High
-- **Status**: in-progress — branch e PRs próprios; implementação em validação.
+- **Status**: resolved — publicado em 14/10/2026; API #60 e interface #53, 95 testes aprovados e verificação autenticada em produção.
 - **Created**: 2026-10-14
 - **Origin**: usuário quer perfil/carteira numa seção exclusiva de Milhas, com os mesmos clientes e produtos diferentes.
 - **Scope**: navegação por produto, diretório exclusivo de carteiras registradas, página de perfil em Milhas, simulador nessa área e redirecionamento do endereço antigo. Preservar IDs/CRUD/histórico e cadastro único. Carteira fora da página de viagens da pessoa. Não classificar voo como Milhas só pelo meio de emissão; não inventar assinatura/financeiro/permissão por produto.
@@ -182,7 +182,7 @@ Os critérios funcionais já permitem iniciar o planejamento técnico. A configu
 
 > Itens levantados na auditoria de persistência e fluxos críticos em 2026-09-03.
 
-**Last Updated**: 2026-10-13
+**Last Updated**: 2026-10-14
 **Resumo registrado em 17/09/2026**: 38 itens (1 TODO pending — needs live repro, 1 TODO in-progress, 1 DEBT, 35 resolved). Esta contagem histórica não inclui TODO-038 nem representa uma nova auditoria dos estados antigos.
 
 ---

@@ -2,7 +2,7 @@
 
 Você vai desenvolver a metade atribuída ao Claude no backlog do AgênciaHub, em paralelo com o Codex. Não está sozinho no projeto. Trabalhe em checkouts e branches próprios, não reverta alterações do Codex e não use o diretório original como checkout de implementação.
 
-**Diretriz nova do usuário: Viagens e Milhas são produtos diferentes.** A pessoa e seus contatos são compartilhados; perfil/carteira, cartões, clubes, acúmulo e simulador pertencem à área própria de Milhas. Solicitação, cotação, reserva e economia de uma viagem pertencem a Viagens, inclusive quando a passagem é emitida com milhas. Leia `docs/dominios-viagens-milhas-2026-10-14.md` antes de especificar F02. Para novos contratos/modelos, identificar explicitamente o produto (`TRAVEL` ou `MILES`) em UI/API/persistência: a mesma pessoa pode ter os dois, com vigência/cancelamento/recebíveis independentes. Não deduzir produto pelo cliente ou pela unidade de emissão. Codex está separando a navegação e as páginas (TODO-051); não refaça carteira/CRM.
+**Diretriz nova do usuário: Viagens e Milhas são produtos diferentes.** A pessoa e seus contatos são compartilhados; perfil/carteira, cartões, clubes, acúmulo e simulador pertencem à área própria de Milhas. Solicitação, cotação, reserva e economia de uma viagem pertencem a Viagens, inclusive quando a passagem é emitida com milhas. Leia `docs/dominios-viagens-milhas-2026-10-14.md` antes de especificar F02. Para novos contratos/modelos, identificar explicitamente o produto (`TRAVEL` ou `MILES`) em UI/API/persistência: a mesma pessoa pode ter os dois, com vigência/cancelamento/recebíveis independentes. Não deduzir produto pelo cliente ou pela unidade de emissão. Codex publicou a navegação e as páginas separadas (TODO-051, PRs API #60/interface #53); não refaça carteira/CRM.
 
 ## Leia primeiro
 
@@ -17,7 +17,7 @@ Os repositórios originais são `C:/workspace-pessoal/agencia-hub` (`Felipendev/
 
 O Codex publicou a carteira manual F04, o simulador F06 com CRUD/histórico, a Biblioteca com edição/exclusão, a calculadora/comparativo e correções de lucro/financeiro, DDI, sessão e prevenção de viagens duplicadas. A consolidação de duplicados legados, o diagnóstico público de milhas e as integrações com tarefas ainda não estão concluídos. Não reimplemente nem altere esses módulos. O leitor de prints teve diagnóstico pausado; não aplique seu stash.
 
-Referência de produção em 14/10: frontend `fe86a8cdfe73f255d28e6408e6958f820e8a3c9e`, API `91614f0cfc00c4d468402283235e4083d7fb7b34`, migrações até V55. Atualize origin/main antes de iniciar, pois esses SHAs são históricos.
+Referência de produção em 14/10: frontend `27ad5aaccd7a55291c78353b64b5a6d55adf95c5`, API `6ca4dce21530625b9aed9d89042191901960772f`, migrações até V55. Atualize origin/main antes de iniciar, pois esses SHAs são históricos.
 
 ## Suas cinco frentes
 
