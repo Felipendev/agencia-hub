@@ -4,7 +4,7 @@
 
 Divisão atual: **cinco frentes pendentes para Codex e cinco para Claude**, com branches/worktrees próprios e PRs isolados por feature e repositório. Após TODO-051 publicado, Codex começa TODO-041/F01; Claude começa TODO-046/F02. Codex integra arquivos compartilhados, numeração final de migrações e publicação; Claude entrega seus módulos por PR, sem push direto em main ou publicação concorrente.
 
-Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). Esses documentos separam entregas já realizadas e limites das pendências; não significam que Claude já iniciou a implementação.
+Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). F02 foi entregue pelo Claude em PRs de rascunho API #61/UI #54, confirmados abertos em 14/10; revisão e integração ainda pendentes. O vínculo de simulações ao cliente é a subentrega Codex TODO-052 da evolução F06, sem redistribuir as cinco frentes.
 
 **Diretriz de domínio posterior do usuário:** Viagens e Milhas são produtos separados, com as mesmas pessoas. Separação estrutural TODO-051 publicada pelo Codex em 14/10, antes das próximas integrações. Contratos, tarefas e atendimentos novos identificam o produto; indicadores e cancelamentos não se misturam. Referência: [dois produtos e uma identidade](../docs/dominios-viagens-milhas-2026-10-14.md). O prompt do Claude passa a exigir produto explícito desde F02.
 
@@ -84,6 +84,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 - **Created**: 2026-10-14
 - **Origin**: lacunas explícitas após a entrega manual TODO-040.
 - **Scope**: diagnóstico público de milhas com revisão autenticada antes de incorporar; plano → tarefas sem repetição; reaproveitamento opcional de cartões no simulador. Visitante não sobrescreve carteira por igualdade de telefone/e-mail.
+- **Subentrega independente**: TODO-052 vincula simulações ao cliente; não depende de F01 e não será incluída no mesmo PR de diagnóstico/tarefas.
 - **Branch**: `codex/f04-diagnostico-integracoes`, em frontend e API; separar subentregas quando necessário.
 
 ### TODO-044: Histórico e exportação consolidada (F11)
@@ -107,12 +108,16 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-046: Contratos versionados da agência (F02)
 - **Owner**: Claude
 - **Priority**: High
-- **Status**: pending — primeiro trabalho atribuído ao Claude; ainda não acionado.
+- **Status**: in-review — Claude entregou API #61/UI #54 em rascunho; não publicado nem aceito como concluído.
 - **Created**: 2026-10-14
 - **Origin**: divisão paralela autorizada pelo usuário.
 - **Scope**: modelos com CRUD, rascunhos preenchidos a partir da pessoa, revisão/geração, versão dos dados/modelo e estados rascunho/enviado/assinado/cancelado. Assinado exige evidência. Preservar emitidos por versionamento/cancelamento; recebível existente somente por vínculo explícito, sem segunda venda/receita.
 - **Branch**: `claude/f02-contratos`, em frontend e API; PRs isolados `[F02][API]` e `[F02][UI]` vinculados.
 - **Reference**: prompt de entrada e acordo de coordenação acima.
+- **Entrega recebida em 14/10**: [API #61](https://github.com/Felipendev/agencia-hub-api/pull/61), head `4464c8f99d6a1aa5385bf50ecb2ef52c521fc6e0`; [UI #54](https://github.com/Felipendev/agencia-hub/pull/54), head `42f5473c1807397cb79e80c0831c36db346cf8cd`. Ambos abertos, draft e base main, conferidos no GitHub. Demais alegações de aceite/CI/testes são o relatório do Claude, ainda sem revisão independente do Codex.
+- **Pendências de aceite Codex**: rodar `ContractIntegrationTest,ContractTemplateRendererTest,ContractValuesTest,ContractPdfRendererTest`; revisar CRUD, produto TRAVEL/MILES, isolamento, concorrência, snapshots e ausência de efeito financeiro. Integrar proteção `/contratos`, menus de gestor/vendedor e atalhos nas áreas apropriadas; erro específico ao excluir pessoa vinculada a contratos e ordem do `AgencyDeletionScheduler`. Conferir numeração V56 antes do merge e documentação instalada do Next antes de editar UI.
+- **Decisão de domínio em aberto**: retenção/anonimização dos dados pessoais preservados nos contratos emitidos; avaliar o comportamento existente e explicitar a decisão antes de aprovar o ciclo de anonimização. Não assumir que os snapshots já são cobertos pela anonimização atual.
+- **Achado relatado, a validar**: carteira registra autor como `PlatformAccount@<hash>`; confirmar no código/dados de teste, corrigir identidade auditável se reproduzido sem inventar autor dos registros antigos.
 
 ### TODO-047: Economia realizada e relatório do cliente (F03)
 - **Owner**: Claude
@@ -161,13 +166,36 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 - **Branch**: `codex/separacao-dominios-milhas`, API e frontend com PRs vinculados.
 - **Reference**: `docs/dominios-viagens-milhas-2026-10-14.md`.
 
+### TODO-052: Vincular simulações de acúmulo ao cliente de Milhas (F06)
+- **Owner**: Codex — subentrega da evolução F04/F06 em TODO-043; não transfere trabalho do Claude.
+- **Priority**: High
+- **Status**: pending — task criada a pedido do usuário; implementação ainda não iniciada.
+- **Created**: 2026-10-14
+- **Origin**: usuário perguntou se o simulador deveria estar associado a cliente e autorizou criar a task. A implementação atual salva por agência, sem customerId.
+- **Context**: cenários pessoais precisam compor o acompanhamento de Milhas da pessoa, mantendo identidade compartilhada com Viagens e separação dos produtos. Cálculo avulso continua disponível sem persistência/vínculo.
+- **Scope**: selecionar pessoa do CRM para salvar novos planos; persistir customerId validado na mesma agência; abrir simulador a partir do perfil de Milhas com cliente selecionado; consultar/filtrar cenários por cliente no simulador e exibi-los no perfil. Preservar IDs, versões, edição e exclusão existentes. Associar explicitamente cenários legados sem cliente, sem dedução por título, nome, telefone ou ordem de criação.
+- **CRUD e vínculo**: criação exige cliente; listagem/consulta identifica o cliente; edição mantém o mesmo ID e pode corrigir o vínculo para pessoa autorizada da mesma agência, com confirmação clara e histórico do cliente anterior/novo; exclusão mantém as regras do CRUD já entregue. Duplicação é ação distinta e solicita confirmação do cliente da cópia. Histórico preserva o vínculo de cada versão, inclusive versões antigas sem cliente.
+- **Aceite**:
+  - Calcular sem cliente não grava registro. Salvar novo plano sem cliente é recusado pela interface e API. Vínculo e alterações persistem após recarregar; sucesso somente após confirmação da API.
+  - Perfil e simulador mostram os mesmos cenários pelo mesmo customerId; dois clientes têm listas distintas. Filtros da agência permitem localizar também os legados sem vínculo para revisão manual.
+  - Nenhuma pessoa, conta ou perfil de Milhas é duplicado/criado por simples consulta. Reutilizar identidade existente e documentar se haverá inclusão no diretório de Milhas por possuir um plano, sem exigir carteira para simular.
+  - Dados legados permanecem acessíveis e editáveis para associação explícita, preservando IDs/resultados/histórico. Não atribuir cliente automaticamente; definir compatibilidade da API e estados vazios/erros recuperáveis.
+  - Cliente de outra agência/inexistente é recusado em criação, consulta, mudança de vínculo e duplicação; usar as permissões atuais de gestor/vendedor. Verificar filtros e IDs contra acesso cruzado.
+  - Alteração concorrente respeita expectedVersion; alteração de vínculo é auditada sem reescrever versões anteriores. Política de exclusão/anonimização da pessoa trata o vínculo e explica eventuais bloqueios, sem perda silenciosa de histórico.
+  - Simulações permanecem no produto Milhas; não alteram saldo da carteira, vendas, receitas, tarefas ou viagens. Arquivar perfil de Milhas não apaga cenários nem inativa a pessoa.
+  - Testes cobrem CRUD com vínculo, persistência, migração/associação legada, troca de cliente e histórico, permissões, isolamento, conflito de versão e ausência de efeitos em saldo/financeiro; validar tipos, lint e build.
+- **Affected Files**: frontend `src/app/(app)/milhas/simulador/page.tsx`, `src/app/(app)/milhas/clientes/[id]/page.tsx`, ClientePicker e tipos/cliente API de simulações; API `AccumulationSimulationController.java`, DTOs/domínio de simulações, persistência/versões e nova migração Flyway; testes de interface/integração.
+- **Complexity**: Medium
+- **Branch**: `codex/f06-simulacoes-cliente` em frontend e API; PRs isolados e vinculados, migração numerada na integração sem colidir com F02/V56.
+- **Dependencies**: TODO-051 publicado e CRUD TODO-038 existente; independente de F01, contratos e diagnóstico público.
+
 ### Sequência das propostas da engenharia reversa
 
 Fonte funcional: [comparativo e critérios de aceite](../docs/comparativo-sou-gestor-2026-10-13.md). Última entrega: [Biblioteca e simulador](../docs/entrega-biblioteca-e-simulador-2026-10-13.md).
 
 | Ordem | Proposta | Estado e preparação |
 |---|---|---|
-| 0 | F06 — Simulador | CRUD completo publicado em 14/10/2026; TODO-038 concluído, incluindo histórico e edição do mesmo registro. |
+| 0 | F06 — Simulador | CRUD publicado em TODO-038; vínculo ao cliente e histórico desse vínculo pendentes em TODO-052. |
 | 1 | F04 — Perfil e carteira de milhas | Carteira manual publicada no TODO-040, com CRUD e histórico. Integração com tarefas F01 e diagnóstico público específico continuam etapas posteriores. |
 | 2 | F01 — Checklist e rotinas | Modelos e execuções com CRUD aplicável, responsável, prazo, histórico e prevenção de duplicação. |
 | 3 | F08 — Próxima ação comercial | Ação, data e responsável no CRM existente; concluir/reprogramar mantém histórico. |

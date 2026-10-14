@@ -1,6 +1,8 @@
 # Divisão de desenvolvimento — Codex e Claude
 
-Atualizado em 14/10/2026, por solicitação do usuário. Este acordo organiza o trabalho futuro em dois fluxos independentes, com branches e PRs por feature. Não significa que Claude já foi acionado ou que as tarefas pendentes foram implementadas.
+Atualizado em 14/10/2026, por solicitação do usuário. Este acordo organiza o trabalho em dois fluxos independentes, com branches e PRs por feature. Claude entregou F02 em rascunho (API #61/UI #54); essa entrega ainda precisa de revisão, testes da API e integração. As demais tarefas permanecem pendentes.
+
+**Atualização de acompanhamento:** TODO-052 registra o vínculo das simulações de acúmulo ao cliente, sob Codex, como subentrega da evolução F06/TODO-043 em PRs próprios (`codex/f06-simulacoes-cliente`). Calcular pode ser avulso; salvar novo plano exige pessoa da mesma agência. Cenários legados só recebem vínculo por revisão explícita. Não muda a divisão das cinco frentes de cada agente. Pendências de integração dos contratos e decisão de retenção/anonimização estão registradas em TODO-046; PRs em rascunho não equivalem a feature publicada.
 
 **Orientação posterior do usuário — dois produtos:** Viagens e Milhas terão áreas e fluxos próprios, compartilhando a identidade da pessoa. Carteira/perfil e simulador ficam em Milhas. Uma passagem emitida com milhas continua em Viagens. Antes de desenvolver F02, F01, F07, F08, F09 ou F11, ler `dominios-viagens-milhas-2026-10-14.md`: contratos/tarefas/atendimentos que servem aos dois mundos devem identificar explicitamente `TRAVEL` ou `MILES`, com ciclos de vida e indicadores próprios. A separação estrutural foi publicada pelo Codex (TODO-051, PRs API #60/interface #53), antes das integrações seguintes; não muda as cinco frentes do Claude.
 
