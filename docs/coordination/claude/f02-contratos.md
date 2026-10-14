@@ -1,7 +1,7 @@
 # F02 — Contratos (TODO-046) — Claude
 
 Branch `claude/f02-contratos` nos dois repositórios, a partir de `origin/main` de 14/10/2026 (frontend `fe86a8c`, API `91614f0`).
-PRs: API [Felipendev/agencia-hub-api#61](https://github.com/Felipendev/agencia-hub-api/pull/61) · UI (ver PR `[F02][UI] Gestão de contratos`).
+PRs: API [Felipendev/agencia-hub-api#61](https://github.com/Felipendev/agencia-hub-api/pull/61) · UI [Felipendev/agencia-hub#54](https://github.com/Felipendev/agencia-hub/pull/54).
 
 ## Especificação
 
@@ -59,7 +59,7 @@ Rotas próprias: `/contratos` (lista e filtros, `?customerId=`), `/contratos/mod
 
 ## Validação
 
-- Frontend: `npx tsc --noEmit`, `npm run lint` (0 erros), `npx vitest run` (25 arquivos, 95 testes, incluindo 18 novos de contratos) e `next build` com as rotas `/contratos*`.
+- Frontend: `npx tsc --noEmit`, `npm run lint` (0 erros), `npx vitest run` (28 arquivos, 102 testes após rebase em `origin/main` 27ad5aa, incluindo 18 novos de contratos) e `next build` com as rotas `/contratos*`.
   O build local precisou substituir temporariamente `next/font/google` porque este ambiente não acessa o Google Fonts; o arquivo não foi alterado no commit.
 - API: CI do PR (compile, Flyway em PostgreSQL 16 com a nova migration, package com compilação dos testes) verde. A migration também foi aplicada em PostgreSQL 16 efêmero local e as consultas SQL principais foram executadas.
   **Os testes JUnit não foram executados aqui**: o Maven Central está bloqueado na rede deste ambiente e a CI atual não roda testes. Executar antes do merge: `mvn test -Dtest='ContractIntegrationTest,ContractTemplateRendererTest,ContractValuesTest,ContractPdfRendererTest'`.
