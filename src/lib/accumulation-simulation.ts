@@ -8,7 +8,8 @@ export type AccumulationResult = {
   monthlyPoints: number; basePoints: number; goalMiles: number;
   scenarios: { program: string; bonusPercent: number; projectedMiles: number; remainingMiles: number; goalReached: boolean }[];
 };
-export type SavedSimulation = { id: string; assumptions: AccumulationAssumptions; result: AccumulationResult; createdAt: string };
+export type SavedSimulation = { id: string; assumptions: AccumulationAssumptions; result: AccumulationResult; createdAt: string; updatedAt: string; version: number };
+export type SimulationVersion = { version: number; assumptions: AccumulationAssumptions; result: AccumulationResult; author: string; recordedAt: string };
 
 export function calculateAccumulation(input: AccumulationAssumptions): AccumulationResult | null {
   if (!Number.isFinite(input.monthlySpending) || input.monthlySpending < 0 || input.monthlySpending > 10_000_000 ||
