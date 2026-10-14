@@ -6,6 +6,8 @@ Divisão atual: **cinco frentes pendentes para Codex e cinco para Claude**, com 
 
 Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). Esses documentos separam entregas já realizadas e limites das pendências; não significam que Claude já iniciou a implementação.
 
+**Diretriz de domínio posterior do usuário:** Viagens e Milhas são produtos separados, com as mesmas pessoas. Separação estrutural em TODO-051 sob Codex, antes das próximas integrações. Contratos, tarefas e atendimentos novos identificam o produto; indicadores e cancelamentos não se misturam. Referência: [dois produtos e uma identidade](../docs/dominios-viagens-milhas-2026-10-14.md). O prompt do Claude passa a exigir produto explícito desde F02.
+
 A exigência do usuário passa a ser **CRUD completo para todas as features em que essas operações façam sentido**, incluindo interface, API e persistência. Salvar alterações como um novo registro não equivale a editar. Histórico financeiro usa cancelamento/estorno/versionamento quando necessário, sem exclusão destrutiva para contornar regras do domínio.
 
 As autorizações atuais do usuário abrangem implementação, testes, validação e publicação em produção. Restrições antigas de testes reproduzidas nas seções históricas abaixo não descrevem a autorização vigente. Não reabrir ou encerrar automaticamente tarefas antigas apenas pelo resumo de setembro.
@@ -147,6 +149,17 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 - **Origin**: parte não entregue da proposta F10 e divisão autorizada pelo usuário.
 - **Scope**: hotel, transfer e atividades com data/anexos/observações, CRUD aplicável e vínculos corretos; reaproveitar Biblioteca/itinerário/anexos sem duplicá-los ou gerar despesa automática.
 - **Branch**: `claude/f10-etapas-viagem`, em frontend e API; PRs próprios, sem editar silenciosamente a página central de viagem.
+
+### TODO-051: Separar os produtos Viagens e Milhas, mantendo identidade compartilhada
+- **Owner**: Codex — subentrega estrutural da evolução F04, antes de F01/F08.
+- **Priority**: High
+- **Status**: in-progress — branch e PRs próprios; implementação em validação.
+- **Created**: 2026-10-14
+- **Origin**: usuário quer perfil/carteira numa seção exclusiva de Milhas, com os mesmos clientes e produtos diferentes.
+- **Scope**: navegação por produto, diretório exclusivo de carteiras registradas, página de perfil em Milhas, simulador nessa área e redirecionamento do endereço antigo. Preservar IDs/CRUD/histórico e cadastro único. Carteira fora da página de viagens da pessoa. Não classificar voo como Milhas só pelo meio de emissão; não inventar assinatura/financeiro/permissão por produto.
+- **Aceite**: diretório não matricula automaticamente todo cliente do CRM; mesmo customerId em ambos; arquivar milhas não inativa pessoa/viagem; consulta isolada por agência, login nas rotas novas, erros recuperáveis e links antigos válidos. Próximos contratos/tarefas/atendimentos formalizam produto TRAVEL/MILES.
+- **Branch**: `codex/separacao-dominios-milhas`, API e frontend com PRs vinculados.
+- **Reference**: `docs/dominios-viagens-milhas-2026-10-14.md`.
 
 ### Sequência das propostas da engenharia reversa
 

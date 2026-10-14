@@ -2,6 +2,8 @@
 
 Atualizado em 14/10/2026, por solicitação do usuário. Este acordo organiza o trabalho futuro em dois fluxos independentes, com branches e PRs por feature. Não significa que Claude já foi acionado ou que as tarefas pendentes foram implementadas.
 
+**Orientação posterior do usuário — dois produtos:** Viagens e Milhas terão áreas e fluxos próprios, compartilhando a identidade da pessoa. Carteira/perfil e simulador ficam em Milhas. Uma passagem emitida com milhas continua em Viagens. Antes de desenvolver F02, F01, F07, F08, F09 ou F11, ler `dominios-viagens-milhas-2026-10-14.md`: contratos/tarefas/atendimentos que servem aos dois mundos devem identificar explicitamente `TRAVEL` ou `MILES`, com ciclos de vida e indicadores próprios. A separação estrutural é do Codex (TODO-051), antes das integrações seguintes; não muda as cinco frentes do Claude.
+
 ## Base disponível e entregas concluídas
 
 Frontend: `C:/workspace-pessoal/agencia-hub`, repositório `Felipendev/agencia-hub`, Next.js 16.2.6 / React 19 / Tailwind 4. API: `C:/workspace-pessoal/agencia-hub-api`, repositório `Felipendev/agencia-hub-api`, Spring Boot / Java 21 / PostgreSQL / Flyway.

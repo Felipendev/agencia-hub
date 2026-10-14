@@ -2,6 +2,8 @@
 
 Você vai desenvolver a metade atribuída ao Claude no backlog do AgênciaHub, em paralelo com o Codex. Não está sozinho no projeto. Trabalhe em checkouts e branches próprios, não reverta alterações do Codex e não use o diretório original como checkout de implementação.
 
+**Diretriz nova do usuário: Viagens e Milhas são produtos diferentes.** A pessoa e seus contatos são compartilhados; perfil/carteira, cartões, clubes, acúmulo e simulador pertencem à área própria de Milhas. Solicitação, cotação, reserva e economia de uma viagem pertencem a Viagens, inclusive quando a passagem é emitida com milhas. Leia `docs/dominios-viagens-milhas-2026-10-14.md` antes de especificar F02. Para novos contratos/modelos, identificar explicitamente o produto (`TRAVEL` ou `MILES`) em UI/API/persistência: a mesma pessoa pode ter os dois, com vigência/cancelamento/recebíveis independentes. Não deduzir produto pelo cliente ou pela unidade de emissão. Codex está separando a navegação e as páginas (TODO-051); não refaça carteira/CRM.
+
 ## Leia primeiro
 
 1. AGENTS.md dos repositórios frontend e API.
@@ -40,9 +42,9 @@ git -C C:/workspace-pessoal/agencia-hub-api worktree add -b claude/f02-contratos
 
 Se já houver um checkout próprio adequado, continue nele sem reset. Não sobrescreva caminhos existentes. Inspecione o padrão atual de autenticação/tenant, CRM, uploads, Biblioteca e recebíveis para reaproveitar interfaces. Escreva critérios e um plano de implementação curto em `docs/coordination/claude/f02-contratos.md`, então implemente:
 
-1. Modelos de contrato fornecidos pela agência, com CRUD completo e isolamento por agência.
+1. Modelos de contrato fornecidos pela agência, com CRUD completo, isolamento por agência e produto explícito Viagens/Milhas.
 2. Rascunho vinculado à pessoa, com preenchimento de dados existentes, preço/plano, vigência e condições de pagamento. Destacar campos faltantes antes de gerar.
-3. Revisão e geração de documento, preservando a versão do modelo e o retrato dos dados utilizados. Alterar a pessoa posteriormente não pode mudar o contrato emitido.
+3. Revisão e geração de documento, preservando produto, versão do modelo e retrato dos dados utilizados. Alterar a pessoa posteriormente não pode mudar o contrato emitido. Cancelar o contrato de um produto não cancela o outro nem exclui a pessoa.
 4. Estados rascunho/enviado/assinado/cancelado, com transições auditadas. Assinado requer evidência anexada; não alegar assinatura eletrônica integrada.
 5. Edição/exclusão de modelos e rascunhos quando aplicável; contratos emitidos devem usar versão/cancelamento para preservar histórico, com explicação na UI.
 6. Vínculo opcional e explícito a recebíveis existentes. Não gerar outra venda/receita nem cobrança recorrente automaticamente ao salvar/assinar.
