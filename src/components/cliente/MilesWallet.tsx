@@ -46,10 +46,10 @@ const profileLabels: Record<keyof WalletProfile, string> = {
   actionPlan: "Plano de ações",
 };
 
-export function MilesWallet({ customerId }: { customerId: string }) {
+export function MilesWallet({ customerId, defaultOpen = false }: { customerId: string; defaultOpen?: boolean }) {
   const { token } = useAuth();
   const base = getAgenciaHubApiBaseUrl();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [view, setView] = useState<WalletView | null>(null);
   const [tab, setTab] = useState<
     "PROFILE" | WalletKind | "MOVEMENTS" | "HISTORY"

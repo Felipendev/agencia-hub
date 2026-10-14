@@ -52,19 +52,25 @@ const OWNER_GROUPS: NavGroup[] = [
     label: "Principal",
     items: [
       { href: "/dashboard",   label: "Dashboard",             icon: "layout"   },
-      { href: "/cotacoes",    label: "Cotações",              icon: "document" },
       { href: "/clientes",    label: "Pessoas",              icon: "users"    },
     ],
   },
   {
-    label: "Operacional",
+    label: "Viagens",
     items: [
+      { href: "/cotacoes", label: "Cotações", icon: "document" },
       { href: "/calculadora", label: "Calculadora de voos", icon: "calculator" },
       { href: "/viagens",     label: "Viagens",                icon: "plane"      },
-      { href: "/simulador-acumulo", label: "Simulador de acúmulo", icon: "calculator" },
-      { href: "/biblioteca",  label: "Biblioteca",             icon: "document"   },
     ],
   },
+  {
+    label: "Milhas",
+    items: [
+      { href: "/milhas", label: "Perfis e carteiras", icon: "wallet" },
+      { href: "/milhas/simulador", label: "Simulador de acúmulo", icon: "calculator" },
+    ],
+  },
+  { label: "Materiais", items: [{ href: "/biblioteca", label: "Biblioteca", icon: "document" }] },
   {
     label: "Financeiro",
     items: [
@@ -95,19 +101,25 @@ const SELLER_GROUPS: NavGroup[] = [
     label: "Principal",
     items: [
       { href: "/meu-painel",  label: "Meu Painel",            icon: "layout"   },
-      { href: "/cotacoes",    label: "Cotações",              icon: "document" },
       { href: "/clientes",    label: "Pessoas",              icon: "users"    },
     ],
   },
   {
-    label: "Operacional",
+    label: "Viagens",
     items: [
+      { href: "/cotacoes", label: "Cotações", icon: "document" },
       { href: "/calculadora", label: "Calculadora de voos", icon: "calculator" },
       { href: "/viagens",     label: "Viagens",                icon: "plane"      },
-      { href: "/simulador-acumulo", label: "Simulador de acúmulo", icon: "calculator" },
-      { href: "/biblioteca",  label: "Biblioteca",             icon: "document"   },
     ],
   },
+  {
+    label: "Milhas",
+    items: [
+      { href: "/milhas", label: "Perfis e carteiras", icon: "wallet" },
+      { href: "/milhas/simulador", label: "Simulador de acúmulo", icon: "calculator" },
+    ],
+  },
+  { label: "Materiais", items: [{ href: "/biblioteca", label: "Biblioteca", icon: "document" }] },
   {
     label: "Financeiro",
     items: [
@@ -137,7 +149,9 @@ function NavGroupSection({
             pathname === item.href ||
             (item.href !== "/dashboard" &&
               item.href !== "/meu-painel" &&
-              pathname.startsWith(item.href));
+              (item.href === "/milhas"
+                ? pathname.startsWith("/milhas/clientes/")
+                : pathname.startsWith(`${item.href}/`)));
           return (
             <Link
               key={item.href}
@@ -275,6 +289,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       {/* ── Mobile drawer ───────────────────────────────────────── */}
       <aside
+        id="hub-mobile-navigation"
+        aria-label="Menu principal"
+        aria-hidden={!mobileOpen}
+        inert={!mobileOpen}
         className={`fixed inset-y-0 left-0 z-50 flex w-[min(240px,85%)] flex-col bg-[var(--hub-blue-dark)] text-white shadow-[var(--hub-shadow-lg)] transition-transform duration-200 lg:hidden ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
@@ -302,6 +320,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               className="rounded-[var(--hub-radius-sm)] p-1.5 text-[var(--hub-text-secondary)] hover:bg-[var(--hub-bg-subtle)] lg:hidden"
               onClick={() => setMobileOpen(true)}
               aria-label="Abrir menu"
+              aria-controls="hub-mobile-navigation"
+              aria-expanded={mobileOpen}
             >
               <IconMenu className="h-5 w-5" />
             </button>
