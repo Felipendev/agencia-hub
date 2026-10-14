@@ -5,6 +5,7 @@ import type {
   ContractFieldView,
   ContractStatus,
   ContractSummary,
+  Product,
   DeleteOutcome,
   DocumentMeta,
   DocumentView,
@@ -71,8 +72,13 @@ const body = (value: unknown) => JSON.stringify(value);
 
 export const contractsApi = {
   fields: (token?: string | null) => json<ContractFieldView[]>(token, "/contract-templates/fields"),
-  listTemplates: (token: string | null | undefined, includeArchived = false) =>
-    json<TemplateSummary[]>(token, `/contract-templates${includeArchived ? "?includeArchived=true" : ""}`),
+  listTemplates: (token: string | null | undefined, includeArchived = false, product?: Product) => {
+    const query = new URLSearchParams();
+    if (includeArchived) query.set("includeArchived", "true");
+    if (product) query.set("product", product);
+    const suffix = query.toString();
+    return json<TemplateSummary[]>(token, `/contract-templates${suffix ? `?${suffix}` : ""}`);
+  },
   getTemplate: (token: string | null | undefined, id: string) => json<TemplateDetail>(token, `/contract-templates/${id}`),
   templateVersion: (token: string | null | undefined, id: string, version: number) =>
     json<TemplateVersion>(token, `/contract-templates/${id}/versions/${version}`),
@@ -85,9 +91,10 @@ export const contractsApi = {
   restoreTemplate: (token: string | null | undefined, id: string, expectedVersion: number) =>
     json<TemplateDetail>(token, `/contract-templates/${id}/restore?expectedVersion=${expectedVersion}`, { method: "POST" }),
 
-  list: (token: string | null | undefined, filters: { customerId?: string; status?: ContractStatus } = {}) => {
+  list: (token: string | null | undefined, filters: { customerId?: string; product?: Product; status?: ContractStatus } = {}) => {
     const query = new URLSearchParams();
     if (filters.customerId) query.set("customerId", filters.customerId);
+    if (filters.product) query.set("product", filters.product);
     if (filters.status) query.set("status", filters.status);
     const suffix = query.toString();
     return json<ContractSummary[]>(token, `/contracts${suffix ? `?${suffix}` : ""}`);

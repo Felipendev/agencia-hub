@@ -8,8 +8,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { contractsApi } from "@/lib/contracts/api";
-import { STATUS_LABEL, STATUS_TONE, formatDay, formatMoney, formatMoment } from "@/lib/contracts/format";
-import type { ContractStatus, ContractSummary } from "@/lib/contracts/types";
+import { PRODUCT_LABEL, STATUS_LABEL, STATUS_TONE, formatDay, formatMoney, formatMoment, isProduct } from "@/lib/contracts/format";
+import type { ContractStatus, ContractSummary, Product } from "@/lib/contracts/types";
 
 const linkButton =
   "inline-flex items-center justify-center rounded-[var(--hub-radius)] px-4 py-2 text-sm font-medium transition-colors";
@@ -21,6 +21,8 @@ function ContractsList() {
   const [rows, setRows] = useState<ContractSummary[] | null>(null);
   const [error, setError] = useState("");
   const [status, setStatus] = useState<"" | ContractStatus>("");
+  const initialProduct = params.get("product");
+  const [product, setProduct] = useState<"" | Product>(isProduct(initialProduct) ? initialProduct : "");
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -35,11 +37,14 @@ function ContractsList() {
 
   const visible = useMemo(() => {
     const term = search.trim().toLocaleLowerCase("pt-BR");
-    return (rows ?? []).filter((row) => (!status || row.status === status)
+    return (rows ?? []).filter((row) => (!status || row.status === status) && (!product || row.product === product)
       && (!term || `${row.title} ${row.customerName} ${row.planName ?? ""}`.toLocaleLowerCase("pt-BR").includes(term)));
-  }, [rows, status, search]);
+  }, [rows, status, product, search]);
 
-  const newHref = customerId ? `/contratos/novo?customerId=${encodeURIComponent(customerId)}` : "/contratos/novo";
+  const newQuery = new URLSearchParams();
+  if (customerId) newQuery.set("customerId", customerId);
+  if (product) newQuery.set("product", product);
+  const newHref = `/contratos/novo${newQuery.size ? `?${newQuery}` : ""}`;
 
   return (
     <div className="space-y-6">
@@ -57,6 +62,11 @@ function ContractsList() {
 
       <div className="flex flex-wrap gap-3">
         <Input aria-label="Buscar contratos" placeholder="Buscar por título, pessoa ou plano" value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm" />
+        <select aria-label="Filtrar produto" className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white px-3 text-sm" value={product} onChange={(e) => setProduct(e.target.value as "" | Product)}>
+          <option value="">Viagens e Milhas</option>
+          <option value="TRAVEL">Viagens</option>
+          <option value="MILES">Milhas</option>
+        </select>
         <select aria-label="Filtrar status" className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white px-3 text-sm" value={status} onChange={(e) => setStatus(e.target.value as "" | ContractStatus)}>
           <option value="">Todos os status</option>
           {(Object.keys(STATUS_LABEL) as ContractStatus[]).map((key) => <option key={key} value={key}>{STATUS_LABEL[key]}</option>)}
@@ -76,6 +86,7 @@ function ContractsList() {
             <thead className="bg-[var(--hub-bg-subtle)] text-left text-xs text-[var(--hub-text-muted)]">
               <tr>
                 <th className="px-4 py-2 font-medium">Contrato</th>
+                <th className="px-4 py-2 font-medium">Produto</th>
                 <th className="px-4 py-2 font-medium">Pessoa</th>
                 <th className="px-4 py-2 font-medium">Status</th>
                 <th className="px-4 py-2 font-medium">Valor</th>
@@ -90,6 +101,7 @@ function ContractsList() {
                     <Link href={`/contratos/${row.id}`} className="font-medium text-[var(--hub-blue-dark)] hover:underline">{row.title}</Link>
                     <p className="text-xs text-[var(--hub-text-muted)]">{row.templateName} · modelo v{row.templateVersion}{row.latestDocumentVersion ? ` · documento v${row.latestDocumentVersion}` : ""}</p>
                   </td>
+                  <td className="px-4 py-3">{PRODUCT_LABEL[row.product]}</td>
                   <td className="px-4 py-3">{row.customerName}</td>
                   <td className="px-4 py-3">
                     <Badge tone={STATUS_TONE[row.status]}>{STATUS_LABEL[row.status]}</Badge>

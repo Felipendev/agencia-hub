@@ -9,7 +9,7 @@ describe("cliente HTTP de contratos", () => {
   it("envia a chave de idempotência e o token na criação do rascunho", async () => {
     const fetchMock = vi.fn().mockResolvedValue(Response.json({ contract: { id: "k" } }, { status: 201 }));
     vi.stubGlobal("fetch", fetchMock);
-    await contractsApi.create("tok", "key-1", { customerId: "p", templateId: "t", title: "T", planName: null, price: null, startDate: null, endDate: null, paymentMode: null, installments: null, paymentTerms: null, notes: null });
+    await contractsApi.create("tok", "key-1", { customerId: "p", product: "TRAVEL", templateId: "t", title: "T", planName: null, price: null, startDate: null, endDate: null, paymentMode: null, installments: null, paymentTerms: null, notes: null });
     const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe("https://api.example/api/v1/contracts");
     const headers = init.headers as Headers;

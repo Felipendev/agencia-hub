@@ -1,4 +1,8 @@
-import type { ContractDetail, ContractStatus, DraftInput, PaymentMode } from "./types";
+import type { ContractDetail, ContractStatus, DraftInput, PaymentMode, Product } from "./types";
+
+export const PRODUCT_LABEL: Record<Product, string> = { TRAVEL: "Viagens", MILES: "Milhas" };
+
+export const isProduct = (value: string | null | undefined): value is Product => value === "TRAVEL" || value === "MILES";
 
 export const STATUS_LABEL: Record<ContractStatus, string> = {
   DRAFT: "Rascunho",
@@ -118,7 +122,8 @@ export function parsePrice(raw: string): number | null {
   return Number(normalized);
 }
 
-export function toDraftInput(customerId: string, form: DraftForm, expectedVersion?: number): DraftInput {
+export function toDraftInput(customerId: string, product: Product | "", form: DraftForm, expectedVersion?: number): DraftInput {
+  if (!product) throw new Error("Escolha se o contrato é de Viagens ou de Milhas.");
   if (!form.title.trim()) throw new Error("Informe o título do contrato.");
   if (!form.templateId) throw new Error("Escolha um modelo de contrato.");
   if (form.startDate && form.endDate && form.endDate < form.startDate) throw new Error("O fim da vigência não pode ser anterior ao início.");
@@ -129,6 +134,7 @@ export function toDraftInput(customerId: string, form: DraftForm, expectedVersio
   const text = (value: string) => (value.trim() ? value.trim() : null);
   return {
     customerId,
+    product,
     templateId: form.templateId,
     templateVersion: form.templateVersion,
     title: form.title.trim(),

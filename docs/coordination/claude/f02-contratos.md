@@ -7,6 +7,7 @@ PRs: API [Felipendev/agencia-hub-api#61](https://github.com/Felipendev/agencia-h
 
 ### Regras de negócio
 
+- **Produto explícito** (diretriz de 14/10, `docs/dominios-viagens-milhas-2026-10-14.md`): modelo, contrato e documento emitido registram `TRAVEL` (Viagens) ou `MILES` (Milhas). O produto é escolhido pela pessoa usuária, nunca deduzido do cliente ou do uso de milhas, e não muda depois de criado. O banco impede contrato com modelo de outro produto (FK composta). A mesma pessoa pode ter contratos dos dois produtos, com vigência, assinatura e cancelamento independentes; cancelar um não altera o outro nem a pessoa. Campo de modelo `{{contrato.produto}}` e filtros `?product=` na lista de contratos e de modelos.
 - **Modelo** (`contract_templates` + `contract_template_versions`): texto fornecido pela agência; o sistema só substitui campos `{{chave}}` de um catálogo fechado (pessoa, agência, termos). Campo desconhecido é recusado ao salvar. Não há cláusulas geradas pelo sistema.
 - Editar nome/descrição mantém o mesmo ID e a mesma versão; alterar o conteúdo cria a versão `n+1`. Versões são imutáveis.
 - Excluir modelo sem contratos remove de fato; modelo já usado é **arquivado** (não aparece para novos rascunhos, pode ser reativado).
@@ -48,6 +49,7 @@ Rotas próprias: `/contratos` (lista e filtros, `?customerId=`), `/contratos/mod
 | Critério | Status |
 |---|---|
 | CRUD de modelos com isolamento por agência; editar mantém ID | Implementado; teste de integração escrito |
+| Produto TRAVEL/MILES explícito em modelo, contrato e documento; independência entre produtos | Implementado; teste de integração escrito e testes UI passando |
 | Rascunho vinculado à pessoa, preenchido com dados existentes, preço/plano, vigência, pagamento | Implementado |
 | Campos faltantes destacados antes de gerar | Implementado (API 422 + destaque na UI); testes UI passando |
 | Documento preserva versão do modelo e retrato dos dados; alterar a pessoa não muda emitido | Implementado; teste de integração escrito |
@@ -59,7 +61,7 @@ Rotas próprias: `/contratos` (lista e filtros, `?customerId=`), `/contratos/mod
 
 ## Validação
 
-- Frontend: `npx tsc --noEmit`, `npm run lint` (0 erros), `npx vitest run` (28 arquivos, 102 testes após rebase em `origin/main` 27ad5aa, incluindo 18 novos de contratos) e `next build` com as rotas `/contratos*`.
+- Frontend: `npx tsc --noEmit`, `npm run lint` (0 erros), `npx vitest run` (29 arquivos, 105 testes, incluindo 21 de contratos) e `next build` com as rotas `/contratos*`.
   O build local precisou substituir temporariamente `next/font/google` porque este ambiente não acessa o Google Fonts; o arquivo não foi alterado no commit.
 - API: CI do PR (compile, Flyway em PostgreSQL 16 com a nova migration, package com compilação dos testes) verde. A migration também foi aplicada em PostgreSQL 16 efêmero local e as consultas SQL principais foram executadas.
   **Os testes JUnit não foram executados aqui**: o Maven Central está bloqueado na rede deste ambiente e a CI atual não roda testes. Executar antes do merge: `mvn test -Dtest='ContractIntegrationTest,ContractTemplateRendererTest,ContractValuesTest,ContractPdfRendererTest'`.

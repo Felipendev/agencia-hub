@@ -1,5 +1,7 @@
 /** Contrato JSON do módulo F02 (`/contracts`, `/contract-templates`). */
 
+/** Viagens e Milhas são produtos distintos; o produto é escolhido explicitamente. */
+export type Product = "TRAVEL" | "MILES";
 export type ContractStatus = "DRAFT" | "SENT" | "SIGNED" | "CANCELLED";
 export type PaymentMode = "CASH" | "INSTALLMENTS";
 export type AttachmentKind = "SIGNED_EVIDENCE" | "SUPPORTING";
@@ -11,6 +13,7 @@ export type AuditEntry = { id: string; action: string; detail: Record<string, un
 
 export type TemplateSummary = {
   id: string;
+  product: Product;
   name: string;
   description: string | null;
   currentVersion: number;
@@ -30,12 +33,13 @@ export type TemplateDetail = {
   history: AuditEntry[];
 };
 
-export type TemplateInput = { name: string; description: string; body: string; expectedVersion?: number };
+export type TemplateInput = { product?: Product; name: string; description: string; body: string; expectedVersion?: number };
 
 export type DeleteOutcome = { outcome: "DELETED" | "ARCHIVED"; message: string };
 
 export type ContractSummary = {
   id: string;
+  product: Product;
   customerId: string;
   customerName: string;
   templateId: string;
@@ -55,6 +59,7 @@ export type ContractSummary = {
 
 export type DocumentMeta = {
   version: number;
+  product: Product;
   dataRevision: number;
   templateId: string;
   templateVersion: number;
@@ -110,6 +115,7 @@ export type ContractDetail = {
 
 export type DraftInput = {
   customerId: string;
+  product: Product;
   templateId: string;
   templateVersion?: number | null;
   title: string;

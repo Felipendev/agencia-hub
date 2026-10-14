@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { DraftFields, MissingFields } from "@/components/contratos/draft-fields";
 import { ContractApiError, UPLOAD_ACCEPT, contractsApi, saveBlob, uploadProblem } from "@/lib/contracts/api";
 import {
+  PRODUCT_LABEL,
   STATUS_LABEL,
   STATUS_TONE,
   actionLabel,
@@ -102,11 +103,11 @@ function ContractPage() {
   const linkedIds = new Set((detail.receivables ?? []).map((r) => r.receivableId));
   const available = (receivableOptions ?? []).filter((r) => !linkedIds.has(r.id));
   const evidenceAttachment = detail.attachments.find((a) => a.kind === "SIGNED_EVIDENCE");
-  const activeTemplates = templates.filter((t) => !t.archived || t.id === form.templateId);
+  const activeTemplates = templates.filter((t) => t.product === c.product && (!t.archived || t.id === form.templateId));
   const dirty = isDraft && JSON.stringify(form) !== JSON.stringify(formFromDetail(detail));
 
   const save = () => run(async () => {
-    const next = await contractsApi.update(token, id, toDraftInput(c.customerId, form, version));
+    const next = await contractsApi.update(token, id, toDraftInput(c.customerId, c.product, form, version));
     apply(next); setPreview(null);
     return next.contract.rowVersion === version ? "Nenhuma alteração para salvar." : "Rascunho salvo.";
   });
@@ -181,8 +182,9 @@ function ContractPage() {
   return (
     <div className="space-y-6">
       <PageHeader title={c.title} description={`${c.customerName} · ${c.templateName} (modelo v${c.templateVersion})`}>
+        <Badge tone="muted">{PRODUCT_LABEL[c.product]}</Badge>
         <Badge tone={STATUS_TONE[c.status]}>{STATUS_LABEL[c.status]}</Badge>
-        <Link href={`/contratos?customerId=${c.customerId}`} className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white px-4 py-2 text-sm font-medium hover:bg-[var(--hub-bg-subtle)]">Contratos da pessoa</Link>
+        <Link href={`/contratos?customerId=${c.customerId}&product=${c.product}`} className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white px-4 py-2 text-sm font-medium hover:bg-[var(--hub-bg-subtle)]">Contratos da pessoa</Link>
       </PageHeader>
 
       {error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}

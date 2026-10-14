@@ -10,7 +10,7 @@ vi.mock("@/lib/api/agencia-hub-env", () => ({ getAgenciaHubApiBaseUrl: () => "ht
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); accountKind = "AGENCY_OWNER"; });
 
 const fields = [{ key: "cliente.nome", label: "Nome da pessoa", source: "CUSTOMER" }];
-const summary = { id: "t1", name: "Assessoria", description: null, currentVersion: 1, archived: false, rowVersion: 1, contractCount: 2, updatedAt: "2026-10-14T12:00:00Z" };
+const summary = { id: "t1", product: "MILES", name: "Assessoria", description: null, currentVersion: 1, archived: false, rowVersion: 1, contractCount: 2, updatedAt: "2026-10-14T12:00:00Z" };
 const detail = (over: Record<string, unknown> = {}, tpl: Record<string, unknown> = {}) => ({
   template: { ...summary, ...tpl }, body: "Contratante: {{cliente.nome}}", usedFields: ["cliente.nome"],
   versions: [{ version: 1, body: "Contratante: {{cliente.nome}}", usedFields: ["cliente.nome"], author: "Gestor", createdAt: "2026-10-14T12:00:00Z" }],
@@ -36,7 +36,7 @@ describe("modelos de contrato", () => {
     fireEvent.click(screen.getByRole("button", { name: "Salvar alterações" }));
     await screen.findByText(/versão 2\. Contratos já emitidos continuam/);
     const patch = fetchMock.mock.calls.find(([, init]) => init?.method === "PATCH")!;
-    expect(JSON.parse(String(patch[1]!.body))).toMatchObject({ body: "Novo texto {{cliente.nome}}", expectedVersion: 1 });
+    expect(JSON.parse(String(patch[1]!.body))).toMatchObject({ product: "MILES", body: "Novo texto {{cliente.nome}}", expectedVersion: 1 });
   });
 
   it("arquiva modelo usado e mostra a explicação da API", async () => {

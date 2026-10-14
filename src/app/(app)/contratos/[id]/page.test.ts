@@ -15,11 +15,11 @@ vi.mock("next/navigation", () => ({
 }));
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); push.mockReset(); accountKind = "AGENCY_OWNER"; });
 
-const template = { id: "t1", name: "Assessoria", description: null, currentVersion: 1, archived: false, rowVersion: 1, contractCount: 1, updatedAt: "2026-10-14T12:00:00Z" };
+const template = { id: "t1", product: "TRAVEL", name: "Assessoria", description: null, currentVersion: 1, archived: false, rowVersion: 1, contractCount: 1, updatedAt: "2026-10-14T12:00:00Z" };
 const missingPrice = [{ key: "contrato.valor", label: "Valor total", source: "CONTRACT" }];
 function detail(overrides: Record<string, unknown> = {}, contract: Record<string, unknown> = {}) {
   return {
-    contract: { id: "c1", customerId: "p1", customerName: "Ana", templateId: "t1", templateName: "Assessoria", templateVersion: 1, title: "Assessoria anual",
+    contract: { id: "c1", product: "TRAVEL", customerId: "p1", customerName: "Ana", templateId: "t1", templateName: "Assessoria", templateVersion: 1, title: "Assessoria anual",
       status: "DRAFT", planName: null, price: null, startDate: null, endDate: null, latestDocumentVersion: null, documentCurrent: false, rowVersion: 1,
       updatedAt: "2026-10-14T12:00:00Z", ...contract },
     paymentMode: null, installments: null, paymentTerms: null, notes: null, dataRevision: 1, latestTemplateVersion: 1, sentOn: null, signedOn: null,
@@ -49,7 +49,7 @@ describe("detalhe do contrato", () => {
     fireEvent.click(screen.getByRole("button", { name: "Salvar rascunho" }));
     await screen.findByText("Rascunho salvo.");
     const patch = fetchMock.mock.calls.find(([, init]) => init?.method === "PATCH")!;
-    expect(JSON.parse(String(patch[1]!.body))).toMatchObject({ customerId: "p1", price: 1200, expectedVersion: 1 });
+    expect(JSON.parse(String(patch[1]!.body))).toMatchObject({ customerId: "p1", product: "TRAVEL", price: 1200, expectedVersion: 1 });
     expect((screen.getByRole("button", { name: "Gerar documento" }) as HTMLButtonElement).disabled).toBe(false);
   });
 
@@ -72,11 +72,12 @@ describe("detalhe do contrato", () => {
   });
 
   it("exige evidência para registrar a assinatura e envia multipart", async () => {
-    const sent = detail({ sentOn: "2026-10-14", documents: [{ version: 1, dataRevision: 1, templateId: "t1", templateVersion: 1, contentSha256: "a".repeat(64), author: "Gestor", createdAt: "2026-10-14T12:00:00Z" }] },
+    const sent = detail({ sentOn: "2026-10-14", documents: [{ version: 1, product: "TRAVEL", dataRevision: 1, templateId: "t1", templateVersion: 1, contentSha256: "a".repeat(64), author: "Gestor", createdAt: "2026-10-14T12:00:00Z" }] },
       { status: "SENT", latestDocumentVersion: 1, documentCurrent: true, rowVersion: 3 });
     const signed = detail({ signedOn: "2026-10-14", attachments: [{ id: "e1", kind: "SIGNED_EVIDENCE", documentVersion: 1, description: null, filename: "assinado.pdf", contentType: "application/pdf", byteSize: 4, author: "Gestor", createdAt: "2026-10-14T12:00:00Z" }] },
       { status: "SIGNED", latestDocumentVersion: 1, documentCurrent: true, rowVersion: 4 });
-    const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+    const fetchMock = vi.fn(async (url: string, _init?: RequestInit) => {
+      void _init;
       if (url.endsWith("/sign")) return Response.json(signed);
       if (url.endsWith("/contracts/c1")) return Response.json(sent);
       if (url.includes("/contract-templates")) return Response.json([template]);

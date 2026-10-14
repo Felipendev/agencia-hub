@@ -8,12 +8,14 @@ Adicionar `"/contratos"` em `PROTECTED_PREFIXES` e `"/contratos", "/contratos/:p
 
 ## 2. Entrada de menu em `src/components/layout/dashboard-shell.tsx`
 
-- Rótulo: **Contratos**; rota: `/contratos`; ícone sugerido: `document`.
-- Visível para `AGENCY_OWNER` e `SALES_AGENT` (OWNER_GROUPS e SELLER_GROUPS). A página de modelos é acessível a partir de `/contratos` (botão "Modelos").
+Com a navegação separada por produto (TODO-051), sugestão: item **Contratos** no grupo Viagens → `/contratos?product=TRAVEL` e no grupo Milhas → `/contratos?product=MILES`, para dono e vendedor. Sem `product`, a página lista os dois produtos com filtro. Modelos: botão "Modelos" dentro de `/contratos`.
 
-## 3. Acesso a partir da página da pessoa `src/app/(app)/clientes/[id]/page.tsx`
+## 3. Atalhos nas páginas da pessoa
 
-Ação/ligação "Contratos" com `href={`/contratos?customerId=${id}`}` e "Novo contrato" com `href={`/contratos/novo?customerId=${id}`}`. Contrato: as duas rotas aceitam o UUID da pessoa; nenhuma prop ou context novo é necessário.
+- Viagens — `src/app/(app)/clientes/[id]/page.tsx`: `/contratos?customerId=${id}&product=TRAVEL` e `/contratos/novo?customerId=${id}&product=TRAVEL`.
+- Milhas — `src/app/(app)/milhas/clientes/[id]/page.tsx`: os mesmos links com `product=MILES`.
+
+As rotas aceitam esses parâmetros; nenhuma prop ou context novo é necessário. O produto vem do contexto da página, nunca do cadastro.
 
 ## 4. API — mensagens e ordem de exclusão (arquivos centrais)
 

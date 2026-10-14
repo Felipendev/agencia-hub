@@ -12,8 +12,8 @@ import { Label } from "@/components/ui/label";
 import { DraftFields } from "@/components/contratos/draft-fields";
 import { listCustomersRemote } from "@/lib/api/list-customers-remote";
 import { contractsApi } from "@/lib/contracts/api";
-import { emptyDraftForm, toDraftInput, type DraftForm } from "@/lib/contracts/format";
-import type { TemplateSummary } from "@/lib/contracts/types";
+import { PRODUCT_LABEL, emptyDraftForm, isProduct, toDraftInput, type DraftForm } from "@/lib/contracts/format";
+import type { Product, TemplateSummary } from "@/lib/contracts/types";
 import type { Cliente } from "@/types";
 
 function NewContract() {
@@ -23,6 +23,9 @@ function NewContract() {
   const [customers, setCustomers] = useState<Cliente[] | null>(null);
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [customerId, setCustomerId] = useState(params.get("customerId") ?? "");
+  const initialProduct = params.get("product");
+  // Sem produto na URL, a pessoa escolhe: o produto nunca é deduzido do cadastro.
+  const [product, setProduct] = useState<Product | "">(isProduct(initialProduct) ? initialProduct : "");
   const [search, setSearch] = useState("");
   const [form, setForm] = useState<DraftForm>(emptyDraftForm());
   const [busy, setBusy] = useState(false);
@@ -38,11 +41,19 @@ function NewContract() {
         if (!active) return;
         setCustomers(people);
         setTemplates(models);
-        if (models.length === 1) setForm((f) => (f.templateId ? f : { ...f, templateId: models[0].id }));
+
       })
       .catch((e: Error) => { if (active) setError(e.message); });
     return () => { active = false; };
   }, [token]);
+
+  const productTemplates = useMemo(() => templates.filter((t) => t.product === product), [templates, product]);
+
+  function chooseProduct(next: Product | "") {
+    setProduct(next);
+    const available = templates.filter((t) => t.product === next);
+    setForm((f) => ({ ...f, templateId: available.length === 1 ? available[0].id : "", templateVersion: null }));
+  }
 
   const options = useMemo(() => {
     const term = search.trim().toLocaleLowerCase("pt-BR");
@@ -54,7 +65,7 @@ function NewContract() {
     setError("");
     if (!customerId) { setError("Escolha a pessoa do contrato."); return; }
     let input;
-    try { input = toDraftInput(customerId, form); } catch (e) { setError(e instanceof Error ? e.message : "Revise os campos."); return; }
+    try { input = toDraftInput(customerId, product, form); } catch (e) { setError(e instanceof Error ? e.message : "Revise os campos."); return; }
     setBusy(true);
     try {
       const created = await contractsApi.create(token, requestKey.current, input);
@@ -71,13 +82,25 @@ function NewContract() {
         <Link href="/contratos" className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white px-4 py-2 text-sm font-medium hover:bg-[var(--hub-bg-subtle)]">Voltar</Link>
       </PageHeader>
       {error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
-      {templates.length === 0 && customers !== null && (
+      {product && productTemplates.length === 0 && customers !== null && (
         <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-          Nenhum modelo ativo. <Link href="/contratos/modelos" className="underline">Cadastre o modelo da agência</Link> antes de criar contratos.
+          Nenhum modelo ativo de {PRODUCT_LABEL[product]}. <Link href="/contratos/modelos" className="underline">Cadastre o modelo da agência</Link> antes de criar contratos.
         </p>
       )}
       <form onSubmit={submit}>
         <Card className="space-y-4">
+          <fieldset>
+            <legend className="mb-1.5 text-xs font-medium text-[var(--hub-text-secondary)]">Produto <span aria-hidden="true" className="text-red-600">*</span></legend>
+            <div className="flex flex-wrap gap-2">
+              {(["TRAVEL", "MILES"] as Product[]).map((value) => (
+                <label key={value} className={`flex cursor-pointer items-center gap-2 rounded-[var(--hub-radius)] border px-3 py-2 text-sm ${product === value ? "border-[var(--hub-blue)] bg-[var(--hub-blue)]/5" : "border-[var(--hub-border)]"}`}>
+                  <input type="radio" name="product" value={value} checked={product === value} disabled={busy} onChange={() => chooseProduct(value)} />
+                  {PRODUCT_LABEL[value]}
+                </label>
+              ))}
+            </div>
+            <p className="mt-1 text-xs text-[var(--hub-text-muted)]">A mesma pessoa pode ter contratos de Viagens e de Milhas, com vigência e cancelamento independentes.</p>
+          </fieldset>
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <Label htmlFor="customer-search">Buscar pessoa</Label>
@@ -91,7 +114,7 @@ function NewContract() {
               </select>
             </div>
           </div>
-          <DraftFields form={form} onChange={setForm} templates={templates} missing={[]} disabled={busy} />
+          <DraftFields form={form} onChange={setForm} templates={productTemplates} missing={[]} disabled={busy || !product} />
           <div className="flex gap-2">
             <Button type="submit" disabled={busy || !token}>{busy ? "Criando…" : "Criar rascunho"}</Button>
           </div>
