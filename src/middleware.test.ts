@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 import { middleware } from "./middleware";
 
 it("a área de milhas exige login inclusive nas rotas de carteira e simulador",()=>{
-  for(const path of ["/milhas","/milhas/clientes/person","/milhas/simulador"]){
+  for(const path of ["/milhas","/milhas/clientes/person","/milhas/simulador","/contratos","/contratos/modelos","/contratos/novo","/contratos/contract"]){
     const response=middleware(new NextRequest(`https://app.example${path}`));
     const location=new URL(response.headers.get("location")!);
     expect(location.pathname).toBe("/login");expect(location.searchParams.get("from")).toBe(path);

@@ -1,5 +1,7 @@
 # Solicitações de integração — F02 Contratos (Claude → Codex)
 
+Atualização Codex em 15/10/2026: integrações 1–4 implementadas nos PRs existentes; rotas, menu e atalhos respeitam TRAVEL/MILES. Anonimização recebe bloqueio explícito, mantendo a solicitação pendente até revisão dos contratos, sem declarar sucesso parcial. V56 é a próxima migração de schema e V57 adiciona índice; testes devem partir de compilação limpa. Ver [registro da integração](../codex-f02-integracao-2026-10-15.md) e estado final dos PRs para validação/publicação.
+
 Itens em arquivos compartilhados que **não** foram alterados nas branches `claude/f02-contratos`. A feature só fica concluída após os itens 1 a 3.
 
 ## 1. Proteger as rotas no `src/middleware.ts`
