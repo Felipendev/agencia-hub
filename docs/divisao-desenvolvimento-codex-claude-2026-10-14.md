@@ -23,7 +23,7 @@ Na data deste acordo, produção contém frontend `27ad5aaccd7a55291c78353b64b5a
 
 O leitor de prints voltou a funcionar nos testes disponíveis. O diagnóstico adicional foi pausado a pedido do usuário; não alegar uma nova correção ou publicar o stash de diagnóstico junto a outra feature. Login exclusivo de desenvolvimento também permanece fora das entregas.
 
-## Divisão das dez frentes pendentes
+## Divisão das dez frentes e estado atual
 
 A divisão é de cinco frentes para cada agente. O esforço não é uma estimativa de horas: estoque e créditos de indicação têm decisões de negócio pendentes, uma em cada fluxo.
 
@@ -34,13 +34,13 @@ A divisão é de cinco frentes para cada agente. O esforço não é uma estimati
 | TODO-043 | Codex | Evolução F04 e conexão F06 | Diagnóstico público com revisão autenticada, plano → tarefas após F01, uso opcional de cartões no simulador. Nunca sobrescrever carteira com telefone/e-mail enviados por visitante. | `codex/f04-diagnostico-integracoes` |
 | TODO-044 | Codex | F11 — Exportação consolidada | Histórico e exportação seletiva por pessoa/período, aproveitando o que existe. Cada dono implementa a auditoria do próprio módulo; Codex integra as exportações. | `codex/f11-historico-exportacao` |
 | TODO-045 | Codex | F05 — Lotes e reservas | Condicionada: definir custódia, titularidade, custo, reservas e cancelamentos antes de debitar/reservar milhas reais. | `codex/f05-lotes-reservas` |
-| TODO-046 | Claude | F02 — Contratos | Primeira do Claude. Modelos da agência, preenchimento/revisão, documento versionado, evidência de assinatura e cancelamento. CRUD de modelos/rascunhos e preservação de documentos emitidos. | `claude/f02-contratos` |
+| TODO-046 | Claude | F02 — Contratos | Concluída e publicada em 15/10 (API #61/UI #54). Modelos da agência, preenchimento/revisão, documento versionado, evidência de assinatura e cancelamento. CRUD de modelos/rascunhos e preservação de documentos emitidos. | `claude/f02-contratos` |
 | TODO-047 | Claude | F03 — Economia do cliente | Comparação documentada por viagem, fonte/data/condições, custo efetivo e relatório. Economia realizada distinta de estimativa e de lucro da agência. | `claude/f03-economia-cliente` |
 | TODO-048 | Claude | F07 — Agenda e atas | Compromissos, responsáveis e atas consultáveis, edição/cancelamento apropriados e fuso consistente. Conexão com tarefas fica para um PR de integração após F01. | `claude/f07-agenda-atas` |
 | TODO-049 | Claude | F09 — Indicações | Cadastro e acompanhamento indicador/indicado, origem e estado. Créditos/resgate financeiro condicionados à definição do gatilho e regras de estorno. | `claude/f09-indicacoes` |
 | TODO-050 | Claude | Extensão F10 — Etapas de viagem | Hotel, transfer e atividades com datas, observações e anexos, reutilizando vínculos existentes. Sem duplicar trechos, anexos ou criar despesas automaticamente. | `claude/f10-etapas-viagem` |
 
-Ordem Codex: F01 → F08 → evolução F04/F06 → F11; F05 quando houver regra definida. Ordem Claude: F02 → F03 → F07 → etapas F10; cadastro de indicações pode avançar sem automatizar créditos. Claude não depende de F01 para começar contratos, economia, agenda ou etapas.
+Ordem Codex: F01 → F08 → evolução F04/F06 → F11; F05 quando houver regra definida. Ordem restante Claude: F03 → F07 → etapas F10; cadastro de indicações pode avançar sem automatizar créditos. Claude não depende de F01 para começar contratos, economia, agenda ou etapas.
 
 ## Donos dos arquivos e módulos
 
