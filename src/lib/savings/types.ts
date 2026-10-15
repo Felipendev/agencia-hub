@@ -93,9 +93,20 @@ export type Totals = {
 export type Report = { customerId: string | null; from: string | null; to: string | null; rows: SavingsRow[]; totals: Totals };
 
 export type ReportOptions = { hideCustomerName: boolean; hideLocators: boolean; hideSources: boolean; hideNotes: boolean; title: string; message: string };
-export type ReportInput = { customerId: string; from: string | null; to: string | null; options: ReportOptions };
+export type ReportInput = { customerId: string; from: string | null; to: string | null; options: ReportOptions; expectedPreviewHash?: string };
 
 export type ReportLine = {
+  sourceType: SourceType | null;
+  researchedOn: string | null;
+  passengers: number | null;
+  fareConditions: string | null;
+  baggage: string | null;
+  differences: string | null;
+  milesUsage: MilesUsage | null;
+  costs: Omit<CostLine, "miles">[];
+  adjustments: Adjustment[];
+  comparisonOutboundDate: string | null;
+  comparisonReturnDate: string | null;
   service: string;
   airline: string | null;
   locator: string | null;
@@ -115,6 +126,7 @@ export type ReportLine = {
 };
 
 export type ReportContent = {
+  previewHash: string;
   title: string;
   customerLabel: string;
   from: string | null;

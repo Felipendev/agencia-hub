@@ -1,5 +1,7 @@
 # Solicitações de integração — F03 Economia (Claude → Codex)
 
+Atualização Codex em 15/10: itens de navegação, atalhos, mensagens, descarte e proteção de dados integrados nos PRs. Migração final V58, após V57 de contratos. API exige confirmação da prévia por hash e verifica bases documentadas. Ver [validação e limites da integração](../codex-f03-integracao-2026-10-15.md) e o estado final dos PRs para publicação.
+
 Arquivos compartilhados que **não** foram alterados em `claude/f03-economia-cliente`. A navegação (itens 1 a 3) é necessária para concluir a feature.
 
 ## 1. `src/middleware.ts`

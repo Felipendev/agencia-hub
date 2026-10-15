@@ -11,8 +11,8 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { listCustomersRemote } from "@/lib/api/list-customers-remote";
-import { saveBlob, savingsApi } from "@/lib/savings/api";
-import { formatDay, formatMoment, formatMoney } from "@/lib/savings/format";
+import { SavingsApiError, saveBlob, savingsApi } from "@/lib/savings/api";
+import { ADJUSTMENT_LABEL, COST_LABEL, SOURCE_LABEL, TRIP_STATUS, formatDay, formatMoment, formatMoney } from "@/lib/savings/format";
 import type { ReportContent, ReportInput, ReportOptions, SharedReportSummary } from "@/lib/savings/types";
 import type { Cliente } from "@/types";
 
@@ -64,7 +64,7 @@ function SharedReports() {
   async function run(action: () => Promise<string | void>) {
     setBusy(true); setError(""); setNotice("");
     try { const message = await action(); if (message) setNotice(message); }
-    catch (e) { setError(e instanceof Error ? e.message : "Não foi possível concluir a ação."); }
+    catch (e) { if (e instanceof SavingsApiError && e.status === 409) setPreview(null); setError(e instanceof Error ? e.message : "Não foi possível concluir a ação."); }
     finally { setBusy(false); }
   }
 
@@ -99,10 +99,11 @@ function SharedReports() {
             <label key={key} className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(options[key])} onChange={(e) => change(() => setOptions({ ...options, [key]: e.target.checked }))} /> {label}</label>
           ))}
         </fieldset>
+        <p className="text-xs text-[var(--hub-text-muted)]">As opções ocultam os campos indicados. Revise também os textos livres, descrições e links da prévia antes de compartilhar.</p>
         <div className="flex flex-wrap gap-2">
           <Button variant="secondary" disabled={busy || !customerId} onClick={() => run(async () => { setPreview(await savingsApi.previewReport(token, input())); })}>Ver prévia</Button>
           <Button disabled={busy || !preview} onClick={() => run(async () => {
-            const created = await savingsApi.createReport(token, input());
+            const created = await savingsApi.createReport(token, { ...input(), expectedPreviewHash: preview!.previewHash });
             setReports((rows) => [{ id: created.id, customerId: created.customerId, title: created.content.title, from: created.from, to: created.to, trips: created.content.totals.trips, savings: created.content.totals.savings, author: created.author, createdAt: created.createdAt }, ...(rows ?? [])]);
             setPreview(null);
             return "Relatório gerado. Baixe o PDF para compartilhar com o cliente.";
@@ -120,10 +121,18 @@ function SharedReports() {
             {preview.lines.map((line, i) => (
               <li key={i} className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] p-3">
                 <p className="font-medium">{line.service}{line.airline ? ` · ${line.airline}` : ""}{line.locator ? ` · ${line.locator}` : ""} · {formatDay(line.travelStartDate)}</p>
+                <p className="text-xs">Situação: {TRIP_STATUS[line.status] ?? line.status}{line.travelEndDate ? ` · Volta: ${formatDay(line.travelEndDate)}` : ""}</p>
+                <p className="text-xs">Comparativo: {line.route ?? "não informado"} · {line.passengers ?? "—"} passageiro(s) · {line.fareConditions ?? "tarifa não informada"} · Bagagem: {line.baggage ?? "não informada"}</p>
+                {line.comparisonOutboundDate && <p className="text-xs">Datas do comparativo: {formatDay(line.comparisonOutboundDate)}{line.comparisonReturnDate ? ` a ${formatDay(line.comparisonReturnDate)}` : " (somente ida)"}</p>}
+                {line.researchedOn && <p className="text-xs">Pesquisa: {formatDay(line.researchedOn)}{line.sourceType ? ` · ${SOURCE_LABEL[line.sourceType]}` : ""}</p>}
+                {line.differences && <p className="text-xs">Diferenças: {line.differences}</p>}
+                {(line.costs ?? []).map((cost, index) => <p key={`cost-${index}`} className="text-xs">Custo — {COST_LABEL[cost.kind]}: {formatMoney(cost.amount)} · {cost.description}{cost.origin ? ` (origem: ${cost.origin})` : ""}</p>)}
+                {(line.adjustments ?? []).map((adjustment, index) => <p key={`adjustment-${index}`} className="text-xs">Ajuste — {ADJUSTMENT_LABEL[adjustment.kind]}: {formatMoney(adjustment.amount)} em {formatDay(adjustment.date)} · {adjustment.description}</p>)}
+                {line.methodology && <p className="text-xs">Metodologia: {line.methodology}</p>}
                 {line.available
                   ? <p>Economia {formatMoney(line.savings)} ({line.savingsPercent?.toLocaleString("pt-BR")}%) · comparável {formatMoney(line.comparablePrice)} · custo {formatMoney(line.effectiveCost)}</p>
                   : <p className="text-[var(--hub-text-muted)]">Indisponível: {line.unavailableReasons.join("; ")}</p>}
-                {line.source && <p className="text-xs text-[var(--hub-text-muted)]">Fonte: {line.source}</p>}
+                {line.source && <p className="break-words text-xs text-[var(--hub-text-muted)]">Fonte: {line.source}</p>}
                 {line.notes && <p className="text-xs text-[var(--hub-text-muted)]">Observações: {line.notes}</p>}
               </li>
             ))}
