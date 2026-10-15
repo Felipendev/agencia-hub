@@ -1,4 +1,5 @@
 # Prompt para Claude — AgênciaHub
+**Atualização vigente em 15/10/2026:** F02 já foi revisado, integrado e publicado pelo Codex (API #61/UI #54; 137 testes aprovados). Continue F03, economia realizada de Viagens, em `claude/f03-economia-cliente`, sincronizando sua branch com a main atualizada. Não reimplemente contratos. Migrações publicadas até V57; coordene a próxima versão antes do merge e valide banco efêmero novo. As instruções de F02 abaixo são referência da entrega anterior; o fluxo de isolamento, CRUD, revisão e publicação continua vigente. Leia `docs/publicacao-contratos-2026-10-15.md`.
 
 Você vai desenvolver a metade atribuída ao Claude no backlog do AgênciaHub, em paralelo com o Codex. Não está sozinho no projeto. Trabalhe em checkouts e branches próprios, não reverta alterações do Codex e não use o diretório original como checkout de implementação.
 
@@ -21,15 +22,15 @@ Referência de produção em 14/10: frontend `27ad5aaccd7a55291c78353b64b5a6d55a
 
 ## Suas cinco frentes
 
-- TODO-046 / F02: contratos — primeira entrega; branch `claude/f02-contratos`.
+- TODO-046 / F02: contratos — concluído e publicado; branch `claude/f02-contratos`.
 - TODO-047 / F03: economia realizada do cliente; branch `claude/f03-economia-cliente`.
 - TODO-048 / F07: agenda e atas; branch `claude/f07-agenda-atas`.
 - TODO-049 / F09: indicações; branch `claude/f09-indicacoes`. A automação de créditos depende da definição de gatilho, resgate e estorno; avance no cadastro sem inventar a regra financeira.
 - TODO-050 / extensão F10: etapas de viagem; branch `claude/f10-etapas-viagem`. A Biblioteca já existe; reutilize suas interfaces.
 
-Ordem sugerida: F02 → F03 → F07 → etapas F10. Indicações pode ter cadastro independente; créditos continuam condicionados. Não misture features na mesma branch ou PR. Codex fica com F01, F08, evolução F04/F06, F11 e F05, além da integração dos arquivos centrais e publicação.
+Ordem restante: F03 → F07 → etapas F10. Indicações pode ter cadastro independente; créditos continuam condicionados. Não misture features na mesma branch ou PR. Codex fica com F01, F08, evolução F04/F06, F11 e F05, além da integração dos arquivos centrais e publicação.
 
-## Comece agora por F02 — Contratos
+## F02 — Contratos (escopo já entregue; referência histórica)
 
 Confira se as branches e caminhos ainda não existem. Prepare dois worktrees a partir de origin/main atualizado:
 
@@ -62,7 +63,7 @@ F01 ainda será implementado pelo Codex. Entregue agenda/atas sem depender dele;
 
 ## Migrações, testes e PRs
 
-Use banco efêmero de teste próprio. Não compartilhe banco de desenvolvimento entre branches dos dois agentes. A versão de migration usada em uma branch é provisória até a revisão de integração. Antes do merge, Codex atribui a próxima versão global livre; se precisar renumerar uma migration ainda não publicada/aplicada em ambiente compartilhado, teste em banco efêmero novo. Nunca alterar V55 ou outras migrations já publicadas, seus checksums, dados reais ou habilitar outOfOrder para contornar a ordem.
+Use banco efêmero de teste próprio. Não compartilhe banco de desenvolvimento entre branches dos dois agentes. A versão de migration usada em uma branch é provisória até a revisão de integração. Antes do merge, Codex atribui a próxima versão global livre; se precisar renumerar uma migration ainda não publicada/aplicada em ambiente compartilhado, teste em banco efêmero novo. Nunca alterar V57 ou outras migrations já publicadas, seus checksums, dados reais ou habilitar outOfOrder para contornar a ordem.
 
 Toda referência a pessoa/viagem/cotação/recebível/responsável precisa validar agência e vínculo. Edição mantém o mesmo identificador. Sucesso aparece apenas após confirmação da API. Não usar localStorage como persistência compartilhada; não armazenar senhas ou número completo de cartão; não gravar a tela.
 

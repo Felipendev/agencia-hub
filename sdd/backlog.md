@@ -1,10 +1,10 @@
 # Technical Backlog
 
-## Atualização vigente — 14/10/2026
+## Atualização vigente — 15/10/2026
 
-Divisão atual: **cinco frentes pendentes para Codex e cinco para Claude**, com branches/worktrees próprios e PRs isolados por feature e repositório. Após TODO-051 publicado, Codex começa TODO-041/F01; Claude começa TODO-046/F02. Codex integra arquivos compartilhados, numeração final de migrações e publicação; Claude entrega seus módulos por PR, sem push direto em main ou publicação concorrente.
+Divisão atual: **cinco frentes atribuídas a cada agente; F02 do Claude concluído, quatro frentes dele pendentes**, com branches/worktrees próprios e PRs isolados por feature e repositório. Após TODO-051 publicado, Codex começa TODO-041/F01; Claude segue TODO-047/F03. Codex integra arquivos compartilhados, numeração final de migrações e publicação; Claude entrega seus módulos por PR, sem push direto em main ou publicação concorrente.
 
-Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). F02 foi entregue pelo Claude em PRs de rascunho API #61/UI #54, confirmados abertos em 14/10; revisão e integração ainda pendentes. O vínculo de simulações ao cliente é a subentrega Codex TODO-052 da evolução F06, sem redistribuir as cinco frentes.
+Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). F02 foi revisado, integrado pelo Codex e publicado em 15/10 pelos PRs API #61/UI #54; 32 testes da API e 105 da interface aprovados. O vínculo de simulações ao cliente é a subentrega Codex TODO-052 da evolução F06, sem redistribuir as cinco frentes.
 
 **Diretriz de domínio posterior do usuário:** Viagens e Milhas são produtos separados, com as mesmas pessoas. Separação estrutural TODO-051 publicada pelo Codex em 14/10, antes das próximas integrações. Contratos, tarefas e atendimentos novos identificam o produto; indicadores e cancelamentos não se misturam. Referência: [dois produtos e uma identidade](../docs/dominios-viagens-milhas-2026-10-14.md). O prompt do Claude passa a exigir produto explícito desde F02.
 
@@ -108,16 +108,18 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-046: Contratos versionados da agência (F02)
 - **Owner**: Claude
 - **Priority**: High
-- **Status**: in-review — Claude entregou API #61/UI #54 em rascunho; não publicado nem aceito como concluído.
+- **Status**: resolved — publicado em 15/10/2026, API #61/UI #54, após revisão e integração Codex; 137 testes aprovados.
 - **Created**: 2026-10-14
 - **Origin**: divisão paralela autorizada pelo usuário.
 - **Scope**: modelos com CRUD, rascunhos preenchidos a partir da pessoa, revisão/geração, versão dos dados/modelo e estados rascunho/enviado/assinado/cancelado. Assinado exige evidência. Preservar emitidos por versionamento/cancelamento; recebível existente somente por vínculo explícito, sem segunda venda/receita.
 - **Branch**: `claude/f02-contratos`, em frontend e API; PRs isolados `[F02][API]` e `[F02][UI]` vinculados.
 - **Reference**: prompt de entrada e acordo de coordenação acima.
-- **Entrega recebida em 14/10**: [API #61](https://github.com/Felipendev/agencia-hub-api/pull/61), head `4464c8f99d6a1aa5385bf50ecb2ef52c521fc6e0`; [UI #54](https://github.com/Felipendev/agencia-hub/pull/54), head `42f5473c1807397cb79e80c0831c36db346cf8cd`. Ambos abertos, draft e base main, conferidos no GitHub. Demais alegações de aceite/CI/testes são o relatório do Claude, ainda sem revisão independente do Codex.
-- **Pendências de aceite Codex**: rodar `ContractIntegrationTest,ContractTemplateRendererTest,ContractValuesTest,ContractPdfRendererTest`; revisar CRUD, produto TRAVEL/MILES, isolamento, concorrência, snapshots e ausência de efeito financeiro. Integrar proteção `/contratos`, menus de gestor/vendedor e atalhos nas áreas apropriadas; erro específico ao excluir pessoa vinculada a contratos e ordem do `AgencyDeletionScheduler`. Conferir numeração V56 antes do merge e documentação instalada do Next antes de editar UI.
-- **Decisão de domínio em aberto**: retenção/anonimização dos dados pessoais preservados nos contratos emitidos; avaliar o comportamento existente e explicitar a decisão antes de aprovar o ciclo de anonimização. Não assumir que os snapshots já são cobertos pela anonimização atual.
-- **Achado relatado, a validar**: carteira registra autor como `PlatformAccount@<hash>`; confirmar no código/dados de teste, corrigir identidade auditável se reproduzido sem inventar autor dos registros antigos.
+- **Entrega recebida em 14/10**: [API #61](https://github.com/Felipendev/agencia-hub-api/pull/61), head `4464c8f99d6a1aa5385bf50ecb2ef52c521fc6e0`; [UI #54](https://github.com/Felipendev/agencia-hub/pull/54), head `42f5473c1807397cb79e80c0831c36db346cf8cd`. Este era o estado inicial de recebimento em 14/10. Em 15/10 foram incorporados os commits posteriores do Claude e as integrações do Codex; ambos os PRs estão merged.
+- **Aceite concluído pelo Codex em 15/10**: 32 testes de API e 105 frontend aprovados, incluindo CRUD, TRAVEL/MILES, isolamento, concorrência, snapshots, PDF antigo e ausência de efeito financeiro. Integradas proteção de rotas, menus e atalhos; conflito específico ao excluir pessoa com contratos, bloqueio explícito da anonimização parcial e ordem de descarte dos contratos na exclusão da agência. V56/V57 conferidas; build/tipos/lint e revisão visual desktop/celular aprovados.
+- **Decisão de domínio em aberto**: retenção/anonimização dos dados pessoais preservados nos contratos emitidos; avaliar o comportamento existente e explicitar a decisão para automatizar o ciclo completo de anonimização. Nesta entrega, a API mantém a solicitação pendente com mensagem específica quando existem contratos; não declara anonimização parcial concluída.
+- **Achado do módulo Milhas**: uso de `principal.getName()` confirmado por leitura; correção da identidade do autor segue separada em TODO-043, com teste de reprodução e sem inventar autores antigos.
+
+- **Publicação**: API merge `41a50d9ac3ca236c76e10163fed9ddb2bfec6ed3`, Railway SUCCESS; UI merge `b528cbbf5f002573adfdc43b102db6ea40fad75f`, Vercel READY no domínio principal. V56/V57 aplicadas; novas rotas exigem login. [Registro e limites da verificação](../docs/publicacao-contratos-2026-10-15.md).
 
 ### TODO-047: Economia realizada e relatório do cliente (F03)
 - **Owner**: Claude
