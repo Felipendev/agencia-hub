@@ -124,7 +124,7 @@ export default function ViagemDetalhePage() {
 
   async function remove() {
     if (!base || !token) return;
-    if (!window.confirm("Excluir esta viagem?")) return;
+    if (!window.confirm("Excluir esta viagem? A análise de economia, suas versões e evidências também serão excluídas. Relatórios já gerados serão preservados.")) return;
     const response = await fetch(`${base}/trips/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
     if (!response.ok) { setError("Não foi possível excluir a viagem."); return; }
     router.push("/viagens");
@@ -138,6 +138,7 @@ export default function ViagemDetalhePage() {
   return (
     <div className="space-y-6">
       <BackButton href="/viagens" label="Viagens" />
+      <Link href={`/economia/viagens/${id}`} className="text-sm font-medium text-[var(--hub-blue)] hover:underline">Economia da viagem</Link>
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[var(--hub-text-primary)]">{t.customerName}</h1>
