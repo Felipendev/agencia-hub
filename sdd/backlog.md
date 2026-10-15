@@ -124,11 +124,14 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-047: Economia realizada e relatório do cliente (F03)
 - **Owner**: Claude
 - **Priority**: High
-- **Status**: pending
+- **Status**: in-review — API #62/UI #55, integração pronta, 47 testes API + 114 frontend aprovados; publicação pendente da validação da prévia e autorização da configuração temporária.
 - **Created**: 2026-10-14
 - **Origin**: divisão paralela autorizada pelo usuário.
 - **Scope**: comparação equivalente com preço/fonte/data/condições, custo efetivo documentado, edição/versionamento aplicável e relatório por pessoa/período. Sem base, indicar indisponível; separar estimativa, resultado realizado e lucro. Cancelamentos/reembolsos ajustam os resultados.
 - **Branch**: `claude/f03-economia-cliente`, em frontend e API; PRs próprios.
+
+- **Integração Codex em 15/10**: main/F02 incorporados; V58 renumerada após V57; proteção, menus e atalhos integrados; base comparativa completa exigida; hash da prévia impede emissão de conteúdo não revisado; PDF/prévia incluem datas/custos/ajustes; proteção de exclusão e anonimização parcial e descarte por agência validados. CI de ambos os PRs aprovada nos heads API `5d07e90ca0f0ac6e221496e55eb5a88943bfc402` e UI `d67a5b1c49ca0f97e7d9698bee316c3d4eee660f`.
+- **Prévia temporária**: esquema `f03_v58_review` preparado em cinco variáveis somente do ambiente efêmero `agencia-hub-api-pr-62`, sem apagar dados. A ferramenta Railway cancelou `accept_deploy` com a mensagem de que o usuário não aprovou a ação; patch continua STAGED. Autorização específica solicitada. Não aplicar por outro caminho nem marcar publicado antes da confirmação da prévia e dos deploys.
 
 ### TODO-048: Agenda e atas de atendimento (F07)
 - **Owner**: Claude
