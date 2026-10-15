@@ -83,6 +83,7 @@ export default function ClienteDetalhePage() {
             Editar pessoa
           </Button>
         </PageHeader>
+        <div className="flex flex-wrap gap-4 text-sm"><Link className="text-[var(--hub-blue)] hover:underline" href={`/contratos?customerId=${id}&product=TRAVEL`}>Contratos de Viagens</Link><Link className="text-[var(--hub-blue)] hover:underline" href={`/contratos/novo?customerId=${id}&product=TRAVEL`}>Novo contrato de Viagens</Link></div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--hub-radius)] border border-[var(--hub-border)] p-4 text-sm">
         <p>Esta é a visão de viagens da pessoa. O acompanhamento de milhas tem uma área própria.</p>
