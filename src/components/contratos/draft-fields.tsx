@@ -15,12 +15,14 @@ export function DraftFields({
   templates,
   missing,
   disabled,
+  productLocked,
 }: {
   form: DraftForm;
   onChange: (form: DraftForm) => void;
   templates: TemplateSummary[];
   missing: ContractFieldView[];
   disabled?: boolean;
+  productLocked?: boolean;
 }) {
   const missingInputs = new Set(missing.map((f) => CONTRACT_FIELD_INPUT[f.key]).filter(Boolean));
   const cls = (key: keyof DraftForm) => (missingInputs.has(key) ? highlight : "");
@@ -32,11 +34,19 @@ export function DraftFields({
     <div className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
         <div>
+          <Label htmlFor="draft-product" required>Produto</Label>
+          <select id="draft-product" required disabled={disabled || productLocked} className={selectClass} value={form.product}
+            onChange={(e) => onChange({ ...form, product: e.target.value as DraftForm["product"], templateId: "", templateVersion: null })}>
+            <option value="">Escolha o produto</option><option value="TRAVEL">Viagens</option><option value="MILES">Milhas</option>
+          </select>
+          <p className="mt-1 text-xs text-[var(--hub-text-muted)]">Produtos têm contratos independentes para a mesma pessoa. Para trocar o produto de um contrato existente, crie outro rascunho.</p>
+        </div>
+        <div>
           <Label htmlFor="draft-template" required>Modelo</Label>
           <select id="draft-template" required disabled={disabled} className={selectClass} value={form.templateId}
-            onChange={(e) => onChange({ ...form, templateId: e.target.value, templateVersion: null })}>
+            onChange={(e) => onChange({ ...form, product: templates.find(t => t.id === e.target.value)?.product ?? form.product, templateId: e.target.value, templateVersion: null })}>
             <option value="">Escolha um modelo</option>
-            {templates.map((t) => <option key={t.id} value={t.id}>{t.name}{t.archived ? " (arquivado)" : ""}</option>)}
+            {templates.filter(t => t.product && (!form.product || t.product === form.product)).map((t) => <option key={t.id} value={t.id}>{t.name} · {t.product === "MILES" ? "Milhas" : "Viagens"}{t.archived ? " (arquivado)" : ""}</option>)}
           </select>
           {selectedTemplate && form.templateVersion != null && form.templateVersion < selectedTemplate.currentVersion && (
             <p className="mt-1 text-xs text-amber-700">

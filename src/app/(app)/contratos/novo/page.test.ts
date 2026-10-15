@@ -10,7 +10,7 @@ vi.mock("@/lib/api/agencia-hub-env", () => ({ getAgenciaHubApiBaseUrl: () => "ht
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }), useSearchParams: () => new URLSearchParams("customerId=p1") }));
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); push.mockReset(); });
 
-const template = { id: "t1", name: "Assessoria", description: null, currentVersion: 1, archived: false, rowVersion: 1, contractCount: 0, updatedAt: "2026-10-14T12:00:00Z" };
+const template = { id: "t1", product: "MILES", name: "Assessoria", description: null, currentVersion: 1, archived: false, rowVersion: 1, contractCount: 0, updatedAt: "2026-10-14T12:00:00Z" };
 const person = { id: "p1", name: "Ana", email: "ana@x.com", phone: null, interestDestination: null, status: "ACTIVE", notes: "", createdAt: "2026-10-14T12:00:00Z", deletedAt: null };
 
 it("reenvia com a mesma chave após falha e só navega quando a API confirma", async () => {

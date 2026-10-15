@@ -1,6 +1,7 @@
 /** Contrato JSON do módulo F02 (`/contracts`, `/contract-templates`). */
 
 export type ContractStatus = "DRAFT" | "SENT" | "SIGNED" | "CANCELLED";
+export type ContractProduct = "TRAVEL" | "MILES";
 export type PaymentMode = "CASH" | "INSTALLMENTS";
 export type AttachmentKind = "SIGNED_EVIDENCE" | "SUPPORTING";
 export type FieldSource = "CUSTOMER" | "AGENCY" | "CONTRACT";
@@ -10,6 +11,7 @@ export type ContractFieldView = { key: string; label: string; source: FieldSourc
 export type AuditEntry = { id: string; action: string; detail: Record<string, unknown> | null; author: string; createdAt: string };
 
 export type TemplateSummary = {
+  product: ContractProduct | null;
   id: string;
   name: string;
   description: string | null;
@@ -30,11 +32,12 @@ export type TemplateDetail = {
   history: AuditEntry[];
 };
 
-export type TemplateInput = { name: string; description: string; body: string; expectedVersion?: number };
+export type TemplateInput = { product: ContractProduct; name: string; description: string; body: string; expectedVersion?: number };
 
 export type DeleteOutcome = { outcome: "DELETED" | "ARCHIVED"; message: string };
 
 export type ContractSummary = {
+  product: ContractProduct | null;
   id: string;
   customerId: string;
   customerName: string;
@@ -109,6 +112,7 @@ export type ContractDetail = {
 };
 
 export type DraftInput = {
+  product: ContractProduct;
   customerId: string;
   templateId: string;
   templateVersion?: number | null;

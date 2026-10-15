@@ -4,6 +4,7 @@ import type {
   ContractDetail,
   ContractFieldView,
   ContractStatus,
+  ContractProduct,
   ContractSummary,
   DeleteOutcome,
   DocumentMeta,
@@ -85,10 +86,11 @@ export const contractsApi = {
   restoreTemplate: (token: string | null | undefined, id: string, expectedVersion: number) =>
     json<TemplateDetail>(token, `/contract-templates/${id}/restore?expectedVersion=${expectedVersion}`, { method: "POST" }),
 
-  list: (token: string | null | undefined, filters: { customerId?: string; status?: ContractStatus } = {}) => {
+  list: (token: string | null | undefined, filters: { customerId?: string; status?: ContractStatus; product?: ContractProduct } = {}) => {
     const query = new URLSearchParams();
     if (filters.customerId) query.set("customerId", filters.customerId);
     if (filters.status) query.set("status", filters.status);
+    if (filters.product) query.set("product", filters.product);
     const suffix = query.toString();
     return json<ContractSummary[]>(token, `/contracts${suffix ? `?${suffix}` : ""}`);
   },

@@ -12,9 +12,9 @@ describe("formatação e validação de contratos", () => {
   });
 
   it("monta o DTO do rascunho e valida vigência e parcelas", () => {
-    const form = { ...emptyDraftForm("tpl"), title: " Assessoria ", price: "1.000,00", paymentMode: "INSTALLMENTS" as const, installments: "3", startDate: "2026-11-01" };
+    const form = { ...emptyDraftForm("tpl"), product: "MILES" as const, title: " Assessoria ", price: "1.000,00", paymentMode: "INSTALLMENTS" as const, installments: "3", startDate: "2026-11-01" };
     expect(toDraftInput("person", form, 2)).toEqual({
-      customerId: "person", templateId: "tpl", templateVersion: null, title: "Assessoria", planName: null, price: 1000,
+      product: "MILES", customerId: "person", templateId: "tpl", templateVersion: null, title: "Assessoria", planName: null, price: 1000,
       startDate: "2026-11-01", endDate: null, paymentMode: "INSTALLMENTS", installments: 3, paymentTerms: null, notes: null, expectedVersion: 2,
     });
     expect(toDraftInput("person", { ...form, paymentMode: "CASH" }).installments).toBeNull();
@@ -22,6 +22,7 @@ describe("formatação e validação de contratos", () => {
     expect(() => toDraftInput("person", { ...form, endDate: "2026-10-01" })).toThrow(/vigência/);
     expect(() => toDraftInput("person", { ...form, title: "" })).toThrow(/título/);
     expect(() => toDraftInput("person", { ...form, templateId: "" })).toThrow(/modelo/);
+    expect(() => toDraftInput("person", { ...form, product: "" })).toThrow(/produto/);
   });
 
   it("exibe datas sem deslocar o dia e calcula hoje no fuso da agência", () => {

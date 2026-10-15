@@ -24,7 +24,7 @@ function NewContract() {
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [customerId, setCustomerId] = useState(params.get("customerId") ?? "");
   const [search, setSearch] = useState("");
-  const [form, setForm] = useState<DraftForm>(emptyDraftForm());
+  const [form, setForm] = useState<DraftForm>(() => ({ ...emptyDraftForm(), product: params.get("product") === "MILES" ? "MILES" : params.get("product") === "TRAVEL" ? "TRAVEL" : "" }));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   // Mesma chave em reenvios do mesmo formulário: a API devolve o rascunho já criado.
@@ -38,7 +38,7 @@ function NewContract() {
         if (!active) return;
         setCustomers(people);
         setTemplates(models);
-        if (models.length === 1) setForm((f) => (f.templateId ? f : { ...f, templateId: models[0].id }));
+        if (models.length === 1 && models[0].product) setForm((f) => (f.templateId || (f.product && f.product !== models[0].product) ? f : { ...f, product: models[0].product!, templateId: models[0].id }));
       })
       .catch((e: Error) => { if (active) setError(e.message); });
     return () => { active = false; };

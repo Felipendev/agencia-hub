@@ -8,8 +8,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { contractsApi } from "@/lib/contracts/api";
-import { STATUS_LABEL, STATUS_TONE, formatDay, formatMoney, formatMoment } from "@/lib/contracts/format";
-import type { ContractStatus, ContractSummary } from "@/lib/contracts/types";
+import { PRODUCT_LABEL, STATUS_LABEL, STATUS_TONE, formatDay, formatMoney, formatMoment } from "@/lib/contracts/format";
+import type { ContractProduct, ContractStatus, ContractSummary } from "@/lib/contracts/types";
 
 const linkButton =
   "inline-flex items-center justify-center rounded-[var(--hub-radius)] px-4 py-2 text-sm font-medium transition-colors";
@@ -21,6 +21,7 @@ function ContractsList() {
   const [rows, setRows] = useState<ContractSummary[] | null>(null);
   const [error, setError] = useState("");
   const [status, setStatus] = useState<"" | ContractStatus>("");
+  const [product, setProduct] = useState<"" | ContractProduct>(() => params.get("product") === "MILES" ? "MILES" : params.get("product") === "TRAVEL" ? "TRAVEL" : "");
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -35,11 +36,14 @@ function ContractsList() {
 
   const visible = useMemo(() => {
     const term = search.trim().toLocaleLowerCase("pt-BR");
-    return (rows ?? []).filter((row) => (!status || row.status === status)
+    return (rows ?? []).filter((row) => (!status || row.status === status) && (!product || row.product === product)
       && (!term || `${row.title} ${row.customerName} ${row.planName ?? ""}`.toLocaleLowerCase("pt-BR").includes(term)));
-  }, [rows, status, search]);
+  }, [rows, status, product, search]);
 
-  const newHref = customerId ? `/contratos/novo?customerId=${encodeURIComponent(customerId)}` : "/contratos/novo";
+  const newQuery = new URLSearchParams();
+  if (customerId) newQuery.set("customerId", customerId);
+  if (product) newQuery.set("product", product);
+  const newHref = `/contratos/novo${newQuery.size ? `?${newQuery}` : ""}`;
 
   return (
     <div className="space-y-6">
@@ -56,6 +60,7 @@ function ContractsList() {
       {error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
 
       <div className="flex flex-wrap gap-3">
+        <select aria-label="Filtrar produto" className="rounded border bg-white px-3 text-sm" value={product} onChange={e => setProduct(e.target.value as "" | ContractProduct)}><option value="">Todos os produtos</option><option value="TRAVEL">Viagens</option><option value="MILES">Milhas</option></select>
         <Input aria-label="Buscar contratos" placeholder="Buscar por título, pessoa ou plano" value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm" />
         <select aria-label="Filtrar status" className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white px-3 text-sm" value={status} onChange={(e) => setStatus(e.target.value as "" | ContractStatus)}>
           <option value="">Todos os status</option>
@@ -88,6 +93,7 @@ function ContractsList() {
                 <tr key={row.id} className="border-t border-[var(--hub-border)]">
                   <td className="px-4 py-3">
                     <Link href={`/contratos/${row.id}`} className="font-medium text-[var(--hub-blue-dark)] hover:underline">{row.title}</Link>
+                    <p className="text-xs text-[var(--hub-text-muted)]">{row.product ? PRODUCT_LABEL[row.product] : "Classificação pendente"}</p>
                     <p className="text-xs text-[var(--hub-text-muted)]">{row.templateName} · modelo v{row.templateVersion}{row.latestDocumentVersion ? ` · documento v${row.latestDocumentVersion}` : ""}</p>
                   </td>
                   <td className="px-4 py-3">{row.customerName}</td>

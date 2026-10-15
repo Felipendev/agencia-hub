@@ -15,11 +15,11 @@ vi.mock("next/navigation", () => ({
 }));
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); push.mockReset(); accountKind = "AGENCY_OWNER"; });
 
-const template = { id: "t1", name: "Assessoria", description: null, currentVersion: 1, archived: false, rowVersion: 1, contractCount: 1, updatedAt: "2026-10-14T12:00:00Z" };
+const template = { id: "t1", product: "MILES", name: "Assessoria", description: null, currentVersion: 1, archived: false, rowVersion: 1, contractCount: 1, updatedAt: "2026-10-14T12:00:00Z" };
 const missingPrice = [{ key: "contrato.valor", label: "Valor total", source: "CONTRACT" }];
 function detail(overrides: Record<string, unknown> = {}, contract: Record<string, unknown> = {}) {
   return {
-    contract: { id: "c1", customerId: "p1", customerName: "Ana", templateId: "t1", templateName: "Assessoria", templateVersion: 1, title: "Assessoria anual",
+    contract: { id: "c1", product: "MILES", customerId: "p1", customerName: "Ana", templateId: "t1", templateName: "Assessoria", templateVersion: 1, title: "Assessoria anual",
       status: "DRAFT", planName: null, price: null, startDate: null, endDate: null, latestDocumentVersion: null, documentCurrent: false, rowVersion: 1,
       updatedAt: "2026-10-14T12:00:00Z", ...contract },
     paymentMode: null, installments: null, paymentTerms: null, notes: null, dataRevision: 1, latestTemplateVersion: 1, sentOn: null, signedOn: null,

@@ -15,6 +15,7 @@ import { DraftFields, MissingFields } from "@/components/contratos/draft-fields"
 import { ContractApiError, UPLOAD_ACCEPT, contractsApi, saveBlob, uploadProblem } from "@/lib/contracts/api";
 import {
   STATUS_LABEL,
+  PRODUCT_LABEL,
   STATUS_TONE,
   actionLabel,
   formFromDetail,
@@ -180,7 +181,7 @@ function ContractPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title={c.title} description={`${c.customerName} · ${c.templateName} (modelo v${c.templateVersion})`}>
+      <PageHeader title={c.title} description={`${c.product ? PRODUCT_LABEL[c.product] : "Classificação pendente"} · ${c.customerName} · ${c.templateName} (modelo v${c.templateVersion})`}>
         <Badge tone={STATUS_TONE[c.status]}>{STATUS_LABEL[c.status]}</Badge>
         <Link href={`/contratos?customerId=${c.customerId}`} className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] bg-white px-4 py-2 text-sm font-medium hover:bg-[var(--hub-bg-subtle)]">Contratos da pessoa</Link>
       </PageHeader>
@@ -249,7 +250,7 @@ function ContractPage() {
         <Card className="space-y-4">
           <CardTitle>Dados do rascunho</CardTitle>
           <MissingFields missing={missing} customerId={c.customerId} />
-          <DraftFields form={form} onChange={setForm} templates={activeTemplates} missing={missing} disabled={busy} />
+          <DraftFields form={form} onChange={setForm} templates={activeTemplates} missing={missing} disabled={busy} productLocked={!!c.product} />
           <div className="flex flex-wrap gap-2">
             <Button onClick={save} disabled={busy}>Salvar rascunho</Button>
             <Button variant="secondary" onClick={showPreview} disabled={busy}>Revisar texto com os dados atuais</Button>

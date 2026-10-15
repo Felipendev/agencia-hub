@@ -12,10 +12,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { contractsApi } from "@/lib/contracts/api";
 import { SOURCE_LABEL, actionLabel, formatMoment } from "@/lib/contracts/format";
-import type { ContractFieldView, TemplateDetail, TemplateSummary } from "@/lib/contracts/types";
+import type { ContractFieldView, ContractProduct, TemplateDetail, TemplateSummary } from "@/lib/contracts/types";
 
-type Form = { name: string; description: string; body: string };
-const empty: Form = { name: "", description: "", body: "" };
+type Form = { product: "" | ContractProduct; name: string; description: string; body: string };
+const empty: Form = { product: "", name: "", description: "", body: "" };
 
 export default function ContractTemplatesPage() {
   const { token, user } = useAuth();
@@ -53,7 +53,7 @@ export default function ContractTemplatesPage() {
     setError(""); setNotice(""); setViewVersion(null);
     try {
       const detail = await contractsApi.getTemplate(token, id);
-      setSelected(detail); setEditing(false); setForm({ name: detail.template.name, description: detail.template.description ?? "", body: detail.body });
+      setSelected(detail); setEditing(false); setForm({ product: detail.template.product ?? "", name: detail.template.name, description: detail.template.description ?? "", body: detail.body });
     } catch (e) { setError(e instanceof Error ? e.message : "Não foi possível abrir o modelo."); }
   }
 
@@ -74,9 +74,10 @@ export default function ContractTemplatesPage() {
 
   async function save(event: React.FormEvent) {
     event.preventDefault();
+    if (!form.product) { setError("Escolha o produto do modelo."); return; }
     setBusy(true); setError(""); setNotice("");
     try {
-      const input = { name: form.name, description: form.description, body: form.body };
+      const input = { product: form.product, name: form.name, description: form.description, body: form.body };
       const detail = selected
         ? await contractsApi.updateTemplate(token, selected.template.id, { ...input, expectedVersion: selected.template.rowVersion })
         : await contractsApi.createTemplate(token, input);
@@ -146,7 +147,7 @@ export default function ContractTemplatesPage() {
                 <button type="button" onClick={() => open(row.id)}
                   className={`w-full rounded-[var(--hub-radius)] px-3 py-2 text-left text-sm hover:bg-[var(--hub-bg-subtle)] ${selected?.template.id === row.id ? "bg-[var(--hub-bg-subtle)]" : ""}`}>
                   <span className="font-medium">{row.name}</span>
-                  <span className="block text-xs text-[var(--hub-text-muted)]">v{row.currentVersion} · {row.contractCount} contrato(s){row.archived ? " · arquivado" : ""}</span>
+                  <span className="block text-xs text-[var(--hub-text-muted)]">{row.product === "MILES" ? "Milhas" : row.product === "TRAVEL" ? "Viagens" : "Classificação pendente"} · v{row.currentVersion} · {row.contractCount} contrato(s){row.archived ? " · arquivado" : ""}</span>
                 </button>
               </li>
             ))}
@@ -161,6 +162,7 @@ export default function ContractTemplatesPage() {
                   <CardTitle>{selected ? "Editar modelo" : "Novo modelo"}</CardTitle>
                   {selected && <CardDescription>Alterar o conteúdo cria a versão {selected.template.currentVersion + 1}; as versões anteriores e os documentos emitidos não mudam.</CardDescription>}
                   <div className="grid gap-4 md:grid-cols-2">
+                    <div><Label htmlFor="template-product" required>Produto</Label><select id="template-product" required disabled={!!selected?.template.contractCount && !!selected.template.product} className="h-10 w-full rounded border bg-white px-3 text-sm" value={form.product} onChange={e => setForm({ ...form, product: e.target.value as Form["product"] })}><option value="">Escolha o produto</option><option value="TRAVEL">Viagens</option><option value="MILES">Milhas</option></select><p className="mt-1 text-xs text-[var(--hub-text-muted)]">Modelos já usados preservam o produto. Crie outro modelo para o outro produto.</p></div>
                     <div><Label htmlFor="template-name" required>Nome</Label><Input id="template-name" required maxLength={200} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
                     <div><Label htmlFor="template-description">Descrição</Label><Input id="template-description" maxLength={1000} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
                   </div>
@@ -186,7 +188,7 @@ export default function ContractTemplatesPage() {
                   </div>
                   <div className="flex gap-2">
                     <Button type="submit" disabled={busy}>{busy ? "Salvando…" : selected ? "Salvar alterações" : "Criar modelo"}</Button>
-                    <Button variant="secondary" disabled={busy} onClick={() => { setEditing(false); if (selected) setForm({ name: selected.template.name, description: selected.template.description ?? "", body: selected.body }); }}>Cancelar</Button>
+                    <Button variant="secondary" disabled={busy} onClick={() => { setEditing(false); if (selected) setForm({ product: selected.template.product ?? "", name: selected.template.name, description: selected.template.description ?? "", body: selected.body }); }}>Cancelar</Button>
                   </div>
                 </form>
               ) : selected && (
@@ -194,6 +196,7 @@ export default function ContractTemplatesPage() {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <CardTitle>{selected.template.name}</CardTitle>
+                      <p className="text-sm">Produto: {selected.template.product === "MILES" ? "Milhas" : selected.template.product === "TRAVEL" ? "Viagens" : "Classificação pendente"}</p>
                       <CardDescription>{selected.template.description || "Sem descrição"} · versão atual {selected.template.currentVersion}</CardDescription>
                     </div>
                     <div className="flex flex-wrap gap-2">
