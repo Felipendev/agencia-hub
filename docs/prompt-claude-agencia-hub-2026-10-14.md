@@ -63,7 +63,7 @@ F01 ainda será implementado pelo Codex. Entregue agenda/atas sem depender dele;
 
 ## Migrações, testes e PRs
 
-Use banco efêmero de teste próprio. Não compartilhe banco de desenvolvimento entre branches dos dois agentes. A versão de migration usada em uma branch é provisória até a revisão de integração. Antes do merge, Codex atribui a próxima versão global livre; se precisar renumerar uma migration ainda não publicada/aplicada em ambiente compartilhado, teste em banco efêmero novo. Nunca alterar V57 ou outras migrations já publicadas, seus checksums, dados reais ou habilitar outOfOrder para contornar a ordem.
+Use banco efêmero de teste próprio. Não compartilhe banco entre agentes. Leia `docs/migrations-reservadas-2026-10-15.md` antes de criar SQL: produção está em V57, F03 usa V58, sua F07 tem V59 reservada; V60 é F01/Codex e V61 é simulações por cliente/Codex. Não usar números provisórios, repetir números ou ocupar reservas alheias. Se precisar de mais migrations, solicitar ajuste da reserva antes de executá-las. Ordem de merge/publicação obrigatória: V58 → V59 → V60 → V61; desenvolvimento paralelo não autoriza publicar fora da ordem. Nunca alterar migrations publicadas, checksums, dados reais ou habilitar outOfOrder/ignorar validação. Testar banco novo e atualização da base anterior; Codex valida prévia e publica API antes da UI.
 
 Toda referência a pessoa/viagem/cotação/recebível/responsável precisa validar agência e vínculo. Edição mantém o mesmo identificador. Sucesso aparece apenas após confirmação da API. Não usar localStorage como persistência compartilhada; não armazenar senhas ou número completo de cartão; não gravar a tela.
 

@@ -78,9 +78,9 @@ Proteger alterações locais de desenvolvimento: `src/app/login/login-form.tsx`,
 
 Não reservar V56–V79 para um agente e V80–V99 para outro: se a faixa alta entrar primeiro, uma migração baixa posterior pode não ser aplicada pelo Flyway na configuração normal.
 
-Durante desenvolvimento, cada branch usa a próxima versão livre da sua base, com nome de domínio distinto e banco de teste próprio. Duas branches isoladas podem ter provisoriamente V56, mas não podem ser integradas assim.
+Não usar números provisórios nem repetir números entre agentes, mesmo em branches isoladas. Antes de escrever SQL, registrar a reserva no documento `migrations-reservadas-2026-10-15.md`. Reservas iniciais: V58 F03/Claude com integração Codex; V59 F07/Claude; V60 F01/Codex; V61 vínculo de simulações ao cliente/Codex. Demais features aguardam reserva explícita. Esta regra substitui a orientação anterior de numeração provisória.
 
-Antes do merge de cada PR de API, Codex confere `origin/main`, atribui a próxima versão global livre e verifica a sequência. Se necessário, o autor renomeia somente a migração ainda não integrada/aplicada em produção ou ambiente compartilhado e testa novamente em banco efêmero novo. Não renomear migrações publicadas, habilitar `outOfOrder` por conveniência, alterar checksums ou recriar bancos com dados reais. Merges de API são sequenciais; após cada um, a próxima branch é atualizada e sua numeração validada.
+Ordem obrigatória de integração e publicação: V58 → V59 → V60 → V61. Desenvolvimento pode ser paralelo; o merge de uma versão espera as anteriores, com branch atualizada e teste de atualização do banco. Se uma feature precisar de mais migrations, o integrador revisa as reservas antes de qualquer execução; ninguém toma um número reservado. Não renumerar migrations já executadas, habilitar `outOfOrder`, reparar checksums para esconder alterações ou recriar bancos com dados reais. Prévia que já executou uma numeração experimental usa novo esquema isolado validado, preservando o anterior. Ver protocolo e situação dos ambientes no documento de reservas.
 
 ## Contratos entre módulos
 
