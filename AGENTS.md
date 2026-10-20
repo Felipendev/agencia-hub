@@ -21,4 +21,4 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## Coordenação de migrations
 
 - Ler `docs/migrations-reservadas-2026-10-15.md` antes de criar migrations na API. Não usar números provisórios ou reservas alheias.
-- V58 publicada (F03); V59 Claude/F07; V60 Codex/F01; V61 Codex/simulações por cliente. Publicação nessa ordem, API antes da UI, com migrations e inicialização validadas. F01 permanece em rascunho até V59 integrada.
+- V58 F03; V59 Claude/F07; V60 Codex/F01; V61 Codex/simulações por cliente. Publicação nessa ordem, API antes da UI, com migrações e inicialização validadas.
