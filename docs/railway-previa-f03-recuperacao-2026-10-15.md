@@ -1,5 +1,7 @@
 # Recuperação da prévia F03
 
+**Atualização em 20/10/2026:** este runbook é histórico. API #62 já integrada; deploy de produção `70ad7fb6-a722-46e5-99c8-50c226379a7b` SUCCESS, com logs confirmando V57 → V58 em public e inicialização concluída. Não há ajuste manual pendente dessa prévia para concluir a publicação do F03. Não aplicar estas variáveis à produção. Estado vigente: `migrations-reservadas-2026-10-15.md`.
+
 ## Diagnóstico confirmado
 
 Produção permanece no deploy saudável F02, API `41a50d9ac3ca236c76e10163fed9ddb2bfec6ed3`, migrations até V57. Site e OpenAPI retornaram 200 durante a investigação. A falha examinada pertence à prévia efêmera `agencia-hub-api-pr-62`, deploy `49170051-8039-4514-9c89-ec236e082857`.

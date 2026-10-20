@@ -1,8 +1,8 @@
 # Technical Backlog
 
-## Atualização vigente — 15/10/2026
+## Atualização vigente — 20/10/2026
 
-Divisão atual: **cinco frentes atribuídas a cada agente; F02 do Claude concluído, quatro frentes dele pendentes**, com branches/worktrees próprios e PRs isolados por feature e repositório. Após TODO-051 publicado, Codex começa TODO-041/F01; Claude segue TODO-047/F03. Codex integra arquivos compartilhados, numeração final de migrações e publicação; Claude entrega seus módulos por PR, sem push direto em main ou publicação concorrente.
+Divisão atual: **cinco frentes atribuídas a cada agente; F02 e F03 do Claude concluídos, três frentes dele pendentes**, com branches/worktrees próprios e PRs isolados por feature e repositório. Codex segue TODO-041/F01 (V60); Claude segue TODO-048/F07 (V59). Codex integra arquivos compartilhados, reservas de migrações e publicação sequencial; Claude entrega seus módulos por PR, sem push direto em main ou publicação concorrente. TODO-052 tem V61 reservada. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
 
 Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). F02 foi revisado, integrado pelo Codex e publicado em 15/10 pelos PRs API #61/UI #54; 32 testes da API e 105 da interface aprovados. O vínculo de simulações ao cliente é a subentrega Codex TODO-052 da evolução F06, sem redistribuir as cinco frentes.
 
@@ -124,14 +124,14 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-047: Economia realizada e relatório do cliente (F03)
 - **Owner**: Claude
 - **Priority**: High
-- **Status**: in-review — API #62/UI #55, integração pronta, 47 testes API + 114 frontend aprovados; publicação pendente da validação da prévia e autorização da configuração temporária.
+- **Status**: resolved — API #62/UI #55 integradas e publicadas; Railway SUCCESS com V58 e Vercel READY no domínio principal, conferidos em 20/10. 48 testes backend (incluindo inicialização isolada) e 114 frontend aprovados nas validações de 15/10. [Registro da publicação e limites](../docs/publicacao-economia-2026-10-20.md).
 - **Created**: 2026-10-14
 - **Origin**: divisão paralela autorizada pelo usuário.
 - **Scope**: comparação equivalente com preço/fonte/data/condições, custo efetivo documentado, edição/versionamento aplicável e relatório por pessoa/período. Sem base, indicar indisponível; separar estimativa, resultado realizado e lucro. Cancelamentos/reembolsos ajustam os resultados.
 - **Branch**: `claude/f03-economia-cliente`, em frontend e API; PRs próprios.
 
 - **Integração Codex em 15/10**: main/F02 incorporados; V58 renumerada após V57; proteção, menus e atalhos integrados; base comparativa completa exigida; hash da prévia impede emissão de conteúdo não revisado; PDF/prévia incluem datas/custos/ajustes; proteção de exclusão e anonimização parcial e descarte por agência validados. CI de ambos os PRs aprovada nos heads API `5d07e90ca0f0ac6e221496e55eb5a88943bfc402` e UI `d67a5b1c49ca0f97e7d9698bee316c3d4eee660f`.
-- **Prévia temporária**: esquema `f03_v58_review` preparado em cinco variáveis somente do ambiente efêmero `agencia-hub-api-pr-62`, sem apagar dados. A ferramenta Railway cancelou `accept_deploy` com a mensagem de que o usuário não aprovou a ação; patch continua STAGED. Autorização específica solicitada. Não aplicar por outro caminho nem marcar publicado antes da confirmação da prévia e dos deploys.
+- **Encerramento em 20/10**: API merge `cc5079b97bd6bbf9c70d2bf53f4ea3e665b891ff`, Railway `70ad7fb6-a722-46e5-99c8-50c226379a7b` SUCCESS; logs confirmam public V57 → V58. UI merge `0ce8b788e76abeeec17a6fbabdad198e773531c0`, Vercel `dpl_yhN7wcRVyiS4YgNTNzNeNruJDLGV` READY em www.agenciashub.com.br. Incidente da prévia é histórico; nenhuma ação manual daquele runbook está pendente para esta entrega. Rotas públicas/proteção conferidas; sem novo CRUD autenticado com dados reais em produção.
 
 ### TODO-048: Agenda e atas de atendimento (F07)
 - **Owner**: Claude

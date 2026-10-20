@@ -1,5 +1,5 @@
 # Prompt para Claude — AgênciaHub
-**Atualização vigente em 15/10/2026:** F02 já foi revisado, integrado e publicado pelo Codex (API #61/UI #54; 137 testes aprovados). Continue F03, economia realizada de Viagens, em `claude/f03-economia-cliente`, sincronizando sua branch com a main atualizada. Não reimplemente contratos. Migrações publicadas até V57; coordene a próxima versão antes do merge e valide banco efêmero novo. As instruções de F02 abaixo são referência da entrega anterior; o fluxo de isolamento, CRUD, revisão e publicação continua vigente. Leia `docs/publicacao-contratos-2026-10-15.md`.
+**Atualização vigente em 20/10/2026:** F02 e F03 foram integrados e publicados (F03 API #62/UI #55; 48 testes backend e 114 frontend nas validações anteriores, deploys confirmados). Sua próxima tarefa é **F07 — agenda e atas**, branch `claude/f07-agenda-atas` nos dois repositórios, com **V59 reservada**. Parta de origin/main atualizada; API já tem V58. Não refaça contratos/economia nem aplique variáveis da antiga prévia à produção. Leia `docs/publicacao-economia-2026-10-20.md` e `docs/migrations-reservadas-2026-10-15.md`. F01/Codex usa V60, simulações por cliente/Codex V61; publicar nessa ordem. As instruções de F02 abaixo são referência histórica; isolamento, CRUD e revisão continuam obrigatórios.
 
 Você vai desenvolver a metade atribuída ao Claude no backlog do AgênciaHub, em paralelo com o Codex. Não está sozinho no projeto. Trabalhe em checkouts e branches próprios, não reverta alterações do Codex e não use o diretório original como checkout de implementação.
 
@@ -23,12 +23,12 @@ Referência de produção em 14/10: frontend `27ad5aaccd7a55291c78353b64b5a6d55a
 ## Suas cinco frentes
 
 - TODO-046 / F02: contratos — concluído e publicado; branch `claude/f02-contratos`.
-- TODO-047 / F03: economia realizada do cliente; branch `claude/f03-economia-cliente`.
+- TODO-047 / F03: economia realizada do cliente — concluída e publicada, API #62/UI #55.
 - TODO-048 / F07: agenda e atas; branch `claude/f07-agenda-atas`.
 - TODO-049 / F09: indicações; branch `claude/f09-indicacoes`. A automação de créditos depende da definição de gatilho, resgate e estorno; avance no cadastro sem inventar a regra financeira.
 - TODO-050 / extensão F10: etapas de viagem; branch `claude/f10-etapas-viagem`. A Biblioteca já existe; reutilize suas interfaces.
 
-Ordem restante: F03 → F07 → etapas F10. Indicações pode ter cadastro independente; créditos continuam condicionados. Não misture features na mesma branch ou PR. Codex fica com F01, F08, evolução F04/F06, F11 e F05, além da integração dos arquivos centrais e publicação.
+Ordem restante: F07 → etapas F10. Indicações pode ter cadastro independente; créditos continuam condicionados. F07 identifica o produto TRAVEL/MILES explicitamente; mesmas pessoas, contextos de atendimento separados. Entregar CRUD aplicável, responsáveis e fuso, preservando histórico no cancelamento. Não prometer integração externa ou tarefas de F01 antes do contrato real existir. Não misture features na mesma branch ou PR. Codex fica com F01, F08, evolução F04/F06, F11 e F05, além da integração dos arquivos centrais e publicação.
 
 ## F02 — Contratos (escopo já entregue; referência histórica)
 

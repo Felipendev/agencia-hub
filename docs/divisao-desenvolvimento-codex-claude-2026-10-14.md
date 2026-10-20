@@ -1,6 +1,6 @@
 # Divisão de desenvolvimento — Codex e Claude
 
-Atualizado em 15/10/2026, por solicitação do usuário. Este acordo organiza o trabalho em dois fluxos independentes, com branches e PRs por feature. F02 do Claude foi revisado, integrado pelo Codex e publicado (API #61/UI #54): 32 testes API e 105 frontend aprovados, migrações até V57. Claude segue F03, em branch/PR próprios e com main atualizada. Registro: `publicacao-contratos-2026-10-15.md`. As demais tarefas permanecem pendentes.
+Atualizado em 20/10/2026. Este acordo organiza o trabalho em dois fluxos independentes, com branches e PRs por feature. F02 e F03 do Claude estão publicados: F03 API #62/UI #55, Railway SUCCESS com V58 e Vercel READY no domínio principal; validações anteriores somam 48 testes backend e 114 frontend. Claude segue F07/agenda e atas (V59); Codex segue F01/checklists (V60), depois simulações por cliente (V61). Registros: `publicacao-economia-2026-10-20.md` e `migrations-reservadas-2026-10-15.md`. As demais tarefas permanecem pendentes.
 
 **Atualização de acompanhamento:** TODO-052 registra o vínculo das simulações de acúmulo ao cliente, sob Codex, como subentrega da evolução F06/TODO-043 em PRs próprios (`codex/f06-simulacoes-cliente`). Calcular pode ser avulso; salvar novo plano exige pessoa da mesma agência. Cenários legados só recebem vínculo por revisão explícita. Não muda a divisão das cinco frentes de cada agente. Integrações de contratos concluídas em TODO-046. A decisão futura de retenção/anonimização permanece explícita: pedidos com contratos ficam pendentes para revisão, sem confirmação parcial.
 
@@ -35,12 +35,12 @@ A divisão é de cinco frentes para cada agente. O esforço não é uma estimati
 | TODO-044 | Codex | F11 — Exportação consolidada | Histórico e exportação seletiva por pessoa/período, aproveitando o que existe. Cada dono implementa a auditoria do próprio módulo; Codex integra as exportações. | `codex/f11-historico-exportacao` |
 | TODO-045 | Codex | F05 — Lotes e reservas | Condicionada: definir custódia, titularidade, custo, reservas e cancelamentos antes de debitar/reservar milhas reais. | `codex/f05-lotes-reservas` |
 | TODO-046 | Claude | F02 — Contratos | Concluída e publicada em 15/10 (API #61/UI #54). Modelos da agência, preenchimento/revisão, documento versionado, evidência de assinatura e cancelamento. CRUD de modelos/rascunhos e preservação de documentos emitidos. | `claude/f02-contratos` |
-| TODO-047 | Claude | F03 — Economia do cliente | Comparação documentada por viagem, fonte/data/condições, custo efetivo e relatório. Economia realizada distinta de estimativa e de lucro da agência. | `claude/f03-economia-cliente` |
+| TODO-047 | Claude | F03 — Economia do cliente | Concluída e publicada, API #62/UI #55, V58. Comparação documentada, CRUD/versões e relatório revisado. | `claude/f03-economia-cliente` |
 | TODO-048 | Claude | F07 — Agenda e atas | Compromissos, responsáveis e atas consultáveis, edição/cancelamento apropriados e fuso consistente. Conexão com tarefas fica para um PR de integração após F01. | `claude/f07-agenda-atas` |
 | TODO-049 | Claude | F09 — Indicações | Cadastro e acompanhamento indicador/indicado, origem e estado. Créditos/resgate financeiro condicionados à definição do gatilho e regras de estorno. | `claude/f09-indicacoes` |
 | TODO-050 | Claude | Extensão F10 — Etapas de viagem | Hotel, transfer e atividades com datas, observações e anexos, reutilizando vínculos existentes. Sem duplicar trechos, anexos ou criar despesas automaticamente. | `claude/f10-etapas-viagem` |
 
-Ordem Codex: F01 → F08 → evolução F04/F06 → F11; F05 quando houver regra definida. Ordem restante Claude: F03 → F07 → etapas F10; cadastro de indicações pode avançar sem automatizar créditos. Claude não depende de F01 para começar contratos, economia, agenda ou etapas.
+Ordem Codex: F01 → vínculo de simulações por cliente → F08 → evolução F04/F06 → F11; F05 quando houver regra definida. Ordem restante Claude: F07 → etapas F10; cadastro de indicações pode avançar sem automatizar créditos. Agenda e etapas não dependem de F01 para seu CRUD; conexões com tarefas aguardam contrato real. Publicação obedece às reservas de migrations.
 
 ## Donos dos arquivos e módulos
 
@@ -113,4 +113,4 @@ Os trechos de setembro do backlog são históricos. As antigas proibições de t
 
 Codex: preparar F01 em worktrees próprios, especificar o contrato de tarefas e implementar modelos/tarefas/execuções com auditoria e confirmação idempotente.
 
-Claude: sincronizar a branch F03 com main após F02; ler os critérios F03 do comparativo, implementar a economia realizada de Viagens sem confundir com projeção de Milhas ou lucro. V57 já foi publicada; coordenar a próxima migração e testar banco efêmero novo. O prompt de entrada está em `prompt-claude-agencia-hub-2026-10-14.md`.
+Claude: começar F07 agenda/atas a partir da main com V58, usando a reserva V59; ler critérios do comparativo e separação de produtos, manter UI/API/CRUD próprios e PRs isolados. Codex segue F01/V60; publicar na ordem das reservas. O prompt vigente está em `prompt-claude-agencia-hub-2026-10-14.md`.
