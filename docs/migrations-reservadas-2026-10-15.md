@@ -4,8 +4,9 @@ Atualizado em 20/10/2026. Autoridade única para reserva: Codex como integrador.
 
 ## Base confirmada
 
-- Produção confirmada em 20/10: API `cc5079b97bd6bbf9c70d2bf53f4ea3e665b891ff`, PR #62 integrado, deploy Railway `70ad7fb6-a722-46e5-99c8-50c226379a7b` SUCCESS. Logs confirmam atualização do schema public de V57 para V58 e inicialização concluída.
-- V58 `trip_savings` já publicada na API. V56/V57 de contratos preservadas. Site e OpenAPI retornaram HTTP 200; rota /savings sem autenticação retorna 403.
+- Produção confirmada em 20/10: API `a9932f8691518ef93dc3ee41328f64d3fe664bd4`, Railway `b603ff5f-acfd-4141-b7f6-cfa052b56bb4` SUCCESS. Schema public em V61, após upgrades sequenciais V58→V59→V60→V61 e inicialização confirmada em cada etapa.
+- Interface `a3b67c8a634939a6c77cca093da200b2674734d0`, Vercel `dpl_DBbTbgb8vrswnQ6vms4KJrmhhTm8` READY em www.agenciashub.com.br. Site e OpenAPI HTTP 200; rotas protegidas da API sem sessão HTTP 403.
+- V56 a V61 publicadas e imutáveis. Registros: publicacao-agenda-2026-10-20.md, publicacao-checklists-2026-10-20.md e publicacao-simulacoes-cliente-2026-10-20.md.
 - A prévia `agencia-hub-api-pr-62` pertence ao incidente histórico de 15/10. O ajuste manual descrito naquele runbook não é mais pré-requisito para a entrega: a API já foi integrada e publicada. Não reaplicar configurações da prévia à produção nem tentar recuperar aquele histórico para encaixar outra numeração.
 
 ## Reservas obrigatórias
@@ -15,9 +16,9 @@ Atualizado em 20/10/2026. Autoridade única para reserva: Codex como integrador.
 | V56 | Claude / integração Codex | F02 contratos | Publicada, imutável |
 | V57 | Claude / integração Codex | F02 índices | Publicada, imutável |
 | V58 | Claude / integração Codex | F03 economia, `claude/f03-economia-cliente` | Publicada na API, imutável |
-| V59 | Claude / integração Codex | F07 agenda/atas, `claude/f07-agenda-atas` | API #65/UI #58 revisados; 29 testes API/127 UI; prévia bloqueada pelo Postgres não implantado e confirmação Railway recusada; não publicada |
-| V60 | Codex | F01 checklists, `codex/f01-checklists` | Implementada, API #63/UI #56 em rascunho; aguarda V59 e validação do upgrade, não publicada |
-| V61 | Codex | TODO-052 simulações por cliente, `codex/f06-simulacoes-cliente` | Implementada, API #64/UI #57 em rascunho; aguarda V59/V60 e upgrade sequencial, não publicada |
+| V59 | Claude / integração Codex | F07 agenda/atas, `claude/f07-agenda-atas` | Publicada: API #65 3dca6dc, Railway a45d66e4 SUCCESS/V59; UI #58 615fda0, Vercel READY no domínio principal |
+| V60 | Codex | F01 checklists, `codex/f01-checklists` | Publicada: API #63 9f7f224, Railway 1f607de2 SUCCESS/V60; UI #56 04f903b, Vercel READY no domínio principal |
+| V61 | Codex | TODO-052 simulações por cliente, `codex/f06-simulacoes-cliente` | Publicada: API #64 a9932f8, Railway b603ff5f SUCCESS/V61; UI #57 a3b67c8, Vercel READY no domínio principal |
 | V62 | Claude | TODO-050 extensão F10, `claude/f10-etapas-viagem` | Reservada, uma migration inicial; publicar após V61 |
 
 F08, F09, evolução F04/F06, F11 e F05: sem número autorizado por enquanto. Reservar aqui antes de criar migrations. Se precisar de mais de um arquivo, combinar previamente a revisão das reservas; não ocupar número alheio. Não criar migrations vazias para liberar a fila.

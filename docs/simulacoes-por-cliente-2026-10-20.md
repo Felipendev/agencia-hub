@@ -1,5 +1,7 @@
 # TODO-052 — Simulações vinculadas ao cliente de Milhas
 
+**Estado vigente: publicado em produção em 20/10.** API #64/UI #57, V61, 47 testes backend/144 frontend na integração final. Detalhes e deploys em [registro de publicação](publicacao-simulacoes-cliente-2026-10-20.md). As seções preparatórias abaixo registram o histórico anterior à publicação.
+
 Implementação independente em `codex/f06-simulacoes-cliente`, baseada em main/V58. **Não publicada**: V61 reservada, aguarda V59/Claude e V60/F01 antes de integrar. Não renumerar, criar placeholders ou desativar o gate de sequência.
 
 ## Comportamento
@@ -26,7 +28,7 @@ Histórico referenciando uma pessoa bloqueia exclusão silenciosa e processament
 
 Somente gestor/vendedor da agência; IDs estrangeiros recusados em criação, consulta, filtros, edição, histórico e exclusão. Nenhuma alteração em saldo, perfil/carteira, financeiro, vendas, tarefas ou viagens. Ao integrar após F01, preservar ambos os blocos de verificação de privacidade, tratamento de conflitos e descarte da agência; não sobrescrever o módulo de tarefas.
 
-## Validação e publicação pendente
+## Validação inicial (histórico anterior à integração)
 
 Testes HTTP usam PostgreSQL efêmero próprio. Incluem vínculo e troca pelo mesmo ID, versões, concorrência, legado, autor, isolamento e papéis, exclusão/anonimização, descarte e ausência de efeitos financeiros/carteira. Migração local V58→V61 conserva ID, premissas, autor e ausência de vínculos; **não substitui** upgrade real V60→V61 quando os módulos anteriores forem integrados.
 
@@ -36,6 +38,6 @@ Resultados em 20/10: **27 testes backend e 123 frontend aprovados**. `mvn test -
 
 Evidências visuais locais: [desktop](evidencias-simulacoes-cliente/desktop.png), [edição no celular](evidencias-simulacoes-cliente/mobile-edicao.png), [perfil](evidencias-simulacoes-cliente/perfil.png). Dados fictícios, requisições de negócio interceptadas, sem alterações na API real. Layout verificado em 1440×1000 e 390×844, sem rolagem horizontal global. Esses testes não são validação autenticada em produção.
 
-PRs em rascunho: [API #64](https://github.com/Felipendev/agencia-hub-api/pull/64), head `969cdf6c5bc0ab4fb5a6fc8a930274658e8e52da`; [UI #57](https://github.com/Felipendev/agencia-hub/pull/57), head `18b06d9d521b566b5d00b58f1686193081663c10`. CI da UI e Vercel aprovados nesse head. CI da API bloqueada no gate sequencial com “Migration V61 cannot be integrated yet: expected V59”; compilação/testes posteriores da CI não executados. Os 27 testes backend acima foram executados localmente em banco efêmero.
+## Interface integrada após F01/F07
 
-Fila de integração: Claude entrega F07/V59; Codex atualiza F01/V60 e valida V59→V60, depois atualiza este módulo/V61 e valida V60→V61. Nenhum desses PRs foi integrado/publicado. Não promover UI antes da API correspondente.
+Main atualizada com agenda e checklists; perfil mantém planos, tarefas, agenda e contratos da pessoa. 144 testes frontend aprovados, build/tipos e lint sem erros (dois avisos preexistentes). API #64 integrada em a9932f8691518ef93dc3ee41328f64d3fe664bd4 após prévia saudável no deploy 6214ef06-c409-48b3-a548-371673b08c4c, com V61 e inicialização confirmadas. API em produção saudável e CI aprovada. UI #57 integrada em a3b67c8a634939a6c77cca093da200b2674734d0; Vercel dpl_DBbTbgb8vrswnQ6vms4KJrmhhTm8 READY no domínio principal. Validação final: 47 testes backend e 144 frontend, upgrade V60→V61 aprovado.

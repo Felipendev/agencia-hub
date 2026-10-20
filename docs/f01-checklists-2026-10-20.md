@@ -2,8 +2,6 @@
 
 Implementação em `codex/f01-checklists` nos dois repositórios. **Ainda não publicada:** V60 reservada para este módulo; V59 pertence à agenda/atas do Claude e precisa entrar primeiro. A implementação não cria uma V59 vazia, não renumera V60 nem desativa o gate de migrations.
 
-PRs em rascunho: [API #63](https://github.com/Felipendev/agencia-hub-api/pull/63), head `d1d74536e5ac72757aafc8c9f2bb121f80200445`; [UI #56](https://github.com/Felipendev/agencia-hub/pull/56), head `9a9a186d2d2a6b7b1946bd55b28c9d8791881cdc`. A CI da API confirmou o bloqueio esperado: `Migration V60 cannot be integrated yet: expected V59`. Na UI, corrigida uma opção não suportada (`exact`) nas consultas getByRole dos testes; `npx tsc --noEmit` e os oito testes do módulo passaram após a correção. Código de produto e contagem de casos não mudaram.
-
 ## Entrega
 
 - Tarefas avulsas por pessoa e produto TRAVEL/MILES: criar, consultar, editar pelo mesmo ID e excluir logicamente enquanto abertas. Concluir/cancelar/reabrir são operações explícitas, com versão, autor, data e motivo quando necessário. Encerradas precisam reabrir antes de editar/excluir.
@@ -44,3 +42,7 @@ Testes HTTP com PostgreSQL efêmero: CRUD, versão, auditoria, papéis/tenant, c
 Frontend: testes de edição pelo mesmo ID, confirmação após API, preservação de formulário em erro, chave idempotente em reenvio, aplicação/modelos/execuções, exclusão recusada e separação de produto. Build e lint sem erros novos; duas diretivas ESLint antigas em cotações permanecem fora de escopo. Evidências visuais com dados fictícios interceptados apenas no navegador local, sem chamada de negócio à API real. Desktop 1440×1000 e celular 390×844 sem rolagem horizontal global.
 
 Antes de publicar: integrar V59, atualizar esta branch com main, rodar teste do upgrade real e regressões, confirmar CI incluindo gate sequencial, validar prévia própria e só então publicar API e UI. Não promover a prévia de UI contra uma API de produção que ainda não possui `/work`.
+
+Interface atualizada com F07 da main; atalhos de agenda e tarefas preservados. 135 testes frontend aprovados, build/tipos aprovados e lint com zero erros (dois avisos preexistentes). API #63 integrada em 9f7f224df444d29870ed4eeaeda1073e9063e273 após prévia saudável com V60; produção da API em implantação. UI ainda aguarda confirmação da API e CI do head atualizado.
+
+Publicação concluída; estado final em docs/publicacao-checklists-2026-10-20.md. As dependências pendentes citadas nas seções anteriores são o histórico da preparação.

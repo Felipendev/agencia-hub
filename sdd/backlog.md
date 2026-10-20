@@ -2,7 +2,7 @@
 
 ## Atualização vigente — 20/10/2026
 
-Divisão atual: **cinco frentes atribuídas a cada agente; F02 e F03 do Claude concluídos, três frentes dele pendentes**, com branches/worktrees próprios e PRs isolados por feature e repositório. Codex implementou TODO-041/F01 (V60, API #63/UI #56) e TODO-052 (V61, API #64/UI #57), em revisão e aguardando TODO-048/F07 do Claude (V59). Codex integra arquivos compartilhados, reservas de migrações e publicação sequencial; Claude entrega seus módulos por PR, sem push direto em main ou publicação concorrente. TODO-052 tem V61 implementada em rascunho, não publicada. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
+Divisão atual: **cinco frentes atribuídas a cada agente; F02, F03 e F07 do Claude concluídos, duas frentes dele pendentes**, com branches/worktrees próprios e PRs isolados. F07/V59 (API #65/UI #58), F01/V60 (API #63/UI #56) e TODO-052/V61 (API #64/UI #57) publicados em 20/10, nessa ordem, API antes da UI. Railway SUCCESS e Vercel READY confirmados. Codex coordena arquivos compartilhados, reservas e publicação; Claude segue TODO-050/F10 com V62 reservada. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
 
 Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). F02 foi revisado, integrado pelo Codex e publicado em 15/10 pelos PRs API #61/UI #54; 32 testes da API e 105 da interface aprovados. O vínculo de simulações ao cliente é a subentrega Codex TODO-052 da evolução F06, sem redistribuir as cinco frentes.
 
@@ -61,7 +61,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-041: Checklists, tarefas e rotinas por pessoa (F01)
 - **Owner**: Codex
 - **Priority**: High
-- **Status**: in-review — implementação local validada em 20/10, [API #63](https://github.com/Felipendev/agencia-hub-api/pull/63)/[UI #56](https://github.com/Felipendev/agencia-hub/pull/56) em rascunho; V60 aguarda V59/F07 do Claude e teste de upgrade real antes de publicar.
+- **Status**: resolved — publicado em 20/10; API #63/UI #56, V60. 32 testes backend sequenciais e 135 frontend aprovados, CI/prévia e produção confirmadas. Ver docs/publicacao-checklists-2026-10-20.md.
 - **Created**: 2026-10-14
 - **Origin**: divisão paralela autorizada pelo usuário.
 - **Scope**: modelos, tarefa avulsa e execução periódica com responsável, prazo, situação, vínculos opcionais e histórico. Mudanças em modelo não reescrevem execuções anteriores; repetir geração não duplica efeito. CRUD aplicável e cancelamento/conclusão auditados.
@@ -138,7 +138,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-048: Agenda e atas de atendimento (F07)
 - **Owner**: Claude
 - **Priority**: Medium
-- **Status**: in-review — Claude entregou [API #65](https://github.com/Felipendev/agencia-hub-api/pull/65)/[UI #58](https://github.com/Felipendev/agencia-hub/pull/58), V59. Integrações Codex e 29 testes API/127 UI aprovados. Prévia bloqueada pelo Postgres não implantado; conector recusou confirmar Deploy Changes na prévia. Ação exata em docs/publicacao-agenda-2026-10-20.md; não publicada. Tarefas a partir de atas continuam integração posterior.
+- **Status**: resolved — F07 publicado em 20/10, API #65/UI #58, V59, Railway SUCCESS e Vercel READY; 29 testes backend/127 frontend aprovados. Recuperação da prévia confirmada, sem ação manual pendente. Tarefas a partir de atas continuam integração posterior. Referência: docs/publicacao-agenda-2026-10-20.md.
 - **Created**: 2026-10-14
 - **Origin**: divisão paralela autorizada pelo usuário.
 - **Scope**: compromissos e atas vinculados à pessoa, responsável, datas/duração/objetivo/link e decisões. CRUD aplicável, cancelamento preservando histórico e fuso consistente. Não prometer sincronização de agenda externa.
@@ -176,7 +176,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-052: Vincular simulações de acúmulo ao cliente de Milhas (F06)
 - **Owner**: Codex — subentrega da evolução F04/F06 em TODO-043; não transfere trabalho do Claude.
 - **Priority**: High
-- **Status**: in-review — implementação validada localmente em 20/10; [API #64](https://github.com/Felipendev/agencia-hub-api/pull/64)/[UI #57](https://github.com/Felipendev/agencia-hub/pull/57) em rascunho. V61 aguarda V59/F07 e V60/F01; não publicada.
+- **Status**: resolved — publicado em 20/10: API #64/UI #57, V61; Railway SUCCESS e Vercel READY no domínio principal. Referência: docs/publicacao-simulacoes-cliente-2026-10-20.md.
 - **Created**: 2026-10-14
 - **Origin**: usuário perguntou se o simulador deveria estar associado a cliente e autorizou criar a task. A implementação atual salva por agência, sem customerId.
 - **Context**: cenários pessoais precisam compor o acompanhamento de Milhas da pessoa, mantendo identidade compartilhada com Viagens e separação dos produtos. Cálculo avulso continua disponível sem persistência/vínculo.
@@ -195,7 +195,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 - **Complexity**: Medium
 - **Branch**: `codex/f06-simulacoes-cliente` em frontend e API; V61 reservada. Não renumerar nem usar placeholders para contornar dependências.
 - **Implementado em 20/10**: cliente obrigatório ao salvar; cálculo avulso sem gravação, filtros por pessoa/legados, planos na ficha de Milhas e edição pelo mesmo ID. Vínculo por versão, confirmação na troca/associação e cópia; autores da sessão sem inventar autor legado. Não inclui automaticamente no diretório de carteiras nem altera saldo/Viagens/financeiro. Histórico bloqueia exclusão/anonimização parcial da pessoa com mensagem de revisão pendente.
-- **Validação local**: 27 testes backend, 123 frontend, tipos/build aprovados; lint zero erros e dois avisos preexistentes. Visual desktop/celular com dados fictícios e API interceptada, sem overflow global. Upgrade local V58→V61 conserva legados, mas não substitui V60→V61. Preservar blocos F01/F06 nos arquivos de privacidade/descarte/conflitos e perfil ao integrar. [Documentação](../docs/simulacoes-por-cliente-2026-10-20.md). Heads do código API `969cdf6c5bc0ab4fb5a6fc8a930274658e8e52da`, UI `18b06d9d521b566b5d00b58f1686193081663c10`.
+- **Validação final**: 47 testes backend e 144 frontend aprovados após integrar main/V60; upgrade V60→V61 conserva legados e histórico. Build/tipos aprovados, lint zero erros e dois avisos preexistentes; CI e prévias aprovadas. Visual local desktop/celular com dados fictícios. Produção confirmada por migration, inicialização, OpenAPI 200 e interface READY; sem CRUD autenticado com dados reais em produção. [Documentação](../docs/simulacoes-por-cliente-2026-10-20.md).
 - **Dependencies**: TODO-051 publicado e CRUD TODO-038 existente; independente de F01, contratos e diagnóstico público.
 
 ### Sequência das propostas da engenharia reversa
@@ -204,7 +204,7 @@ Fonte funcional: [comparativo e critérios de aceite](../docs/comparativo-sou-ge
 
 | Ordem | Proposta | Estado e preparação |
 |---|---|---|
-| 0 | F06 — Simulador | CRUD publicado em TODO-038; vínculo ao cliente em revisão no TODO-052 (API #64/UI #57), V61 não publicada. |
+| 0 | F06 — Simulador | CRUD publicado em TODO-038; vínculo ao cliente publicado no TODO-052 (API #64/UI #57), V61. |
 | 1 | F04 — Perfil e carteira de milhas | Carteira manual publicada no TODO-040, com CRUD e histórico. Integração com tarefas F01 e diagnóstico público específico continuam etapas posteriores. |
 | 2 | F01 — Checklist e rotinas | Modelos e execuções com CRUD aplicável, responsável, prazo, histórico e prevenção de duplicação. |
 | 3 | F08 — Próxima ação comercial | Ação, data e responsável no CRM existente; concluir/reprogramar mantém histórico. |
