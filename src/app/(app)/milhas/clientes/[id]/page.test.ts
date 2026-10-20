@@ -9,6 +9,10 @@ vi.mock("@/contexts/auth-context", () => ({
   useAuth: () => ({ token: "test" }),
 }));
 vi.mock("next/navigation", () => ({ useParams: () => ({ id: "person" }) }));
+vi.mock("@/components/cliente/CustomerSimulations", () => ({
+  CustomerSimulations: ({ customerId }: { customerId: string }) =>
+    React.createElement("p", null, `Planos ${customerId}`),
+}));
 vi.mock("@/components/cliente/MilesWallet", () => ({
   MilesWallet: ({
     customerId,
