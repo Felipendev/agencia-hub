@@ -1,6 +1,6 @@
 # Divisão de desenvolvimento — Codex e Claude
 
-Atualizado em 20/10/2026. Este acordo organiza o trabalho em dois fluxos independentes, com branches e PRs por feature. F02 e F03 do Claude estão publicados: F03 API #62/UI #55, Railway SUCCESS com V58 e Vercel READY no domínio principal; validações anteriores somam 48 testes backend e 114 frontend. Claude segue F07/agenda e atas (V59); Codex segue F01/checklists (V60), depois simulações por cliente (V61). Registros: `publicacao-economia-2026-10-20.md` e `migrations-reservadas-2026-10-15.md`. As demais tarefas permanecem pendentes.
+Atualizado em 20/10/2026. Este acordo organiza o trabalho em dois fluxos independentes, com branches e PRs por feature. F02 e F03 do Claude estão publicados: F03 API #62/UI #55, Railway SUCCESS com V58 e Vercel READY no domínio principal; validações anteriores somam 48 testes backend e 114 frontend. Claude segue F07/agenda e atas (V59); Codex implementou F01/checklists (V60, API #63/UI #56) e simulações por cliente (V61, API #64/UI #57); PRs em rascunho aguardam V59 e os upgrades sequenciais. Registros: `publicacao-economia-2026-10-20.md` e `migrations-reservadas-2026-10-15.md`. As demais tarefas permanecem pendentes.
 
 **Atualização de acompanhamento:** TODO-052 registra o vínculo das simulações de acúmulo ao cliente, sob Codex, como subentrega da evolução F06/TODO-043 em PRs próprios (`codex/f06-simulacoes-cliente`). Calcular pode ser avulso; salvar novo plano exige pessoa da mesma agência. Cenários legados só recebem vínculo por revisão explícita. Não muda a divisão das cinco frentes de cada agente. Integrações de contratos concluídas em TODO-046. A decisão futura de retenção/anonimização permanece explícita: pedidos com contratos ficam pendentes para revisão, sem confirmação parcial.
 
@@ -111,6 +111,6 @@ Os trechos de setembro do backlog são históricos. As antigas proibições de t
 
 ## Primeiro passo de cada agente
 
-Codex: preparar F01 em worktrees próprios, especificar o contrato de tarefas e implementar modelos/tarefas/execuções com auditoria e confirmação idempotente.
+Codex: F01 e TODO-052 estão implementados e validados localmente em worktrees/PRs próprios. Integrar V59/F07 quando entregue, atualizar F01 e revalidar V59→V60, depois TODO-052 com V60→V61. Publicar API antes de UI em cada etapa. F08 permanece a próxima frente de desenvolvimento, ainda sem migration reservada.
 
 Claude: começar F07 agenda/atas a partir da main com V58, usando a reserva V59; ler critérios do comparativo e separação de produtos, manter UI/API/CRUD próprios e PRs isolados. Codex segue F01/V60; publicar na ordem das reservas. O prompt vigente está em `prompt-claude-agencia-hub-2026-10-14.md`.
