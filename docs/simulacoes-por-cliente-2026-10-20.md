@@ -35,3 +35,7 @@ Frontend: seleção/obrigatoriedade, edição, duplicação, conflitos, confirma
 Resultados em 20/10: **27 testes backend e 123 frontend aprovados**. `mvn test -Dtest=SimulationCustomerIntegrationTest,SimulationCustomerMigrationTest,AccumulationSimulationCrudIntegrationTest,LibraryAndAccumulationIntegrationTest,DataDeletionIntegrationTest,DataDeletionMultiTenancyIntegrationTest,AgencyDeletionSchedulerIntegrationTest`; UI `npm test`, `npm run lint`, `npm run build` e checagem de tipos. Lint sem erros, duas diretivas antigas em cotações fora do escopo. Revisão manual registrada em sdd/wip/20261020-f06-simulacoes-cliente/verdicts/code_review.json; cobertura percentual não medida.
 
 Evidências visuais locais: [desktop](evidencias-simulacoes-cliente/desktop.png), [edição no celular](evidencias-simulacoes-cliente/mobile-edicao.png), [perfil](evidencias-simulacoes-cliente/perfil.png). Dados fictícios, requisições de negócio interceptadas, sem alterações na API real. Layout verificado em 1440×1000 e 390×844, sem rolagem horizontal global. Esses testes não são validação autenticada em produção.
+
+## Interface integrada após F01/F07
+
+Main atualizada com agenda e checklists; perfil mantém planos, tarefas, agenda e contratos da pessoa. 144 testes frontend aprovados, build/tipos e lint sem erros (dois avisos preexistentes). API #64 integrada em a9932f8691518ef93dc3ee41328f64d3fe664bd4 após prévia saudável no deploy 6214ef06-c409-48b3-a548-371673b08c4c, com V61 e inicialização confirmadas. Publicação da UI depende da saúde da API em produção e CI do head atualizado.
