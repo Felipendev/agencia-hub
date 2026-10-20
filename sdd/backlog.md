@@ -138,7 +138,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-048: Agenda e atas de atendimento (F07)
 - **Owner**: Claude
 - **Priority**: Medium
-- **Status**: pending — agenda/atas independem de F01; criação de tarefas será integração posterior.
+- **Status**: in-review — Claude entregou [API #65](https://github.com/Felipendev/agencia-hub-api/pull/65)/[UI #58](https://github.com/Felipendev/agencia-hub/pull/58), V59. Integrações Codex e 26 testes API/127 UI aprovados; CI/prévia e publicação em andamento. Tarefas a partir de atas continuam integração posterior.
 - **Created**: 2026-10-14
 - **Origin**: divisão paralela autorizada pelo usuário.
 - **Scope**: compromissos e atas vinculados à pessoa, responsável, datas/duração/objetivo/link e decisões. CRUD aplicável, cancelamento preservando histórico e fuso consistente. Não prometer sincronização de agenda externa.
@@ -160,7 +160,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 - **Created**: 2026-10-14
 - **Origin**: parte não entregue da proposta F10 e divisão autorizada pelo usuário.
 - **Scope**: hotel, transfer e atividades com data/anexos/observações, CRUD aplicável e vínculos corretos; reaproveitar Biblioteca/itinerário/anexos sem duplicá-los ou gerar despesa automática.
-- **Branch**: `claude/f10-etapas-viagem`, em frontend e API; PRs próprios, sem editar silenciosamente a página central de viagem.
+- **Branch**: `claude/f10-etapas-viagem`, em frontend e API; PRs próprios, sem editar silenciosamente a página central de viagem. V62 reservada em 20/10 pelo integrador; publicar após V61, sem ocupar V60/V61.
 
 ### TODO-051: Separar os produtos Viagens e Milhas, mantendo identidade compartilhada
 - **Owner**: Codex — subentrega estrutural da evolução F04, antes de F01/F08.
