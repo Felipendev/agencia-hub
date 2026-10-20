@@ -16,7 +16,7 @@ Atualizado em 20/10/2026. Autoridade única para reserva: Codex como integrador.
 | V57 | Claude / integração Codex | F02 índices | Publicada, imutável |
 | V58 | Claude / integração Codex | F03 economia, `claude/f03-economia-cliente` | Publicada na API, imutável |
 | V59 | Claude | F07 agenda/atas, `claude/f07-agenda-atas` | Reservada, uma migration inicial |
-| V60 | Codex | F01 checklists, `codex/f01-checklists` | Reservada, uma migration inicial |
+| V60 | Codex | F01 checklists, `codex/f01-checklists` | Implementada, API #63/UI #56 em rascunho; aguarda V59 e validação do upgrade, não publicada |
 | V61 | Codex | TODO-052 simulações por cliente, `codex/f06-simulacoes-cliente` | Reservada, uma migration inicial |
 
 F08, F09, extensão F10, evolução F04/F06, F11 e F05: sem número autorizado por enquanto. Reservar aqui antes de criar migrations. Se precisar de mais de um arquivo, combinar previamente a revisão das reservas; não ocupar número alheio. Não criar migrations vazias para liberar a fila.

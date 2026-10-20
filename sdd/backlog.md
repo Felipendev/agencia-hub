@@ -61,12 +61,14 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-041: Checklists, tarefas e rotinas por pessoa (F01)
 - **Owner**: Codex
 - **Priority**: High
-- **Status**: pending — próximo trabalho do Codex.
+- **Status**: in-review — implementação local validada em 20/10, [API #63](https://github.com/Felipendev/agencia-hub-api/pull/63)/[UI #56](https://github.com/Felipendev/agencia-hub/pull/56) em rascunho; V60 aguarda V59/F07 do Claude e teste de upgrade real antes de publicar.
 - **Created**: 2026-10-14
 - **Origin**: divisão paralela autorizada pelo usuário.
 - **Scope**: modelos, tarefa avulsa e execução periódica com responsável, prazo, situação, vínculos opcionais e histórico. Mudanças em modelo não reescrevem execuções anteriores; repetir geração não duplica efeito. CRUD aplicável e cancelamento/conclusão auditados.
 - **Branch**: `codex/f01-checklists`, em frontend e API; PRs próprios.
 - **Coordination**: Codex define/publica o contrato de criação de tarefas para integrações posteriores de carteira/agenda.
+- **Implementado em 20/10**: tarefas avulsas, modelos e aplicações por período com histórico, versões, idempotência/concorrência, snapshots, cancelamento/reabertura e exclusão lógica aplicável. Menus separados em Viagens/Milhas, filtros, responsáveis e referências validadas por agência/pessoa. Execução usa cancelamento no lugar de exclusão para preservar rastreabilidade; edição de título/observações pelo mesmo ID. Geração manual explícita, sem agendamento automático. Sem efeitos em financeiro/carteira.
+- **Validação local**: 29 casos backend distintos aprovados, 122 frontend, build/tipos e lint sem erros novos; visual desktop 1440×1000 e celular 390×844 sem overflow. Banco efêmero, upgrade V58→V60 preservando dados e regressões de privacidade/economia. Esse teste local não substitui V59→V60; não há publicação nem novo CRUD em produção. Heads API `d1d74536e5ac72757aafc8c9f2bb121f80200445`, UI `ad9d477c7f9a3ab2f55319853c760aff58bbe7bc`. Gate sequencial recusa V60 até V59 integrada, conforme esperado. Contrato e limites: [F01](../docs/f01-checklists-2026-10-20.md).
 
 ### TODO-042: Próxima ação e follow-up comercial (F08)
 - **Owner**: Codex

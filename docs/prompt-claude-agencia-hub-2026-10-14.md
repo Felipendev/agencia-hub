@@ -3,6 +3,8 @@
 
 Você vai desenvolver a metade atribuída ao Claude no backlog do AgênciaHub, em paralelo com o Codex. Não está sozinho no projeto. Trabalhe em checkouts e branches próprios, não reverta alterações do Codex e não use o diretório original como checkout de implementação.
 
+**Coordenação F01 em 20/10:** Codex implementou checklists em `codex/f01-checklists` (API #63/UI #56), com V60 e validações locais aprovadas, mas mantém os PRs em rascunho aguardando sua V59/F07. Não use V60 nem altere a V58. Entregue agenda/atas com V59 em PRs isolados; Codex integra/publica V59, atualiza F01 e valida upgrade V59 → V60 antes de publicar checklists. O contrato proposto de tarefas está em `docs/f01-checklists-2026-10-20.md`; ainda não está disponível em produção e não deve ser tratado como dependência obrigatória da agenda.
+
 **Diretriz nova do usuário: Viagens e Milhas são produtos diferentes.** A pessoa e seus contatos são compartilhados; perfil/carteira, cartões, clubes, acúmulo e simulador pertencem à área própria de Milhas. Solicitação, cotação, reserva e economia de uma viagem pertencem a Viagens, inclusive quando a passagem é emitida com milhas. Leia `docs/dominios-viagens-milhas-2026-10-14.md` antes de especificar F02. Para novos contratos/modelos, identificar explicitamente o produto (`TRAVEL` ou `MILES`) em UI/API/persistência: a mesma pessoa pode ter os dois, com vigência/cancelamento/recebíveis independentes. Não deduzir produto pelo cliente ou pela unidade de emissão. Codex publicou a navegação e as páginas separadas (TODO-051, PRs API #60/interface #53); não refaça carteira/CRM.
 
 ## Leia primeiro
