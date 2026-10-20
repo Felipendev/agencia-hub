@@ -138,7 +138,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-048: Agenda e atas de atendimento (F07)
 - **Owner**: Claude
 - **Priority**: Medium
-- **Status**: in-review — Claude entregou [API #65](https://github.com/Felipendev/agencia-hub-api/pull/65)/[UI #58](https://github.com/Felipendev/agencia-hub/pull/58), V59. Integrações Codex e 26 testes API/127 UI aprovados; CI/prévia e publicação em andamento. Tarefas a partir de atas continuam integração posterior.
+- **Status**: in-review — Claude entregou [API #65](https://github.com/Felipendev/agencia-hub-api/pull/65)/[UI #58](https://github.com/Felipendev/agencia-hub/pull/58), V59. Integrações Codex e 29 testes API/127 UI aprovados. Prévia bloqueada pelo Postgres não implantado; conector recusou confirmar Deploy Changes na prévia. Ação exata em docs/publicacao-agenda-2026-10-20.md; não publicada. Tarefas a partir de atas continuam integração posterior.
 - **Created**: 2026-10-14
 - **Origin**: divisão paralela autorizada pelo usuário.
 - **Scope**: compromissos e atas vinculados à pessoa, responsável, datas/duração/objetivo/link e decisões. CRUD aplicável, cancelamento preservando histórico e fuso consistente. Não prometer sincronização de agenda externa.
