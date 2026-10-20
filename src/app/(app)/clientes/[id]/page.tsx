@@ -84,6 +84,7 @@ export default function ClienteDetalhePage() {
           </Button>
         </PageHeader>
         <Link href={`/economia?customerId=${id}`} className="text-sm font-medium text-[var(--hub-blue)] hover:underline">Economia nas viagens</Link>
+        <Link href={`/viagens/tarefas?customerId=${id}`} className="ml-4 text-sm font-medium text-[var(--hub-blue)] hover:underline">Tarefas de Viagens</Link>
         <div className="flex flex-wrap gap-4 text-sm">
           <Link className="text-[var(--hub-blue)] hover:underline" href={`/agenda?customerId=${id}&product=TRAVEL`}>Agenda de Viagens</Link>
           <Link className="text-[var(--hub-blue)] hover:underline" href={`/agenda/novo?customerId=${id}&product=TRAVEL`}>Novo compromisso de Viagens</Link>
