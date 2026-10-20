@@ -41,7 +41,12 @@ export function toZonedIso(date: string, time: string, zone: string): string {
   // Duas iterações resolvem a mudança de offset (horário de verão) perto do instante.
   let offset = offsetMinutes(new Date(naive), zone);
   offset = offsetMinutes(new Date(naive - offset * 60000), zone);
-  return `${date}T${time.slice(0, 5)}:00${formatOffset(offset)}`;
+  const iso = `${date}T${time.slice(0, 5)}:00${formatOffset(offset)}`;
+  const roundTrip = fromIso(iso, zone);
+  if (roundTrip.date !== date || roundTrip.time !== time.slice(0, 5)) {
+    throw new Error("Este horário não existe no fuso escolhido. Revise a data e o horário, inclusive mudanças de horário de verão.");
+  }
+  return iso;
 }
 
 /** Instante ISO → data e hora no fuso indicado. */

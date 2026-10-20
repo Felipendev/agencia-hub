@@ -1,0 +1,21 @@
+{
+  "tasks": [
+    {
+      "status": "in-progress",
+      "id": "review"
+    },
+    {
+      "status": "in-progress",
+      "id": "integration"
+    },
+    {
+      "status": "in-progress",
+      "id": "validation"
+    },
+    {
+      "status": "pending",
+      "id": "publication"
+    }
+  ],
+  "feature": "TODO-048"
+}

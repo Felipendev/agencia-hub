@@ -135,6 +135,11 @@ function AgendaList() {
   );
 }
 
+function AgendaRoute() {
+  const params = useSearchParams();
+  return <AgendaList key={params.toString()} />;
+}
+
 export default function AgendaPage() {
-  return <Suspense fallback={<p className="text-sm text-[var(--hub-text-muted)]">Carregando agenda…</p>}><AgendaList /></Suspense>;
+  return <Suspense fallback={<p className="text-sm text-[var(--hub-text-muted)]">Carregando agenda…</p>}><AgendaRoute /></Suspense>;
 }

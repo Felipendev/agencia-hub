@@ -24,5 +24,7 @@ describe("fuso da agenda", () => {
 
   it("recusa data ou hora inválidas", () => {
     expect(() => toZonedIso("", "10:00", "UTC")).toThrow();
+    expect(() => toZonedIso("2026-02-30", "10:00", "UTC")).toThrow();
+    expect(() => toZonedIso("2026-03-08", "02:30", "America/New_York")).toThrow(/não existe/);
   });
 });
