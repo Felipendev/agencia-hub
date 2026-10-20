@@ -154,7 +154,7 @@ describe("F01 — operações persistidas da interface", () => {
   it("edita o mesmo ID com versão e confirma somente após a API", async () => {
     await ready();
     fireEvent.click(
-      screen.getByRole("button", { name: "Editar", exact: true }),
+      screen.getByRole("button", { name: "Editar" }),
     );
     fireEvent.change(screen.getByLabelText("Tarefa"), {
       target: { value: "Saldo conferido" },
@@ -167,7 +167,7 @@ describe("F01 — operações persistidas da interface", () => {
         }),
     );
     fireEvent.click(
-      screen.getByRole("button", { name: "Salvar", exact: true }),
+      screen.getByRole("button", { name: "Salvar" }),
     );
     await waitFor(() => expect(mocks.saveTask).toHaveBeenCalled());
     expect(screen.queryByText("Tarefa salva.")).toBeNull();
@@ -187,13 +187,13 @@ describe("F01 — operações persistidas da interface", () => {
     );
     await ready();
     fireEvent.click(
-      screen.getByRole("button", { name: "Editar", exact: true }),
+      screen.getByRole("button", { name: "Editar" }),
     );
     fireEvent.change(screen.getByLabelText("Tarefa"), {
       target: { value: "Minha revisão" },
     });
     fireEvent.click(
-      screen.getByRole("button", { name: "Salvar", exact: true }),
+      screen.getByRole("button", { name: "Salvar" }),
     );
     await screen.findByText("Este registro foi alterado. Recarregue.");
     expect((screen.getByLabelText("Tarefa") as HTMLInputElement).value).toBe(
@@ -212,11 +212,11 @@ describe("F01 — operações persistidas da interface", () => {
       target: { value: "Nova atividade" },
     });
     fireEvent.click(
-      screen.getByRole("button", { name: "Salvar", exact: true }),
+      screen.getByRole("button", { name: "Salvar" }),
     );
     await screen.findByText("Sem conexão");
     fireEvent.click(
-      screen.getByRole("button", { name: "Salvar", exact: true }),
+      screen.getByRole("button", { name: "Salvar" }),
     );
     await screen.findByText("Tarefa salva.");
     expect(mocks.saveTask.mock.calls[0][3]).toBe(
@@ -227,10 +227,10 @@ describe("F01 — operações persistidas da interface", () => {
   it("aplica modelo e passa a consultar as tarefas da execução retornada", async () => {
     await ready();
     fireEvent.click(
-      screen.getByRole("button", { name: "Modelos", exact: true }),
+      screen.getByRole("button", { name: "Modelos" }),
     );
     fireEvent.click(
-      screen.getByRole("button", { name: "Aplicar", exact: true }),
+      screen.getByRole("button", { name: "Aplicar" }),
     );
     fireEvent.change(screen.getByLabelText("Cliente"), {
       target: { value: "person-1" },
@@ -258,16 +258,16 @@ describe("F01 — operações persistidas da interface", () => {
   it("edita um modelo existente em vez de criar outra cópia", async () => {
     await ready();
     fireEvent.click(
-      screen.getByRole("button", { name: "Modelos", exact: true }),
+      screen.getByRole("button", { name: "Modelos" }),
     );
     fireEvent.click(
-      screen.getByRole("button", { name: "Editar modelo", exact: true }),
+      screen.getByRole("button", { name: "Editar modelo" }),
     );
     fireEvent.change(screen.getByLabelText("Nome do modelo"), {
       target: { value: "Rotina revisada" },
     });
     fireEvent.click(
-      screen.getByRole("button", { name: "Salvar", exact: true }),
+      screen.getByRole("button", { name: "Salvar" }),
     );
     await waitFor(() =>
       expect(mocks.saveTemplate).toHaveBeenCalledWith(
@@ -284,16 +284,16 @@ describe("F01 — operações persistidas da interface", () => {
     vi.spyOn(window, "prompt").mockReturnValue("Cliente pausou");
     await ready();
     fireEvent.click(
-      screen.getByRole("button", { name: "Execuções", exact: true }),
+      screen.getByRole("button", { name: "Execuções" }),
     );
     fireEvent.click(
-      screen.getByRole("button", { name: "Editar execução", exact: true }),
+      screen.getByRole("button", { name: "Editar execução" }),
     );
     fireEvent.change(screen.getByLabelText("Título"), {
       target: { value: "Semana revisada" },
     });
     fireEvent.click(
-      screen.getByRole("button", { name: "Salvar", exact: true }),
+      screen.getByRole("button", { name: "Salvar" }),
     );
     await screen.findByText("Execução atualizada.");
     expect(mocks.saveRun).toHaveBeenCalledWith(
@@ -323,7 +323,7 @@ describe("F01 — operações persistidas da interface", () => {
     mocks.deleteTask.mockRejectedValueOnce(new Error("Conflito de versão"));
     await ready();
     fireEvent.click(
-      screen.getByRole("button", { name: "Excluir", exact: true }),
+      screen.getByRole("button", { name: "Excluir" }),
     );
     await screen.findByText("Conflito de versão");
     expect(screen.queryByText("Tarefa excluída.")).toBeNull();
