@@ -60,19 +60,11 @@ function MilesCustomer({ id }: { id: string }) {
           <MilesWallet key={person.id} customerId={person.id} defaultOpen />
           <CustomerSimulations customerId={person.id} />
           <div className="flex flex-wrap gap-4 text-sm">
-            <Link
-              className="text-[var(--hub-blue)] hover:underline"
-              href={`/contratos?customerId=${person.id}&product=MILES`}
-            >
-              Contratos de Milhas
-            </Link>
-            <Link
-              className="text-[var(--hub-blue)] hover:underline"
-              href={`/contratos/novo?customerId=${person.id}&product=MILES`}
-            >
-              Novo contrato de Milhas
-            </Link>
+            <Link className="text-[var(--hub-blue)] hover:underline" href={`/agenda?customerId=${person.id}&product=MILES`}>Agenda de Milhas</Link>
+            <Link className="text-[var(--hub-blue)] hover:underline" href={`/agenda/novo?customerId=${person.id}&product=MILES`}>Novo compromisso de Milhas</Link>
           </div>
+          <div className="flex flex-wrap gap-4 text-sm"><Link className="text-[var(--hub-blue)] hover:underline" href={`/contratos?customerId=${person.id}&product=MILES`}>Contratos de Milhas</Link><Link className="text-[var(--hub-blue)] hover:underline" href={`/contratos/novo?customerId=${person.id}&product=MILES`}>Novo contrato de Milhas</Link></div>
+          <Link className="text-sm text-[var(--hub-blue)] hover:underline" href={`/milhas/tarefas?customerId=${person.id}`}>Tarefas de Milhas</Link>
         </>
       ) : (
         <p role="status">Carregando a pessoa…</p>

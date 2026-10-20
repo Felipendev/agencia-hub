@@ -2,6 +2,15 @@ import { expect, it } from "vitest";
 import { NextRequest } from "next/server";
 import { middleware } from "./middleware";
 
+it("protege a agenda, o cadastro e os detalhes sem sessão", () => {
+  for (const path of ["/agenda", "/agenda/novo", "/agenda/appointment"]) {
+    const response = middleware(new NextRequest(`https://app.example${path}`));
+    const location = new URL(response.headers.get("location")!);
+    expect(location.pathname).toBe("/login");
+    expect(location.searchParams.get("from")).toBe(path);
+  }
+});
+
 it("a área de milhas exige login inclusive nas rotas de carteira e simulador",()=>{
   for(const path of ["/milhas","/milhas/clientes/person","/milhas/simulador","/contratos","/contratos/modelos","/contratos/novo","/contratos/contract","/economia","/economia/relatorios","/economia/viagens/trip"]){
     const response=middleware(new NextRequest(`https://app.example${path}`));

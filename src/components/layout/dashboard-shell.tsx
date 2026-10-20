@@ -54,6 +54,7 @@ const OWNER_GROUPS: NavGroup[] = [
       { href: "/dashboard",   label: "Dashboard",             icon: "layout"   },
       { href: "/clientes",    label: "Pessoas",              icon: "users"    },
       { href: "/contratos", label: "Contratos", icon: "document" },
+      { href: "/agenda", label: "Agenda e atas", icon: "document" },
     ],
   },
   {
@@ -62,6 +63,7 @@ const OWNER_GROUPS: NavGroup[] = [
       { href: "/cotacoes", label: "Cotações", icon: "document" },
       { href: "/calculadora", label: "Calculadora de voos", icon: "calculator" },
       { href: "/economia", label: "Economia do cliente", icon: "cash" },
+      { href: "/viagens/tarefas", label: "Checklists e rotinas", icon: "document" },
       { href: "/viagens",     label: "Viagens",                icon: "plane"      },
     ],
   },
@@ -70,6 +72,7 @@ const OWNER_GROUPS: NavGroup[] = [
     items: [
       { href: "/milhas", label: "Perfis e carteiras", icon: "wallet" },
       { href: "/milhas/simulador", label: "Simulador de acúmulo", icon: "calculator" },
+      { href: "/milhas/tarefas", label: "Checklists e rotinas", icon: "document" },
     ],
   },
   { label: "Materiais", items: [{ href: "/biblioteca", label: "Biblioteca", icon: "document" }] },
@@ -105,6 +108,7 @@ const SELLER_GROUPS: NavGroup[] = [
       { href: "/meu-painel",  label: "Meu Painel",            icon: "layout"   },
       { href: "/clientes",    label: "Pessoas",              icon: "users"    },
       { href: "/contratos", label: "Contratos", icon: "document" },
+      { href: "/agenda", label: "Agenda e atas", icon: "document" },
     ],
   },
   {
@@ -113,6 +117,7 @@ const SELLER_GROUPS: NavGroup[] = [
       { href: "/cotacoes", label: "Cotações", icon: "document" },
       { href: "/calculadora", label: "Calculadora de voos", icon: "calculator" },
       { href: "/economia", label: "Economia do cliente", icon: "cash" },
+      { href: "/viagens/tarefas", label: "Checklists e rotinas", icon: "document" },
       { href: "/viagens",     label: "Viagens",                icon: "plane"      },
     ],
   },
@@ -121,6 +126,7 @@ const SELLER_GROUPS: NavGroup[] = [
     items: [
       { href: "/milhas", label: "Perfis e carteiras", icon: "wallet" },
       { href: "/milhas/simulador", label: "Simulador de acúmulo", icon: "calculator" },
+      { href: "/milhas/tarefas", label: "Checklists e rotinas", icon: "document" },
     ],
   },
   { label: "Materiais", items: [{ href: "/biblioteca", label: "Biblioteca", icon: "document" }] },
@@ -153,6 +159,7 @@ function NavGroupSection({
             pathname === item.href ||
             (item.href !== "/dashboard" &&
               item.href !== "/meu-painel" &&
+              !(item.href === "/viagens" && pathname.startsWith("/viagens/tarefas")) &&
               (item.href === "/milhas"
                 ? pathname.startsWith("/milhas/clientes/")
                 : pathname.startsWith(`${item.href}/`)));
