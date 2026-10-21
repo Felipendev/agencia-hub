@@ -2,20 +2,19 @@
 
 Especificação: `docs/coordination/claude/f09-indicacoes.md`. Branch `claude/f09-indicacoes` nos dois repositórios. Os arquivos abaixo **não** são alterados nessa branch.
 
-## 0. Reserva de migration — bloqueia o SQL
+## 0. Migration — V63 reservada
 
-Pedido: reservar **um** arquivo para F09 em `docs/migrations-reservadas-2026-10-15.md`, depois da V62 (F10). Sugestão: **V63**, `V63__referrals.sql`, branch `claude/f09-indicacoes`, a publicar depois da V62.
+O Codex reservou a **V63** em 21/10. O arquivo único é `V63__referrals.sql`, aplicado sobre V1–V62 num Postgres 16 efêmero.
 
-Conteúdo previsto (aditivo, sem alterar tabelas existentes):
+**Publicar só depois da V62 (#66):** a branch parte da `main` em V61. Depois do merge do #66, ela precisa ser atualizada antes da integração; o Flyway rejeitaria a V62 se a V63 fosse aplicada antes.
+
+Tabelas criadas, sem alterar as existentes:
 - `referrals`:
   - indicador e indicado com FK para `customers`, ou contato do indicado ainda sem cadastro;
   - responsável com FK para `users`;
-  - venda opcional com FK para `sales`;
-  - produto `TRAVEL`/`MILES`, estado, versão e motivo;
-  - índice único parcial (`agency_id`, `product`, `referred_customer_id`) para indicações não canceladas.
-- `referral_events`: auditoria sem FK de indicação, para preservar exclusões.
-
-Até a reserva, só entram na branch domínio puro, interface e testes que não dependem do schema.
+  - venda opcional com FK para `sales`, `ON DELETE SET NULL`;
+  - índice único parcial `referrals_active_referred_uq`.
+- `referral_events`: auditoria sem FK de indicação.
 
 ## 1. Middleware — `src/middleware.ts`
 
@@ -36,12 +35,12 @@ A alternativa é um único item em Principal, perto de Agenda e atas, para `/ind
 
 O produto vem do contexto da página, nunca do cadastro.
 
-## 4. API — arquivos centrais (depois da reserva)
+## 4. API — arquivos centrais
 
-- **`GlobalExceptionHandler.handleDataIntegrity`:** as FKs `referrals.referrer_customer_id` e `referrals.referred_customer_id` **não** terão cascata, para preservar o histórico das indicações, que é base de futuros créditos.
-  - Sugestão para a FK do indicador ou do indicado: 409 `REFERRAL_HISTORY_EXISTS` — "Esta pessoa participa de indicações. Cancele ou exclua as indicações antes de excluir a pessoa."
-  - `referrals.responsible_id`, ao remover usuário: "Este usuário é responsável por indicações. Altere o responsável antes de removê-lo." A alternativa é `ON DELETE SET NULL`, se o Codex preferir; me avise para eu ajustar a migration.
-  - `referrals.sale_id` usará `ON DELETE SET NULL`: excluir a venda remove só a evidência, e o histórico registra.
+- **`GlobalExceptionHandler.handleDataIntegrity`:** as FKs `referrals_referrer_customer_id_fkey` e `referrals_referred_customer_id_fkey` **não** têm cascata, para preservar o histórico das indicações, que é base de futuros créditos.
+  - Sugestão para essas duas FKs: 409 `REFERRAL_HISTORY_EXISTS` — "Esta pessoa participa de indicações. Cancele ou exclua as indicações antes de excluir a pessoa."
+  - `referrals_responsible_id_fkey`, ao remover usuário: "Este usuário é responsável por indicações. Altere o responsável antes de removê-lo." A alternativa é `ON DELETE SET NULL`, se o Codex preferir; me avise para eu ajustar a migration.
+  - `referrals.sale_id` usa `ON DELETE SET NULL`: excluir a venda remove só a evidência, e o histórico registra.
 - **`AgencyDeletionScheduler`:** apagar `referral_events` e `referrals` da agência **antes** de vendas, pessoas e usuários.
 - **`ProcessDataDeletionRequest`:** a indicação guarda nome, telefone e e-mail de quem ainda não é cliente, além de observações livres. Proposta: seguir a regra de contratos e agenda e manter a solicitação pendente quando a pessoa participar de indicações, até a decisão de retenção ou anonimização. Contatos de não clientes podem ser anonimizados pela própria indicação, numa extensão futura.
 

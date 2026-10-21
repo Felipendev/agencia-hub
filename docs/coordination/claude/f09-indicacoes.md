@@ -2,7 +2,7 @@
 
 Branch `claude/f09-indicacoes` nos dois repositórios, criada a partir de `origin/main` (frontend `a3b67c8`, API `a9932f8`, migrations publicadas até V61; V62 reservada para F10).
 
-**Migration:** sem número autorizado. Pedi a reserva de **um** arquivo em `docs/coordination/requests/claude-f09-indicacoes.md` (sugestão: V63, depois da V62). Nenhum SQL de migration é escrito antes de a reserva constar em `docs/migrations-reservadas-2026-10-15.md`.
+**Migration:** **V63** reservada pelo Codex em 21/10, um arquivo `V63__referrals.sql`. Publicar depois da V62 (F10, #66).
 
 ## Escopo desta entrega
 
@@ -100,5 +100,5 @@ Arquivos compartilhados solicitados ao Codex: menu, atalhos nas páginas da pess
 1. Especificação e pedido de reserva (este documento). ✔
 2. Domínio puro na API (validação, ciclo, normalização de contato) e testes, sem SQL. ✔ (`domain/referrals/Referrals.java`, `ReferralsTest`)
 3. Interface com cliente de API, filtros e testes (com respostas simuladas). ✔ `/indicacoes`, `/indicacoes/nova`, `/indicacoes/[id]`; 14 testes; evidências em `evidencias-f09/`. Usa também `GET /referrals/members` (equipe da agência, como a agenda).
-4. Depois da reserva: migration, serviço/controller, testes de integração, validação em Postgres efêmero.
+4. Migration V63, serviço/controller, testes de integração e validação em Postgres efêmero. ✔
 5. PRs em rascunho `[F09][API] Indicações (Vxx)` e `[F09][UI] Indicações`, vinculados.
