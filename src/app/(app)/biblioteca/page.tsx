@@ -67,7 +67,7 @@ export default function BibliotecaPage() {
     } catch (e) { setError(e instanceof Error ? e.message : "Erro ao baixar."); }
   }
   async function remove(row: Material) {
-    if (!window.confirm(`Excluir “${row.title}” da biblioteca da agência?`)) return;
+    if (!window.confirm(`Excluir “${row.title}” da biblioteca da agência? Os vínculos com etapas de viagem também serão removidos. As etapas serão preservadas.`)) return;
     setBusy(true); setError(""); setNotice("");
     try { await request(`/${row.id}`, { method: "DELETE" }); setMaterials((rows) => rows.filter((r) => r.id !== row.id)); if (editing === row.id) { setEditing(null); setForm(empty); setFile(null); } setNotice("Material excluído."); }
     catch (e) { setError(e instanceof Error ? e.message : "Erro ao excluir."); } finally { setBusy(false); }
