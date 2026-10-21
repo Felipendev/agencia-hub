@@ -27,6 +27,12 @@ function routes(get: () => unknown, write: (url: string, init: RequestInit) => R
 }
 
 describe("detalhe da indicação", () => {
+  it("mantém os atalhos de pessoas no produto Milhas", async () => {
+    vi.stubGlobal("fetch", routes(() => detail({ product: "MILES", referredCustomerId: "p2", referredCustomerName: "Bia Souza" }), () => Response.json({})));
+    render(React.createElement(IndicacaoPage));
+    expect((await screen.findByRole("link", { name: "Ana" })).getAttribute("href")).toBe("/milhas/clientes/p1");
+    expect(screen.getByRole("link", { name: "Bia Souza" }).getAttribute("href")).toBe("/milhas/clientes/p2");
+  });
   it("reutiliza prospecto já cadastrado quando o vínculo falha", async () => {
     let links = 0;
     const fetchMock = routes(() => detail(), (url) => {
