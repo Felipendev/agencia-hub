@@ -98,7 +98,7 @@ Arquivos compartilhados solicitados ao Codex: menu, atalhos nas páginas da pess
 ## Plano
 
 1. Especificação e pedido de reserva (este documento). ✔
-2. Domínio puro na API (validação, ciclo, normalização de contato) e testes, sem SQL.
-3. Interface com cliente de API, filtros e testes (com respostas simuladas).
+2. Domínio puro na API (validação, ciclo, normalização de contato) e testes, sem SQL. ✔ (`domain/referrals/Referrals.java`, `ReferralsTest`)
+3. Interface com cliente de API, filtros e testes (com respostas simuladas). ✔ `/indicacoes`, `/indicacoes/nova`, `/indicacoes/[id]`; 14 testes; evidências em `evidencias-f09/`. Usa também `GET /referrals/members` (equipe da agência, como a agenda).
 4. Depois da reserva: migration, serviço/controller, testes de integração, validação em Postgres efêmero.
 5. PRs em rascunho `[F09][API] Indicações (Vxx)` e `[F09][UI] Indicações`, vinculados.
