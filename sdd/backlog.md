@@ -1,8 +1,8 @@
 # Technical Backlog
 
-## Atualização vigente — 20/10/2026
+## Atualização vigente — 21/10/2026
 
-Divisão atual: **cinco frentes atribuídas a cada agente; F02, F03 e F07 do Claude concluídos, duas frentes dele pendentes**, com branches/worktrees próprios e PRs isolados. F07/V59 (API #65/UI #58), F01/V60 (API #63/UI #56) e TODO-052/V61 (API #64/UI #57) publicados em 20/10, nessa ordem, API antes da UI. Railway SUCCESS e Vercel READY confirmados. Codex coordena arquivos compartilhados, reservas e publicação; Claude segue TODO-050/F10 com V62 reservada. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
+Divisão atual: **cinco frentes atribuídas a cada agente; F02, F03 e F07 do Claude concluídos, duas frentes dele pendentes**, com branches/worktrees próprios e PRs isolados. F07/V59 (API #65/UI #58), F01/V60 (API #63/UI #56) e TODO-052/V61 (API #64/UI #57) publicados em 20/10, nessa ordem, API antes da UI. Railway SUCCESS e Vercel READY confirmados. Codex coordena arquivos compartilhados, reservas e publicação; F10/V62 está integrado nos PRs e aguarda publicação devido ao incidente Railway; Claude segue TODO-049/F09 com V63 reservada. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
 
 Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). F02 foi revisado, integrado pelo Codex e publicado em 15/10 pelos PRs API #61/UI #54; 32 testes da API e 105 da interface aprovados. O vínculo de simulações ao cliente é a subentrega Codex TODO-052 da evolução F06, sem redistribuir as cinco frentes.
 
@@ -147,7 +147,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-049: Indicações e créditos de relacionamento (F09)
 - **Owner**: Claude
 - **Priority**: Medium
-- **Status**: pending — cadastro pode avançar; gatilho/resgate/estorno de créditos precisam de regra definida.
+- **Status**: pending — cadastro com V63 reservada em 21/10; Claude pode avançar em branch própria, uma migration inicial, publicação após V62. Gatilho/resgate/estorno de créditos precisam de regra definida.
 - **Created**: 2026-10-14
 - **Origin**: divisão paralela autorizada pelo usuário.
 - **Scope**: indicador/indicado, origem e situação com CRUD/histórico. Não confundir crédito com cupom, comissão ou desconto; não automatizar nascimento de crédito ou financeiro por suposição.
@@ -156,11 +156,13 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-050: Etapas e materiais vinculados à viagem (extensão F10)
 - **Owner**: Claude — etapas; Biblioteca existente continua sob manutenção do Codex.
 - **Priority**: Low
-- **Status**: pending
+- **Status**: in-review — Claude implementou API #66/UI #59; integração Codex concluída em 21/10 (API 575a280, UI 57fdf27), 46 testes backend/155 frontend aprovados, upgrade V61→V62 e banco novo validados. Publicação bloqueada por incidente Railway com novos builds pausados; prévia ainda no commit antigo. Produção preservada em V61; não marcar resolvido até publicar API e depois UI.
 - **Created**: 2026-10-14
 - **Origin**: parte não entregue da proposta F10 e divisão autorizada pelo usuário.
 - **Scope**: hotel, transfer e atividades com data/anexos/observações, CRUD aplicável e vínculos corretos; reaproveitar Biblioteca/itinerário/anexos sem duplicá-los ou gerar despesa automática.
 - **Branch**: `claude/f10-etapas-viagem`, em frontend e API; PRs próprios, sem editar silenciosamente a página central de viagem. V62 reservada em 20/10 pelo integrador; publicar após V61, sem ocupar V60/V61.
+
+- **Integração**: navegação/avisos, descarte da agência, idempotência completa e versão de status corrigidos. Histórico preserva customerId; anonimização com etapas/histórico permanece pendente para revisão, sem falsa conclusão parcial. [Registro e retomada](../docs/f10-integracao-2026-10-21.md).
 
 ### TODO-051: Separar os produtos Viagens e Milhas, mantendo identidade compartilhada
 - **Owner**: Codex — subentrega estrutural da evolução F04, antes de F01/F08.
