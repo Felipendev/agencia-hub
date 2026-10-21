@@ -82,7 +82,7 @@ function ReferralsList() {
       <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-5">
         <div>
           <Label htmlFor="f-product">Produto</Label>
-          <select id="f-product" className={select} value={product} onChange={(e) => setProduct(e.target.value as "" | Product)}>
+          <select id="f-product" className={select} value={product} onChange={(e) => { setProduct(e.target.value as "" | Product); setRows(null); setSummary(null); setError(""); }}>
             <option value="">Viagens e Milhas</option><option value="TRAVEL">Viagens</option><option value="MILES">Milhas</option>
           </select>
         </div>
@@ -141,7 +141,8 @@ function ReferralsList() {
 
 function ReferralsRoute() {
   const params = useSearchParams();
-  return <ReferralsList key={params.toString()} />;
+  const { token } = useAuth();
+  return <ReferralsList key={`${params.toString()}:${token ?? ""}`} />;
 }
 
 export default function IndicacoesPage() {

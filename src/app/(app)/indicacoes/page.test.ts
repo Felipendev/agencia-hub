@@ -20,6 +20,22 @@ function api() {
 }
 
 describe("lista de indicações", () => {
+  it("oculta os resultados de Milhas enquanto carrega o produto Viagens", async () => {
+    search = new URLSearchParams("product=MILES");
+    let resolveTravel!: (response: Response) => void;
+    const pending = new Promise<Response>((resolve) => { resolveTravel = resolve; });
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      if (String(url).includes("summary")) return Response.json(summary);
+      return String(url).includes("product=TRAVEL") ? pending : Response.json([row]);
+    }));
+    render(React.createElement(IndicacoesPage));
+    await screen.findByText("Ana → Bia");
+    fireEvent.change(screen.getByLabelText("Produto"), { target: { value: "TRAVEL" } });
+    expect(screen.queryByText("Ana → Bia")).toBeNull();
+    expect(screen.getByText("Carregando indicações…")).toBeTruthy();
+    resolveTravel(Response.json([]));
+    await screen.findByText("Nenhuma indicação encontrada com esses filtros.");
+  });
   it("filtra pelo produto da URL e mostra o resumo sem valores financeiros", async () => {
     search = new URLSearchParams("product=MILES");
     const fetchMock = api();

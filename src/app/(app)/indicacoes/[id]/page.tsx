@@ -55,6 +55,7 @@ function ReferralPage() {
   const [saleId, setSaleId] = useState("");
   const [sales, setSales] = useState<{ customerId: string; options: Option[] }>({ customerId: "", options: [] });
   const [linkTo, setLinkTo] = useState("");
+  const [createdPerson, setCreatedPerson] = useState<{ id: string; name: string } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -110,8 +111,12 @@ function ReferralPage() {
   });
 
   const createAndLink = () => run(async () => {
-    const person = await referralsApi.createPerson(token, { name: r.referredName ?? "", phone: r.referredPhone, email: r.referredEmail });
-    setPeople((rows) => [...(rows ?? []), { id: person.id, label: person.name }]);
+    const person = createdPerson ?? await referralsApi.createPerson(token, { name: r.referredName ?? "", phone: r.referredPhone, email: r.referredEmail });
+    if (!createdPerson) {
+      setCreatedPerson(person);
+      setPeople((rows) => [...(rows ?? []), { id: person.id, label: person.name }]);
+    }
+    setLinkTo(person.id);
     try {
       apply(await referralsApi.linkReferred(token, id, person.id, r.version));
     } catch (e) {
@@ -238,7 +243,7 @@ function ReferralPage() {
               </select>
             </div>
             <Button variant="secondary" disabled={busy || !linkTo} onClick={() => run(async () => { apply(await referralsApi.linkReferred(token, id, linkTo, r.version)); setLinkTo(""); return "Pessoa indicada vinculada ao cadastro."; })}>Vincular</Button>
-            <Button variant="ghost" disabled={busy} onClick={createAndLink}>Cadastrar “{r.referredName}” como prospecto</Button>
+            <Button variant="ghost" disabled={busy} onClick={createAndLink}>{createdPerson ? "Vincular prospecto já cadastrado" : `Cadastrar “${r.referredName}” como prospecto`}</Button>
           </div>
         </Card>
       )}
@@ -270,5 +275,7 @@ function ReferralPage() {
 }
 
 export default function IndicacaoPage() {
-  return <Suspense fallback={<p className="text-sm text-[var(--hub-text-muted)]">Carregando indicação…</p>}><ReferralPage /></Suspense>;
+  const { id } = useParams<{ id: string }>();
+  const { token } = useAuth();
+  return <Suspense fallback={<p className="text-sm text-[var(--hub-text-muted)]">Carregando indicação…</p>}><ReferralPage key={`${id}:${token ?? ""}`} /></Suspense>;
 }

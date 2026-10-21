@@ -27,6 +27,22 @@ function routes(get: () => unknown, write: (url: string, init: RequestInit) => R
 }
 
 describe("detalhe da indicação", () => {
+  it("reutiliza prospecto já cadastrado quando o vínculo falha", async () => {
+    let links = 0;
+    const fetchMock = routes(() => detail(), (url) => {
+      if (url.endsWith("/customers")) return Response.json({ id: "p3", name: "Bia Souza" }, { status: 201 });
+      links++;
+      return links === 1 ? Response.json({ message: "Falha temporária" }, { status: 503 }) : Response.json(detail({ referredCustomerId: "p3", referredCustomerName: "Bia Souza", version: 4 }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(React.createElement(IndicacaoPage));
+    fireEvent.click(await screen.findByRole("button", { name: "Cadastrar “Bia Souza” como prospecto" }));
+    await screen.findByText(/A pessoa foi cadastrada em Pessoas, mas não foi vinculada/);
+    fireEvent.click(screen.getByRole("button", { name: "Vincular prospecto já cadastrado" }));
+    await screen.findByText("Pessoa cadastrada como prospecto e vinculada à indicação.");
+    expect(fetchMock.mock.calls.filter(([u, i]) => String(u).endsWith("/customers") && i?.method === "POST")).toHaveLength(1);
+    expect(fetchMock.mock.calls.filter(([u, i]) => String(u).endsWith("/referred-customer/p3") && i?.method === "PUT")).toHaveLength(2);
+  });
   it("convertida exige indicado no cadastro; vincular usa a versão atual", async () => {
     const fetchMock = routes(() => detail({}, { warnings: [{ kind: "CUSTOMER", id: "p2", label: "Bia Souza" }] }), () => Response.json(detail({ referredCustomerId: "p2", referredCustomerName: "Bia Souza", version: 4 })));
     vi.stubGlobal("fetch", fetchMock);

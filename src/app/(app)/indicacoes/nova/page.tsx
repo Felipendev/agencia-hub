@@ -70,6 +70,12 @@ function NewReferral() {
   );
 }
 
+function NewReferralRoute() {
+  const params = useSearchParams();
+  const { token } = useAuth();
+  return <NewReferral key={`${params.toString()}:${token ?? ""}`} />;
+}
+
 export default function NovaIndicacaoPage() {
-  return <Suspense fallback={<p className="text-sm text-[var(--hub-text-muted)]">Carregando…</p>}><NewReferral /></Suspense>;
+  return <Suspense fallback={<p className="text-sm text-[var(--hub-text-muted)]">Carregando…</p>}><NewReferralRoute /></Suspense>;
 }
