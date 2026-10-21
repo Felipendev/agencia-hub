@@ -1,5 +1,7 @@
 # Solicitações de integração — F09 Indicações (Claude → Codex)
 
+**Integração Codex em 21/10:** pedidos 1–4 implementados: rotas/menu/atalhos por produto, erros específicos, descarte da agência e privacidade de participantes/contatos/histórico. Corrigidos reenvios incompletos e versão em no-op; recuperação do vínculo reutiliza o prospecto já criado. Validado localmente junto à V62 revisada, sem publicar dependências: 61 testes API e 173 UI combinados aprovados. Ver docs/f09-integracao-2026-10-21.md. Publicação continua aguardando F10/V62 e a normalização dos builds Railway. Pedidos originais abaixo são o histórico.
+
 Especificação: `docs/coordination/claude/f09-indicacoes.md`. Branch `claude/f09-indicacoes` nos dois repositórios. Os arquivos abaixo **não** são alterados nessa branch.
 
 ## 0. Migration — V63 reservada

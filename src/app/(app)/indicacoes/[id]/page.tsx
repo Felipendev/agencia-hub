@@ -95,6 +95,7 @@ function ReferralPage() {
   if (!detail || !form) return <p className="text-sm text-[var(--hub-text-muted)]">Carregando indicação…</p>;
 
   const r = detail.referral;
+  const personHref = (personId: string) => r.product === "MILES" ? `/milhas/clientes/${personId}` : `/clientes/${personId}`;
   const cancelled = r.status === "CANCELLED";
   const reasonRequired = target ? needsReason(r.status, target) : false;
   const canSubmitStatus = target && (!reasonRequired || reason.trim()) && (target !== "CONVERTED" || convertedOn);
@@ -141,7 +142,7 @@ function ReferralPage() {
           <ul className="mt-1 list-disc pl-5">
             {detail.warnings.map((w) => (
               <li key={`${w.kind}-${w.id}`}>
-                {w.kind === "CUSTOMER" ? <>a pessoa cadastrada <Link href={`/clientes/${w.id}`} className="underline">{w.label}</Link>. Considere vincular a indicação a ela.</> : <>outra indicação ativa: <Link href={`/indicacoes/${w.id}`} className="underline">{w.label}</Link>.</>}
+                {w.kind === "CUSTOMER" ? <>a pessoa cadastrada <Link href={personHref(w.id)} className="underline">{w.label}</Link>. Considere vincular a indicação a ela.</> : <>outra indicação ativa: <Link href={`/indicacoes/${w.id}`} className="underline">{w.label}</Link>.</>}
               </li>
             ))}
           </ul>
@@ -171,10 +172,10 @@ function ReferralPage() {
           </form>
         ) : (
           <dl className="grid gap-3 text-sm md:grid-cols-3">
-            <div><dt className={muted}>Quem indicou</dt><dd><Link href={`/clientes/${r.referrerId}`} className="underline">{r.referrerName}</Link></dd></div>
+            <div><dt className={muted}>Quem indicou</dt><dd><Link href={personHref(r.referrerId)} className="underline">{r.referrerName}</Link></dd></div>
             <div>
               <dt className={muted}>Pessoa indicada</dt>
-              <dd>{r.referredCustomerId ? <Link href={`/clientes/${r.referredCustomerId}`} className="underline">{r.referredCustomerName}</Link> : <>{r.referredName} <span className={muted}>(ainda não cadastrada)</span></>}</dd>
+              <dd>{r.referredCustomerId ? <Link href={personHref(r.referredCustomerId)} className="underline">{r.referredCustomerName}</Link> : <>{r.referredName} <span className={muted}>(ainda não cadastrada)</span></>}</dd>
             </div>
             {!r.referredCustomerId && <div><dt className={muted}>Contato</dt><dd>{[r.referredPhone, r.referredEmail].filter(Boolean).join(" · ")}</dd></div>}
             <div><dt className={muted}>Responsável</dt><dd>{r.responsibleName ?? "Sem responsável"}</dd></div>

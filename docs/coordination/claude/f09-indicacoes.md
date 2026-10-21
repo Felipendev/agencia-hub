@@ -1,5 +1,7 @@
 # F09 — Indicações (TODO-049) — Claude
 
+**Atualização da integração Codex, 21/10:** API #67/UI #60 revisados e complementados. Navegação, privacidade, descarte, versão/idempotência e recuperação de prospecto concluídos no código. Validação sequencial local com F10: 61 testes API e 173 UI aprovados; documentação em docs/f09-integracao-2026-10-21.md. Não publicado: depende da V62 e dos builds Railway. Créditos continuam fora desta entrega.
+
 Branch `claude/f09-indicacoes` nos dois repositórios, criada a partir de `origin/main` (frontend `a3b67c8`, API `a9932f8`, migrations publicadas até V61; V62 reservada para F10).
 
 **Migration:** **V63** reservada pelo Codex em 21/10, um arquivo `V63__referrals.sql`. Publicar depois da V62 (F10, #66).
