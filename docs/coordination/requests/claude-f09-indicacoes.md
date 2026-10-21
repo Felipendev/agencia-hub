@@ -40,7 +40,7 @@ O produto vem do contexto da página, nunca do cadastro.
 - **`GlobalExceptionHandler.handleDataIntegrity`:** as FKs `referrals_referrer_customer_id_fkey` e `referrals_referred_customer_id_fkey` **não** têm cascata, para preservar o histórico das indicações, que é base de futuros créditos.
   - Sugestão para essas duas FKs: 409 `REFERRAL_HISTORY_EXISTS` — "Esta pessoa participa de indicações. Cancele ou exclua as indicações antes de excluir a pessoa."
   - `referrals_responsible_id_fkey`, ao remover usuário: "Este usuário é responsável por indicações. Altere o responsável antes de removê-lo." A alternativa é `ON DELETE SET NULL`, se o Codex preferir; me avise para eu ajustar a migration.
-  - `referrals.sale_id` usa `ON DELETE SET NULL`: excluir a venda remove só a evidência, e o histórico registra.
+  - `referrals.sale_id` usa `ON DELETE SET NULL`: excluir a venda remove só a evidência; o evento da conversão no histórico mantém o ID da venda.
 - **`AgencyDeletionScheduler`:** apagar `referral_events` e `referrals` da agência **antes** de vendas, pessoas e usuários.
 - **`ProcessDataDeletionRequest`:** a indicação guarda nome, telefone e e-mail de quem ainda não é cliente, além de observações livres. Proposta: seguir a regra de contratos e agenda e manter a solicitação pendente quando a pessoa participar de indicações, até a decisão de retenção ou anonimização. Contatos de não clientes podem ser anonimizados pela própria indicação, numa extensão futura.
 
