@@ -6,8 +6,9 @@ import EtapasDaViagemPage from "./page";
 
 vi.mock("@/contexts/auth-context", () => ({ useAuth: () => ({ token: "tok" }) }));
 vi.mock("@/lib/api/agencia-hub-env", () => ({ getAgenciaHubApiBaseUrl: () => "https://api.example" }));
-vi.mock("next/navigation", () => ({ useParams: () => ({ id: "t1" }) }));
-afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
+const navigation = vi.hoisted(() => ({ id: "t1" }));
+vi.mock("next/navigation", () => ({ useParams: () => ({ id: navigation.id }) }));
+afterEach(() => { cleanup(); navigation.id = "t1"; vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 const trip = { id: "t1", customerId: "p1", customerName: "Ana", serviceType: "AEREO", bookingLocator: "ABC123", status: "UPCOMING", travelStartDate: "2099-01-10", travelEndDate: "2099-01-15" };
 const hotel = { id: "s1", kind: "HOTEL", title: "Hotel Central", startsAt: "2099-01-10T17:00:00Z", endsAt: "2099-01-12T15:00:00Z", timeZone: "America/Fortaleza",
@@ -25,6 +26,24 @@ function routes(get: () => unknown, write: (url: string, init: RequestInit) => R
 }
 
 describe("etapas da viagem", () => {
+  it("não mostra etapas da viagem anterior enquanto carrega outra viagem", async () => {
+    let resolveNext!: (response: Response) => void;
+    const next = new Promise<Response>((resolve) => { resolveNext = resolve; });
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      if (url.endsWith("/trips/t2/stages")) return next;
+      if (url.endsWith("/trips/t1/stages")) return Response.json(itinerary());
+      return Response.json([]);
+    }));
+    const view = render(React.createElement(EtapasDaViagemPage));
+    await screen.findByRole("article", { name: "Hotel Central" });
+    navigation.id = "t2";
+    view.rerender(React.createElement(EtapasDaViagemPage));
+    expect(screen.queryByRole("article", { name: "Hotel Central" })).toBeNull();
+    expect(screen.getByText("Carregando etapas…")).toBeTruthy();
+    resolveNext(Response.json(itinerary([], { id: "t2", customerName: "Bruna" })));
+    await screen.findByText(/Bruna/);
+    expect(screen.queryByRole("article", { name: "Hotel Central" })).toBeNull();
+  });
   it("cria etapa com chave de idempotência e só confirma depois da API", async () => {
     const created = { ...hotel, id: "s2", kind: "ACTIVITY", title: "Passeio de barco", startsAt: "2099-01-11T12:00:00Z", endsAt: null };
     const fetchMock = routes(() => itinerary(), () => Response.json({ trip, stage: created, history: [{ id: "e1", stageId: "s2", action: "CREATED", detail: { title: "Passeio de barco" }, author: "Gestor <g@x>", createdAt: "2099-01-01T00:00:00Z" }] }, { status: 201 }));

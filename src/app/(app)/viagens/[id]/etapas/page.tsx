@@ -159,7 +159,9 @@ function StagesPage() {
                   <span className={muted}>{new Date(h.createdAt).toLocaleString("pt-BR", { timeZone: AGENCY_ZONE, dateStyle: "short", timeStyle: "short" })}</span> · {actionLabel(h.action)}
                   {note && <span className="text-[var(--hub-text-secondary)]"> — {note}</span>}
                   {typeof h.detail?.previousStartsAt === "string" && typeof h.detail?.timeZone === "string" && (
-                    <span className="text-[var(--hub-text-secondary)]"> — antes: {formatInZone(h.detail.previousStartsAt, h.detail.timeZone)}</span>
+                    <span className="text-[var(--hub-text-secondary)]"> — antes: {formatInZone(h.detail.previousStartsAt, typeof h.detail.previousTimeZone === "string" ? h.detail.previousTimeZone : h.detail.timeZone)}
+                      {typeof h.detail.previousEndsAt === "string" && <> até {formatInZone(h.detail.previousEndsAt, typeof h.detail.previousTimeZone === "string" ? h.detail.previousTimeZone : h.detail.timeZone)}</>}
+                    </span>
                   )}
                   <span className={muted}> · {h.author}</span>
                 </li>
@@ -372,5 +374,7 @@ function StageCard({ stage: s, tripId, token, busy, run, onDetail, attachments, 
 }
 
 export default function EtapasDaViagemPage() {
-  return <Suspense fallback={<p className="text-sm text-[var(--hub-text-muted)]">Carregando etapas…</p>}><StagesPage /></Suspense>;
+  const { id } = useParams<{ id: string }>();
+  const { token } = useAuth();
+  return <Suspense fallback={<p className="text-sm text-[var(--hub-text-muted)]">Carregando etapas…</p>}><StagesPage key={`${id}:${token ?? ""}`} /></Suspense>;
 }

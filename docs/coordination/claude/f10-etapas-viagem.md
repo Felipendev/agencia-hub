@@ -42,7 +42,7 @@ Rota própria `/viagens/[id]/etapas`, com:
 - vínculo com anexos da viagem (incluindo envio de arquivo novo pelo endpoint existente) e com materiais da Biblioteca;
 - histórico.
 
-A página central da viagem **não é editada**: o link "Etapas da viagem" fica em `docs/coordination/requests/claude-f10-etapas-viagem.md`.
+A integração Codex em 21/10 adicionou o link "Etapas da viagem" à página central, avisos de exclusão e proteção do histórico de dados pessoais. Ver `docs/f10-integracao-2026-10-21.md`; pedidos originais preservados como histórico.
 
 ## Critérios de aceite
 

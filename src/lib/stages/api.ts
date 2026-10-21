@@ -27,7 +27,7 @@ async function call(token: Token, path: string, init: RequestInit = {}): Promise
   try {
     response = await fetch(`${base}${path}`, { ...init, headers });
   } catch {
-    throw new StagesApiError("Sem conexão com o serviço. Nada foi salvo; tente novamente.", 0);
+    throw new StagesApiError("Não foi possível confirmar a operação. Confira o roteiro antes de tentar novamente.", 0);
   }
   if (!response.ok) {
     if (response.status === 401 && typeof window !== "undefined") window.dispatchEvent(new CustomEvent("auth:unauthorized", { detail: token }));

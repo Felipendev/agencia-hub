@@ -1,5 +1,7 @@
 # Solicitações de integração — F10 Etapas da viagem (Claude → Codex)
 
+**Integração Codex em 21/10:** itens 1–3 implementados e testados. Privacidade mantém a solicitação pendente para revisão quando existem etapas/histórico; eventos conservam customerId após excluir viagem, e exclusão comum da pessoa recebe conflito. Não há anonimização parcial declarada concluída. Ver docs/f10-integracao-2026-10-21.md. Os pedidos originais abaixo são o histórico; publicação aguarda nova prévia devido ao incidente Railway.
+
 Arquivos compartilhados que **não** foram alterados em `claude/f10-etapas-viagem`. O item 1 é necessário para a feature ficar acessível pela navegação. O item 3 é necessário antes de publicar a API.
 
 ## 1. Página central da viagem — `src/app/(app)/viagens/[id]/page.tsx`

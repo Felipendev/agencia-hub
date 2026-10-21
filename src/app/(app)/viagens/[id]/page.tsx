@@ -103,7 +103,7 @@ export default function ViagemDetalhePage() {
   }
 
   async function deleteAttachment(attachment: Attachment) {
-    if (!base || !token || !window.confirm(`Remover o arquivo "${attachment.filename}"?`)) return;
+    if (!base || !token || !window.confirm(`Remover o arquivo "${attachment.filename}"? Se estiver vinculado a etapas da viagem, esses vínculos também serão removidos. As etapas serão preservadas.`)) return;
     setSavingAttachmentId(attachment.id); setError("");
     try {
       const response = await fetch(`${base}/attachments/${attachment.id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
@@ -124,7 +124,7 @@ export default function ViagemDetalhePage() {
 
   async function remove() {
     if (!base || !token) return;
-    if (!window.confirm("Excluir esta viagem? A análise de economia, suas versões e evidências também serão excluídas. Relatórios já gerados serão preservados.")) return;
+    if (!window.confirm("Excluir esta viagem? As etapas do roteiro (hotel, transfer e atividades) e seus vínculos também serão removidos. O histórico das etapas será preservado. A análise de economia, suas versões e evidências também serão excluídas. Relatórios já gerados serão preservados.")) return;
     const response = await fetch(`${base}/trips/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
     if (!response.ok) { setError("Não foi possível excluir a viagem."); return; }
     router.push("/viagens");
@@ -138,7 +138,10 @@ export default function ViagemDetalhePage() {
   return (
     <div className="space-y-6">
       <BackButton href="/viagens" label="Viagens" />
-      <Link href={`/economia/viagens/${id}`} className="text-sm font-medium text-[var(--hub-blue)] hover:underline">Economia da viagem</Link>
+      <nav aria-label="Ferramentas da viagem" className="flex flex-wrap gap-4">
+        <Link href={`/viagens/${id}/etapas`} className="text-sm font-medium text-[var(--hub-blue)] hover:underline">Etapas da viagem</Link>
+        <Link href={`/economia/viagens/${id}`} className="text-sm font-medium text-[var(--hub-blue)] hover:underline">Economia da viagem</Link>
+      </nav>
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[var(--hub-text-primary)]">{t.customerName}</h1>
