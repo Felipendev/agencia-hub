@@ -2,7 +2,7 @@
 
 ## Atualização vigente — 21/10/2026
 
-Divisão atual: **cinco frentes atribuídas a cada agente; F02, F03 e F07 do Claude concluídos, duas frentes dele pendentes**, com branches/worktrees próprios e PRs isolados. F07/V59 (API #65/UI #58), F01/V60 (API #63/UI #56) e TODO-052/V61 (API #64/UI #57) publicados em 20/10, nessa ordem, API antes da UI. Railway SUCCESS e Vercel READY confirmados. Codex coordena arquivos compartilhados, reservas e publicação; F10/V62 está integrado nos PRs e aguarda publicação devido ao incidente Railway; Claude segue TODO-049/F09 com V63 reservada. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
+Divisão atual: **cinco frentes atribuídas a cada agente; F02/F03/F07 do Claude publicados e F10/F09 entregues em PRs, complementados e testados pelo Codex, ainda sem publicação**. F07/V59, F01/V60 e TODO-052/V61 publicados em 20/10. F10/V62 (API #66/UI #59) aguarda nova prévia saudável devido ao incidente Railway com builds pausados; F09/V63 (API #67/UI #60) foi validado localmente com F10 e aguarda V62 na main. Codex integra arquivos compartilhados, migrations e publicação API antes da UI. Não misturar branches de produto nem contornar o gate. F08 segue a próxima frente de desenvolvimento do Codex, ainda sem migration reservada. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
 
 Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). F02 foi revisado, integrado pelo Codex e publicado em 15/10 pelos PRs API #61/UI #54; 32 testes da API e 105 da interface aprovados. O vínculo de simulações ao cliente é a subentrega Codex TODO-052 da evolução F06, sem redistribuir as cinco frentes.
 
@@ -147,16 +147,18 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-049: Indicações e créditos de relacionamento (F09)
 - **Owner**: Claude
 - **Priority**: Medium
-- **Status**: pending — cadastro com V63 reservada em 21/10; Claude pode avançar em branch própria, uma migration inicial, publicação após V62. Gatilho/resgate/estorno de créditos precisam de regra definida.
+- **Status**: in-review — cadastro F09 implementado e integrado nos PRs API #67 (58cd19c)/UI #60 (50be3bb), ainda não publicados. Validação local combinada com F10: 61 testes API e 173 UI aprovados; upgrade V62→V63 preserva etapas. Créditos dependem de definição de gatilho/valor/resgate/estorno, fora desta entrega.
 - **Created**: 2026-10-14
 - **Origin**: divisão paralela autorizada pelo usuário.
 - **Scope**: indicador/indicado, origem e situação com CRUD/histórico. Não confundir crédito com cupom, comissão ou desconto; não automatizar nascimento de crédito ou financeiro por suposição.
 - **Branch**: `claude/f09-indicacoes`, em frontend e API; PRs próprios.
 
+- **Integração em 21/10**: middleware, menus/atalhos por produto, privacidade de participantes e contatos fora do CRM, descarte da agência, erros específicos, reenvio e versão corrigidos. Prospecto já criado é reutilizado se o vínculo falhar. [Registro e retomada](../docs/f09-integracao-2026-10-21.md). Atualizar com main após V62 e revalidar no head real; CI do PR independente não pode pular a V62.
+
 ### TODO-050: Etapas e materiais vinculados à viagem (extensão F10)
 - **Owner**: Claude — etapas; Biblioteca existente continua sob manutenção do Codex.
 - **Priority**: Low
-- **Status**: in-review — Claude implementou API #66/UI #59; integração Codex concluída em 21/10 (API 575a280, UI 57fdf27), 46 testes backend/155 frontend aprovados, upgrade V61→V62 e banco novo validados. Publicação bloqueada por incidente Railway com novos builds pausados; prévia ainda no commit antigo. Produção preservada em V61; não marcar resolvido até publicar API e depois UI.
+- **Status**: in-review — Claude implementou API #66/UI #59; integração Codex concluída em 21/10 (API e82a06d, UI 57fdf27), 46 testes backend/155 frontend da entrega, ampliados para 61/173 na validação combinada com F09; upgrade V61→V62 e banco novo validados. Publicação bloqueada por incidente Railway com novos builds pausados; prévia ainda no commit antigo. Produção preservada em V61; não marcar resolvido até publicar API e depois UI.
 - **Created**: 2026-10-14
 - **Origin**: parte não entregue da proposta F10 e divisão autorizada pelo usuário.
 - **Scope**: hotel, transfer e atividades com data/anexos/observações, CRUD aplicável e vínculos corretos; reaproveitar Biblioteca/itinerário/anexos sem duplicá-los ou gerar despesa automática.

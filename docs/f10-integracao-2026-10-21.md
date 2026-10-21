@@ -41,3 +41,7 @@ V63 reservada ao Claude/F09 cadastro de indicações (uma migration, sem crédit
 ## Conferência dos heads finais
 
 CI GitHub API aprovada no head 575a2803d2adb0f8dfee7fae359ac76305495804 (run 39609989831); CI GitHub frontend aprovada no head 57fdf27cd94d885bd404beb9a6582f75f7ccf37b (run 39611080276), incluindo build padrão em instalação independente. Prévia Vercel dpl_BV8WX1VuozP7hfjPbUNK5EMXfdzT em construção na última consulta. Os PRs #66/#59 permanecem em rascunho e não foram integrados. Falta validar o head revisado na prévia Railway após a retomada dos builds, e então publicar na ordem API→UI. Servidor e navegador locais de QA encerrados.
+
+## Atualização da revisão conjunta com F09
+
+F10 API agora em e82a06ddab449a1855d0ac2d2c3473a73bf6846a: única mudança posterior é fixar o alvo do teste de upgrade em V62, evitando contar V63 como parte da entrega. CI desse head aprovada (run 39614993153). UI continua 57fdf27cd94d885bd404beb9a6582f75f7ccf37b. Validação local conjunta com F09: 61 testes API e 173 UI aprovados; ver f09-integracao-2026-10-21.md. Produção ainda não alterada; validar prévia do novo head quando Railway retomar builds.

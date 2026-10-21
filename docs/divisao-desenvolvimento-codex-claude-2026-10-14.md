@@ -1,6 +1,6 @@
 # Divisão de desenvolvimento — Codex e Claude
 
-Atualizado em 21/10/2026. F02/F03/F07 do Claude publicados. Codex integrou F07/V59 (API #65/UI #58), F01/V60 (API #63/UI #56) e simulações por cliente/V61 (API #64/UI #57), API antes da UI, migrations sequenciais e deploys confirmados. F10/TODO-050 foi entregue e integrado nos PRs API #66/UI #59 (46 testes backend/155 frontend), mas V62 ainda não publicada devido ao incidente Railway. Claude segue F09/cadastro com V63 reservada; Codex conclui a publicação F10 após normalização e segue F08, ainda sem reserva. Demais frentes mantêm seus donos. Referências: registros de publicação de agenda, checklists e simulações por cliente, e migrations-reservadas-2026-10-15.md.
+Atualizado em 21/10/2026. F02/F03/F07 do Claude publicados. Codex integrou F07/V59 (API #65/UI #58), F01/V60 (API #63/UI #56) e simulações por cliente/V61 (API #64/UI #57), API antes da UI, migrations sequenciais e deploys confirmados. F10/TODO-050 foi entregue e integrado nos PRs API #66/UI #59 (46 testes backend/155 frontend), mas V62 ainda não publicada devido ao incidente Railway. F09/cadastro V63 também entregue e integrado nos PRs API #67/UI #60, com 61 testes API/173 UI na validação local conjunta; Codex conclui a publicação F10 após normalização e segue F08, ainda sem reserva. Demais frentes mantêm seus donos. Referências: registros de publicação de agenda, checklists e simulações por cliente, e migrations-reservadas-2026-10-15.md.
 
 **Atualização de acompanhamento:** TODO-052 registra o vínculo das simulações de acúmulo ao cliente, sob Codex, como subentrega da evolução F06/TODO-043 em PRs próprios (`codex/f06-simulacoes-cliente`). Calcular pode ser avulso; salvar novo plano exige pessoa da mesma agência. Cenários legados só recebem vínculo por revisão explícita. Não muda a divisão das cinco frentes de cada agente. Integrações de contratos concluídas em TODO-046. A decisão futura de retenção/anonimização permanece explícita: pedidos com contratos ficam pendentes para revisão, sem confirmação parcial.
 
@@ -40,7 +40,7 @@ A divisão é de cinco frentes para cada agente. O esforço não é uma estimati
 | TODO-049 | Claude | F09 — Indicações | Cadastro e acompanhamento indicador/indicado, origem e estado. Créditos/resgate financeiro condicionados à definição do gatilho e regras de estorno. | `claude/f09-indicacoes` |
 | TODO-050 | Claude | Extensão F10 — Etapas de viagem | Hotel, transfer e atividades com datas, observações e anexos, reutilizando vínculos existentes. Sem duplicar trechos, anexos ou criar despesas automaticamente. | `claude/f10-etapas-viagem` |
 
-F01 e vínculo de simulações publicados. Ordem restante Codex: F08 → evolução F04/F06 → F11; F05 quando houver regra definida. Ordem restante Claude: cadastro de indicações F09/V63; F10/V62 entregue e em publicação pelo Codex; cadastro de indicações pode avançar sem automatizar créditos. Agenda e etapas não dependem de F01 para seu CRUD; conexões com tarefas aguardam contrato real. Publicação obedece às reservas de migrations.
+F01 e vínculo de simulações publicados. Ordem restante Codex: F08 → evolução F04/F06 → F11; F05 quando houver regra definida. Claude entregou F10/V62 e cadastro F09/V63; integração/publicação com Codex, nessa ordem; cadastro de indicações pode avançar sem automatizar créditos. Agenda e etapas não dependem de F01 para seu CRUD; conexões com tarefas aguardam contrato real. Publicação obedece às reservas de migrations.
 
 ## Donos dos arquivos e módulos
 
@@ -113,4 +113,4 @@ Os trechos de setembro do backlog são históricos. As antigas proibições de t
 
 Codex: F01 e TODO-052 publicados após F07. Próxima frente: F08, ainda sem migration reservada; registrar reserva antes de criar SQL.
 
-Claude: partir de origin/main atualizada, iniciar TODO-049/F09 na branch `claude/f09-indicacoes`, com V63 reservada para uma migration do cadastro, sem créditos automáticos. Atualizar com V62 antes de integrar, sem placeholders. Preservar os heads revisados do F10 durante a validação final. O prompt vigente está em `prompt-claude-agencia-hub-2026-10-14.md`.
+Claude: preservar os heads revisados de F10 e F09; não iniciar migration nova. Créditos de indicação dependem de regra de negócio e nova entrega autorizada. F10/V62 e F09/V63 aguardam publicação sequencial pelo Codex após normalização do Railway. O prompt vigente está em `prompt-claude-agencia-hub-2026-10-14.md`.

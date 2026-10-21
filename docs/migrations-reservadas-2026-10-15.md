@@ -19,8 +19,8 @@ Atualizado em 21/10/2026. Autoridade única para reserva: Codex como integrador.
 | V59 | Claude / integração Codex | F07 agenda/atas, `claude/f07-agenda-atas` | Publicada: API #65 3dca6dc, Railway a45d66e4 SUCCESS/V59; UI #58 615fda0, Vercel READY no domínio principal |
 | V60 | Codex | F01 checklists, `codex/f01-checklists` | Publicada: API #63 9f7f224, Railway 1f607de2 SUCCESS/V60; UI #56 04f903b, Vercel READY no domínio principal |
 | V61 | Codex | TODO-052 simulações por cliente, `codex/f06-simulacoes-cliente` | Publicada: API #64 a9932f8, Railway b603ff5f SUCCESS/V61; UI #57 a3b67c8, Vercel READY no domínio principal |
-| V62 | Claude / integração Codex | TODO-050 extensão F10, `claude/f10-etapas-viagem` | API #66/UI #59 em revisão e integração Codex; uma migration V62 existente, ainda não publicada |
-| V63 | Claude | TODO-049 F09 cadastro de indicações, `claude/f09-indicacoes` | Reservada para uma migration inicial do cadastro, sem créditos automáticos; publicar após V62 |
+| V62 | Claude / integração Codex | TODO-050 extensão F10, `claude/f10-etapas-viagem` | API #66 e82a06d/UI #59 57fdf27 revisados, CI aprovada; nova prévia e publicação bloqueadas pelos builds Railway pausados |
+| V63 | Claude | TODO-049 F09 cadastro de indicações, `claude/f09-indicacoes` | Implementada e revisada: API #67 58cd19c/UI #60 50be3bb; 61 testes API/173 UI na validação local combinada com V62. Ainda não publicada; atualizar com main após V62 e revalidar |
 
 F08, evolução F04/F06, F11 e F05: sem número autorizado por enquanto. Reservar aqui antes de criar migrations. Se precisar de mais de um arquivo, combinar previamente a revisão das reservas; não ocupar número alheio. Não criar migrations vazias para liberar a fila.
 
