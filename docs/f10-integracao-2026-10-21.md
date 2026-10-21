@@ -37,3 +37,7 @@ Railway publica incidente em https://status.railway.com/ com novos builds pausad
 Retomada: após normalização do Railway, construir a prévia no head revisado, confirmar logs/inicialização/rotas e somente então integrar API #66. Confirmar V61→V62 e saúde em produção, depois integrar UI #59 e conferir Vercel READY no commit de merge. Não reaplicar configuração de schemas antigos, não editar migrations publicadas e não usar repair/outOfOrder.
 
 V63 reservada ao Claude/F09 cadastro de indicações (uma migration, sem créditos automáticos). F08 ainda sem reserva. Nenhuma ação manual solicitada ao usuário neste incidente de provedor.
+
+## Conferência dos heads finais
+
+CI GitHub API aprovada no head 575a2803d2adb0f8dfee7fae359ac76305495804 (run 39609989831); CI GitHub frontend aprovada no head 57fdf27cd94d885bd404beb9a6582f75f7ccf37b (run 39611080276), incluindo build padrão em instalação independente. Prévia Vercel dpl_BV8WX1VuozP7hfjPbUNK5EMXfdzT em construção na última consulta. Os PRs #66/#59 permanecem em rascunho e não foram integrados. Falta validar o head revisado na prévia Railway após a retomada dos builds, e então publicar na ordem API→UI. Servidor e navegador locais de QA encerrados.
