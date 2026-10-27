@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { GlobalSearch } from "@/components/layout/GlobalSearch";
@@ -65,6 +65,7 @@ const OWNER_GROUPS: NavGroup[] = [
       { href: "/economia", label: "Economia do cliente", icon: "cash" },
       { href: "/viagens/tarefas", label: "Checklists e rotinas", icon: "document" },
       { href: "/viagens",     label: "Viagens",                icon: "plane"      },
+      { href: "/indicacoes?product=TRAVEL", label: "Indicações", icon: "userPlus" },
     ],
   },
   {
@@ -73,6 +74,7 @@ const OWNER_GROUPS: NavGroup[] = [
       { href: "/milhas", label: "Perfis e carteiras", icon: "wallet" },
       { href: "/milhas/simulador", label: "Simulador de acúmulo", icon: "calculator" },
       { href: "/milhas/tarefas", label: "Checklists e rotinas", icon: "document" },
+      { href: "/indicacoes?product=MILES", label: "Indicações", icon: "userPlus" },
     ],
   },
   { label: "Materiais", items: [{ href: "/biblioteca", label: "Biblioteca", icon: "document" }] },
@@ -119,6 +121,7 @@ const SELLER_GROUPS: NavGroup[] = [
       { href: "/economia", label: "Economia do cliente", icon: "cash" },
       { href: "/viagens/tarefas", label: "Checklists e rotinas", icon: "document" },
       { href: "/viagens",     label: "Viagens",                icon: "plane"      },
+      { href: "/indicacoes?product=TRAVEL", label: "Indicações", icon: "userPlus" },
     ],
   },
   {
@@ -127,6 +130,7 @@ const SELLER_GROUPS: NavGroup[] = [
       { href: "/milhas", label: "Perfis e carteiras", icon: "wallet" },
       { href: "/milhas/simulador", label: "Simulador de acúmulo", icon: "calculator" },
       { href: "/milhas/tarefas", label: "Checklists e rotinas", icon: "document" },
+      { href: "/indicacoes?product=MILES", label: "Indicações", icon: "userPlus" },
     ],
   },
   { label: "Materiais", items: [{ href: "/biblioteca", label: "Biblioteca", icon: "document" }] },
@@ -141,10 +145,12 @@ const SELLER_GROUPS: NavGroup[] = [
 function NavGroupSection({
   group,
   pathname,
+  product,
   onNavigate,
 }: {
   group: NavGroup;
   pathname: string;
+  product: string | null;
   onNavigate?: () => void;
 }) {
   return (
@@ -155,7 +161,9 @@ function NavGroupSection({
       <div className="space-y-0.5">
         {group.items.map((item) => {
           const Icon = iconMap[item.icon];
-          const active =
+          const active = item.href.startsWith("/indicacoes?")
+            ? pathname.startsWith("/indicacoes") && new URLSearchParams(item.href.split("?")[1]).get("product") === product
+            :
             pathname === item.href ||
             (item.href !== "/dashboard" &&
               item.href !== "/meu-painel" &&
@@ -168,6 +176,7 @@ function NavGroupSection({
               key={item.href}
               href={item.href}
               onClick={onNavigate}
+              aria-current={active ? "page" : undefined}
               className={`group flex items-center gap-2.5 rounded-[var(--hub-radius)] px-3 py-2 text-sm transition-all ${
                 active
                   ? "bg-white/15 text-white font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.07)]"
@@ -196,6 +205,7 @@ function SidebarContent({
   pathname: string;
   onNavigate?: () => void;
 }) {
+  const product = useSearchParams().get("product");
   return (
     <nav className="flex flex-1 flex-col overflow-y-auto px-3 py-4">
       {groups.map((group) => (
@@ -203,6 +213,7 @@ function SidebarContent({
           key={group.label}
           group={group}
           pathname={pathname}
+          product={product}
           onNavigate={onNavigate}
         />
       ))}
@@ -257,7 +268,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        <SidebarContent groups={groups} pathname={pathname} />
+        <Suspense fallback={null}><SidebarContent groups={groups} pathname={pathname} /></Suspense>
 
         {/* Footer */}
         <div className="border-t border-white/8 px-3 py-3 space-y-2">
@@ -319,7 +330,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <IconX className="h-4 w-4" />
           </button>
         </div>
-        <SidebarContent groups={groups} pathname={pathname} onNavigate={() => setMobileOpen(false)} />
+        <Suspense fallback={null}><SidebarContent groups={groups} pathname={pathname} onNavigate={() => setMobileOpen(false)} /></Suspense>
       </aside>
 
       {/* ── Main ────────────────────────────────────────────────── */}
