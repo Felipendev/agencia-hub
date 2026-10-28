@@ -159,9 +159,10 @@ export function TaskEditor({
           }}
           id="work-person"
           required
-          disabled={!!task?.runId}
+          disabled={!!task?.runId || !!task?.fromSimulation}
           showNovoButton={false}
         />
+        {task?.fromSimulation && <p className="text-sm text-[var(--hub-text-secondary)]">Esta tarefa preserva a pessoa e o produto Milhas do plano de origem. Título, prazo, responsável e observações podem ser editados neste mesmo registro.</p>}
         <div>
           <Label htmlFor="work-title">Tarefa</Label>
           <Input

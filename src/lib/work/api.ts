@@ -19,6 +19,7 @@ export type Filters = {
   state?: TaskState;
   dueBefore?: string;
   runId?: string;
+  simulationId?: string;
 };
 function query(filters: object) {
   const params = new URLSearchParams();

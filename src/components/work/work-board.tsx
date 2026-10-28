@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { PageHeader } from "@/components/layout/page-header";
@@ -53,6 +54,7 @@ const ACTIONS: Record<string, string> = {
   DONE: "Concluído",
   CANCELLED: "Cancelado",
   MOVED_FROM: "Pessoa anterior",
+  PLAN_LINKED: "Vinculada ao plano de Milhas",
 };
 function failure(error: unknown) {
   return error instanceof Error
@@ -71,6 +73,7 @@ function Snapshot({ value }: { value: unknown }) {
         <p className="whitespace-pre-wrap break-words">{data.notes}</p>
       )}
       {typeof data.dueOn === "string" && <p>Prazo: {formatDate(data.dueOn)}</p>}
+      {typeof data.sourceVersion === "number" && <p>Versão do plano: {data.sourceVersion}</p>}
       {typeof data.state === "string" && (
         <p>Situação: {STATE_LABELS[data.state as TaskState] ?? data.state}</p>
       )}
@@ -95,10 +98,16 @@ function Snapshot({ value }: { value: unknown }) {
 export function WorkBoard({ product }: { product: Product }) {
   const { token } = useAuth();
   const params = useSearchParams();
+  return <WorkBoardInner key={`${product}:${token}:${params.toString()}`} product={product} />;
+}
+function WorkBoardInner({ product }: { product: Product }) {
+  const { token } = useAuth();
+  const params = useSearchParams();
   const [tab, setTab] = useState<keyof typeof TAB_LABELS>("tasks");
   const [customerId, setCustomer] = useState(params.get("customerId") ?? "");
   const [responsibleId, setResponsible] = useState("");
-  const [state, setState] = useState<TaskState | "">("OPEN");
+  const [simulationId, setSimulationId] = useState(params.get("simulationId") ?? "");
+  const [state, setState] = useState<TaskState | "">(params.get("simulationId") ? "" : "OPEN");
   const [overdue, setOverdue] = useState(false);
   const [runId, setRunId] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]),
@@ -128,13 +137,14 @@ export function WorkBoard({ product }: { product: Product }) {
         state: state || undefined,
         dueBefore: overdue ? todayLocal() : undefined,
         runId: runId || undefined,
+        simulationId: simulationId || undefined,
       }),
       workApi.templates(token, product),
       workApi.runs(token, product, customerId || undefined),
       listCustomersRemote(token),
       workApi.members(token),
     ]);
-  }, [token, product, customerId, responsibleId, state, overdue, runId]);
+  }, [token, product, customerId, responsibleId, state, overdue, runId, simulationId]);
   useEffect(() => {
     if (!token) return;
     let active = true;
@@ -225,6 +235,7 @@ export function WorkBoard({ product }: { product: Product }) {
           </Button>
         </div>
       </PageHeader>
+      {simulationId && <p className="text-sm">Tarefas filtradas pelo plano de acúmulo. <Button size="sm" variant="secondary" onClick={() => setSimulationId("")}>Mostrar outros planos</Button></p>}
       <div className="grid gap-3 md:grid-cols-3">
         <fieldset disabled={disabled}>
           <ClientePicker
@@ -488,8 +499,9 @@ export function WorkBoard({ product }: { product: Product }) {
                     >
                       {STATE_LABELS[task.state]} · Prazo{" "}
                       {formatDate(task.dueOn)}
-                      {task.runId ? " · De uma execução" : " · Avulsa"}
+                      {task.fromSimulation ? " · De um plano de Milhas" : task.runId ? " · De uma execução" : " · Avulsa"}
                     </p>
+                    {task.fromSimulation && <p className="break-words text-sm">Origem: {task.simulationTitle}. {!task.simulationId && "Plano excluído; histórico de origem preservado. "}{(task.simulationSourceId || task.simulationId) && <Link className="underline" href={`/milhas/simulador/${task.simulationSourceId || task.simulationId}/tarefas`}>Consultar geração</Link>}</p>}
                     {task.notes && (
                       <p className="whitespace-pre-wrap break-words text-sm">
                         {task.notes}

@@ -12,6 +12,7 @@ import { WorkBoard } from "./work-board";
 import type { Task, Template, Run } from "@/lib/work/types";
 
 const mocks = vi.hoisted(() => ({
+  query: "",
   tasks: vi.fn(),
   templates: vi.fn(),
   runs: vi.fn(),
@@ -33,7 +34,7 @@ vi.mock("@/contexts/auth-context", () => ({
   useAuth: () => ({ token: "test-token" }),
 }));
 vi.mock("next/navigation", () => ({
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => new URLSearchParams(mocks.query),
 }));
 vi.mock("@/lib/api/list-customers-remote", () => ({
   listCustomersRemote: mocks.customers,
@@ -119,6 +120,7 @@ const run: Run = {
   cancelReason: "",
 };
 beforeEach(() => {
+  mocks.query = "";
   vi.clearAllMocks();
   mocks.tasks.mockResolvedValue([task]);
   mocks.templates.mockResolvedValue([model]);
@@ -151,6 +153,26 @@ async function ready(product: "MILES" | "TRAVEL" = "MILES") {
   await screen.findByText("Verificar saldo");
 }
 describe("F01 — operações persistidas da interface", () => {
+  it("filtra o conjunto gerado e permite editar o mesmo ID preservando a pessoa", async () => {
+    mocks.query = "simulationId=plan-1&customerId=person-1";
+    mocks.tasks.mockResolvedValue([{ ...task, fromSimulation: true, simulationId: "plan-1", simulationTitle: "Meta Lisboa" }]);
+    await ready();
+    expect(mocks.tasks).toHaveBeenLastCalledWith("test-token", expect.objectContaining({ product: "MILES", simulationId: "plan-1", state: undefined }));
+    expect(screen.getByRole("link", { name: "Consultar geração" }).getAttribute("href")).toBe("/milhas/simulador/plan-1/tarefas");
+    fireEvent.click(screen.getByRole("button", { name: "Editar" }));
+    expect((screen.getByLabelText("Cliente") as HTMLSelectElement).disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText("Tarefa"), { target: { value: "Meta atualizada" } });
+    fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
+    await waitFor(() => expect(mocks.saveTask).toHaveBeenCalledWith("test-token", expect.objectContaining({ customerId: "person-1", title: "Meta atualizada", expectedVersion: 4 }), "task-1", expect.any(String)));
+  });
+  it("limpa filtro de plano e mantém a origem quando o plano já foi excluído", async () => {
+    mocks.query = "simulationId=plan-1";
+    mocks.tasks.mockResolvedValue([{ ...task, fromSimulation: true, simulationId: null, simulationSourceId: "plan-1", simulationTitle: "Meta histórica" }]);
+    await ready(); expect(screen.getByText(/Plano excluído; histórico de origem preservado/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Consultar geração" }).getAttribute("href")).toBe("/milhas/simulador/plan-1/tarefas");
+    fireEvent.click(screen.getByRole("button", { name: "Mostrar outros planos" }));
+    await waitFor(() => expect(mocks.tasks).toHaveBeenLastCalledWith("test-token", expect.objectContaining({ simulationId: undefined })));
+  });
   it("edita o mesmo ID com versão e confirma somente após a API", async () => {
     await ready();
     fireEvent.click(
