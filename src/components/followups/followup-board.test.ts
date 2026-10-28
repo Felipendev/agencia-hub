@@ -50,7 +50,7 @@ describe("F08 acompanhamento comercial", () => {
   });
   it("pede confirmação para excluir e não retira a ação quando a API recusa", async () => {
     mount(); await screen.findByText("Retornar com proposta");
-    fireEvent.click(screen.getByRole("button", { name: "Excluir", exact: true })); expect(mocks.remove).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Excluir" })); expect(mocks.remove).not.toHaveBeenCalled();
     mocks.remove.mockRejectedValueOnce(new Error("Versão antiga"));
     fireEvent.click(screen.getByRole("button", { name: "Confirmar exclusão" }));
     await screen.findByRole("alert"); expect(screen.queryByText("Ação excluída. O histórico foi preservado.")).toBeNull();
@@ -74,13 +74,13 @@ describe("F08 acompanhamento comercial", () => {
     mount(); await screen.findByText("Retornar com proposta"); mocks.list.mockResolvedValue(board([{ ...row, deleted: true }]));
     fireEvent.change(screen.getByLabelText("Situação"), { target: { value: "DELETED" } });
     await screen.findByText("Excluída"); expect(mocks.list).toHaveBeenLastCalledWith("f08-token", expect.objectContaining({ deleted: true, state: undefined }));
-    expect(screen.queryByRole("button", { name: "Reabrir com motivo" })).toBeNull(); expect(screen.queryByRole("button", { name: "Excluir", exact: true })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Reabrir com motivo" })).toBeNull(); expect(screen.queryByRole("button", { name: "Excluir" })).toBeNull();
     mocks.history.mockResolvedValue([{ id: "e1", action: "DELETED", snapshot: { before: row, after: { ...row, deleted: true } }, authorId: "u1", authorName: "Equipe", createdAt: "2026-10-27T10:00:00Z" }]);
     fireEvent.click(screen.getByRole("button", { name: "Histórico" })); await screen.findByText("Excluída · Equipe");
     expect(screen.getByText(/Antes: Retornar com proposta/)).toBeTruthy();
   });
   it("conclui e cancela usando versão e motivo da ação selecionada", async () => {
-    mount(); await screen.findByText("Retornar com proposta"); fireEvent.click(screen.getByRole("button", { name: "Cancelar ação", exact: true }));
+    mount(); await screen.findByText("Retornar com proposta"); fireEvent.click(screen.getByRole("button", { name: "Cancelar ação" }));
     fireEvent.change(screen.getByLabelText("Motivo"), { target: { value: "Cliente pediu pausa" } }); fireEvent.click(screen.getByRole("button", { name: "Salvar ação" }));
     await screen.findByText("Ação salva."); expect(mocks.state).toHaveBeenCalledWith("f08-token", row, "CANCELLED", "Cliente pediu pausa");
   });
