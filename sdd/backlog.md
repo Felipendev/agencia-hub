@@ -2,7 +2,7 @@
 
 ## Atualização vigente — 28/10/2026
 
-Divisão atual: **cinco frentes atribuídas ao Claude com código entregue; F02/F03/F07/F10 e cadastro F09 publicados**. Codex concluiu em 27/10 a integração e publicação sequencial F10/V62 (API #66/UI #59) e F09/V63 (API #67/UI #60), API antes da UI. Base anterior em V63; interface READY no domínio principal. 61 testes API/173 UI repetidos no head integrado, CI e prévias aprovadas. Créditos/recompensas F09 continuam dependendo de regras de negócio, sem automação financeira. F08/TODO-042 publicado em 28/10: API #68/V64 e UI #61 READY no domínio principal, API antes da UI. 70 testes API/185 UI aprovados. Próxima frente Codex: TODO-043, evolução F04/F06, ainda sem migration reservada. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
+Divisão atual: **cinco frentes atribuídas ao Claude com código entregue; F02/F03/F07/F10 e cadastro F09 publicados**. Codex concluiu em 27/10 a integração e publicação sequencial F10/V62 (API #66/UI #59) e F09/V63 (API #67/UI #60), API antes da UI. Base anterior em V63; interface READY no domínio principal. 61 testes API/173 UI repetidos no head integrado, CI e prévias aprovadas. Créditos/recompensas F09 continuam dependendo de regras de negócio, sem automação financeira. F08/TODO-042 publicado em 28/10: API #68/V64 e UI #61 READY no domínio principal, API antes da UI. 70 testes API/185 UI aprovados. TODO-043 em andamento: TODO-053 plano → tarefas publicada na V65; diagnóstico público/cartões seguem em entregas separadas, sem outra migration reservada. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
 
 Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). F02 foi revisado, integrado pelo Codex e publicado em 15/10 pelos PRs API #61/UI #54; 32 testes da API e 105 da interface aprovados. O vínculo de simulações ao cliente é a subentrega Codex TODO-052 da evolução F06, sem redistribuir as cinco frentes.
 
@@ -83,7 +83,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-043: Diagnóstico e integrações da carteira e do simulador (evolução F04/F06)
 - **Owner**: Codex
 - **Priority**: High
-- **Status**: in_progress — TODO-053 inicia plano → tarefas; diagnóstico público e reaproveitamento de cartões seguem pendentes, em entregas separadas.
+- **Status**: in_progress — TODO-053 plano → tarefas publicada em 28/10; seguir diagnóstico público e reaproveitamento de cartões em entregas separadas.
 - **Created**: 2026-10-14
 - **Origin**: lacunas explícitas após a entrega manual TODO-040.
 - **Scope**: diagnóstico público de milhas com revisão autenticada antes de incorporar; plano → tarefas sem repetição; reaproveitamento opcional de cartões no simulador. Visitante não sobrescreve carteira por igualdade de telefone/e-mail.
@@ -93,7 +93,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-053: Gerar tarefas de Milhas a partir de plano salvo
 - **Owner**: Codex
 - **Priority**: High
-- **Status**: in_progress — V65 reservada em 28/10/2026 antes do SQL, base publicada V64.
+- **Status**: resolved — publicada em 28/10/2026: API #69/V65 e UI #62, 38 testes API/200 UI aprovados, deploys e domínio confirmados. Registro em docs/publicacao-plano-tarefas-2026-10-28.md.
 - **Scope**: revisão de até 20 tarefas com data, responsável e observações; geração explícita e atômica uma vez por plano, sem repetição após edição ou exclusão de tarefas. Guarda versão/pessoa/premissas usadas. CRUD e estados das tarefas reutilizam F01; origem não muda de pessoa/produto. Alterar o plano não altera tarefas existentes. Excluir plano preserva tarefas e comprovante de geração; comprovante é histórico imutável, não cadastro editável. Sem alterar carteira/saldos ou criar viagens/financeiro.
 - **Aceite**: CRUD persistido, versões/conflitos, isolamento e permissões, reenvio/concorrência, origem congelada, planos legados sem pessoa bloqueados, banco novo/upgrade V64→V65, privacidade e descarte da agência; API antes da UI e deploys confirmados.
 - **Branch**: `codex/f04-diagnostico-integracoes`, PRs isolados de diagnóstico público/cartões; não conclui TODO-043 inteira.

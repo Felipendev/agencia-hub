@@ -1,0 +1,25 @@
+{
+  "feature": "TODO-053",
+  "tasks": [
+    {
+      "id": "P1",
+      "title": "V65, geração atômica e proveniência F01",
+      "status": "completed"
+    },
+    {
+      "id": "P2",
+      "title": "Testes HTTP/upgrade/privacidade/descarte",
+      "status": "completed"
+    },
+    {
+      "id": "P3",
+      "title": "Revisão de geração e navegação ao CRUD de tarefas",
+      "status": "completed"
+    },
+    {
+      "id": "P4",
+      "title": "Gates, revisão, prévia e produção API antes da UI",
+      "status": "completed"
+    }
+  ]
+}
