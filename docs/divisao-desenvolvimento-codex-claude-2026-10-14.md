@@ -1,6 +1,6 @@
 # Divisão de desenvolvimento — Codex e Claude
 
-**Estado vigente em 28/10/2026:** F02/F03/F07/F10 e cadastro F09 publicados; F08/TODO-042 publicado (API68/UI61). TODO-043 tem plano → tarefas publicado (API69/V65, UI62) e cartões publicado (UI63). Diagnóstico público/autores TODO-055 implementado e validado em API70/UI64:35 testes API/234 UI, CI verde e prévias aprovadas. API70 integrada no merge3a30baf; produção ainda V65/6ad7fb73 porque dois builds Railway falharam antes do Maven. Diagnóstico da plataforma confirmou Infrastructure Error no deploy89fae589; UI64 ed19970 permanece draft até V66/startup confirmados. Site/API ativa HTTP200; nenhuma variável/schema/pool alterado. V56–V66 imutáveis; nenhuma reserva V67. Não há código pendente do Claude nas cinco frentes atribuídas. F11 é a próxima frente; F05 e créditos F09 dependem de regras. Retomada exata em docs/publicacao-diagnostico-milhas-2026-10-28.md.
+**Estado vigente em 28/10/2026:** F02/F03/F07/F10 e cadastro F09 publicados; F08/TODO-042 publicado. TODO-043 concluída: simulações por cliente TODO-052, plano → tarefas TODO-053, cartões TODO-054 e diagnóstico público/autores TODO-055 publicados. Última entrega: API70 merge3a30bafbc2d62bc1d050c6409a7800986ecc7e8e/V66, Railwayf5cb7fad-5e8c-4fde-bb39-2e8494ae485d Active; UI64 mergebe685c874290390d636d6151e4959846407e331b, Verceldpl_9drBurR6nXYTCCjhNWbt4JyAx2TW READY em www.agenciashub.com.br.35 testes API/234 UI, CI/prévias aprovadas; V65→V66/startup e smoke de produção confirmados. Incidente Railway Z1JDWW1W resolvido; repetição após recuperação publicou o mesmo código, sem alteração de configuração. V56–V66 imutáveis; nenhuma reserva V67. Não há código pendente do Claude nas cinco frentes atribuídas. Próxima frente Codex: F11/TODO-044. F05 e créditos F09 dependem de regras. Ver docs/publicacao-diagnostico-milhas-2026-10-28.md.
 
 Os estados de 21/10 e 27/10 e as instruções de retomada abaixo são históricos; esta atualização prevalece.
 
@@ -118,5 +118,3 @@ Os trechos de setembro do backlog são históricos. As antigas proibições de t
 Codex: F01 e TODO-052 publicados após F07. Próxima frente: F08, ainda sem migration reservada; registrar reserva antes de criar SQL.
 
 Claude: preservar os heads revisados de F10 e F09; não iniciar migration nova. Créditos de indicação dependem de regra de negócio e nova entrega autorizada. F10/V62 e F09/V63 aguardam publicação sequencial pelo Codex após normalização do Railway. O prompt vigente está em `prompt-claude-agencia-hub-2026-10-14.md`.
-
-

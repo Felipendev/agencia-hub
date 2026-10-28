@@ -2,7 +2,7 @@
 
 ## Atualização vigente — 28/10/2026
 
-Divisão atual: **cinco frentes atribuídas ao Claude com código entregue; F02/F03/F07/F10 e cadastro F09 publicados**. Codex concluiu em 27/10 a integração e publicação sequencial F10/V62 (API #66/UI #59) e F09/V63 (API #67/UI #60), API antes da UI. Base anterior em V63; interface READY no domínio principal. 61 testes API/173 UI repetidos no head integrado, CI e prévias aprovadas. Créditos/recompensas F09 continuam dependendo de regras de negócio, sem automação financeira. F08/TODO-042 publicado em 28/10: API #68/V64 e UI #61 READY no domínio principal, API antes da UI. 70 testes API/185 UI aprovados. TODO-043 em andamento: TODO-053 plano → tarefas publicada na V65; TODO-054 cartões publicada na UI #63, Vercel DzZnLAqn READY no domínio principal. Diagnóstico público e autores implementados em API70/UI64 (TODO-055/V66), CI verde, prévia V66/startup/HTTP aprovada após atraso Railway; API70 integrada; produção bloqueada em dois builds Railway antes do Maven (Infrastructure Error confirmado). Versão ativaV65 preservada; UI64 draft aguardando V66/startup. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
+Divisão atual: **cinco frentes atribuídas ao Claude com código entregue; F02/F03/F07/F10 e cadastro F09 publicados**. Codex concluiu em 27/10 a integração e publicação sequencial F10/V62 (API #66/UI #59) e F09/V63 (API #67/UI #60), API antes da UI. Base anterior em V63; interface READY no domínio principal. 61 testes API/173 UI repetidos no head integrado, CI e prévias aprovadas. Créditos/recompensas F09 continuam dependendo de regras de negócio, sem automação financeira. F08/TODO-042 publicado em 28/10: API #68/V64 e UI #61 READY no domínio principal, API antes da UI. 70 testes API/185 UI aprovados. TODO-043 concluída em28/10: simulações por cliente, plano → tarefas, cartões e diagnóstico público/revisão/autores publicados (TODO-052/053/054/055). API atual3a30baf/V66 Railwayf5cb7fad Active; UIbe685c8 Vercel9drBurR6 READY no domínio principal.35 testes API/234 UI na última entrega, startup e smoke confirmados. Próxima frenteF11/TODO-044; F05/créditosF09 dependem de regras. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
 
 Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). F02 foi revisado, integrado pelo Codex e publicado em 15/10 pelos PRs API #61/UI #54; 32 testes da API e 105 da interface aprovados. O vínculo de simulações ao cliente é a subentrega Codex TODO-052 da evolução F06, sem redistribuir as cinco frentes.
 
@@ -55,7 +55,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 - **Origin**: próxima tarefa autorizada pelo usuário após TODO-038.
 - **Escopo**: perfil de objetivos/frequência/destinos/plano, contas por programa e titular, cartões, clubes, vencimentos, movimentações e histórico compartilhado por agência. CRUD por identificador para metadados; arquivamento/reativação para perfil e contas; estorno para movimentos confirmados. Nenhum saldo futuro, vencimento ou plano gera débito/crédito automático.
 - **Aceite**: persistir após recarregar; editar o mesmo registro; manter auditoria; impedir duplicação por confirmação repetida e saldo negativo concorrente; validar inteiros/datas; impedir consulta/alteração entre agências/pessoas; não exibir sucesso quando a API recusa a operação.
-- **Dependências futuras, não concluídas nesta tarefa**: geração de tarefas F01 a partir do plano; formulário público específico de diagnóstico sem sobrescrita insegura da carteira.
+- **Evoluções posteriores entregues**: plano → tarefas TODO-053 e diagnóstico público com revisão TODO-055 publicados em28/10; detalhes na TODO-043. A entrega original da carteira não incluía essas operações.
 - **Referência**: `docs/perfil-carteira-milhas-2026-10-14.md`.
 
 ### TODO-041: Checklists, tarefas e rotinas por pessoa (F01)
@@ -83,7 +83,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-043: Diagnóstico e integrações da carteira e do simulador (evolução F04/F06)
 - **Owner**: Codex
 - **Priority**: High
-- **Status**: in_progress — TODO-053 plano → tarefas publicada em 28/10; TODO-054 cartões publicada na UI #63. Diagnóstico público e autores implementados em API70/UI64; prévia V66 aprovada e API70 integrada. Publicação bloqueada em dois builds Railway antes do Maven (Infrastructure Error); ativaV65 preservada, UI64 draft. Ver relatório TODO-055.
+- **Status**: resolved — TODO-052/053/054/055 publicadas. Diagnóstico público com revisão e autores estáveis publicados em28/10: API70/V66 e UI64;35 testes API/234 UI, CI, startup e domínio confirmados. Ver docs/publicacao-diagnostico-milhas-2026-10-28.md.
 - **Created**: 2026-10-14
 - **Origin**: lacunas explícitas após a entrega manual TODO-040.
 - **Scope**: diagnóstico público de milhas com revisão autenticada antes de incorporar; plano → tarefas sem repetição; reaproveitamento opcional de cartões no simulador. Visitante não sobrescreve carteira por igualdade de telefone/e-mail.
@@ -109,7 +109,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 - **Branch**: `codex/f06-cartoes-simulador`, UI somente; PR #63.
 ### TODO-055: Diagnóstico público de Milhas com revisão
 - **Owner**: Codex — subentrega TODO-043.
-- **Status**: in_progress — API70/UI64 implementadas,35 testes API/234 UI e CI aprovados. Prévias aprovadas, API70 integrada3a30baf. Produção bloqueada no build Railway: primeira falha gRPC e repetição89fae589 também FAILED antes de startup. API ativa preservada emV65; UI64 ed19970 permanece draft até V66/startup confirmados. Registro em docs/publicacao-diagnostico-milhas-2026-10-28.md.
+- **Status**: resolved — publicada em28/10: API70 merge3a30baf/V66, Railwayf5cb7fad Active; UI64 mergebe685c8, Vercel9drBurR6 READY no domínio principal.35 testes API/234 UI aprovados; migration/startup/HTTP confirmados após recuperação Railway, sem alterar configuração.
 - **Priority**: High
 - **Created**: 2026-10-28
 - **Scope**: link público gerenciado pela agência; declarações de perfil, contas, cartões e clubes em fila própria. CRUD interno com edição pelo mesmo ID, versões, arquivamento/reativação por motivo. Incorporar somente após revisão autenticada, seleção explícita da pessoa/registros e confirmação da versão da carteira. Sem associação por e-mail/telefone e sem efeito em Viagens/financeiro. Incorporado fica histórico imutável; correções posteriores pelo CRUD da carteira. Novos autores da carteira usam ID estável da sessão; não reconstruir autores antigos.
@@ -145,7 +145,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 - **Entrega recebida em 14/10**: [API #61](https://github.com/Felipendev/agencia-hub-api/pull/61), head `4464c8f99d6a1aa5385bf50ecb2ef52c521fc6e0`; [UI #54](https://github.com/Felipendev/agencia-hub/pull/54), head `42f5473c1807397cb79e80c0831c36db346cf8cd`. Este era o estado inicial de recebimento em 14/10. Em 15/10 foram incorporados os commits posteriores do Claude e as integrações do Codex; ambos os PRs estão merged.
 - **Aceite concluído pelo Codex em 15/10**: 32 testes de API e 105 frontend aprovados, incluindo CRUD, TRAVEL/MILES, isolamento, concorrência, snapshots, PDF antigo e ausência de efeito financeiro. Integradas proteção de rotas, menus e atalhos; conflito específico ao excluir pessoa com contratos, bloqueio explícito da anonimização parcial e ordem de descarte dos contratos na exclusão da agência. V56/V57 conferidas; build/tipos/lint e revisão visual desktop/celular aprovados.
 - **Decisão de domínio em aberto**: retenção/anonimização dos dados pessoais preservados nos contratos emitidos; avaliar o comportamento existente e explicitar a decisão para automatizar o ciclo completo de anonimização. Nesta entrega, a API mantém a solicitação pendente com mensagem específica quando existem contratos; não declara anonimização parcial concluída.
-- **Achado do módulo Milhas**: uso de `principal.getName()` confirmado por leitura; correção da identidade do autor segue separada em TODO-043, com teste de reprodução e sem inventar autores antigos.
+- **Achado do módulo Milhas resolvido na TODO-055**: novas escritas da carteira usam ID estável da sessão, com teste de regressão. Autores antigos não foram reconstruídos nem reescritos.
 
 - **Publicação**: API merge `41a50d9ac3ca236c76e10163fed9ddb2bfec6ed3`, Railway SUCCESS; UI merge `b528cbbf5f002573adfdc43b102db6ea40fad75f`, Vercel READY no domínio principal. V56/V57 aplicadas; novas rotas exigem login. [Registro e limites da verificação](../docs/publicacao-contratos-2026-10-15.md).
 

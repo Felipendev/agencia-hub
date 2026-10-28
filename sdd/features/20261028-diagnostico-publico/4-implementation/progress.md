@@ -1,3 +1,7 @@
+Estado vigente: CONCLUÍDA/PUBLICADA em28/10.35 testes API/234 UI; revisão independente/CI/prévias aprovadas. API3a30baf V66 aplicada às23:15:19UTC, startup23:15:23.529UTC, Railwayf5cb7fad Active. UIbe685c8 Vercel9drBurR6 READY no domínio principal. Smoke público/protegido aprovado sem negócios reais. D1–D4 completas; TODO-043/055 resolvidas.
+
+Histórico da implementação e do incidente (estados antigos abaixo não são vigentes):
+
 Implementação da API em andamento após reserva V66; sem alteração de configuração de produção.
 
 CRUD público/interno e revisão implementados; 233 testes UI aprovados, 17 focados com98,7%linhas/91,95%branches nos quatro componentes novos. Tipos/lint/build aprovados, inspeção desktop/celular com dados fictícios. API11testes de diagnóstico+upgrade aprovados; suíte ampliada em finalização. Revisão estática identificou guardLGPD antes do lock: corrigido com rechecagem após FOR UPDATE e teste concorrente real aprovado; revisão final sem bloqueadores. Descarte da agência inclui carteiras/movimentos e diagnósticos. Primeira compilação usou getFirst incompatível com release17 do projeto: ajustado para get(0). Teste inicial também corrigiu normalização UTC do comprovante; respostas repetidas agora idênticas. Nada publicado ainda.
