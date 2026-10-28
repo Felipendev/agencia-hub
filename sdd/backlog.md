@@ -1,8 +1,8 @@
 # Technical Backlog
 
-## Atualização vigente — 27/10/2026
+## Atualização vigente — 28/10/2026
 
-Divisão atual: **cinco frentes atribuídas ao Claude com código entregue; F02/F03/F07/F10 e cadastro F09 publicados**. Codex concluiu em 27/10 a integração e publicação sequencial F10/V62 (API #66/UI #59) e F09/V63 (API #67/UI #60), API antes da UI. Produção atual em V63; interface READY no domínio principal. 61 testes API/173 UI repetidos no head integrado, CI e prévias aprovadas. Créditos/recompensas F09 continuam dependendo de regras de negócio, sem automação financeira. F08 é a próxima frente do Codex, ainda sem migration reservada. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
+Divisão atual: **cinco frentes atribuídas ao Claude com código entregue; F02/F03/F07/F10 e cadastro F09 publicados**. Codex concluiu em 27/10 a integração e publicação sequencial F10/V62 (API #66/UI #59) e F09/V63 (API #67/UI #60), API antes da UI. Produção atual em V63; interface READY no domínio principal. 61 testes API/173 UI repetidos no head integrado, CI e prévias aprovadas. Créditos/recompensas F09 continuam dependendo de regras de negócio, sem automação financeira. F08/TODO-042 implementado: API #68 publicada em 28/10 com V64 (70 testes); UI #61 em validação final (185 testes), mantendo API antes da UI. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
 
 Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). F02 foi revisado, integrado pelo Codex e publicado em 15/10 pelos PRs API #61/UI #54; 32 testes da API e 105 da interface aprovados. O vínculo de simulações ao cliente é a subentrega Codex TODO-052 da evolução F06, sem redistribuir as cinco frentes.
 
@@ -73,7 +73,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-042: Próxima ação e follow-up comercial (F08)
 - **Owner**: Codex
 - **Priority**: High
-- **Status**: pending
+- **Status**: in_progress — API publicada/V64; UI #61 em validação final.
 - **Created**: 2026-10-14
 - **Origin**: divisão paralela autorizada pelo usuário.
 - **Scope**: ação, data e responsável por pessoa/prospecto; filtros de atrasados/hoje/próximos e resumo; concluir/reprogramar mantém histórico, sem reconstruir o funil existente.
@@ -782,3 +782,4 @@ Nenhuma ideia registrada nesta auditoria.
 ## ✅ Resolved Items
 
 Nenhum item resolvido.
+

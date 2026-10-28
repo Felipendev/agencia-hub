@@ -1,6 +1,6 @@
 # Registro de migrations — Codex e Claude
 
-Atualizado em 27/10/2026. Autoridade única para reserva: Codex como integrador. Ler antes de escrever SQL; nunca escolher a próxima versão apenas olhando a própria branch. Este registro substitui a instrução anterior de números provisórios.
+Atualizado em 28/10/2026. Autoridade única para reserva: Codex como integrador. Ler antes de escrever SQL; nunca escolher a próxima versão apenas olhando a própria branch. Este registro substitui a instrução anterior de números provisórios.
 
 ## Base confirmada
 
@@ -24,14 +24,14 @@ Atualizado em 27/10/2026. Autoridade única para reserva: Codex como integrador.
 | V62 | Claude / integração Codex | TODO-050 extensão F10, `claude/f10-etapas-viagem` | Publicada em 27/10: API #66 882b3f3, Railway 492b242c SUCCESS/V62; UI #59 8f6ade9, Vercel 3La2peo READY no domínio principal. Evidência em publicacao-etapas-2026-10-27.md |
 | V63 | Claude / integração Codex | TODO-049 F09 cadastro de indicações, `claude/f09-indicacoes` | Publicada em 27/10 após V62: API #67 7ef4ce8, Railway f3abd48b ativo/V63; UI #60 0820264, Vercel GN4Z6tZ READY. 61 testes API/173 UI repetidos no head integrado. Créditos seguem fora do escopo |
 
-| V64 | Codex | TODO-042 F08 follow-up comercial, `codex/f08-follow-up` | Reservada em 27/10 após V63 publicada; uma migration, registros e auditoria próprios; banco novo e upgrade V63→V64 obrigatórios |
+| V64 | Codex | TODO-042 F08 follow-up comercial, `codex/f08-follow-up` | API publicada em 28/10: PR #68 merge 33f8238, Railway bd121bb3 ativo/V64. 70 testes API aprovados, banco novo e upgrade V63→V64. UI #61 em validação final, 185 testes aprovados. Não reutilizar V64 |
 
 Evolução F04/F06, F11 e F05: sem número autorizado por enquanto. F08 tem somente V64 reservada. Se precisar de mais de um arquivo, combinar previamente a revisão das reservas; não ocupar número alheio. Não criar migrations vazias para liberar a fila.
 
 ## Fluxo de integração
 
 1. Cada agente usa banco de teste próprio e branch/PR isolados. Não apontar testes para produção.
-2. Desenvolver em paralelo, publicar em sequência V58 → V59 → V60 → V61 → V62 → V63. Versão maior aguarda as anteriores; sem `outOfOrder` ou ignore de validação.
+2. Desenvolver em paralelo, publicar em sequência V58 → V59 → V60 → V61 → V62 → V63 → V64. Versão maior aguarda as anteriores; sem `outOfOrder` ou ignore de validação.
 3. Antes de integrar, buscar main e comparar nomes/conteúdo das migrations publicadas. Não editar/renomear migrations executadas nem usar repair para mascarar divergências.
 4. Validar tanto banco novo quanto atualização da base anterior com dados representativos e preservação dos registros. CI de compilação não substitui esse teste.
 5. Validar inicialização da aplicação com as configurações reais de schema/pool na prévia; publicar API, confirmar migração e saúde, depois UI. Não mudar configuração de produção para resolver problema da prévia.
@@ -44,3 +44,4 @@ A CI da API executa `scripts/check-migrations.sh` nos PRs, comparando a árvore 
 A orientação anterior adicionou `SPRING_DATASOURCE_HIKARI_CONNECTION_INIT_SQL`. O deploy passou a falhar no binding dessa propriedade porque o pool já estava iniciado. Correção: remover essa variável e selecionar o schema pela URL JDBC, conservando Flyway/Hibernate alinhados ao schema isolado. Não aplicar essas variáveis à produção.
 
 O ajuste exige remover uma variável; o conector disponível não expõe exclusão de variável. A aplicação deve ser feita no painel Railway, no ambiente e serviço exatos indicados no runbook da prévia, após o teste de inicialização. Não apagar Postgres, volume ou dados. Não alterar V56/V57 publicadas.
+
