@@ -79,6 +79,7 @@ export default function MilesDirectoryPage() {
         title="Milhas"
         description="Um espaço próprio para acompanhar pontos, cartões, clubes e metas de viagem."
       >
+        <Link href="/milhas/diagnosticos" className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] px-4 py-2 text-sm font-medium hover:bg-[var(--hub-bg-subtle)]">Diagnósticos de Milhas</Link>
         <Link
           href="/milhas/simulador"
           className="rounded-[var(--hub-radius)] border border-[var(--hub-border)] px-4 py-2 text-sm font-medium hover:bg-[var(--hub-bg-subtle)]"
