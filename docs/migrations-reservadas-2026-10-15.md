@@ -27,7 +27,9 @@ Atualizado em 28/10/2026. Autoridade única para reserva: Codex como integrador.
 | V63 | Claude / integração Codex | TODO-049 F09 cadastro de indicações, `claude/f09-indicacoes` | Publicada em 27/10 após V62: API #67 7ef4ce8, Railway f3abd48b ativo/V63; UI #60 0820264, Vercel GN4Z6tZ READY. 61 testes API/173 UI repetidos no head integrado. Créditos seguem fora do escopo |
 | V64 | Codex | TODO-042 F08 follow-up comercial, `codex/f08-follow-up` | API publicada em 28/10: PR #68 merge 33f8238, Railway bd121bb3 ativo/V64. 70 testes API aprovados, banco novo e upgrade V63→V64. UI #61 merge aff2b2b publicada, Vercel 5vGkBfek READY no domínio principal. 185 testes UI aprovados. Imutável; ver publicacao-follow-up-2026-10-28.md |
 
-Evolução F04/F06, F11 e F05: sem número autorizado por enquanto. F08/V64 está publicada e imutável. Se precisar de mais de um arquivo, combinar previamente a revisão das reservas; não ocupar número alheio. Não criar migrations vazias para liberar a fila.
+| V65 | Codex | TODO-053, subentrega TODO-043: plano → tarefas de Milhas, `codex/f04-diagnostico-integracoes` | Reservada em 28/10 antes do SQL, após V64 publicada. Uma migration para comprovante de geração e vínculos às tarefas F01; sem diagnóstico público nesta versão. Banco novo e upgrade V64→V65 obrigatórios. |
+
+Diagnóstico público/reaproveitamento de cartões F04/F06, F11 e F05: sem número autorizado por enquanto. F08/V64 está publicada e imutável. Não ocupar número alheio nem criar migrations vazias para liberar a fila.
 
 ## Fluxo de integração
 

@@ -83,12 +83,20 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-043: Diagnóstico e integrações da carteira e do simulador (evolução F04/F06)
 - **Owner**: Codex
 - **Priority**: High
-- **Status**: pending — próxima frente Codex; contrato F01 e vínculo de simulações publicados. Reservar migration e separar diagnóstico público de integração plano → tarefas antes de implementar.
+- **Status**: in_progress — TODO-053 inicia plano → tarefas; diagnóstico público e reaproveitamento de cartões seguem pendentes, em entregas separadas.
 - **Created**: 2026-10-14
 - **Origin**: lacunas explícitas após a entrega manual TODO-040.
 - **Scope**: diagnóstico público de milhas com revisão autenticada antes de incorporar; plano → tarefas sem repetição; reaproveitamento opcional de cartões no simulador. Visitante não sobrescreve carteira por igualdade de telefone/e-mail.
 - **Subentrega independente**: TODO-052 vincula simulações ao cliente; não depende de F01 e não será incluída no mesmo PR de diagnóstico/tarefas.
 - **Branch**: `codex/f04-diagnostico-integracoes`, em frontend e API; separar subentregas quando necessário.
+
+### TODO-053: Gerar tarefas de Milhas a partir de plano salvo
+- **Owner**: Codex
+- **Priority**: High
+- **Status**: in_progress — V65 reservada em 28/10/2026 antes do SQL, base publicada V64.
+- **Scope**: revisão de até 20 tarefas com data, responsável e observações; geração explícita e atômica uma vez por plano, sem repetição após edição ou exclusão de tarefas. Guarda versão/pessoa/premissas usadas. CRUD e estados das tarefas reutilizam F01; origem não muda de pessoa/produto. Alterar o plano não altera tarefas existentes. Excluir plano preserva tarefas e comprovante de geração; comprovante é histórico imutável, não cadastro editável. Sem alterar carteira/saldos ou criar viagens/financeiro.
+- **Aceite**: CRUD persistido, versões/conflitos, isolamento e permissões, reenvio/concorrência, origem congelada, planos legados sem pessoa bloqueados, banco novo/upgrade V64→V65, privacidade e descarte da agência; API antes da UI e deploys confirmados.
+- **Branch**: `codex/f04-diagnostico-integracoes`, PRs isolados de diagnóstico público/cartões; não conclui TODO-043 inteira.
 
 ### TODO-044: Histórico e exportação consolidada (F11)
 - **Owner**: Codex — consolidação; cada agente mantém a auditoria de seus próprios módulos.
