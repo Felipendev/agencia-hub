@@ -31,6 +31,10 @@ export type Task = {
   stateAt: string | null;
   stateReason: string;
   deleted: boolean;
+  fromSimulation?: boolean;
+  simulationId?: string | null;
+  simulationTitle?: string | null;
+  simulationSourceId?: string | null;
 };
 export type TaskInput = Pick<
   Task,

@@ -1,0 +1,6 @@
+# Progresso
+28/10: main/V64 conferida, branches isoladas nos worktrees limpos reutilizados, V65 reservada e publicada antes do SQL. Escopo TODO-053 separado de diagnóstico público/cartões, sem marcar TODO-043 inteira como concluída. Implementação em andamento.
+
+Geração transacional e CRUD F01 integrados. Primeira validação: 55 testes API e 196 UI aprovados. A revisão independente identificou comprovante não consultável após excluir o plano; corrigido com consulta por source_id e diretório de gerações. Repetição no código corrigido: 38 testes API aprovados (incluindo 9 novos, upgrade V64→V65 preservando CRM/plano/tarefa anteriores, F01, simulações, privacidade e descarte). O reforço da fixture de upgrade detectou um UUID digitado incorretamente na asserção; corrigido e upgrade repetido com sucesso. Sem mudança de migration publicada ou configuração de produção.
+
+23 testes focados UI aprovados após correção, cobertura dos três arquivos novos: 100% linhas/instruções/funções e 95,32% branches. Build webpack aprovado; tipos sem erros. Repetição da suíte inteira/lint final em andamento. Inspeção desktop 1440×1000 e celular 390×844 sem overflow com componentes reais/dados fictícios. Foco após confirmação e bloqueio de recarga durante envio conferidos. Não há CRUD de registros reais em produção nesta validação.

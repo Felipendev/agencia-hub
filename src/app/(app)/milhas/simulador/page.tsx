@@ -254,7 +254,7 @@ function SimulationPlanner() {
     if (
       pending.current ||
       !window.confirm(
-        `Excluir a simulação “${row.assumptions.title}” e seu histórico?`,
+        `Excluir a simulação “${row.assumptions.title}” e seu histórico de versões? Tarefas já geradas e sua origem serão preservadas.`,
       )
     )
       return;
@@ -407,6 +407,7 @@ function SimulationPlanner() {
       >
         ← Milhas
       </Link>
+      <Link href="/milhas/simulador/tarefas-geradas" className="ml-4 text-sm underline">Histórico de gerações de tarefas</Link>
       <div>
         <h1 className="text-2xl font-semibold">Simulador de acúmulo</h1>
         <p className="text-sm text-muted-foreground">
@@ -866,6 +867,7 @@ function SimulationPlanner() {
                   {count(row.result.goalMiles)} milhas
                 </p>
                 <div className="flex flex-wrap gap-2">
+                  <Link className="inline-flex items-center rounded-md border px-3 py-2 text-sm hover:bg-[var(--hub-hover)]" href={`/milhas/simulador/${row.id}/tarefas`}>Planejar tarefas</Link>
                   <Button
                     variant="secondary"
                     disabled={busy || opening}
