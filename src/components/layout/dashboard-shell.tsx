@@ -65,6 +65,7 @@ const OWNER_GROUPS: NavGroup[] = [
       { href: "/economia", label: "Economia do cliente", icon: "cash" },
       { href: "/viagens/tarefas", label: "Checklists e rotinas", icon: "document" },
       { href: "/viagens",     label: "Viagens",                icon: "plane"      },
+      { href: "/viagens/follow-ups", label: "Acompanhamento comercial", icon: "document" },
       { href: "/indicacoes?product=TRAVEL", label: "Indicações", icon: "userPlus" },
     ],
   },
@@ -74,6 +75,7 @@ const OWNER_GROUPS: NavGroup[] = [
       { href: "/milhas", label: "Perfis e carteiras", icon: "wallet" },
       { href: "/milhas/simulador", label: "Simulador de acúmulo", icon: "calculator" },
       { href: "/milhas/tarefas", label: "Checklists e rotinas", icon: "document" },
+      { href: "/milhas/follow-ups", label: "Acompanhamento comercial", icon: "document" },
       { href: "/indicacoes?product=MILES", label: "Indicações", icon: "userPlus" },
     ],
   },
@@ -121,6 +123,7 @@ const SELLER_GROUPS: NavGroup[] = [
       { href: "/economia", label: "Economia do cliente", icon: "cash" },
       { href: "/viagens/tarefas", label: "Checklists e rotinas", icon: "document" },
       { href: "/viagens",     label: "Viagens",                icon: "plane"      },
+      { href: "/viagens/follow-ups", label: "Acompanhamento comercial", icon: "document" },
       { href: "/indicacoes?product=TRAVEL", label: "Indicações", icon: "userPlus" },
     ],
   },
@@ -130,6 +133,7 @@ const SELLER_GROUPS: NavGroup[] = [
       { href: "/milhas", label: "Perfis e carteiras", icon: "wallet" },
       { href: "/milhas/simulador", label: "Simulador de acúmulo", icon: "calculator" },
       { href: "/milhas/tarefas", label: "Checklists e rotinas", icon: "document" },
+      { href: "/milhas/follow-ups", label: "Acompanhamento comercial", icon: "document" },
       { href: "/indicacoes?product=MILES", label: "Indicações", icon: "userPlus" },
     ],
   },
@@ -167,7 +171,7 @@ function NavGroupSection({
             pathname === item.href ||
             (item.href !== "/dashboard" &&
               item.href !== "/meu-painel" &&
-              !(item.href === "/viagens" && pathname.startsWith("/viagens/tarefas")) &&
+              !(item.href === "/viagens" && (pathname.startsWith("/viagens/tarefas") || pathname.startsWith("/viagens/follow-ups"))) &&
               (item.href === "/milhas"
                 ? pathname.startsWith("/milhas/clientes/")
                 : pathname.startsWith(`${item.href}/`)));

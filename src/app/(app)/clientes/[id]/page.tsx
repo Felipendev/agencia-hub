@@ -86,6 +86,7 @@ export default function ClienteDetalhePage() {
         <Link href={`/economia?customerId=${id}`} className="text-sm font-medium text-[var(--hub-blue)] hover:underline">Economia nas viagens</Link>
         <Link href={`/viagens/tarefas?customerId=${id}`} className="ml-4 text-sm font-medium text-[var(--hub-blue)] hover:underline">Tarefas de Viagens</Link>
         <div className="flex flex-wrap gap-4 text-sm">
+          <Link className="text-[var(--hub-blue)] hover:underline" href={`/viagens/follow-ups?customerId=${id}`}>Acompanhamento comercial</Link>
           <Link className="text-[var(--hub-blue)] hover:underline" href={`/indicacoes?customerId=${id}&product=TRAVEL`}>Indicações de Viagens</Link>
           <Link className="text-[var(--hub-blue)] hover:underline" href={`/indicacoes/nova?referrerId=${id}&product=TRAVEL`}>Registrar indicação feita por esta pessoa</Link>
         </div>

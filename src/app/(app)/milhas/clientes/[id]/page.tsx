@@ -66,7 +66,8 @@ function MilesCustomer({ id }: { id: string }) {
           <div className="flex flex-wrap gap-4 text-sm"><Link className="text-[var(--hub-blue)] hover:underline" href={`/contratos?customerId=${person.id}&product=MILES`}>Contratos de Milhas</Link><Link className="text-[var(--hub-blue)] hover:underline" href={`/contratos/novo?customerId=${person.id}&product=MILES`}>Novo contrato de Milhas</Link></div>
           <Link className="text-sm text-[var(--hub-blue)] hover:underline" href={`/milhas/tarefas?customerId=${person.id}`}>Tarefas de Milhas</Link>
           <div className="flex flex-wrap gap-4 text-sm">
-            <Link className="text-[var(--hub-blue)] hover:underline" href={`/indicacoes?customerId=${person.id}&product=MILES`}>Indicações de Milhas</Link>
+            <Link className="text-[var(--hub-blue)] hover:underline" href={`/milhas/follow-ups?customerId=${person.id}`}>Acompanhamento comercial</Link>
+          <Link className="text-[var(--hub-blue)] hover:underline" href={`/indicacoes?customerId=${person.id}&product=MILES`}>Indicações de Milhas</Link>
             <Link className="text-[var(--hub-blue)] hover:underline" href={`/indicacoes/nova?referrerId=${person.id}&product=MILES`}>Registrar indicação feita por esta pessoa</Link>
           </div>
         </>
