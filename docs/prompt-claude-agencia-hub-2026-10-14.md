@@ -1,8 +1,8 @@
 # Prompt para Claude — AgênciaHub
 
-**Estado vigente em 27/10/2026:** F02/F03/F07/F10 e cadastro F09 publicados. Codex concluiu F10 API #66/V62 antes da UI #59 e F09 API #67/V63 antes da UI #60. Produção API 7ef4ce8/V63 e UI 0820264, Vercel READY no domínio principal; 61 testes API/173 UI repetidos no head integrado, gates/CI e prévias aprovados. Não há código pendente do Claude nessas cinco frentes. Créditos F09 dependem de regras de negócio e não foram implementados. F08 continua com Codex, sem nova migration reservada. Ver publicacao-etapas-2026-10-27.md e publicacao-indicacoes-2026-10-27.md.
+**Estado vigente em 28/10/2026:** F02/F03/F07/F10 e cadastro F09 publicados; F08/TODO-042 também concluído pelo Codex, API #68/V64 antes da UI #61. Produção API 33f8238/V64 (Railway bd121bb3 ativo) e UI aff2b2b (Vercel 5vGkBfek READY no domínio principal). 70 testes API e 185 UI aprovados. Não há código pendente do Claude nas cinco frentes atribuídas. Créditos F09 continuam aguardando regras de negócio. Próxima frente Codex: TODO-043, evolução F04/F06; ainda sem nova migration reservada. V56–V64 são imutáveis. Ver publicacao-follow-up-2026-10-28.md.
 
-Os estados de 21/10 e as instruções de retomada abaixo são históricos; esta atualização prevalece.
+Os estados de 21/10 e 27/10 e as instruções de retomada abaixo são históricos; esta atualização prevalece.
 
 **Estado vigente em 21/10/2026:** as cinco frentes atribuídas ao Claude têm código entregue: F02/F03/F07 publicados; F10/V62 e F09/cadastro V63 em PRs, revisados e complementados pelo Codex, ainda não publicados. F10 API #66 e82a06ddab449a1855d0ac2d2c3473a73bf6846a / UI #59 57fdf27cd94d885bd404beb9a6582f75f7ccf37b. F09 API #67 58cd19c231778f6c287fc86aef55fdde0446397e / UI #60 50be3bb52397197fb6fbc8e536471ee0f019e326. Não alterar esses heads durante a integração final.
 

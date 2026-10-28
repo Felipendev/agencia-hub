@@ -1,8 +1,8 @@
 # Divisão de desenvolvimento — Codex e Claude
 
-**Estado vigente em 27/10/2026:** F02/F03/F07/F10 e cadastro F09 publicados. Codex concluiu F10 API #66/V62 antes da UI #59 e F09 API #67/V63 antes da UI #60. Produção API 7ef4ce8/V63 e UI 0820264, Vercel READY no domínio principal; 61 testes API/173 UI repetidos no head integrado, gates/CI e prévias aprovados. Não há código pendente do Claude nessas cinco frentes. Créditos F09 dependem de regras de negócio e não foram implementados. F08 continua com Codex, sem nova migration reservada. Ver publicacao-etapas-2026-10-27.md e publicacao-indicacoes-2026-10-27.md.
+**Estado vigente em 28/10/2026:** F02/F03/F07/F10 e cadastro F09 publicados; F08/TODO-042 também concluído pelo Codex, API #68/V64 antes da UI #61. Produção API 33f8238/V64 (Railway bd121bb3 ativo) e UI aff2b2b (Vercel 5vGkBfek READY no domínio principal). 70 testes API e 185 UI aprovados. Não há código pendente do Claude nas cinco frentes atribuídas. Créditos F09 continuam aguardando regras de negócio. Próxima frente Codex: TODO-043, evolução F04/F06; ainda sem nova migration reservada. V56–V64 são imutáveis. Ver publicacao-follow-up-2026-10-28.md.
 
-Os estados de 21/10 e as instruções de retomada abaixo são históricos; esta atualização prevalece.
+Os estados de 21/10 e 27/10 e as instruções de retomada abaixo são históricos; esta atualização prevalece.
 
 Atualizado em 21/10/2026. F02/F03/F07 do Claude publicados. Codex integrou F07/V59 (API #65/UI #58), F01/V60 (API #63/UI #56) e simulações por cliente/V61 (API #64/UI #57), API antes da UI, migrations sequenciais e deploys confirmados. F10/TODO-050 foi entregue e integrado nos PRs API #66/UI #59 (46 testes backend/155 frontend), mas V62 ainda não publicada devido ao incidente Railway. F09/cadastro V63 também entregue e integrado nos PRs API #67/UI #60, com 61 testes API/173 UI na validação local conjunta; Codex conclui a publicação F10 após normalização e segue F08, ainda sem reserva. Demais frentes mantêm seus donos. Referências: registros de publicação de agenda, checklists e simulações por cliente, e migrations-reservadas-2026-10-15.md.
 

@@ -2,7 +2,7 @@
 
 ## Atualização vigente — 28/10/2026
 
-Divisão atual: **cinco frentes atribuídas ao Claude com código entregue; F02/F03/F07/F10 e cadastro F09 publicados**. Codex concluiu em 27/10 a integração e publicação sequencial F10/V62 (API #66/UI #59) e F09/V63 (API #67/UI #60), API antes da UI. Produção atual em V63; interface READY no domínio principal. 61 testes API/173 UI repetidos no head integrado, CI e prévias aprovadas. Créditos/recompensas F09 continuam dependendo de regras de negócio, sem automação financeira. F08/TODO-042 implementado: API #68 publicada em 28/10 com V64 (70 testes); UI #61 em validação final (185 testes), mantendo API antes da UI. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
+Divisão atual: **cinco frentes atribuídas ao Claude com código entregue; F02/F03/F07/F10 e cadastro F09 publicados**. Codex concluiu em 27/10 a integração e publicação sequencial F10/V62 (API #66/UI #59) e F09/V63 (API #67/UI #60), API antes da UI. Base anterior em V63; interface READY no domínio principal. 61 testes API/173 UI repetidos no head integrado, CI e prévias aprovadas. Créditos/recompensas F09 continuam dependendo de regras de negócio, sem automação financeira. F08/TODO-042 publicado em 28/10: API #68/V64 e UI #61 READY no domínio principal, API antes da UI. 70 testes API/185 UI aprovados. Próxima frente Codex: TODO-043, evolução F04/F06, ainda sem migration reservada. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
 
 Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). F02 foi revisado, integrado pelo Codex e publicado em 15/10 pelos PRs API #61/UI #54; 32 testes da API e 105 da interface aprovados. O vínculo de simulações ao cliente é a subentrega Codex TODO-052 da evolução F06, sem redistribuir as cinco frentes.
 
@@ -73,7 +73,8 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-042: Próxima ação e follow-up comercial (F08)
 - **Owner**: Codex
 - **Priority**: High
-- **Status**: in_progress — API publicada/V64; UI #61 em validação final.
+- **Status**: resolved — publicada em 28/10/2026, API #68/V64 e UI #61; 70 testes API e 185 UI aprovados.
+- **Entrega**: CRUD no mesmo ID, estados, histórico após exclusão, produtos independentes, filtros Fortaleza e revisão de privacidade/descarte. Registro em docs/publicacao-follow-up-2026-10-28.md.
 - **Created**: 2026-10-14
 - **Origin**: divisão paralela autorizada pelo usuário.
 - **Scope**: ação, data e responsável por pessoa/prospecto; filtros de atrasados/hoje/próximos e resumo; concluir/reprogramar mantém histórico, sem reconstruir o funil existente.
@@ -82,7 +83,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-043: Diagnóstico e integrações da carteira e do simulador (evolução F04/F06)
 - **Owner**: Codex
 - **Priority**: High
-- **Status**: pending — conexão de tarefas depende do contrato F01.
+- **Status**: pending — próxima frente Codex; contrato F01 e vínculo de simulações publicados. Reservar migration e separar diagnóstico público de integração plano → tarefas antes de implementar.
 - **Created**: 2026-10-14
 - **Origin**: lacunas explícitas após a entrega manual TODO-040.
 - **Scope**: diagnóstico público de milhas com revisão autenticada antes de incorporar; plano → tarefas sem repetição; reaproveitamento opcional de cartões no simulador. Visitante não sobrescreve carteira por igualdade de telefone/e-mail.
@@ -781,5 +782,4 @@ Nenhuma ideia registrada nesta auditoria.
 
 ## ✅ Resolved Items
 
-Nenhum item resolvido.
-
+TODO-042/F08: publicado em 28/10/2026 nos PRs API #68 e UI #61, V64 e deploys confirmados. Detalhes no item acima e em docs/publicacao-follow-up-2026-10-28.md.
