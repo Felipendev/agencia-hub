@@ -96,6 +96,30 @@ afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
+it("reaproveita cartão sem gravar carteira e persiste premissas editáveis no mesmo plano", async () => {
+  let stored = row;
+  const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+    if (url.endsWith("/miles-wallet")) return Response.json({ profile: null, items: [{ id: "card", kind: "CARD", archived: false, data: { issuer: "Banco", category: "Black", monthlySpend: 4500, pointsPerDollar: 3.25 } }] });
+    if (init?.method === "PATCH") { stored = { ...row, ...JSON.parse(init.body as string), version: 2 }; return Response.json(stored); }
+    if (url.endsWith("/scenario")) return Response.json(stored);
+    return Response.json([stored]);
+  });
+  vi.stubGlobal("fetch", fetchMock); vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+  const view = render(React.createElement(SimuladorAcumuloPage)); await screen.findByRole("heading", { name: "Plano Lisboa" }); fireEvent.click(screen.getByRole("button", { name: "Editar" })); await screen.findByDisplayValue("Plano Lisboa");
+  fireEvent.click(screen.getByRole("button", { name: "Consultar cartões da carteira" })); await screen.findByLabelText("Cartão desta pessoa"); fireEvent.change(screen.getByLabelText("Cartão desta pessoa"), { target: { value: "card" } });
+  expect((screen.getByLabelText("Gasto mensal (R$)") as HTMLInputElement).value).toBe("10000");
+  fireEvent.click(screen.getByRole("button", { name: "Usar no cálculo" }));
+  expect((screen.getByLabelText("Gasto mensal (R$)") as HTMLInputElement).value).toBe("4500");
+  expect((screen.getByLabelText("Pontos por dólar") as HTMLInputElement).value).toBe("3.25");
+  expect((screen.getByLabelText("Câmbio informado (R$ por US$)") as HTMLInputElement).value).toBe("5");
+  fireEvent.change(screen.getByLabelText("Gasto mensal (R$)"), { target: { value: "4600" } });
+  fireEvent.click(screen.getByRole("button", { name: "Salvar alterações" })); await screen.findByText("Alterações salvas. A versão anterior permanece no histórico.");
+  expect(stored.assumptions).toMatchObject({ ...assumptions, monthlySpending: 4600, pointsPerDollar: 3.25 });
+  expect(fetchMock.mock.calls.filter(([, init]) => init?.method === "PATCH").map(([url]) => url)).toEqual(["https://api.example/accumulation-simulations/scenario"]);
+  expect(fetchMock.mock.calls.filter(([url, init]) => url.endsWith("/miles-wallet") && init?.method)).toHaveLength(0);
+  view.unmount(); route.query = "simulationId=scenario"; render(React.createElement(SimuladorAcumuloPage));
+  await screen.findByDisplayValue("4600"); expect((screen.getByLabelText("Pontos por dólar") as HTMLInputElement).value).toBe("3.25");
+});
 it("edita o cenário pelo mesmo ID e envia a versão consultada", async () => {
   const changed = { ...assumptions, title: "Plano atualizado" };
   const fetchMock = vi
