@@ -16,6 +16,7 @@ import {
   type SimulationVersion,
 } from "@/lib/accumulation-simulation";
 import { ClientePicker } from "@/components/cliente/ClientePicker";
+import { SimulationWalletCard } from "@/components/milhas/simulation-wallet-card";
 import { listCustomersRemote } from "@/lib/api/list-customers-remote";
 import type { Cliente } from "@/types";
 
@@ -502,6 +503,12 @@ function SimulationPlanner() {
               confirmação.
             </p>
           )}
+          <SimulationWalletCard
+            key={`${editing?.id ?? "new"}:${editing?.version ?? 0}`}
+            token={token}
+            customerId={customerId}
+            onApply={(values) => { setInput((current) => ({ ...current, ...values })); setNotice(""); }}
+          />
           <div className="grid gap-4 md:grid-cols-3">
             <label className="space-y-1 text-sm">
               Nome da simulação
