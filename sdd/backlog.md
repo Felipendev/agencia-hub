@@ -107,6 +107,14 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 - **CRUD**: reutiliza o CRUD do plano para as premissas e o CRUD da carteira para os cartões; preenchimento local não é novo registro editável. Exclusão futura de cartão não reescreve cenários históricos.
 - **Validação**: 216 testes/51 arquivos; 100% cobertura do componente novo; tipos/lint/build aprovados, revisão SDD independente e inspeção responsiva com dados fictícios. Publicação confirmada em docs/publicacao-cartoes-simulador-2026-10-28.md.
 - **Branch**: `codex/f06-cartoes-simulador`, UI somente; PR #63.
+### TODO-055: Diagnóstico público de Milhas com revisão
+- **Owner**: Codex — subentrega TODO-043.
+- **Status**: in_progress
+- **Priority**: High
+- **Created**: 2026-10-28
+- **Scope**: link público gerenciado pela agência; declarações de perfil, contas, cartões e clubes em fila própria. CRUD interno com edição pelo mesmo ID, versões, arquivamento/reativação por motivo. Incorporar somente após revisão autenticada, seleção explícita da pessoa/registros e confirmação da versão da carteira. Sem associação por e-mail/telefone e sem efeito em Viagens/financeiro. Incorporado fica histórico imutável; correções posteriores pelo CRUD da carteira. Novos autores da carteira usam ID estável da sessão; não reconstruir autores antigos.
+- **Migration**: V66 reservada antes do SQL; branch codex/f04-diagnostico-publico nos dois repos, API antes da UI.
+- **Aceite**: consentimento público explícito, isolamento, permissões, limites/idempotência/concorrência, dados originais e versões preservados, falhas sem sucesso falso, privacidade/descarte da agência, testes banco novo/upgrade e prévia/startup.
 ### TODO-044: Histórico e exportação consolidada (F11)
 - **Owner**: Codex — consolidação; cada agente mantém a auditoria de seus próprios módulos.
 - **Priority**: Medium
@@ -800,6 +808,7 @@ Nenhuma ideia registrada nesta auditoria.
 ## ✅ Resolved Items
 
 TODO-042/F08: publicado em 28/10/2026 nos PRs API #68 e UI #61, V64 e deploys confirmados. Detalhes no item acima e em docs/publicacao-follow-up-2026-10-28.md.
+
 
 
 
