@@ -1,0 +1,25 @@
+{
+  "feature": "TODO-055",
+  "tasks": [
+    {
+      "id": "D1",
+      "title": "V66, API pública/fila e incorporação atômica",
+      "status": "completed"
+    },
+    {
+      "id": "D2",
+      "title": "Privacidade/descarte/autores e testes de upgrade/HTTP",
+      "status": "completed"
+    },
+    {
+      "id": "D3",
+      "title": "Formulário público e CRUD/revisão/navegação interna",
+      "status": "completed"
+    },
+    {
+      "id": "D4",
+      "title": "Gates, revisão, prévias e publicação API antes da UI",
+      "status": "in_progress"
+    }
+  ]
+}

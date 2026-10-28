@@ -109,7 +109,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 - **Branch**: `codex/f06-cartoes-simulador`, UI somente; PR #63.
 ### TODO-055: Diagnóstico público de Milhas com revisão
 - **Owner**: Codex — subentrega TODO-043.
-- **Status**: in_progress
+- **Status**: in_progress — API70/UI64 abertas, validação local concluída; CI/prévias/publicação em andamento.
 - **Priority**: High
 - **Created**: 2026-10-28
 - **Scope**: link público gerenciado pela agência; declarações de perfil, contas, cartões e clubes em fila própria. CRUD interno com edição pelo mesmo ID, versões, arquivamento/reativação por motivo. Incorporar somente após revisão autenticada, seleção explícita da pessoa/registros e confirmação da versão da carteira. Sem associação por e-mail/telefone e sem efeito em Viagens/financeiro. Incorporado fica histórico imutável; correções posteriores pelo CRUD da carteira. Novos autores da carteira usam ID estável da sessão; não reconstruir autores antigos.
@@ -808,6 +808,7 @@ Nenhuma ideia registrada nesta auditoria.
 ## ✅ Resolved Items
 
 TODO-042/F08: publicado em 28/10/2026 nos PRs API #68 e UI #61, V64 e deploys confirmados. Detalhes no item acima e em docs/publicacao-follow-up-2026-10-28.md.
+
 
 
 
