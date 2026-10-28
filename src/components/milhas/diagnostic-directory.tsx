@@ -78,14 +78,14 @@ function Directory({ token, owner }: { token: string; owner: boolean }) {
           name: entry.data.name,
           email: entry.data.email,
           version: entry.version,
-          archived: false,
-          incorporated: false,
+          archived: entry.archived,
+          incorporated: !!entry.receipt,
           createdAt: entry.createdAt,
         },
         ...current.filter((r) => r.id !== entry.id),
       ]);
       setCreating(false);
-      setNotice("Diagnóstico criado para revisão, sem atualizar a carteira.");
+      setNotice(entry.archived ? "O diagnóstico confirmado já está arquivado. Inclua os arquivados para consultá-lo." : entry.receipt ? "O diagnóstico confirmado já foi incorporado. Consulte o comprovante." : "Diagnóstico confirmado na fila, sem atualizar a carteira.");
       setDraft(emptyDiagnostic());
       key.current = "";
     } catch (e) {

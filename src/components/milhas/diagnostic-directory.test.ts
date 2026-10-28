@@ -52,6 +52,11 @@ afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
 });
+it("reenvio preserva estado arquivado/incorporado retornado pela API", async () => {
+  mock.api.list.mockResolvedValue([]);render(createElement(DiagnosticDirectory));await screen.findByText(/Nenhum diagnóstico encontrado/);
+  fireEvent.click(screen.getByRole("button",{name:"Novo diagnóstico"}));mock.api.create.mockResolvedValueOnce({...row,data:{...emptyDiagnostic(),name:"Recebido antes",email:row.email},archived:true,receipt:{customerId:"p1"}});
+  fireEvent.submit(screen.getByRole("button",{name:"Criar diagnóstico"}).closest("form")!);await screen.findByText(/já está arquivado/);expect(screen.queryByText("Recebido antes")).toBeNull();fireEvent.click(screen.getByLabelText("Incluir arquivados"));expect(screen.getByText("Recebido antes")).toBeTruthy();expect(screen.getByText(/Incorporado · Arquivado/)).toBeTruthy();
+});
 it("consulta, busca e exibe arquivados com navegação própria de Milhas", async () => {
   render(createElement(DiagnosticDirectory));
   await screen.findByText("Pessoa");
