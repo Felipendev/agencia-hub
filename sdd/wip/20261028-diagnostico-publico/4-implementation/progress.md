@@ -5,3 +5,9 @@ CRUD público/interno e revisão implementados; 233 testes UI aprovados, 17 foca
 35 testes distintos API aprovados; API PR70 a6d6983 em CI/prévia. Última revisão independente aprovada sem bloqueadores, inclusive seleção parcial do comprovante. UI final233testes, tipos/lint sem erros. Publicação ainda pendente.
 
 PRs criados: API70 a6d69839b458ce7ebe64260980fd2d0de85253d8, UI64 b0c644cf7795c3ebf55e54a872276234bdeec680. CI API SUCCESS; prévia Railway9603271c em validação, ambiente cdabbeee-9552-4dab-b51a-00ad5aca81ae. UI aguardando CI/prévia. Cobertura final UI98,64%linhas/92,04%branches; API Service52/52linhas e History2/2.
+
+Bloqueio externo: incidente oficial Railway Z1JDWW1W identificado em28/10 às17:49UTC. PréviaAPI9603271c emCreating containers/Deploying sem logs da aplicação. CIs API/UI aprovadas e préviaUI READY. Não houve merge/deploy de produção nem configuração modificada. V66 reservada; D4 permanece em andamento até normalização e validação da prévia. Retomada no relatório de publicação.
+
+Atualização: prévia iniciou após atraso Railway, sem configuração modificada. V66/startup/HTTP aprovados. API70 integrada3a30baf; aguardando deploy de produção antes da UI64. Status anterior de bloqueio externo preservado como histórico, não vigente.
+
+Estado final desta retomada: UI ed19970,234 testes/55 arquivos e CI40752771478 verdes, prévia9hvMqy READY. Reenvio preserva estado real arquivado/incorporado; revisão estática aprovada. API main3a30baf validada novamente antes de Deploy latest commit; repetição89fae589 FAILED (00:51). Diagnóstico Railway: Infrastructure Error, build parou antes do Maven. Produção ativa continua6ad7fb73/V65; OpenAPI/site200. Nova rota ainda ausente na versão antiga: não publicar UI64. Nenhuma configuração alterada, nenhuma mensagem ao suporte. D4 permanece in_progress; ver relatório para retomada e IDs.

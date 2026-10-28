@@ -4,6 +4,8 @@ Atualizado em 28/10/2026. Autoridade única para reserva: Codex como integrador.
 
 ## Base confirmada
 
+Bloqueio vigente TODO-055: API70 já integrada em3a30baf/V66, mas builds de produção a7a9ce63 e89fae589 falharam antes do Maven; diagnóstico Railway Infrastructure Error. Produção permanece V65/6ad7fb73; UI64 ed19970 draft. Não publicar UI antes de confirmar V66 e startup. V66 não pode ser reutilizada; V67 sem reserva.
+
 - Produção vigente após TODO-053 em 28/10: API ef31e7b6d597b825cb0b062a3ed57dd19bf8592e, Railway 6ad7fb73-f08f-4a74-b632-2491c6495c0b ativo/V65; UI 68ea7124c37e88b6229f0f8a211a7b4408729310, Vercel dpl_9aLrTTQR24HCtAhBGNbm596nqrAW READY em www.agenciashub.com.br. V56–V65 imutáveis. UI atual após TODO-054: b3722b5, Vercel DzZnLAqn READY. V66 reservada abaixo.
 
 - Base anterior F08 em 28/10: API 33f8238ecc6e5d7caed30534d977d505a8aae865, Railway bd121bb3-2e1b-4051-a4dc-ca3afc10f9b1 ativo/V64; UI aff2b2bbd6c3319ddbc55c30e52a69916f8e13f1, Vercel dpl_5vGkBfekLX1DwrV3NdYJrViczZug READY no domínio principal. Registro: publicacao-follow-up-2026-10-28.md.
@@ -30,7 +32,7 @@ Atualizado em 28/10/2026. Autoridade única para reserva: Codex como integrador.
 | V64 | Codex | TODO-042 F08 follow-up comercial, `codex/f08-follow-up` | API publicada em 28/10: PR #68 merge 33f8238, Railway bd121bb3 ativo/V64. 70 testes API aprovados, banco novo e upgrade V63→V64. UI #61 merge aff2b2b publicada, Vercel 5vGkBfek READY no domínio principal. 185 testes UI aprovados. Imutável; ver publicacao-follow-up-2026-10-28.md |
 | V65 | Codex | TODO-053, subentrega TODO-043: plano → tarefas de Milhas, `codex/f04-diagnostico-integracoes` | Publicada em 28/10: API #69 ef31e7b, Railway 6ad7fb73 ativo/V65; UI #62 68ea712, Vercel 9aLrTTQR READY no domínio principal. 38 testes API/200 UI aprovados; banco novo e V64→V65, startup e domínio confirmados. Imutável. Ver publicacao-plano-tarefas-2026-10-28.md. |
 
-| V66 | Codex | TODO-055 diagnóstico público de Milhas, `codex/f04-diagnostico-publico` | Reservada em 28/10 antes do SQL; configuração de link, declarações revisáveis, versões e comprovante de incorporação. Base V65, banco novo e upgrade V65→V66 obrigatórios. |
+| V66 | Codex | TODO-055 diagnóstico público de Milhas, `codex/f04-diagnostico-publico` | Reservada antes do SQL em8a3acc7. API70 integrada3a30baf após35testes/CI/prévia ACTIVE9603271c (V66/startup/HTTP aprovados). Produção: build a7a9ce63 falhou no daemon gRPC; repetição89fae589 do mesmo commit também FAILED antes de startup. Ativa preservada emV65. UI64 ed19970 draft (234testes/CI e préviaREADY); não publicar antes de V66/startup confirmados. V66 integrada, imutável e não reutilizável. Ver publicacao-diagnostico-milhas-2026-10-28.md. |
 
 Cartões TODO-054 não exigiram migration. F11 e F05 seguem sem número autorizado. V56–V65 publicadas e imutáveis. Não ocupar número alheio nem criar migrations vazias para liberar a fila.
 
@@ -50,4 +52,3 @@ A CI da API executa `scripts/check-migrations.sh` nos PRs, comparando a árvore 
 A orientação anterior adicionou `SPRING_DATASOURCE_HIKARI_CONNECTION_INIT_SQL`. O deploy passou a falhar no binding dessa propriedade porque o pool já estava iniciado. Correção: remover essa variável e selecionar o schema pela URL JDBC, conservando Flyway/Hibernate alinhados ao schema isolado. Não aplicar essas variáveis à produção.
 
 O ajuste exige remover uma variável; o conector disponível não expõe exclusão de variável. A aplicação deve ser feita no painel Railway, no ambiente e serviço exatos indicados no runbook da prévia, após o teste de inicialização. Não apagar Postgres, volume ou dados. Não alterar V56/V57 publicadas.
-
