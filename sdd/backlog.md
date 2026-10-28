@@ -98,6 +98,15 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 - **Aceite**: CRUD persistido, versões/conflitos, isolamento e permissões, reenvio/concorrência, origem congelada, planos legados sem pessoa bloqueados, banco novo/upgrade V64→V65, privacidade e descarte da agência; API antes da UI e deploys confirmados.
 - **Branch**: `codex/f04-diagnostico-integracoes`, PRs isolados de diagnóstico público/cartões; não conclui TODO-043 inteira.
 
+### TODO-054: Reaproveitar cartões da carteira no simulador
+- **Owner**: Codex — subentrega TODO-043/F04/F06.
+- **Priority**: High
+- **Status**: in_progress — implementação validada; UI PR #63 em prévia/CI, sem alteração de API ou migration.
+- **Created**: 2026-10-28
+- **Scope**: consulta opcional e autenticada por pessoa; revisar e copiar somente gasto mensal/pontos por dólar para o formulário. Preservar câmbio/demais premissas, permitir ajuste manual e persistir ao salvar o plano pelo CRUD/versionamento existente. Não cria cartão, carteira ou movimento. Perfil/cartão arquivado e campos inválidos não podem ser usados. Troca de pessoa/sessão descarta consulta antiga; falha tem recuperação sem apagar cálculo.
+- **CRUD**: reutiliza o CRUD do plano para as premissas e o CRUD da carteira para os cartões; preenchimento local não é novo registro editável. Exclusão futura de cartão não reescreve cenários históricos.
+- **Validação**: 216 testes/51 arquivos; 100% cobertura do componente novo; tipos/lint/build aprovados, revisão SDD independente e inspeção responsiva com dados fictícios. Publicação ainda pendente.
+- **Branch**: `codex/f06-cartoes-simulador`, UI somente; PR #63.
 ### TODO-044: Histórico e exportação consolidada (F11)
 - **Owner**: Codex — consolidação; cada agente mantém a auditoria de seus próprios módulos.
 - **Priority**: Medium
@@ -791,3 +800,4 @@ Nenhuma ideia registrada nesta auditoria.
 ## ✅ Resolved Items
 
 TODO-042/F08: publicado em 28/10/2026 nos PRs API #68 e UI #61, V64 e deploys confirmados. Detalhes no item acima e em docs/publicacao-follow-up-2026-10-28.md.
+

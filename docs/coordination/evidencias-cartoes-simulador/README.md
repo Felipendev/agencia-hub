@@ -1,0 +1,4 @@
+# Evidências — TODO-054
+Componente real SimulationWalletCard e componentes/tokens existentes, em harness local isolado com carteira fictícia. Desktop 1440×1000: consulta e seleção antes da cópia. Celular 390×844: aplicação de gasto/pontos mantendo câmbio em 5, sem rolagem horizontal/clipping. Harness não faz parte da entrega; teste de integração usa a página real e confere PATCH no mesmo ID e reabertura.
+
+Validação: 216 testes/51 arquivos aprovados; 15 testes do componente novo, 100% linhas/branches/funções/instruções. TypeScript e ESLint sem erros, build Next webpack aprovado. Revisão estática SDD independente aprovada sem bloqueadores. Sem alteração de API/migration/configuração e sem dados reais gravados em produção. CI e publicação serão registradas no relatório canônico após confirmação.
