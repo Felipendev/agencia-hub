@@ -1,6 +1,6 @@
 # Divisão de desenvolvimento — Codex e Claude
 
-**Estado vigente em 28/10/2026:** F02/F03/F07/F10 e cadastro F09 publicados; F08/TODO-042 também concluído pelo Codex, API #68/V64 antes da UI #61. Produção API 33f8238/V64 (Railway bd121bb3 ativo) e UI aff2b2b (Vercel 5vGkBfek READY no domínio principal). 70 testes API e 185 UI aprovados. Não há código pendente do Claude nas cinco frentes atribuídas. Créditos F09 continuam aguardando regras de negócio. Próxima frente Codex: TODO-043, evolução F04/F06; ainda sem nova migration reservada. V56–V64 são imutáveis. Ver publicacao-follow-up-2026-10-28.md.
+**Estado vigente em 28/10/2026:** F02/F03/F07/F10 e cadastro F09 publicados; F08/TODO-042 publicado (API #68/UI #61). Na TODO-043, TODO-053 plano → tarefas já publicado (API #69/V65 e UI #62). API produção ef31e7b/V65, Railway 6ad7fb73 ativo. TODO-054 cartões no simulador publicado na UI #63, merge b3722b5, Vercel DzZnLAqn READY no domínio principal. 38 testes API/200 UI no TODO-053; 216 UI no TODO-054. Não há código pendente do Claude nas cinco frentes atribuídas. Diagnóstico público e identidade dos autores de Milhas continuam pendentes; créditos F09 aguardam regras. V56–V65 imutáveis, nenhuma reserva V66. Ver publicacao-plano-tarefas-2026-10-28.md e publicacao-cartoes-simulador-2026-10-28.md.
 
 Os estados de 21/10 e 27/10 e as instruções de retomada abaixo são históricos; esta atualização prevalece.
 
@@ -118,3 +118,5 @@ Os trechos de setembro do backlog são históricos. As antigas proibições de t
 Codex: F01 e TODO-052 publicados após F07. Próxima frente: F08, ainda sem migration reservada; registrar reserva antes de criar SQL.
 
 Claude: preservar os heads revisados de F10 e F09; não iniciar migration nova. Créditos de indicação dependem de regra de negócio e nova entrega autorizada. F10/V62 e F09/V63 aguardam publicação sequencial pelo Codex após normalização do Railway. O prompt vigente está em `prompt-claude-agencia-hub-2026-10-14.md`.
+
+

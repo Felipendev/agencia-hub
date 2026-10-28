@@ -1,6 +1,6 @@
 # Prompt para Claude — AgênciaHub
 
-**Estado vigente em 28/10/2026:** F02/F03/F07/F10 e cadastro F09 publicados; F08/TODO-042 também concluído pelo Codex, API #68/V64 antes da UI #61. Produção API 33f8238/V64 (Railway bd121bb3 ativo) e UI aff2b2b (Vercel 5vGkBfek READY no domínio principal). 70 testes API e 185 UI aprovados. Não há código pendente do Claude nas cinco frentes atribuídas. Créditos F09 continuam aguardando regras de negócio. Próxima frente Codex: TODO-043, evolução F04/F06; ainda sem nova migration reservada. V56–V64 são imutáveis. Ver publicacao-follow-up-2026-10-28.md.
+**Estado vigente em 28/10/2026:** F02/F03/F07/F10 e cadastro F09 publicados; F08/TODO-042 publicado (API #68/UI #61). Na TODO-043, TODO-053 plano → tarefas já publicado (API #69/V65 e UI #62). API produção ef31e7b/V65, Railway 6ad7fb73 ativo. TODO-054 cartões no simulador publicado na UI #63, merge b3722b5, Vercel DzZnLAqn READY no domínio principal. 38 testes API/200 UI no TODO-053; 216 UI no TODO-054. Não há código pendente do Claude nas cinco frentes atribuídas. Diagnóstico público e identidade dos autores de Milhas continuam pendentes; créditos F09 aguardam regras. V56–V65 imutáveis, nenhuma reserva V66. Ver publicacao-plano-tarefas-2026-10-28.md e publicacao-cartoes-simulador-2026-10-28.md.
 
 Os estados de 21/10 e 27/10 e as instruções de retomada abaixo são históricos; esta atualização prevalece.
 
@@ -83,3 +83,5 @@ Preserve o login local de desenvolvimento e demais alterações do diretório or
 Abra um PR em rascunho por repositório afetado, com títulos `[F02][API] Contratos versionados por agência` e `[F02][UI] Gestão de contratos`, adaptados ao resultado final. Vincule os dois PRs; informe escopo, validações, migrations, dependências, CRUD entregue e solicitações de integração. Não faça push direto em main, merge ou deploy em produção: Codex ordena revisão, integração, API primeiro e UI depois. Não junte F03/F07/F09/F10 nos PRs de F02.
 
 Avance autonomamente no escopo definido. Pergunte somente quando uma decisão de negócio realmente indispensável estiver ausente; continue trabalho independente que não depende dela. Ao concluir a implementação de F02, entregue os links dos PRs e o status real dos critérios de aceite antes de avançar para a próxima frente.
+
+

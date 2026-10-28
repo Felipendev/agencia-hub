@@ -2,7 +2,7 @@
 
 ## Atualização vigente — 28/10/2026
 
-Divisão atual: **cinco frentes atribuídas ao Claude com código entregue; F02/F03/F07/F10 e cadastro F09 publicados**. Codex concluiu em 27/10 a integração e publicação sequencial F10/V62 (API #66/UI #59) e F09/V63 (API #67/UI #60), API antes da UI. Base anterior em V63; interface READY no domínio principal. 61 testes API/173 UI repetidos no head integrado, CI e prévias aprovadas. Créditos/recompensas F09 continuam dependendo de regras de negócio, sem automação financeira. F08/TODO-042 publicado em 28/10: API #68/V64 e UI #61 READY no domínio principal, API antes da UI. 70 testes API/185 UI aprovados. TODO-043 em andamento: TODO-053 plano → tarefas publicada na V65; diagnóstico público/cartões seguem em entregas separadas, sem outra migration reservada. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
+Divisão atual: **cinco frentes atribuídas ao Claude com código entregue; F02/F03/F07/F10 e cadastro F09 publicados**. Codex concluiu em 27/10 a integração e publicação sequencial F10/V62 (API #66/UI #59) e F09/V63 (API #67/UI #60), API antes da UI. Base anterior em V63; interface READY no domínio principal. 61 testes API/173 UI repetidos no head integrado, CI e prévias aprovadas. Créditos/recompensas F09 continuam dependendo de regras de negócio, sem automação financeira. F08/TODO-042 publicado em 28/10: API #68/V64 e UI #61 READY no domínio principal, API antes da UI. 70 testes API/185 UI aprovados. TODO-043 em andamento: TODO-053 plano → tarefas publicada na V65; TODO-054 cartões publicada na UI #63, Vercel DzZnLAqn READY no domínio principal. Diagnóstico público e identidade dos autores de Milhas seguem pendentes, sem outra migration reservada. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
 
 Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). F02 foi revisado, integrado pelo Codex e publicado em 15/10 pelos PRs API #61/UI #54; 32 testes da API e 105 da interface aprovados. O vínculo de simulações ao cliente é a subentrega Codex TODO-052 da evolução F06, sem redistribuir as cinco frentes.
 
@@ -83,7 +83,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-043: Diagnóstico e integrações da carteira e do simulador (evolução F04/F06)
 - **Owner**: Codex
 - **Priority**: High
-- **Status**: in_progress — TODO-053 plano → tarefas publicada em 28/10; seguir diagnóstico público e reaproveitamento de cartões em entregas separadas.
+- **Status**: in_progress — TODO-053 plano → tarefas publicada em 28/10; TODO-054 cartões publicada na UI #63. Diagnóstico público e identidade dos autores de Milhas seguem pendentes.
 - **Created**: 2026-10-14
 - **Origin**: lacunas explícitas após a entrega manual TODO-040.
 - **Scope**: diagnóstico público de milhas com revisão autenticada antes de incorporar; plano → tarefas sem repetição; reaproveitamento opcional de cartões no simulador. Visitante não sobrescreve carteira por igualdade de telefone/e-mail.
@@ -101,11 +101,11 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-054: Reaproveitar cartões da carteira no simulador
 - **Owner**: Codex — subentrega TODO-043/F04/F06.
 - **Priority**: High
-- **Status**: in_progress — implementação validada; UI PR #63 em prévia/CI, sem alteração de API ou migration.
+- **Status**: resolved — publicada em 28/10 na UI PR #63, merge b3722b5; Vercel DzZnLAqn READY no domínio principal. Sem alteração de API ou migration.
 - **Created**: 2026-10-28
 - **Scope**: consulta opcional e autenticada por pessoa; revisar e copiar somente gasto mensal/pontos por dólar para o formulário. Preservar câmbio/demais premissas, permitir ajuste manual e persistir ao salvar o plano pelo CRUD/versionamento existente. Não cria cartão, carteira ou movimento. Perfil/cartão arquivado e campos inválidos não podem ser usados. Troca de pessoa/sessão descarta consulta antiga; falha tem recuperação sem apagar cálculo.
 - **CRUD**: reutiliza o CRUD do plano para as premissas e o CRUD da carteira para os cartões; preenchimento local não é novo registro editável. Exclusão futura de cartão não reescreve cenários históricos.
-- **Validação**: 216 testes/51 arquivos; 100% cobertura do componente novo; tipos/lint/build aprovados, revisão SDD independente e inspeção responsiva com dados fictícios. Publicação ainda pendente.
+- **Validação**: 216 testes/51 arquivos; 100% cobertura do componente novo; tipos/lint/build aprovados, revisão SDD independente e inspeção responsiva com dados fictícios. Publicação confirmada em docs/publicacao-cartoes-simulador-2026-10-28.md.
 - **Branch**: `codex/f06-cartoes-simulador`, UI somente; PR #63.
 ### TODO-044: Histórico e exportação consolidada (F11)
 - **Owner**: Codex — consolidação; cada agente mantém a auditoria de seus próprios módulos.
@@ -800,4 +800,7 @@ Nenhuma ideia registrada nesta auditoria.
 ## ✅ Resolved Items
 
 TODO-042/F08: publicado em 28/10/2026 nos PRs API #68 e UI #61, V64 e deploys confirmados. Detalhes no item acima e em docs/publicacao-follow-up-2026-10-28.md.
+
+
+
 
