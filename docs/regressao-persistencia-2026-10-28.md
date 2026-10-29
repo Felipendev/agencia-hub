@@ -17,3 +17,5 @@ As mutações agora aguardam a confirmação da API. Respostas inválidas geram 
 - Revisão independente de consistência aprovada. A CI passa a executar a suíte frontend, além de tipos, lint e build.
 
 Os testes HTTP da interface simulam o transporte; os testes Java usam Spring e PostgreSQL embarcado. Não equivalem a uma sessão de navegador com gravação em produção. Antes do merge: atualizar com main e repetir os gates no novo head. Depois da publicação gradual, conferir os fluxos com uma sessão real.
+
+A primeira CI falhou ao iniciar jsdom/undici no Node 20. O jsdom 30.0.1 já presente exige Node ^22.22.2 ou ^24.15.0; o workflow foi alinhado ao Node 24, usado na validação local (24.18.0). Nenhuma dependência foi atualizada para contornar a falha.
