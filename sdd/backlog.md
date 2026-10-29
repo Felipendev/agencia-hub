@@ -2,6 +2,17 @@
 
 ## Atualização vigente — 28/10/2026
 
+### TODO-056: Carregar o financeiro ao entrar no dashboard
+- **Priority**: High
+- **Status**: in_progress — correção implementada no PR draft UI #69, branch `codex/dashboard-financeiro` desde main; integração e publicação pendentes.
+- **Created**: 2026-10-29
+- **Origin**: parcelas recebidas em Vendas, mas Receita vs Despesas e indicadores do dashboard zerados.
+- **Causa comprovada**: painel usava apenas o contexto/cache local e não consultava `/financial-entries` ao abrir; Fluxo de Caixa era responsável por carregar esses dados.
+- **Correção**: consulta autenticada independente, sem cache HTTP; loading/erro/retry/atualização, isolamento de respostas por sessão e cancelamento. Resposta inválida não vira zero nem saldo parcial. Rótulos dos 12 meses usam o dia 1. Sem escritas financeiras, API ou migration.
+- **Validação**: 32 testes focados e suíte266; tipos/build aprovados. Lint src sem erros e dois avisos preexistentes. Revisão independente e inspeção desktop/celular com fixtures aprovadas; CI em execução no head 9a5b81c. Não foi feita consulta aos lançamentos reais da FELTRIX em produção.
+- **Referência**: `docs/correcao-dashboard-financeiro-2026-10-29.md`; evidências em `docs/coordination/evidencias-dashboard-2026-10-29`.
+- **Diretriz vigente**: fornecedores permanecem pausados para revisar reaproveitamento do cadastro existente; V67 só reservada, sem SQL criado/aplicado. Manter novas entregas em rascunho, sem merge/deploy nesta etapa.
+
 Divisão atual: **cinco frentes atribuídas ao Claude com código entregue; F02/F03/F07/F10 e cadastro F09 publicados**. Codex concluiu em 27/10 a integração e publicação sequencial F10/V62 (API #66/UI #59) e F09/V63 (API #67/UI #60), API antes da UI. Base anterior em V63; interface READY no domínio principal. 61 testes API/173 UI repetidos no head integrado, CI e prévias aprovadas. Créditos/recompensas F09 continuam dependendo de regras de negócio, sem automação financeira. F08/TODO-042 publicado em 28/10: API #68/V64 e UI #61 READY no domínio principal, API antes da UI. 70 testes API/185 UI aprovados. TODO-043 concluída em28/10: simulações por cliente, plano → tarefas, cartões e diagnóstico público/revisão/autores publicados (TODO-052/053/054/055). API atual3a30baf/V66 Railwayf5cb7fad Active; UIbe685c8 Vercel9drBurR6 READY no domínio principal.35 testes API/234 UI na última entrega, startup e smoke confirmados. Próxima frenteF11/TODO-044; F05/créditosF09 dependem de regras. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
 
 Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). F02 foi revisado, integrado pelo Codex e publicado em 15/10 pelos PRs API #61/UI #54; 32 testes da API e 105 da interface aprovados. O vínculo de simulações ao cliente é a subentrega Codex TODO-052 da evolução F06, sem redistribuir as cinco frentes.

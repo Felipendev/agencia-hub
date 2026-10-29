@@ -42,6 +42,8 @@ Cartões TODO-054 não exigiram migration. F11 e F05 seguem sem número autoriza
 
 V67 reservada exclusivamente ao Codex para TODO-015/CRUD de fornecedores, branch `codex/crud-fornecedores`. Acrescentar arquivamento e versão ao cadastro de fornecedores; preservar IDs e vínculos antigos. Reserva registrada antes do SQL. Banco novo e upgrade V66→V67 exigem teste local; PRs em rascunho, sem merge/deploy de produção nesta etapa. F11, CSV e correções comerciais anteriores não usam migration. Não reutilizar V67 em outra frente.
 
+**Pausa posterior do usuário em 29/10:** revisar primeiro o CRUD existente em Pessoas e `/suppliers`, evitando duplicação. Nenhum SQL V67 foi criado ou aplicado. Reserva mantida em pausa, sem autorização para implementar o desenho anterior automaticamente. A correção do dashboard TODO-056 não usa migration.
+
 ## Continuação do fluxo de integração
 
 1. Cada agente usa banco de teste próprio e branch/PR isolados. Não apontar testes para produção.
