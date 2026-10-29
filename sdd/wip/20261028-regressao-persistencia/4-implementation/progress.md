@@ -1,0 +1,1 @@
+Implementação e revisão concluídas. 73 testes focados e 307 na suíte UI; 34 testes Java na main. Tipos, lint e build local aprovados. CI inclui npm test. PR em rascunho; integração e publicação pendentes por instrução do usuário. Evidências e limites em docs/regressao-persistencia-2026-10-28.md.
