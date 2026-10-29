@@ -15,6 +15,8 @@ import { BarChart } from "@/components/charts/BarChart";
 import { AreaChart } from "@/components/charts/AreaChart";
 import { DonutChart } from "@/components/charts/DonutChart";
 import { formatBRL, formatDateBR } from "@/lib/format";
+import { useDashboardFinancial } from "@/hooks/use-dashboard-financial";
+import { Button } from "@/components/ui/button";
 import {
   CLIENTE_STATUS_LABELS,
   COTACAO_STATUS_LABELS,
@@ -33,7 +35,10 @@ const COTACAO_COLORS: Record<CotacaoStatus, string> = {
 };
 
 export default function DashboardPage() {
-  const { clientes, lancamentos, cotacoes, isReady } = useData();
+  const { clientes, cotacoes, isReady } = useData();
+  const financial = useDashboardFinancial(isReady);
+  const lancamentos = financial.rows;
+  const financialReady = financial.status === "ready";
 
   // --- Dados para gráficos ---
 
@@ -56,9 +61,8 @@ export default function DashboardPage() {
         }
       }
     }
-    return Object.entries(meses).map(([, v], i) => {
-      const d = new Date();
-      d.setMonth(d.getMonth() - (11 - i));
+    return Object.entries(meses).map(([key, v]) => {
+      const d = new Date(`${key}-01T12:00:00`);
       return {
         label: d.toLocaleDateString("pt-BR", { month: "short" }),
         receita: v.receita,
@@ -164,8 +168,23 @@ export default function DashboardPage() {
         description="Visão geral da operação — período consolidado com base nos lançamentos cadastrados."
       />
 
+      {financial.status === "loading" && (
+        <div role="status" className="rounded-lg border border-[var(--hub-border)] bg-white p-5 text-sm">
+          Carregando financeiro…
+        </div>
+      )}
+      {financial.status === "error" && (
+        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-white p-5 text-sm">
+          <p>{financial.error}</p>
+          {financial.canRetry && <Button type="button" variant="secondary" onClick={financial.refresh}>Tentar novamente</Button>}
+        </div>
+      )}
+      {financialReady && <div className="flex justify-end">
+        <Button type="button" variant="secondary" onClick={financial.refresh}>Atualizar financeiro</Button>
+      </div>}
+
       {/* KPIs financeiros */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {financialReady && <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           title="Faturamento (entradas)"
           value={formatBRL(resumo.faturamento)}
@@ -188,14 +207,14 @@ export default function DashboardPage() {
           value={formatBRL(resumo.totalDespesas)}
           accent="red"
         />
-      </div>
+      </div>}
 
       {/* KPIs operacionais */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           title="Saldo do período"
-          value={formatBRL(resumo.saldo)}
-          hint="Recebido − despesas confirmadas"
+          value={financialReady ? formatBRL(resumo.saldo) : "—"}
+          hint={financialReady ? "Recebido − despesas confirmadas" : financial.status === "error" ? "Financeiro indisponível" : "Aguardando consulta financeira"}
         />
         <KpiCard title="Clientes ativos" value={String(clientesAtivos)} />
         <KpiCard
@@ -212,7 +231,7 @@ export default function DashboardPage() {
 
       {/* Gráficos */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
+        {financialReady && <Card>
           <div className="flex items-start justify-between gap-2">
             <div>
               <CardTitle>Receita vs Despesas</CardTitle>
@@ -224,7 +243,7 @@ export default function DashboardPage() {
               data={receitaVsDespesas}
               height={220}
               formatValue={formatBRL}
-              emptyMessage="Nenhum lançamento confirmado ainda"
+              emptyMessage="Nenhum lançamento confirmado nos últimos 12 meses"
             />
           </div>
           <div className="mt-3 flex gap-5">
@@ -237,7 +256,7 @@ export default function DashboardPage() {
               <span className="text-xs text-[var(--hub-text-muted)]">Despesas</span>
             </div>
           </div>
-        </Card>
+        </Card>}
 
         <Card>
           <CardTitle>Cotações por status</CardTitle>
@@ -251,7 +270,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      {financialReady && <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <div>
             <CardTitle>Faturamento por Categoria</CardTitle>
@@ -278,11 +297,11 @@ export default function DashboardPage() {
             />
           </div>
         </Card>
-      </div>
+      </div>}
 
       {/* Listas recentes */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
+        {financialReady && <Card>
           <div className="mb-4 flex items-center justify-between gap-2">
             <CardTitle>Últimos lançamentos</CardTitle>
             <Link
@@ -318,7 +337,7 @@ export default function DashboardPage() {
               </li>
             ))}
           </ul>
-        </Card>
+        </Card>}
 
         <Card>
           <div className="mb-4 flex items-center justify-between gap-2">
