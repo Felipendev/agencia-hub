@@ -19,3 +19,5 @@ Não há gestão de registros nova: exportação é uma projeção local de dado
 A integração futura deve atualizar a branch com main, repetir os gates e considerar primeiro o PR UI #66 de isolamento/persistência. Não afirmar conclusão de todo TODO-015, TODO-037 ou dos itens F05/créditos F09 bloqueados pelo usuário.
 
 Implementação e validação local concluídas: 13 testes focados, cobertura 100% do arquivo, suíte247, tipos/lint/build e revisão independente aprovados. PR draft/CI em preparação; integração e publicação pendentes.
+
+PR draft UI #68 criado; CI verde no head b843dedc85336d641cfc7b82d4822ed5ae232cb9 (40867526572). Gates da implementação concluídos; integração/publicação pendentes por instrução do usuário.

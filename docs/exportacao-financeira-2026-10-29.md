@@ -24,3 +24,5 @@ TODO-015 continua aberto para completar sua matriz de CRUD de fornecedores e ent
 Validação: 13 testes do CSV aprovados, com 100% de linhas, branches e funções de csv-export.ts; 247 testes da suíte da branch aprovados. Tipos, lint e build local webpack aprovados. Revisão independente de consistência sem bloqueadores; nenhum Excel real ou dado de produção utilizado. O gate da CI desta base executa tipos/lint/build; execução contínua de testes será acrescentada pelo PR independente UI #66.
 
 PR draft UI #68: b843dedc85336d641cfc7b82d4822ed5ae232cb9. CI em execução. Sem merge/deploy de produção.
+
+Validação final: CI verde no head b843dedc85336d641cfc7b82d4822ed5ae232cb9, execução 40867526572. Prévia automática Vercel concluída. Nenhum merge ou deploy de produção.

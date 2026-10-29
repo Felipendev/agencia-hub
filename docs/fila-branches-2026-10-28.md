@@ -8,7 +8,7 @@ Por instrução do usuário, desenvolver e validar em branches independentes, ma
 | F11: histórico e exportação, UI | main `be685c8` → `codex/f11-historico-exportacao` | [UI #65](https://github.com/Felipendev/agencia-hub/pull/65) | Implementado, 244 testes, tipos/lint/build e revisão visual aprovados, CI verde |
 | DEBT-001: confirmação de persistência e isolamento do estado | main `be685c8` → `codex/regressao-persistencia` | [UI #66](https://github.com/Felipendev/agencia-hub/pull/66) | Implementado, 307 testes, tipos/lint/build aprovados; CI verde no head ffe6b9a (execução 40791711202) |
 | TODO-015: correções na validação comercial | main API `3a30baf` / UI `be685c8` → `codex/validacao-comercial` | [API #72](https://github.com/Felipendev/agencia-hub-api/pull/72), [UI #67](https://github.com/Felipendev/agencia-hub/pull/67) | Três regressões corrigidas; 15 testes API/234 UI, tipos/lint/build aprovados; CI verde (API 40792315700 / UI 40792331677) |
-| TODO-015: CSV financeiro completo e proteção de textos | main UI `be685c8` → `codex/exportacao-financeira` | [UI #68](https://github.com/Felipendev/agencia-hub/pull/68) | 13 testes do arquivo baixado, cobertura 100% do serializador, suíte247, tipos/lint/build e revisão aprovados; CI em execução |
+| TODO-015: CSV financeiro completo e proteção de textos | main UI `be685c8` → `codex/exportacao-financeira` | [UI #68](https://github.com/Felipendev/agencia-hub/pull/68) | 13 testes do arquivo baixado, cobertura 100% do serializador, suíte247, tipos/lint/build e revisão aprovados; CI verde (40867526572) |
 
 Não há dependência de código entre DEBT-001 e F11. Nenhuma dessas entregas cria migration; V67 continua sem reserva. As branches não contêm commits uma da outra.
 
