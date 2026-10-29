@@ -15,3 +15,5 @@ Antes da futura integração: atualizar as branches com main e repetir os testes
 Validação local final: 15 testes HTTP/Spring/PostgreSQL aprovados (CommercialFlowIntegrationTest, RequestedFeaturesIntegrationTest, SaleCommissionVisibilityIntegrationTest, FinancialEntryHttpIntegrationTest e FinancialEntryMultiTenancyIntegrationTest). Interface: 234 testes, tipos, lint e build webpack aprovados. Revisão independente dos diffs aprovada. Três casos vermelhos antes da correção estão registrados no log local commercial-red.log; logs são ignorados e não contêm evidências de produção.
 
 PRs em rascunho: API #72 (61636957fcc372f6dba2bbed49f7435a1025b7b7), UI #67 (6917712e07989ec423984cda10da400bf007340e). CI em execução. Sem merge/deploy de produção.
+
+Atualização final: CI verde nos heads acima, execuções API 40792315700 e UI 40792331677. A prévia Vercel concluiu; a prévia Railway automática ainda estava em implantação na última consulta. Nenhuma depende de merge em produção. A inicialização/HTTP da prévia API não foi validada manualmente nesta etapa.

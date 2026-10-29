@@ -1,1 +1,3 @@
 TODO-015: corrigir três regressões reproduzidas, em branches independentes da main. Pagamento direto ao fornecedor preserva custo/margem sem criar obrigação da agência. Custos desconhecidos não viram lucro, no detalhe API/UI. Nome de fornecedor vazio/duplicado é rejeitado na edição, mantendo ID. Testes HTTP incluem reconsulta, CRUD aplicável sem vínculo, rollback e agência. Não há migration, alteração retroativa ou conclusão da matriz inteira do TODO-015. PRs draft API antes da UI; sem merge/deploy. Referência: docs/validacao-comercial-2026-10-28.md.
+
+Implementado em PRs draft API #72/UI #67; 15 testes API, 234 UI, tipos/lint/build e revisão independente aprovados; CI verde nos dois heads. Integração/publicação pendentes. Nenhuma migration.

@@ -7,6 +7,7 @@ Por instrução do usuário, desenvolver e validar em branches independentes, ma
 | F11: histórico e exportação, API | main `3a30baf` → `codex/f11-historico-exportacao` | [API #71](https://github.com/Felipendev/agencia-hub-api/pull/71) | Implementado, 7 testes HTTP/Spring/PostgreSQL, CI verde |
 | F11: histórico e exportação, UI | main `be685c8` → `codex/f11-historico-exportacao` | [UI #65](https://github.com/Felipendev/agencia-hub/pull/65) | Implementado, 244 testes, tipos/lint/build e revisão visual aprovados, CI verde |
 | DEBT-001: confirmação de persistência e isolamento do estado | main `be685c8` → `codex/regressao-persistencia` | [UI #66](https://github.com/Felipendev/agencia-hub/pull/66) | Implementado, 307 testes, tipos/lint/build aprovados; CI verde no head ffe6b9a (execução 40791711202) |
+| TODO-015: correções na validação comercial | main API `3a30baf` / UI `be685c8` → `codex/validacao-comercial` | [API #72](https://github.com/Felipendev/agencia-hub-api/pull/72), [UI #67](https://github.com/Felipendev/agencia-hub/pull/67) | Três regressões corrigidas; 15 testes API/234 UI, tipos/lint/build aprovados; CI verde (API 40792315700 / UI 40792331677) |
 
 Não há dependência de código entre DEBT-001 e F11. Nenhuma dessas entregas cria migration; V67 continua sem reserva. As branches não contêm commits uma da outra.
 
@@ -14,7 +15,7 @@ Não há dependência de código entre DEBT-001 e F11. Nenhuma dessas entregas c
 
 1. Buscar a main vigente, atualizar cada branch e resolver conflitos preservando as duas entregas.
 2. Repetir os gates no head atualizado. DEBT-001 acrescenta testes à CI; depois de integrar ambas as branches, executar também a suíte combinada.
-3. Integrar uma API por vez e confirmar migrations, inicialização e saúde. Só então integrar a UI dependente. F11 exige API #71 antes de UI #65. DEBT-001 pode entrar independentemente.
+3. Integrar uma API por vez e confirmar migrations, inicialização e saúde. Só então integrar a UI dependente. F11 exige API #71 antes de UI #65; correções comerciais exigem API #72 antes de UI #67. DEBT-001 pode entrar independentemente.
 4. Fazer smoke com sessão real após cada publicação e registrar as evidências. Uma prévia automática verde não equivale a smoke de produção.
 
 ## Pendências que não devem ser confundidas com código novo pronto
@@ -25,4 +26,4 @@ Não há dependência de código entre DEBT-001 e F11. Nenhuma dessas entregas c
 
 Validação adicional da main API `3a30baf`: 13 testes aprovados em `RequestedFeaturesIntegrationTest`, `SaleCommissionVisibilityIntegrationTest`, `FlightImportIntegrationTest` e `QuotationFlightPlansTest`. Os 34 testes de CRUD/isolamento de pessoas, cotações e lançamentos financeiros foram executados separadamente para DEBT-001. Nenhuma gravação em produção foi necessária.
 
-Nova frente em andamento: codex/validacao-comercial, API/UI desde main. Três regressões reproduzidas e corrigidas, sem migration ou alteração retroativa; 15 testes API e 234 UI, tipos/lint/build aprovados. PRs draft API #72 e UI #67, CI em execução; API antes da UI. Não representa conclusão de toda a matriz TODO-015.
+Nova frente em andamento: codex/validacao-comercial, API/UI desde main. Três regressões reproduzidas e corrigidas, sem migration ou alteração retroativa; 15 testes API e 234 UI, tipos/lint/build aprovados. PRs draft API #72 e UI #67, CI verde (API 40792315700 / UI 40792331677); API antes da UI. Não representa conclusão de toda a matriz TODO-015.
