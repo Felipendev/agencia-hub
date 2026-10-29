@@ -9,9 +9,9 @@ Por instrução do usuário, desenvolver e validar em branches independentes, ma
 | DEBT-001: confirmação de persistência e isolamento do estado | main `be685c8` → `codex/regressao-persistencia` | [UI #66](https://github.com/Felipendev/agencia-hub/pull/66) | Implementado, 307 testes, tipos/lint/build aprovados; CI verde no head ffe6b9a (execução 40791711202) |
 | TODO-015: correções na validação comercial | main API `3a30baf` / UI `be685c8` → `codex/validacao-comercial` | [API #72](https://github.com/Felipendev/agencia-hub-api/pull/72), [UI #67](https://github.com/Felipendev/agencia-hub/pull/67) | Três regressões corrigidas; 15 testes API/234 UI, tipos/lint/build aprovados; CI verde (API 40792315700 / UI 40792331677) |
 | TODO-015: CSV financeiro completo e proteção de textos | main UI `be685c8` → `codex/exportacao-financeira` | [UI #68](https://github.com/Felipendev/agencia-hub/pull/68) | 13 testes do arquivo baixado, cobertura 100% do serializador, suíte247, tipos/lint/build e revisão aprovados; CI verde (40867526572) |
-| TODO-056: carregamento financeiro no dashboard | main UI `be685c8` → `codex/dashboard-financeiro` | [UI #69](https://github.com/Felipendev/agencia-hub/pull/69) | Consulta independente do cache; 32 testes focados/suíte266, tipos/build/revisão/QA aprovados; CI em execução |
+| TODO-056: carregamento financeiro no dashboard | main UI `be685c8` → `codex/dashboard-financeiro` | [UI #69](https://github.com/Felipendev/agencia-hub/pull/69) | Consulta independente do cache; 32 testes focados/suíte266, tipos/build/revisão/QA aprovados; CI verde (40874021082) |
 
-Não há dependência de código entre DEBT-001 e F11. Nenhuma dessas entregas cria migration; V67 continua sem reserva. As branches não contêm commits uma da outra.
+Não há dependência de código entre DEBT-001 e F11. Nenhuma dessas entregas cria migration; V67 está reservada em pausa para fornecedores; nenhum SQL foi criado ou aplicado. As branches não contêm commits uma da outra.
 
 A exportação UI #68 também parte diretamente da main. Recomenda-se integrar #66 primeiro, pois a exportação usa o estado consultado e a correção de isolamento por sessão está nesse PR. Não há mudanças na API ou no banco para #68. O dashboard #69 faz consulta financeira própria e não depende dessas branches nem de uma nova API/migration; preservar #66 ao combinar as entregas.
 

@@ -9,3 +9,5 @@ Manter regras financeiras: recebidos confirmados no gráfico, pendências separa
 Gates: testes da página real com HTTP simulado para entrada direta, loading/falha/vazio, retry/refresh, remontagem, sessão, abort, datas e compatibilidade; tipos/lint/build; revisão independente de consistência e QA visual com fixtures. Branch/PR independente da main; sem merge/deploy de produção. Não retomar fornecedores ou criar V67 enquanto essa frente está pausada. Relatório e limites em docs/correcao-dashboard-financeiro-2026-10-29.md.
 
 Implementação e validação local concluídas: 32 testes focados/266 suíte, tipos/build, lint src sem erros, revisão independente e visual QA desktop/mobile com fixtures. Hook/adapter100%linhas98,24%branches. PR draft e CI em preparação; integração/publicação pendentes.
+
+PR draft UI #69 criado; CI verde no head9a5b81c (40874021082), incluindo lint limpo. Gates da implementação concluídos; integração/publicação pendentes por instrução do usuário.

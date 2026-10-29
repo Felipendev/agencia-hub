@@ -9,7 +9,7 @@
 - **Origin**: parcelas recebidas em Vendas, mas Receita vs Despesas e indicadores do dashboard zerados.
 - **Causa comprovada**: painel usava apenas o contexto/cache local e não consultava `/financial-entries` ao abrir; Fluxo de Caixa era responsável por carregar esses dados.
 - **Correção**: consulta autenticada independente, sem cache HTTP; loading/erro/retry/atualização, isolamento de respostas por sessão e cancelamento. Resposta inválida não vira zero nem saldo parcial. Rótulos dos 12 meses usam o dia 1. Sem escritas financeiras, API ou migration.
-- **Validação**: 32 testes focados e suíte266; tipos/build aprovados. Lint src sem erros e dois avisos preexistentes. Revisão independente e inspeção desktop/celular com fixtures aprovadas; CI em execução no head 9a5b81c. Não foi feita consulta aos lançamentos reais da FELTRIX em produção.
+- **Validação**: 32 testes focados e suíte266; tipos/build aprovados. Lint src sem erros e dois avisos preexistentes. Revisão independente e inspeção desktop/celular com fixtures aprovadas; CI verde no head 9a5b81c (40874021082), incluindo lint em checkout limpo; prévia automática Vercel concluída. Não foi feita consulta aos lançamentos reais da FELTRIX em produção.
 - **Referência**: `docs/correcao-dashboard-financeiro-2026-10-29.md`; evidências em `docs/coordination/evidencias-dashboard-2026-10-29`.
 - **Diretriz vigente**: fornecedores permanecem pausados para revisar reaproveitamento do cadastro existente; V67 só reservada, sem SQL criado/aplicado. Manter novas entregas em rascunho, sem merge/deploy nesta etapa.
 
