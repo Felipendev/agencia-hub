@@ -1,0 +1,3 @@
+# F11 — evidências locais, dados fictícios
+Componentes reais ActivityHistory, campos/ClientePicker e tokens/globals. Harness local Next com fixtures de auth/consulta/pessoas; modal de criação de pessoa substituído por componente vazio porque não faz parte do fluxo. Nenhum token real, CRM real, banco de produção ou Railway utilizado.
+Desktop1440×1000 e celular390×844: Milhas e Viagens com módulos separados, filtros, resultados/autor/IDs, origem e exportação; larguraDOMigualscrollWidth, sem overflow. Resultados de permissão/falha/paginação/exportação tardia exercitados em testes. Persistência/filtros/autorizaçãoCSV verificados em Spring/PostgreSQL isolado, não pelo harness. Harness parado e mantido em.local ignorado, não incluído no PR.

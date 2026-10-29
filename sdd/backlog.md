@@ -10,7 +10,7 @@ Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenv
 
 A exigência do usuário passa a ser **CRUD completo para todas as features em que essas operações façam sentido**, incluindo interface, API e persistência. Salvar alterações como um novo registro não equivale a editar. Histórico financeiro usa cancelamento/estorno/versionamento quando necessário, sem exclusão destrutiva para contornar regras do domínio.
 
-As autorizações atuais do usuário abrangem implementação, testes, validação e publicação em produção. Restrições antigas de testes reproduzidas nas seções históricas abaixo não descrevem a autorização vigente. Não reabrir ou encerrar automaticamente tarefas antigas apenas pelo resumo de setembro.
+A diretriz vigente de 28/10 é implementar e validar em branches independentes e PRs de rascunho, sem novos merges ou deploys de produção nesta etapa. A publicação gradual será retomada depois. Restrições antigas de testes reproduzidas nas seções históricas abaixo não descrevem a autorização vigente. Não reabrir ou encerrar automaticamente tarefas antigas apenas pelo resumo de setembro.
 
 ### TODO-038: Completar a edição das simulações de acúmulo (F06)
 - **Owner**: Codex — entregue.
@@ -118,7 +118,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-044: Histórico e exportação consolidada (F11)
 - **Owner**: Codex — consolidação; cada agente mantém a auditoria de seus próprios módulos.
 - **Priority**: Medium
-- **Status**: pending
+- **Status**: in_progress — implementação concluída nos PRs draft API #71/UI #65, CI verde; integração e publicação pendentes.
 - **Created**: 2026-10-14
 - **Origin**: divisão paralela autorizada pelo usuário.
 - **Scope**: exportação seletiva por pessoa/período, permissões, omissão de campos sensíveis e reaproveitamento das exportações existentes. Integrar módulos novos após seus contratos, sem controlar suas escritas.
@@ -127,7 +127,7 @@ As autorizações atuais do usuário abrangem implementação, testes, validaç�
 ### TODO-045: Estoque por lotes e reservas (F05)
 - **Owner**: Codex
 - **Priority**: Conditional
-- **Status**: pending — regras de custódia/titularidade/custo/reserva/cancelamento ainda precisam de definição.
+- **Status**: pending — bloqueado pelo usuário em 28/10 até definir custódia/titularidade/custo/reserva/cancelamento.
 - **Created**: 2026-10-14
 - **Origin**: proposta condicionada no comparativo e divisão autorizada pelo usuário.
 - **Scope**: lotes com custo/validade, reserva e consumo rastreáveis; confirmação idempotente e concorrência sem exceder saldo. Não implementar débitos/reservas reais por suposição.
@@ -463,6 +463,7 @@ Esta é a visão curta para acompanhamento. O detalhamento e os critérios de ac
 - **Resolution**: `ProductionSecurityConfiguration` (perfis `prod`/`production`) já recusa subir a aplicação se `JWT_SECRET` estiver ausente/for o segredo de desenvolvimento ou se `CORS_ALLOWED_ORIGINS` estiver ausente/`*`; coberto por `ProductionSecurityConfigurationTest` (3 casos). Adicionada seção no `README.md` documentando que **qualquer** deploy real precisa exportar `SPRING_PROFILES_ACTIVE=production` — sem esse perfil ativo a validação não roda, e nenhum arquivo deste repositório define esse profile automaticamente (é responsabilidade da configuração do serviço no host). Não foi possível confirmar/ajustar a variável direto no Railway: a conta conectada ao MCP Railway não lista um projeto correspondente a este serviço — confirmar manualmente no painel do serviço em produção.
 
 ### TODO-015: Padronizar lançamentos financeiros com fornecedor, observações e composição comercial
+- **Validação vigente em 28/10/2026**: três regressões reproduzidas por testes HTTP (pagamento direto cria obrigação da agência; custo desconhecido vira lucro no detalhe; fornecedor aceita nome vazio ao editar). Correções em `codex/validacao-comercial`, API e UI, desde main, sem migration ou alteração retroativa. Também validar nome duplicado na edição e isolamento. Não encerrar a matriz inteira por esses casos; detalhes em `docs/validacao-comercial-2026-10-28.md`.
 - **Priority**: High
 - **Status**: in-progress
 - **Created**: 2026-09-03
@@ -570,7 +571,7 @@ Esta é a visão curta para acompanhamento. O detalhamento e os critérios de ac
 
 ### DEBT-001: Criar suíte de regressão de persistência entre Next.js e API Java
 - **Priority**: High
-- **Status**: pending
+- **Status**: in_progress — implementado no PR draft UI #66, CI verde no head ffe6b9a; 307 testes UI, 34 API, tipos/lint/build aprovados; integração/publicação pendentes.
 - **Created**: 2026-09-03
 - **Origin**: auditoria de fluxos críticos
 - **Context**: Os testes Java de cliente, cotação e financeiro passam, mas não cobrem o comportamento do frontend diante de falha de rede, API sem URL, validação incompatível ou confirmação visual incorreta. Não há testes de frontend para `addCliente`/`addCotacao`/`addLancamento`.
@@ -732,6 +733,7 @@ Esta é a visão curta para acompanhamento. O detalhamento e os critérios de ac
 ## 🆕 Feature solicitada em 2026-09-13
 
 ### TODO-037: Importar voos de PDF, imagem ou link de companhia para calcular milhas e compor cotação
+- **Validação vigente em 28/10/2026**: testes existentes de cache/cota/concorrência usam visão simulada; parser usa texto fixo. A rodada automatizada passou, mas não comprova precisão de OCR em PDF/PNG/JPEG reais ou disponibilidade do provedor. Aceite por amostras reais continua pendente. Não reabrir incidente de produção apenas pela ausência dessa evidência.
 - **Priority**: High (sugerida pelo impacto no fluxo de cotação)
 - **Status**: in-progress — implementação iniciada em 2026-09-13; código de frontend/backend e testes preparados, 47 testes frontend e 27 backend passaram; build/lint aprovados; publicação em andamento
 - **Created**: 2026-09-13
