@@ -4,14 +4,16 @@ import type { LancamentoFinanceiro, Cliente } from "@/types";
 /**
  * Converte array de objetos para CSV
  */
-function arrayToCSV(data: string[][]): string {
+function arrayToCSV(data: Array<Array<string | number>>): string {
   return data
     .map((row) =>
       row
         .map((cell) => {
-          // Escapa aspas duplas e envolve em aspas se necessário
-          const escaped = String(cell).replace(/"/g, '""');
-          return /[",\n]/.test(escaped) ? `"${escaped}"` : escaped;
+          // Números vêm dos campos monetários; textos nunca devem executar fórmulas.
+          const value = typeof cell === "number"
+            ? (Number.isFinite(cell) ? cell.toFixed(2).replace(".", ",") : "")
+            : (/^[\s\p{Cc}]*[=+@-]/u.test(cell) ? `'${cell}` : cell);
+          return `"${value.replace(/"/g, '""')}"`;
         })
         .join(",")
     )
@@ -49,10 +51,20 @@ export function exportarLancamentosCSV(
     "Descrição",
     "Tipo",
     "Categoria",
-    "Valor (R$)",
+    "Valor do lançamento (R$)",
     "Status",
     "Cliente",
     "Conta Bancária",
+    "ID do lançamento",
+    "ID do cliente",
+    "ID do fornecedor",
+    "Observações",
+    "Venda informada no lançamento (R$)",
+    "Custo do fornecedor (R$)",
+    "Comissão (R$)",
+    "Lucro bruto do lançamento (R$)",
+    "Lucro líquido do lançamento (R$)",
+    "Recorrência configurada",
   ];
 
   const rows = lancamentos.map((l) => [
@@ -60,10 +72,22 @@ export function exportarLancamentosCSV(
     l.descricao,
     l.tipo === "entrada" ? "Entrada" : "Saída",
     l.categoria,
-    l.valor.toFixed(2).replace(".", ","),
+    l.valor,
     l.status,
     l.clienteId ? clienteMap.get(l.clienteId) || "—" : "—",
     l.contaBancaria ?? "—",
+    l.id,
+    l.clienteId ?? "",
+    l.fornecedorId ?? "",
+    l.observacoes ?? "",
+    l.valorVenda ?? "",
+    l.custoFornecedor ?? "",
+    l.valorComissao ?? "",
+    l.tipo === "entrada" && l.valorVenda != null && l.custoFornecedor != null
+      ? l.valorVenda - l.custoFornecedor : "",
+    l.tipo === "entrada" && l.valorVenda != null && l.custoFornecedor != null
+      ? l.valorVenda - l.custoFornecedor - (l.valorComissao ?? 0) : "",
+    l.recorrencia ?? "",
   ]);
 
   const csv = arrayToCSV([headers, ...rows]);
@@ -83,11 +107,11 @@ export function exportarResumoFinanceiroCSV(resumo: {
 }): void {
   const headers = ["Indicador", "Valor (R$)"];
   const rows = [
-    ["Faturamento (Entradas)", resumo.faturamento.toFixed(2).replace(".", ",")],
-    ["Total Recebido", resumo.totalRecebido.toFixed(2).replace(".", ",")],
-    ["A Receber", resumo.aReceber.toFixed(2).replace(".", ",")],
-    ["Total Despesas", resumo.totalDespesas.toFixed(2).replace(".", ",")],
-    ["Saldo", resumo.saldo.toFixed(2).replace(".", ",")],
+    ["Faturamento (Entradas)", resumo.faturamento],
+    ["Total Recebido", resumo.totalRecebido],
+    ["A Receber", resumo.aReceber],
+    ["Total Despesas", resumo.totalDespesas],
+    ["Saldo", resumo.saldo],
   ];
 
   const csv = arrayToCSV([headers, ...rows]);
