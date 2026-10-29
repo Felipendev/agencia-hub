@@ -38,6 +38,12 @@ Cartões TODO-054 não exigiram migration. F11 e F05 seguem sem número autoriza
 
 ## Fluxo de integração
 
+## Reserva de 29/10 — fornecedores comerciais
+
+V67 reservada exclusivamente ao Codex para TODO-015/CRUD de fornecedores, branch `codex/crud-fornecedores`. Acrescentar arquivamento e versão ao cadastro de fornecedores; preservar IDs e vínculos antigos. Reserva registrada antes do SQL. Banco novo e upgrade V66→V67 exigem teste local; PRs em rascunho, sem merge/deploy de produção nesta etapa. F11, CSV e correções comerciais anteriores não usam migration. Não reutilizar V67 em outra frente.
+
+## Continuação do fluxo de integração
+
 1. Cada agente usa banco de teste próprio e branch/PR isolados. Não apontar testes para produção.
 2. Desenvolver em paralelo, publicar em sequência V58 → V59 → V60 → V61 → V62 → V63 → V64 → V65 → V66. Versão maior aguarda as anteriores; sem `outOfOrder` ou ignore de validação.
 3. Antes de integrar, buscar main e comparar nomes/conteúdo das migrations publicadas. Não editar/renomear migrations executadas nem usar repair para mascarar divergências.
