@@ -19,7 +19,7 @@ export async function updateCustomerRemote(
 
   const body = clientePatchToApi(patch);
   if (Object.keys(body).length === 0) {
-    return { ...current, ...patch };
+    return current;
   }
 
   const api = await apiFetch<ApiCustomerResponse>(
@@ -27,5 +27,8 @@ export async function updateCustomerRemote(
     { method: "PATCH", body: JSON.stringify(body) },
     token,
   );
+  if (!api?.id || api.id !== current.id || typeof api.name !== "string") {
+    throw new Error("Resposta da API inválida.");
+  }
   return mergeCustomerApiResponse({ ...current, ...patch }, api);
 }

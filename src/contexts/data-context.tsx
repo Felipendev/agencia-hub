@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -107,35 +108,56 @@ function stripSeedDataWhenRemote(data: Stored, hasApi: boolean): Stored {
   };
 }
 
-function loadStored(): Stored {
+function localDemoAllowed(): boolean {
+  return process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_ALLOW_LOCAL_DATA === "true";
+}
+
+function requireDataService() {
+  if (!getHasRemoteApi() && !localDemoAllowed()) {
+    throw new Error("O serviço de dados está indisponível. Nenhuma alteração foi salva.");
+  }
+}
+
+function loadStored(scope?: string): Stored {
   const hasApi = getHasRemoteApi();
   const empty: Stored = { clientes: [], lancamentos: [], cotacoes: [] };
-  const fallback: Stored = hasApi ? empty : {
+  const fallback: Stored = hasApi || !localDemoAllowed() ? empty : {
     clientes: seedClientes,
     lancamentos: seedLancamentos,
     cotacoes: seedCotacoes,
   };
 
-  if (typeof window === "undefined") return fallback;
+  if (typeof window === "undefined" || (!hasApi && !localDemoAllowed()) || (hasApi && !scope)) return fallback;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return fallback;
-    const normalized = normalizeStored(JSON.parse(raw) as Partial<Stored>);
+    const parsed = JSON.parse(raw) as Partial<Stored> & { scope?: string };
+    // Never assign an unscoped legacy cache or another account's data to the current tenant.
+    if (hasApi && parsed.scope !== scope) return empty;
+    if (!hasApi && parsed.scope) return fallback;
+    const normalized = normalizeStored(parsed);
     return stripSeedDataWhenRemote(normalized, hasApi);
   } catch {
     return fallback;
   }
 }
 
-function saveStored(data: Stored) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+function saveStored(data: Stored, scope?: string) {
+  const remote = getHasRemoteApi();
+  if ((remote && !scope) || (!remote && !localDemoAllowed())) return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, scope: remote ? scope : undefined }));
+  } catch {
+    // Optional cache must not turn an API-confirmed write into a failed operation.
+  }
 }
 
 function normalizeStored(partial: Partial<Stored>): Stored {
-  const rawCot = partial.cotacoes ?? seedCotacoes;
+  const demo = !getHasRemoteApi() && localDemoAllowed();
+  const rawCot = partial.cotacoes ?? (demo ? seedCotacoes : []);
   return {
-    clientes: partial.clientes ?? seedClientes,
-    lancamentos: partial.lancamentos ?? seedLancamentos,
+    clientes: partial.clientes ?? (demo ? seedClientes : []),
+    lancamentos: partial.lancamentos ?? (demo ? seedLancamentos : []),
     cotacoes: rawCot.map((c) => migrateCotacao(c)),
   };
 }
@@ -174,36 +196,50 @@ const DataContext = createContext<DataContextValue | null>(null);
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const { token, user } = useAuth();
+  const scope = token && user ? user.id + ":" + (user.agencyId ?? "") : undefined;
+  const key = getHasRemoteApi() ? scope ?? "signed-out" : "local";
+  // Identity changes reset descendants before any stale records or forms can render.
+  // Token renewal for the same identity keeps the provider and unsaved forms mounted.
+  return <DataSessionProvider key={key} scope={scope}>{children}</DataSessionProvider>;
+}
+
+function DataSessionProvider({ children, scope }: { children: React.ReactNode; scope?: string }) {
+  const { token } = useAuth();
   const [data, setData] = useState<Stored>(() => ({
-    clientes: seedClientes,
-    lancamentos: seedLancamentos,
-    cotacoes: seedCotacoes,
+    clientes: !getHasRemoteApi() && localDemoAllowed() ? seedClientes : [],
+    lancamentos: !getHasRemoteApi() && localDemoAllowed() ? seedLancamentos : [],
+    cotacoes: !getHasRemoteApi() && localDemoAllowed() ? seedCotacoes : [],
   }));
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => { active.current = false; };
+  }, []);
+  const dataMode = useCallback(() => {
+    if (!active.current) throw new Error("A sessão mudou. Reabra a operação na conta atual.");
+    requireDataService();
+  }, []);
+  const confirmed = useCallback(async <T,>(request: Promise<T>): Promise<T> => {
+    const response = await request;
+    if (!active.current) throw new Error("A sessão mudou. Reabra a operação na conta atual.");
+    return response;
+  }, []);
   const [isReady, setIsReady] = useState(false);
   const hasRemoteApi = getHasRemoteApi();
 
   // Initial load
   useEffect(() => {
-    setData(loadStored());
+    setData(loadStored(scope));
     setIsReady(true);
-  }, []);
-
-  // Reset data when the signed-in user changes (login / logout / account switch)
-  const prevUserIdRef = { current: user?.id };
-  useEffect(() => {
-    if (!isReady) return;
-    if (user?.id === prevUserIdRef.current) return;
-    prevUserIdRef.current = user?.id;
-    setData(loadStored());
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, isReady]);
+  }, [scope]);
 
   useEffect(() => {
     if (!isReady) return;
-    saveStored(data);
-  }, [data, isReady]);
+    saveStored(data, scope);
+  }, [data, isReady, scope]);
 
   const addCliente = useCallback(async (c: Omit<Cliente, "id" | "createdAt">) => {
+    dataMode();
     const draft: Cliente = {
       ...c,
       id: generateId(),
@@ -215,7 +251,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       if (!token) {
         throw new Error("Sua sessão expirou. Entre novamente para cadastrar o cliente.");
       }
-      const remote = await createCustomerRemote(draft, token);
+      const remote = await confirmed(createCustomerRemote(draft, token));
       if (!remote) {
         throw new Error("A API de clientes não está configurada.");
       }
@@ -224,16 +260,17 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
     setData((d) => ({ ...d, clientes: [novo, ...d.clientes] }));
     return novo;
-  }, [token]);
+  }, [token, confirmed, dataMode]);
 
   const updateCliente = useCallback(async (id: string, patch: Partial<Cliente>) => {
+    dataMode();
     const current = data.clientes.find((cliente) => cliente.id === id);
     if (!current) throw new Error("Cliente não encontrado.");
 
     let updated: Cliente = { ...current, ...patch };
     if (getHasRemoteApi()) {
       if (!token) throw new Error("Sua sessão expirou. Entre novamente para atualizar o cliente.");
-      updated = await updateCustomerRemote(current, patch, token);
+      updated = await confirmed(updateCustomerRemote(current, patch, token));
     }
 
     setData((d) => ({
@@ -242,18 +279,21 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         cliente.id === id ? updated : cliente,
       ),
     }));
-  }, [data.clientes, token]);
+  }, [data.clientes, token, confirmed, dataMode]);
 
   const deleteCliente = useCallback(async (id: string) => {
-    if (hasRemoteApi && token && isUuid(id)) {
-      await softDeleteCustomer(id, token);
+    dataMode();
+    if (hasRemoteApi) {
+      if (!token) throw new Error("Sua sessão expirou. Entre novamente para excluir o cliente.");
+      if (!isUuid(id)) throw new Error("Este cliente ainda não foi sincronizado com o serviço.");
+      await confirmed(softDeleteCustomer(id, token));
     }
     setData((d) => ({
       ...d,
       clientes: d.clientes.filter((c) => c.id !== id),
       cotacoes: d.cotacoes.filter((c) => c.clienteId !== id),
     }));
-  }, [token, hasRemoteApi]);
+  }, [token, hasRemoteApi, confirmed, dataMode]);
 
   const checkDuplicate = useCallback(
     (email: string, telefone: string, excludeId?: string): ClienteDuplicateCheck =>
@@ -263,6 +303,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   const addLancamento = useCallback(
     async (l: Omit<LancamentoFinanceiro, "id">) => {
+      dataMode();
       const draft: LancamentoFinanceiro = { ...l, id: generateId() };
       let novo = draft;
 
@@ -270,7 +311,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         if (!token) {
           throw new Error("Sua sessão expirou. Entre novamente para registrar o lançamento.");
         }
-        const remote = await createFinancialEntryRemote(draft, token);
+        const remote = await confirmed(createFinancialEntryRemote(draft, token));
         if (!remote) {
           throw new Error("A API financeira não está configurada.");
         }
@@ -283,18 +324,19 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       }));
       return novo;
     },
-    [token],
+    [token, confirmed, dataMode],
   );
 
   const updateLancamento = useCallback(
     async (id: string, patch: Partial<LancamentoFinanceiro>) => {
+      dataMode();
       const current = data.lancamentos.find((entry) => entry.id === id);
       if (!current) throw new Error("Lançamento não encontrado.");
 
       let updated: LancamentoFinanceiro = { ...current, ...patch };
       if (getHasRemoteApi()) {
         if (!token) throw new Error("Sua sessão expirou. Entre novamente para atualizar o lançamento.");
-        const remote = await updateFinancialEntryRemote(current, patch, token);
+        const remote = await confirmed(updateFinancialEntryRemote(current, patch, token));
         if (!remote) throw new Error("Este lançamento ainda não foi sincronizado com a API.");
         updated = remote;
       }
@@ -304,24 +346,26 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         lancamentos: d.lancamentos.map((entry) => entry.id === id ? updated : entry),
       }));
     },
-    [data.lancamentos, token],
+    [data.lancamentos, token, confirmed, dataMode],
   );
 
   const deleteLancamento = useCallback(
     async (id: string) => {
+      dataMode();
       if (getHasRemoteApi()) {
         if (!token) throw new Error("Sua sessão expirou. Entre novamente para excluir o lançamento.");
         if (!isUuid(id)) throw new Error("Este lançamento ainda não foi sincronizado com a API.");
-        const deleted = await deleteFinancialEntryRemote(id, token);
+        const deleted = await confirmed(deleteFinancialEntryRemote(id, token));
         if (!deleted) throw new Error("Não foi possível excluir o lançamento na API.");
       }
       setData((d) => ({ ...d, lancamentos: d.lancamentos.filter((x) => x.id !== id) }));
     },
-    [token],
+    [token, confirmed, dataMode],
   );
 
   const addCotacao = useCallback(
     async (c: Omit<Cotacao, "id" | "createdAt" | "updatedAt">) => {
+      dataMode();
       const now = new Date().toISOString();
       const detalhes = mergeCotacaoDetalhes(c.detalhes);
       const draft: Cotacao = {
@@ -340,7 +384,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         if (!token) {
           throw new Error("Sua sessão expirou. Entre novamente para criar a cotação.");
         }
-        const remote = await createQuotationRemote(draft, token);
+        const remote = await confirmed(createQuotationRemote(draft, token));
         if (!remote) {
           throw new Error("A API de cotações não está configurada.");
         }
@@ -353,10 +397,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       }));
       return novo;
     },
-    [token],
+    [token, confirmed, dataMode],
   );
 
   const saveCotacaoFlightPlan = useCallback(async (id: string, plan: FlightPlan): Promise<Cotacao> => {
+    dataMode();
     const current = data.cotacoes.find((c) => c.id === id);
     if (!current) throw new Error("Cotação não encontrada.");
     const selected = plan.options.find((o) => o.id === plan.selectedOptionId);
@@ -365,113 +410,72 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     let saved: Cotacao = { ...current, ...patch, updatedAt: new Date().toISOString() };
     if (getHasRemoteApi()) {
       if (!token) throw new Error("Sua sessão expirou.");
-      const remote = await updateQuotationRemote(current, patch, token);
+      const remote = await confirmed(updateQuotationRemote(current, patch, token));
       if (!remote) throw new Error("A API de cotações não está configurada.");
       saved = remote;
     }
     setData((d) => ({ ...d, cotacoes: d.cotacoes.map((c) => c.id === id ? saved : c) }));
     return saved;
-  }, [data.cotacoes, token]);
+  }, [data.cotacoes, token, confirmed, dataMode]);
 
   const updateCotacao = useCallback(async (id: string, patch: Partial<Cotacao>) => {
+    dataMode();
     const current = data.cotacoes.find((cotacao) => cotacao.id === id);
     if (!current) throw new Error("Cotação não encontrada.");
-    const now = new Date().toISOString();
-    const mergedForRemote: Cotacao = { ...current, ...patch, updatedAt: now };
-    if (patch.detalhes) {
-      mergedForRemote.detalhes = mergeCotacaoDetalhes({
-        ...current.detalhes,
-        ...patch.detalhes,
-      });
+    let saved: Cotacao = { ...current, ...patch, updatedAt: new Date().toISOString() };
+    if (patch.detalhes) saved.detalhes = mergeCotacaoDetalhes({ ...current.detalhes, ...patch.detalhes });
+    if (getHasRemoteApi()) {
+      if (!token) throw new Error("Sua sessão expirou. Entre novamente para atualizar a cotação.");
+      if (!isUuid(id)) throw new Error("Esta cotação ainda não foi sincronizada com o serviço.");
+      const remote = await confirmed(updateQuotationRemote(current, patch, token));
+      if (!remote) throw new Error("Não foi possível confirmar a alteração da cotação no serviço.");
+      saved = remote;
     }
-    setData((d) => ({
-      ...d,
-      cotacoes: d.cotacoes.map((x) => {
-        if (x.id !== id) return x;
-        return mergedForRemote;
-      }),
-    }));
-
-    try {
-      const apiMerged = await updateQuotationRemote(mergedForRemote, patch, token);
-      if (!apiMerged) return;
-      setData((d) => ({
-        ...d,
-        cotacoes: d.cotacoes.map((x) => (x.id === id ? apiMerged : x)),
-      }));
-    } catch (error) {
-      setData((d) => ({
-        ...d,
-        cotacoes: d.cotacoes.map((x) =>
-          x.id === id && x.updatedAt === now ? current : x,
-        ),
-      }));
-      throw error;
-    }
-  }, [data.cotacoes, token]);
+    setData((d) => ({ ...d, cotacoes: d.cotacoes.map((x) => x.id === id ? saved : x) }));
+  }, [data.cotacoes, token, confirmed, dataMode]);
 
   const resetDemoData = useCallback(() => {
     const hasApi = getHasRemoteApi();
     const fresh: Stored = {
-      clientes: hasApi ? [] : seedClientes,
-      lancamentos: hasApi ? [] : seedLancamentos,
-      cotacoes: hasApi ? [] : seedCotacoes,
+      clientes: hasApi || !localDemoAllowed() ? [] : seedClientes,
+      lancamentos: hasApi || !localDemoAllowed() ? [] : seedLancamentos,
+      cotacoes: hasApi || !localDemoAllowed() ? [] : seedCotacoes,
     };
     setData(fresh);
-    saveStored(fresh);
-  }, []);
+    saveStored(fresh, scope);
+  }, [scope]);
 
   const syncCotacoesFromApi = useCallback(
     async (params?: SyncCotacoesFromApiParams) => {
+      dataMode();
       if (!getHasRemoteApi()) return;
-      try {
-        const list = await listQuotationsRemote({
-          customerId:
-            params?.customerId && isUuid(params.customerId) ?
-              params.customerId
-            : undefined,
-          status:
-            params?.status != null ?
-              cotacaoStatusToApi(params.status)
-            : undefined,
-          search: params?.search?.trim() || undefined,
-          token: params?.token,
-        });
-        setData((d) => {
-          // Keep locally-created cotações (non-UUID IDs) not yet synced to the API
-          const apiIds = new Set(list.map((c) => c.id));
-          const localOnly = d.cotacoes.filter((c) => !isUuid(c.id) && !apiIds.has(c.id));
-          return { ...d, cotacoes: [...list, ...localOnly] };
-        });
-      } catch (e) {
-        console.warn(
-          "[agencia-hub] Falha ao listar cotações na API (lista local inalterada).",
-          e,
-        );
-        // Repropaga para que os chamadores possam exibir mensagem ao usuário
-        throw e;
-      }
-    },
-    [],
+      if (!token || (params?.token && params.token !== token)) throw new Error("Sua sessão expirou. Entre novamente para consultar as cotações.");
+      if (params?.customerId && !isUuid(params.customerId)) throw new Error("Selecione uma pessoa sincronizada para consultar suas cotações.");
+      const list = await confirmed(listQuotationsRemote({
+        customerId: params?.customerId || undefined,
+        status: params?.status != null ? cotacaoStatusToApi(params.status) : undefined,
+        search: params?.search?.trim() || undefined,
+        token,
+      }));
+      setData((d) => ({ ...d, cotacoes: list }));
+    }, [token, confirmed, dataMode],
   );
 
   const syncClientesFromApi = useCallback(async () => {
-    if (!getHasRemoteApi() || !token) return;
-    try {
-      const list = await listCustomersRemote(token);
-      setData((d) => ({ ...d, clientes: list }));
-    } catch (e) {
-      console.warn("[agencia-hub] Falha ao listar clientes da API.", e);
-      throw e;
-    }
-  }, [token]);
+    dataMode();
+    if (!getHasRemoteApi()) return;
+    if (!token) throw new Error("Sua sessão expirou. Entre novamente para consultar as pessoas.");
+    const list = await confirmed(listCustomersRemote(token));
+    setData((d) => ({ ...d, clientes: list }));
+  }, [token, confirmed, dataMode]);
 
   const syncLancamentosFromApi = useCallback(async () => {
+    dataMode();
     if (!getHasRemoteApi()) return;
     if (!token) throw new Error("Sua sessão expirou. Entre novamente para consultar o financeiro.");
-    const list = await listFinancialEntriesRemote(token);
+    const list = await confirmed(listFinancialEntriesRemote(token));
     setData((d) => ({ ...d, lancamentos: list }));
-  }, [token]);
+  }, [token, confirmed, dataMode]);
 
   const value = useMemo<DataContextValue>(
     () => ({
