@@ -1,0 +1,20 @@
+{
+  "feature": "DEBT-001",
+  "tasks": [
+    {
+      "id": "P1",
+      "title": "Reproduzir e corrigir confirmação local sem API/sessão",
+      "status": "completed"
+    },
+    {
+      "id": "P2",
+      "title": "Provar cache/sessão/reload/falhas com provider real e HTTP",
+      "status": "completed"
+    },
+    {
+      "id": "P3",
+      "title": "CI/testes/build/revisão e PRdraft independente",
+      "status": "completed"
+    }
+  ]
+}
