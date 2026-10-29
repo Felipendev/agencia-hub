@@ -31,7 +31,7 @@ O conector Railway exigiu reautenticação. A sessão já existente no navegador
 
 ## Validação autenticada
 
-Foi solicitada uma sessão no domínio principal para conferir o dashboard com dados reais da conta. Até a confirmação do login, os testes e a inspeção com fixtures não equivalem à conferência dos recebimentos reais da FELTRIX. Não foram criados, quitados, excluídos ou reconciliados registros reais para validar esta publicação.
+Login concluído e conferido em produção. Vendas e dashboard da mesma agência apresentaram totais compatíveis; despesas e saldo também foram conferidos. Acesso direto ao dashboard repetido, observando loading seguido dos valores retornados, sem visitar Fluxo de Caixa. Gráfico Receita vs Despesas preenchido no mês correspondente aos recebimentos. Histórico de Viagens consultado com sucesso, retornando eventos e opção de CSV. Nenhum registro real criado, quitado, excluído ou reconciliado. Capturas com dados reais ficaram apenas na pasta local ignorada .local/evidencias-producao-2026-10-29, sem envio ao GitHub.
 
 ## Encerramento da publicação
 
@@ -41,8 +41,8 @@ As sete entregas foram publicadas, API antes de suas interfaces dependentes. Pro
 - UI combinada final: 362 testes em 61 arquivos, tipos sem erros e lint sem erros (dois avisos preexistentes). Revisão independente sem bloqueadores. CI final #68: execução 40897056012, job 123528959935, head `8ccd53c` aprovado antes do merge. Prévia `dpl_CdJC68DRzk58aEpFAwmgNeFJKvUB` READY.
 - API combinada: 22 testes HTTP/Spring/PostgreSQL aprovados. CI #71: execução 40895054542, job 123521767348, head `b469f1c` aprovado antes do merge.
 - Verificação pública final: site 200, dashboard sem sessão 307; OpenAPI da API 200, histórico sem sessão 403. Isso confirma disponibilidade/proteção, não os dados financeiros da conta.
-- A aba de validação continuava na página de login na conferência final. A validação autenticada dos recebimentos reais permanece pendente, sem bloquear a publicação já concluída.
+- Conferência autenticada concluída após novo login: dashboard, comparação com Vendas, entrada direta com nova consulta e gráfico, além de leitura do histórico de Viagens.
 
 Nenhuma variável/configuração Railway foi alterada nesta rodada. Nenhuma migration criada/aplicada. V67 continua reservada e pausada. TODO-015 permanece parcialmente aberto para a matriz comercial e decisão de reaproveitamento de fornecedores; F05 e créditos F09 continuam bloqueados.
 
-Atualização da sessão: o usuário informou ter entrado. Na retomada, a aba do AgênciasHub ainda exibiu login com mensagem de credenciais inválidas; novo acesso foi solicitado. A conferência autenticada permanece pendente. O usuário também confirmou reconexão do Railway; a API já havia sido validada pelo painel antes disso.
+Atualização da sessão: a primeira tentativa mostrou credenciais inválidas; o usuário entrou novamente e a validação autenticada foi concluída. Railway também reconectado; a API já havia sido validada pelo painel.

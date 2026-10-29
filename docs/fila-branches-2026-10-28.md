@@ -37,4 +37,4 @@ Nova frente em andamento: codex/validacao-comercial, API/UI desde main. Três re
 
 ## Produção confirmada em 29/10
 
-PRs API #72/#71 e UI #66/#69/#67/#65/#68 publicados. API ba2a204, Railway b6158faa ACTIVE, schema V66. UI 55badfed, Vercel dpl_2TFqMXhsbBbqcNLQnYDWv1ZLr9jZ READY no domínio principal. Consulta autenticada dos recebimentos FELTRIX ainda pendente de login; não confundir com o smoke público aprovado. Fornecedores continuam pausados, V67 sem SQL. Nenhuma nova frente foi iniciada nesta rodada.
+PRs API #72/#71 e UI #66/#69/#67/#65/#68 publicados. API ba2a204, Railway b6158faa ACTIVE, schema V66. UI 55badfed, Vercel dpl_2TFqMXhsbBbqcNLQnYDWv1ZLr9jZ READY no domínio principal. Consulta autenticada dos recebimentos FELTRIX concluída: dashboard compatível com Vendas, recarga direta e gráfico aprovados; histórico de Viagens consultado. Fornecedores continuam pausados, V67 sem SQL. Nenhuma nova frente foi iniciada nesta rodada.
