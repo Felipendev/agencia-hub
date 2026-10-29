@@ -4,3 +4,7 @@ Implementação local concluída em28/10; publicação/merge fora do escopo dest
 VisualQA1440×1000/390×844 com componentes reais e dados fictícios, sem overflow. Auth/API deconsulta/pessoas são fixtures; criação de pessoa/modal fora deste cenário, não exercitada. Harness .local/history-qa-20261028 parado e ignorado, não vai no PR. Nenhum dado real/produção alterado. Evidências docs/coordination/evidencias-f11 no repositório de coordenação. H3 aguarda PRs/CI, não Railway.
 
 Atualização final: PRs API #71 e UI #65 criados em rascunho, CI verde em ambos os heads. H3 concluída. Integração e publicação permanecem pendentes por instrução do usuário; não houve merge/deploy de produção. Relatório em docs/f11-implementacao-antecipada-2026-10-28.md.
+
+## Publicação 29/10/2026
+
+Entrega integrada e publicada, API antes da UI dependente. Validação final combinada: 362 testes UI e 22 API aprovados; produção API ba2a204 ACTIVE/V66, UI 55badfed READY. Sem migration nova. Evidências e limite do smoke autenticado em docs/publicacao-gradual-2026-10-29.md. As pendências de integração acima são históricas.

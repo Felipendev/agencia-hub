@@ -21,3 +21,7 @@ Os testes HTTP da interface simulam o transporte; os testes Java usam Spring e P
 A primeira CI falhou ao iniciar jsdom/undici no Node 20. O jsdom 30.0.1 já presente exige Node ^22.22.2 ou ^24.15.0; o workflow foi alinhado ao Node 24, usado na validação local (24.18.0). Nenhuma dependência foi atualizada para contornar a falha.
 
 PR UI #66: CI verde no head ffe6b9aa5524fe0eddbc492a8938163daae5b3c7, execução 40791711202. Nenhum merge/deploy de produção.
+
+## Atualização de publicação — 29/10/2026
+
+Subentrega publicada na rodada autorizada: API final ba2a204 ACTIVE/V66; UI final 55badfed READY no domínio principal. 362 testes UI/22 API combinados aprovados. Sem migration nova; fornecedores/V67 continuam pausados. Registro completo e limite da validação autenticada em publicacao-gradual-2026-10-29.md. Notas anteriores de integração/deploy pendentes são históricas. A publicação das subentregas comerciais não encerra toda a matriz TODO-015.

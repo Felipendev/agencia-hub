@@ -30,3 +30,7 @@ Validação local: 32 testes focados da página com HTTP simulado; 266 testes na
 PR draft UI #69, head9a5b81ce0c48d1bf91ee8e405291b39a7d28f638. CI em execução. Nenhum merge ou deploy em produção.
 
 Atualização final: CI verde (tipos/lint/build em checkout limpo), execução40874021082, head9a5b81ce0c48d1bf91ee8e405291b39a7d28f638. Prévia automática Vercel concluída. Sem merge/deploy de produção. Harness local encerrado, aba de teste fechada e viewport restaurado.
+
+## Atualização de publicação — 29/10/2026
+
+Subentrega publicada na rodada autorizada: API final ba2a204 ACTIVE/V66; UI final 55badfed READY no domínio principal. 362 testes UI/22 API combinados aprovados. Sem migration nova; fornecedores/V67 continuam pausados. Registro completo e limite da validação autenticada em publicacao-gradual-2026-10-29.md. Notas anteriores de integração/deploy pendentes são históricas. A publicação das subentregas comerciais não encerra toda a matriz TODO-015.

@@ -13,10 +13,10 @@ API `3a30bafbc2d62bc1d050c6409a7800986ecc7e8e`, Railway `f5cb7fad-5e8c-4fde-bb39
 | Persistência e sessão | UI #66 / `ffe6b9a` | `9d1837f034bf57e6ec5a1a197fbaae55d3467ba6` | Vercel `dpl_2QuqcmWWjgSmT866fgU5gQ5ipgck` READY, domínio principal associado |
 | Dashboard financeiro | UI #69 / `9981f60` após main | `0c47d27585ea61f5466e73fe8ebec6202f2ee5e9` | Vercel `dpl_ZEF3UvAMzFwgjbW5hET5j9UferVn` READY, domínio principal associado |
 | Correções comerciais | API #72 / `6163695` | `1c85bb7e5854734c0cd27a3b809e1efcacdeaa36` | Railway `16df0b78-4dcd-497e-b188-02616f06cabc` ACTIVE; inicialização/HTTP confirmados |
-| Margem indisponível | UI #67 / `1cb2a28` após main | `60e34660ba051fb5b31b7d4f7f636a580439ce01` | Implantação em acompanhamento |
-| Histórico F11 | API #71 / `b469f1c` após main | `ba2a204056d6dcf668393739bc974fee131879e6` | Implantação em acompanhamento |
-| Histórico F11 | UI #65 / `860163d` após main | Pendente | CI/testes em acompanhamento; aguarda API |
-| Exportação financeira | UI #68 | Pendente | Aguarda atualização com a main final e gates |
+| Margem indisponível | UI #67 / `1cb2a28` após main | `60e34660ba051fb5b31b7d4f7f636a580439ce01` | Vercel `dpl_GYpz7R6LAHnPXZ34AiJ1de4FqkRB` READY |
+| Histórico F11 | API #71 / `b469f1c` após main | `ba2a204056d6dcf668393739bc974fee131879e6` | Railway `b6158faa-c1c4-43ad-8411-0560e2b043a0` ACTIVE, commit exato confirmado no painel |
+| Histórico F11 | UI #65 / `860163d` após main | `65249391d44adc35ada724603ac547d0a153c62e` | Vercel `dpl_CNwSLqA1Ho4ye7CjPoEYgz6oUvvp` READY |
+| Exportação financeira | UI #68 / `8ccd53c` após main | `55badfed339a5be602a0e2f5089ae0365ab538ce` | Vercel `dpl_2TFqMXhsbBbqcNLQnYDWv1ZLr9jZ` READY, domínio principal associado |
 
 ## Validações já repetidas
 
@@ -32,3 +32,17 @@ O conector Railway exigiu reautenticação. A sessão já existente no navegador
 ## Validação autenticada
 
 Foi solicitada uma sessão no domínio principal para conferir o dashboard com dados reais da conta. Até a confirmação do login, os testes e a inspeção com fixtures não equivalem à conferência dos recebimentos reais da FELTRIX. Não foram criados, quitados, excluídos ou reconciliados registros reais para validar esta publicação.
+
+## Encerramento da publicação
+
+As sete entregas foram publicadas, API antes de suas interfaces dependentes. Produção final: API `ba2a204056d6dcf668393739bc974fee131879e6`, UI `55badfed339a5be602a0e2f5089ae0365ab538ce`. Os deploys anteriores foram substituídos normalmente; o estado REMOVED de um deploy antigo não indica indisponibilidade do atual.
+
+- API final: pool iniciado às 14:54:47 UTC, 65 migrations validadas, schema público V66 sem alteração e aplicação iniciada às 14:54:51 UTC. Evidência do ambiente ativo em `coordination/evidencias-publicacao-2026-10-29/api-ativa.png`.
+- UI combinada final: 362 testes em 61 arquivos, tipos sem erros e lint sem erros (dois avisos preexistentes). Revisão independente sem bloqueadores. CI final #68: execução 40897056012, job 123528959935, head `8ccd53c` aprovado antes do merge. Prévia `dpl_CdJC68DRzk58aEpFAwmgNeFJKvUB` READY.
+- API combinada: 22 testes HTTP/Spring/PostgreSQL aprovados. CI #71: execução 40895054542, job 123521767348, head `b469f1c` aprovado antes do merge.
+- Verificação pública final: site 200, dashboard sem sessão 307; OpenAPI da API 200, histórico sem sessão 403. Isso confirma disponibilidade/proteção, não os dados financeiros da conta.
+- A aba de validação continuava na página de login na conferência final. A validação autenticada dos recebimentos reais permanece pendente, sem bloquear a publicação já concluída.
+
+Nenhuma variável/configuração Railway foi alterada nesta rodada. Nenhuma migration criada/aplicada. V67 continua reservada e pausada. TODO-015 permanece parcialmente aberto para a matriz comercial e decisão de reaproveitamento de fornecedores; F05 e créditos F09 continuam bloqueados.
+
+Atualização da sessão: o usuário informou ter entrado. Na retomada, a aba do AgênciasHub ainda exibiu login com mensagem de credenciais inválidas; novo acesso foi solicitado. A conferência autenticada permanece pendente. O usuário também confirmou reconexão do Railway; a API já havia sido validada pelo painel antes disso.

@@ -1,9 +1,9 @@
 # Technical Backlog
 
-## Atualização vigente — 28/10/2026
+## Atualização vigente — 29/10/2026
 
 
-Divisão atual: **cinco frentes atribuídas ao Claude com código entregue; F02/F03/F07/F10 e cadastro F09 publicados**. Codex concluiu em 27/10 a integração e publicação sequencial F10/V62 (API #66/UI #59) e F09/V63 (API #67/UI #60), API antes da UI. Base anterior em V63; interface READY no domínio principal. 61 testes API/173 UI repetidos no head integrado, CI e prévias aprovadas. Créditos/recompensas F09 continuam dependendo de regras de negócio, sem automação financeira. F08/TODO-042 publicado em 28/10: API #68/V64 e UI #61 READY no domínio principal, API antes da UI. 70 testes API/185 UI aprovados. TODO-043 concluída em28/10: simulações por cliente, plano → tarefas, cartões e diagnóstico público/revisão/autores publicados (TODO-052/053/054/055). API atual3a30baf/V66 Railwayf5cb7fad Active; UIbe685c8 Vercel9drBurR6 READY no domínio principal.35 testes API/234 UI na última entrega, startup e smoke confirmados. Próxima frenteF11/TODO-044; F05/créditosF09 dependem de regras. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
+Divisão atual: **cinco frentes atribuídas ao Claude com código entregue; F02/F03/F07/F10 e cadastro F09 publicados**. Codex concluiu em 27/10 a integração e publicação sequencial F10/V62 (API #66/UI #59) e F09/V63 (API #67/UI #60), API antes da UI. Base anterior em V63; interface READY no domínio principal. 61 testes API/173 UI repetidos no head integrado, CI e prévias aprovadas. Créditos/recompensas F09 continuam dependendo de regras de negócio, sem automação financeira. F08/TODO-042 publicado em 28/10: API #68/V64 e UI #61 READY no domínio principal, API antes da UI. 70 testes API/185 UI aprovados. TODO-043 concluída em28/10: simulações por cliente, plano → tarefas, cartões e diagnóstico público/revisão/autores publicados (TODO-052/053/054/055). Base publicada em28/10: API3a30baf/V66 e UIbe685c8. Em29/10 foram publicadas persistência, dashboard financeiro, correções comerciais, histórico F11 e CSV: APIba2a204/V66 Railwayb6158faa ACTIVE; UI55badfed Vercel2TFqMXhs READY no domínio principal.22 testes API/362 UI na combinação final; startup e smoke público confirmados. Conferência autenticada dos recebimentos reais pendente de login; F05/créditosF09 seguem bloqueados. Estado vigente em `docs/migrations-reservadas-2026-10-15.md`.
 
 Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenvolvimento-codex-claude-2026-10-14.md) e [prompt de entrada para Claude](../docs/prompt-claude-agencia-hub-2026-10-14.md). F02 foi revisado, integrado pelo Codex e publicado em 15/10 pelos PRs API #61/UI #54; 32 testes da API e 105 da interface aprovados. O vínculo de simulações ao cliente é a subentrega Codex TODO-052 da evolução F06, sem redistribuir as cinco frentes.
 
@@ -11,18 +11,18 @@ Fontes de coordenação: [divisão, donos e fluxo de PRs](../docs/divisao-desenv
 
 A exigência do usuário passa a ser **CRUD completo para todas as features em que essas operações façam sentido**, incluindo interface, API e persistência. Salvar alterações como um novo registro não equivale a editar. Histórico financeiro usa cancelamento/estorno/versionamento quando necessário, sem exclusão destrutiva para contornar regras do domínio.
 
-A diretriz vigente de 28/10 é implementar e validar em branches independentes e PRs de rascunho, sem novos merges ou deploys de produção nesta etapa. A publicação gradual será retomada depois. Restrições antigas de testes reproduzidas nas seções históricas abaixo não descrevem a autorização vigente. Não reabrir ou encerrar automaticamente tarefas antigas apenas pelo resumo de setembro.
+Em 29/10 o usuário autorizou a publicação gradual: API #72/#71 e UI #66/#69/#67/#65/#68 publicadas, produção API ba2a204/UI 55badfed, schema V66. Ver docs/publicacao-gradual-2026-10-29.md. Fornecedores/V67 seguem pausados; F05 e créditos F09 bloqueados. Restrições antigas de testes reproduzidas nas seções históricas abaixo não descrevem a autorização vigente. Não reabrir ou encerrar automaticamente tarefas antigas apenas pelo resumo de setembro.
 
 ### TODO-056: Carregar o financeiro ao entrar no dashboard
 - **Priority**: High
-- **Status**: in_progress — correção implementada no PR draft UI #69, branch `codex/dashboard-financeiro` desde main; integração e publicação pendentes.
+- **Status**: resolved — UI #69 publicada em 29/10; versão final combinada 55badfed READY. 362 testes UI aprovados; consulta autenticada dos recebimentos reais ainda depende do login. Ver docs/publicacao-gradual-2026-10-29.md.
 - **Created**: 2026-10-29
 - **Origin**: parcelas recebidas em Vendas, mas Receita vs Despesas e indicadores do dashboard zerados.
 - **Causa comprovada**: painel usava apenas o contexto/cache local e não consultava `/financial-entries` ao abrir; Fluxo de Caixa era responsável por carregar esses dados.
 - **Correção**: consulta autenticada independente, sem cache HTTP; loading/erro/retry/atualização, isolamento de respostas por sessão e cancelamento. Resposta inválida não vira zero nem saldo parcial. Rótulos dos 12 meses usam o dia 1. Sem escritas financeiras, API ou migration.
 - **Validação**: 32 testes focados e suíte266; tipos/build aprovados. Lint src sem erros e dois avisos preexistentes. Revisão independente e inspeção desktop/celular com fixtures aprovadas; CI verde no head 9a5b81c (40874021082), incluindo lint em checkout limpo; prévia automática Vercel concluída. Não foi feita consulta aos lançamentos reais da FELTRIX em produção.
 - **Referência**: `docs/correcao-dashboard-financeiro-2026-10-29.md`; evidências em `docs/coordination/evidencias-dashboard-2026-10-29`.
-- **Diretriz vigente**: fornecedores permanecem pausados para revisar reaproveitamento do cadastro existente; V67 só reservada, sem SQL criado/aplicado. Manter novas entregas em rascunho, sem merge/deploy nesta etapa.
+- **Diretriz vigente**: fornecedores permanecem pausados para revisar reaproveitamento do cadastro existente; V67 só reservada, sem SQL criado/aplicado. A publicação desta correção foi autorizada e concluída em 29/10; isso não retoma fornecedores.
 
 ### TODO-038: Completar a edição das simulações de acúmulo (F06)
 - **Owner**: Codex — entregue.
@@ -130,7 +130,7 @@ A diretriz vigente de 28/10 é implementar e validar em branches independentes e
 ### TODO-044: Histórico e exportação consolidada (F11)
 - **Owner**: Codex — consolidação; cada agente mantém a auditoria de seus próprios módulos.
 - **Priority**: Medium
-- **Status**: in_progress — implementação concluída nos PRs draft API #71/UI #65, CI verde; integração e publicação pendentes.
+- **Status**: resolved — API #71/UI #65 publicadas em 29/10. API ba2a204 ACTIVE/V66; UI final 55badfed READY; 22 testes API/362 UI combinados aprovados. Ver docs/publicacao-gradual-2026-10-29.md.
 - **Created**: 2026-10-14
 - **Origin**: divisão paralela autorizada pelo usuário.
 - **Scope**: exportação seletiva por pessoa/período, permissões, omissão de campos sensíveis e reaproveitamento das exportações existentes. Integrar módulos novos após seus contratos, sem controlar suas escritas.
@@ -475,6 +475,7 @@ Esta é a visão curta para acompanhamento. O detalhamento e os critérios de ac
 - **Resolution**: `ProductionSecurityConfiguration` (perfis `prod`/`production`) já recusa subir a aplicação se `JWT_SECRET` estiver ausente/for o segredo de desenvolvimento ou se `CORS_ALLOWED_ORIGINS` estiver ausente/`*`; coberto por `ProductionSecurityConfigurationTest` (3 casos). Adicionada seção no `README.md` documentando que **qualquer** deploy real precisa exportar `SPRING_PROFILES_ACTIVE=production` — sem esse perfil ativo a validação não roda, e nenhum arquivo deste repositório define esse profile automaticamente (é responsabilidade da configuração do serviço no host). Não foi possível confirmar/ajustar a variável direto no Railway: a conta conectada ao MCP Railway não lista um projeto correspondente a este serviço — confirmar manualmente no painel do serviço em produção.
 
 ### TODO-015: Padronizar lançamentos financeiros com fornecedor, observações e composição comercial
+- **Publicação em 29/10**: correções API #72/UI #67 e CSV UI #68 integrados e publicados. API ba2a204 ACTIVE/V66; UI 55badfed READY. 22 testes API/362 UI na combinação final. A matriz comercial completa e reaproveitamento do cadastro de fornecedores continuam pendentes/pausados; não encerrar a tarefa inteira. As notas de PRs draft abaixo descrevem a etapa anterior. Ver docs/publicacao-gradual-2026-10-29.md.
 - **Subentrega em 29/10/2026**: CSV financeiro completado no PR draft UI #68, branch `codex/exportacao-financeira` desde main; referências/observações/composição por lançamento, proteção de fórmulas textuais e seleção preservada. 13 testes do Blob, cobertura 100% do serializador, suíte247 e tipos/lint/build aprovados; CI verde no head b843ded (40867526572). Sem API/migration/merge/deploy. Falta completar na interface o CRUD do fornecedor comercial e o repasse de contatos; cadastro/edição da pessoa CRM não substitui editar `/suppliers`. Ver `docs/exportacao-financeira-2026-10-29.md`.
 - **Validação vigente em 28/10/2026**: três regressões reproduzidas por testes HTTP (pagamento direto cria obrigação da agência; custo desconhecido vira lucro no detalhe; fornecedor aceita nome vazio ao editar). Correções nos PRs draft API #72/UI #67 (`codex/validacao-comercial`), desde main, com CI verde, 15 testes API/234 UI e sem migration ou alteração retroativa. Também validar nome duplicado na edição e isolamento. Não encerrar a matriz inteira por esses casos; detalhes em `docs/validacao-comercial-2026-10-28.md`.
 - **Priority**: High
@@ -584,7 +585,7 @@ Esta é a visão curta para acompanhamento. O detalhamento e os critérios de ac
 
 ### DEBT-001: Criar suíte de regressão de persistência entre Next.js e API Java
 - **Priority**: High
-- **Status**: in_progress — implementado no PR draft UI #66, CI verde no head ffe6b9a; 307 testes UI, 34 API, tipos/lint/build aprovados; integração/publicação pendentes.
+- **Status**: resolved — UI #66 publicada em 29/10; 307 testes na entrega e 362 na combinação final. CI aprovada antes do merge, produção UI 55badfed READY. Ver docs/publicacao-gradual-2026-10-29.md.
 - **Created**: 2026-09-03
 - **Origin**: auditoria de fluxos críticos
 - **Context**: Os testes Java de cliente, cotação e financeiro passam, mas não cobrem o comportamento do frontend diante de falha de rede, API sem URL, validação incompatível ou confirmação visual incorreta. Não há testes de frontend para `addCliente`/`addCotacao`/`addLancamento`.

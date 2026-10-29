@@ -1,23 +1,23 @@
 # Fila de integração — atualizada em 29/10/2026
 
-Por instrução do usuário, desenvolver e validar em branches independentes, mantendo PRs em rascunho. Não integrar ou publicar novas entregas nesta etapa. A disponibilidade da hospedagem não determina a conclusão da implementação.
+Em 29/10, o usuário autorizou retomar os deploys de produção. As sete entregas abaixo foram atualizadas com main, validadas, integradas e publicadas separadamente. Registro final: docs/publicacao-gradual-2026-10-29.md. As descrições de rascunho/testes originais abaixo são históricas; a validação combinada final foi de 362 testes UI e 22 API.
 
 | Entrega | Base e branch | PR | Estado |
 | --- | --- | --- | --- |
-| F11: histórico e exportação, API | main `3a30baf` → `codex/f11-historico-exportacao` | [API #71](https://github.com/Felipendev/agencia-hub-api/pull/71) | Implementado, 7 testes HTTP/Spring/PostgreSQL, CI verde |
-| F11: histórico e exportação, UI | main `be685c8` → `codex/f11-historico-exportacao` | [UI #65](https://github.com/Felipendev/agencia-hub/pull/65) | Implementado, 244 testes, tipos/lint/build e revisão visual aprovados, CI verde |
-| DEBT-001: confirmação de persistência e isolamento do estado | main `be685c8` → `codex/regressao-persistencia` | [UI #66](https://github.com/Felipendev/agencia-hub/pull/66) | Implementado, 307 testes, tipos/lint/build aprovados; CI verde no head ffe6b9a (execução 40791711202) |
-| TODO-015: correções na validação comercial | main API `3a30baf` / UI `be685c8` → `codex/validacao-comercial` | [API #72](https://github.com/Felipendev/agencia-hub-api/pull/72), [UI #67](https://github.com/Felipendev/agencia-hub/pull/67) | Três regressões corrigidas; 15 testes API/234 UI, tipos/lint/build aprovados; CI verde (API 40792315700 / UI 40792331677) |
-| TODO-015: CSV financeiro completo e proteção de textos | main UI `be685c8` → `codex/exportacao-financeira` | [UI #68](https://github.com/Felipendev/agencia-hub/pull/68) | 13 testes do arquivo baixado, cobertura 100% do serializador, suíte247, tipos/lint/build e revisão aprovados; CI verde (40867526572) |
-| TODO-056: carregamento financeiro no dashboard | main UI `be685c8` → `codex/dashboard-financeiro` | [UI #69](https://github.com/Felipendev/agencia-hub/pull/69) | Consulta independente do cache; 32 testes focados/suíte266, tipos/build/revisão/QA aprovados; CI verde (40874021082) |
+| F11: histórico e exportação, API | main `3a30baf` → `codex/f11-historico-exportacao` | [API #71](https://github.com/Felipendev/agencia-hub-api/pull/71) | Publicado em 29/10; detalhes e gates em publicacao-gradual-2026-10-29.md |
+| F11: histórico e exportação, UI | main `be685c8` → `codex/f11-historico-exportacao` | [UI #65](https://github.com/Felipendev/agencia-hub/pull/65) | Publicado em 29/10; detalhes e gates em publicacao-gradual-2026-10-29.md |
+| DEBT-001: confirmação de persistência e isolamento do estado | main `be685c8` → `codex/regressao-persistencia` | [UI #66](https://github.com/Felipendev/agencia-hub/pull/66) | Publicado em 29/10; detalhes e gates em publicacao-gradual-2026-10-29.md |
+| TODO-015: correções na validação comercial | main API `3a30baf` / UI `be685c8` → `codex/validacao-comercial` | [API #72](https://github.com/Felipendev/agencia-hub-api/pull/72), [UI #67](https://github.com/Felipendev/agencia-hub/pull/67) | Publicado em 29/10; detalhes e gates em publicacao-gradual-2026-10-29.md |
+| TODO-015: CSV financeiro completo e proteção de textos | main UI `be685c8` → `codex/exportacao-financeira` | [UI #68](https://github.com/Felipendev/agencia-hub/pull/68) | Publicado em 29/10; detalhes e gates em publicacao-gradual-2026-10-29.md |
+| TODO-056: carregamento financeiro no dashboard | main UI `be685c8` → `codex/dashboard-financeiro` | [UI #69](https://github.com/Felipendev/agencia-hub/pull/69) | Publicado em 29/10; detalhes e gates em publicacao-gradual-2026-10-29.md |
 
-Não há dependência de código entre DEBT-001 e F11. Nenhuma dessas entregas cria migration; V67 está reservada em pausa para fornecedores; nenhum SQL foi criado ou aplicado. As branches não contêm commits uma da outra.
+Não há dependência de código entre DEBT-001 e F11. Nenhuma dessas entregas cria migration; V67 está reservada em pausa para fornecedores; nenhum SQL foi criado ou aplicado. Na criação, as branches eram independentes; na publicação foram atualizadas com a main progressivamente.
 
 A exportação UI #68 também parte diretamente da main. Recomenda-se integrar #66 primeiro, pois a exportação usa o estado consultado e a correção de isolamento por sessão está nesse PR. Não há mudanças na API ou no banco para #68. O dashboard #69 faz consulta financeira própria e não depende dessas branches nem de uma nova API/migration; preservar #66 ao combinar as entregas.
 
 Atualização de escopo em 29/10: o usuário pausou fornecedores para revisar o reaproveitamento de Pessoas/fornecedor comercial, antes de criar outro CRUD. V67 foi reservada antes da pausa, mas nenhum SQL foi criado ou aplicado. Não retomar essa frente automaticamente; o bug do dashboard passou a ser a tarefa ativa.
 
-## Integração futura
+## Procedimento aplicado na publicação de 29/10
 
 1. Buscar a main vigente, atualizar cada branch e resolver conflitos preservando as duas entregas.
 2. Repetir os gates no head atualizado. DEBT-001 acrescenta testes à CI; depois de integrar ambas as branches, executar também a suíte combinada.
@@ -34,3 +34,7 @@ Atualização de escopo em 29/10: o usuário pausou fornecedores para revisar o 
 Validação adicional da main API `3a30baf`: 13 testes aprovados em `RequestedFeaturesIntegrationTest`, `SaleCommissionVisibilityIntegrationTest`, `FlightImportIntegrationTest` e `QuotationFlightPlansTest`. Os 34 testes de CRUD/isolamento de pessoas, cotações e lançamentos financeiros foram executados separadamente para DEBT-001. Nenhuma gravação em produção foi necessária.
 
 Nova frente em andamento: codex/validacao-comercial, API/UI desde main. Três regressões reproduzidas e corrigidas, sem migration ou alteração retroativa; 15 testes API e 234 UI, tipos/lint/build aprovados. PRs draft API #72 e UI #67, CI verde (API 40792315700 / UI 40792331677); API antes da UI. Não representa conclusão de toda a matriz TODO-015.
+
+## Produção confirmada em 29/10
+
+PRs API #72/#71 e UI #66/#69/#67/#65/#68 publicados. API ba2a204, Railway b6158faa ACTIVE, schema V66. UI 55badfed, Vercel dpl_2TFqMXhsbBbqcNLQnYDWv1ZLr9jZ READY no domínio principal. Consulta autenticada dos recebimentos FELTRIX ainda pendente de login; não confundir com o smoke público aprovado. Fornecedores continuam pausados, V67 sem SQL. Nenhuma nova frente foi iniciada nesta rodada.

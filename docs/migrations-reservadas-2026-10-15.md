@@ -60,3 +60,7 @@ A CI da API executa `scripts/check-migrations.sh` nos PRs, comparando a árvore 
 A orientação anterior adicionou `SPRING_DATASOURCE_HIKARI_CONNECTION_INIT_SQL`. O deploy passou a falhar no binding dessa propriedade porque o pool já estava iniciado. Correção: remover essa variável e selecionar o schema pela URL JDBC, conservando Flyway/Hibernate alinhados ao schema isolado. Não aplicar essas variáveis à produção.
 
 O ajuste exige remover uma variável; o conector disponível não expõe exclusão de variável. A aplicação deve ser feita no painel Railway, no ambiente e serviço exatos indicados no runbook da prévia, após o teste de inicialização. Não apagar Postgres, volume ou dados. Não alterar V56/V57 publicadas.
+
+## Publicação de 29/10 — sem novas migrations
+
+API #72/#71 integradas em sequência; produção final ba2a204056d6dcf668393739bc974fee131879e6, Railway b6158faa-c1c4-43ad-8411-0560e2b043a0 ACTIVE. Flyway validou 65 migrations e confirmou public V66, sem alteração. UI #66/#69/#67/#65/#68 publicadas, versão final 55badfed339a5be602a0e2f5089ae0365ab538ce, Vercel dpl_2TFqMXhsbBbqcNLQnYDWv1ZLr9jZ READY no domínio principal. V56–V66 permanecem imutáveis; V67 reservada e pausada, nenhum SQL criado/aplicado. Nenhuma configuração de produção alterada. Evidências e limites: publicacao-gradual-2026-10-29.md.

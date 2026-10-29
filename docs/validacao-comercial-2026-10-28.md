@@ -17,3 +17,7 @@ Validação local final: 15 testes HTTP/Spring/PostgreSQL aprovados (CommercialF
 PRs em rascunho: API #72 (61636957fcc372f6dba2bbed49f7435a1025b7b7), UI #67 (6917712e07989ec423984cda10da400bf007340e). CI em execução. Sem merge/deploy de produção.
 
 Atualização final: CI verde nos heads acima, execuções API 40792315700 e UI 40792331677. A prévia Vercel concluiu; a prévia Railway automática ainda estava em implantação na última consulta. Nenhuma depende de merge em produção. A inicialização/HTTP da prévia API não foi validada manualmente nesta etapa.
+
+## Atualização de publicação — 29/10/2026
+
+Subentrega publicada na rodada autorizada: API final ba2a204 ACTIVE/V66; UI final 55badfed READY no domínio principal. 362 testes UI/22 API combinados aprovados. Sem migration nova; fornecedores/V67 continuam pausados. Registro completo e limite da validação autenticada em publicacao-gradual-2026-10-29.md. Notas anteriores de integração/deploy pendentes são históricas. A publicação das subentregas comerciais não encerra toda a matriz TODO-015.
