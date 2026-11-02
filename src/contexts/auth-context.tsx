@@ -10,6 +10,7 @@ import {
   useRef,
 } from "react";
 import { getAgenciaHubApiBaseUrl } from "@/lib/api/agencia-hub-env";
+import { localLoginEnabled } from "@/lib/local-login";
 import type { ApiLoginResponse } from "@/lib/api/auth-types";
 import type { UsuarioSessao } from "@/types";
 import { sessionTiming, shouldRenew } from "@/lib/session-activity";
@@ -166,7 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(
     async (email: string, password: string): Promise<{ ok: boolean; error?: string; code?: string; email?: string }> => {
       const trimmed = email.trim();
-      if (!trimmed || !password) {
+      if (!localLoginEnabled && (!trimmed || !password)) {
         return { ok: false, error: "Preencha e-mail e senha." };
       }
 
@@ -175,7 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // ── Real API login ────────────────────────────────────────────────────
       if (base) {
         try {
-          const res = await fetch(`${base}/auth/login`, {
+          const res = await fetch(`${base}/${localLoginEnabled ? "internal/local-login" : "auth/login"}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: trimmed, password }),

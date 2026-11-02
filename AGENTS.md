@@ -17,3 +17,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Os critérios de aceite devem incluir persistência após recarregar, permissões, isolamento entre agências e mensagens de sucesso somente após confirmação da API.
 - Quando exclusão ou alteração direta não fizer sentido por integridade financeira ou histórico, implementar a operação de domínio apropriada (cancelar, arquivar, estornar ou versionar) e documentar o motivo no backlog e na interface.
 - Não marcar uma feature como concluída enquanto faltar uma operação aplicável do CRUD.
+
+## Coordenação de migrations
+
+- Ler `docs/migrations-reservadas-2026-10-15.md` antes de criar migrations na API. Não usar números provisórios ou reservas alheias.
+- V58 F03; V59 Claude/F07; V60 Codex/F01; V61 Codex/simulações por cliente. Publicação nessa ordem, API antes da UI, com migrações e inicialização validadas.

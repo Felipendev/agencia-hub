@@ -9,6 +9,7 @@ import { Logo } from "@/components/ui/logo";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
+import { localLoginEnabled } from "@/lib/local-login";
 
 export function LoginForm() {
   const router = useRouter();
@@ -117,7 +118,8 @@ export function LoginForm() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+          {localLoginEnabled && <p className="mt-4 text-sm">Acesso local livre: qualquer e-mail e senha abre a mesma agência de testes.</p>}
+          <form onSubmit={handleSubmit} noValidate={localLoginEnabled} className="mt-8 space-y-4">
             <div>
               <Label htmlFor="email">E-mail</Label>
               <Input
